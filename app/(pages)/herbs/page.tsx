@@ -1,17 +1,17 @@
-// nurushop/app/songbooks/page.tsx
+// nurushop/app/songbooks/page.tsx → can be renamed to /remedies/page.tsx if you want
 import { getProductsByCategory } from "@/lib/firestoreHelpers";
 import ProductGrid from "@/components/ui/ProductGrid";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 
 export const dynamic = "force-dynamic";
 
-export default async function SongbooksPage() {
-  const products = await getProductsByCategory("songbooks");
+export default async function RemediesPage() {
+  const products = await getProductsByCategory("remedies"); // fetch remedies category
 
   if (!products) {
     return (
       <div className="flex justify-center items-center h-[60vh]">
-        <LoadingSpinner text="Loading Song Books..." />
+        <LoadingSpinner text="Loading Remedies..." />
       </div>
     );
   }
@@ -20,8 +20,8 @@ export default async function SongbooksPage() {
     <main className="min-h-screen bg-white dark:bg-gray-900">
       <ProductGrid
         products={products}
-        title="Song Books & Hymnals"
-        subtitle="Collections of hymns and songbooks for church and personal worship."
+        title="All Remedies"
+        subtitle="Browse our collection of health remedies, natural products, and wellness items."
       />
     </main>
   );

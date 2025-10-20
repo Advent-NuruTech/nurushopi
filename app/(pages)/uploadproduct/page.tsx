@@ -176,7 +176,7 @@ export default function UploadProductPage() {
               onChange={(e) => setCategory(e.target.value)}
               className="block w-full border rounded px-3 py-2"
             >
-              <option value="herbs">Herbs</option>
+              <option value="herbs">Remedies</option>
               <option value="oils">Oils</option>
               <option value="foods">Foods</option>
               <option value="egw">EGW Books</option>
@@ -185,7 +185,6 @@ export default function UploadProductPage() {
               <option value="bibles">Bibles</option>
               <option value="covers">Covers</option>
               <option value="songbooks">Song Books</option>
-              <option value="authors">Other Authors</option>
              
 
             </select>

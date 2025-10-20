@@ -83,6 +83,7 @@ export default function Navbar() {
     { name: "Song Books", href: "/songbooks", icon: "🎵" },
     { name: "Other Reliable Authors", href: "/authors", icon: "✍️" },
     { name: "Oils", href: "/oils", icon: "🧴" },
+    { name: "Bibles", href: "/bibles", icon: "📖" },
  
   ];
 

@@ -26,7 +26,7 @@ export default function FeaturedSection({ products }: FeaturedSectionProps) {
   const [currentCategory, setCurrentCategory] = useState(0);
 
   const categories = [
-    "food",
+    "foods",
     "herbs",
     "egw",
     "pioneers",

@@ -27,7 +27,7 @@ export default function FeaturedSection({ products }: FeaturedSectionProps) {
   const { addToCart } = useCart();
 
   const categories = [
-    "food",
+    "foods",
     "herbs",
     "egw",
     "pioneers",

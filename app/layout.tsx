@@ -6,10 +6,65 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { CartProvider } from "@/context/CartContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { UserProvider } from "@/context/UserContext";
+import logo from "@/assets/logo.jpg"; 
 
 export const metadata = {
-  title: "NuruShop - Health & Truth",
-  description: "Natural remedies and spiritual literature marketplace",
+  title: "NuruShop - Natural Health & Truth Products",
+  description:
+    "Discover NuruShop’s collection of natural remedies,organic foods, herbal products, and spiritual literature inspired by true health and Bible principles.",
+  keywords: [
+    "Natural remedies",
+    "Health products",
+    "Spiritual books",
+    "Herbal medicine",
+    "Ellen White writings",
+    "Reformers",
+    "Healthy foods",
+"Trusted Books ",
+"Pionners writings",
+    "Bible truth products",
+    "NuruShop",
+
+  ],
+  authors: [{ name: "NuruShop Team" }],
+  icons: {
+    icon: "/assets/logo.jpg", // ✅ favicon/logo path
+  },
+
+  // ✅ Open Graph metadata for social media previews
+  openGraph: {
+    title: "NuruShop – Health & Truth Marketplace",
+    description:
+      "Shop natural health remedies and Bible-based literature at NuruShop. Discover healing and light through natural living.",
+    url: "https://nurushop.co.ke",
+    siteName: "NuruShop",
+    images: [
+      {
+        url: "/assets/logo.jpg",
+        width: 800,
+        height: 600,
+        alt: "NuruShop Logo",
+      },
+    ],
+    type: "website",
+  },
+
+  // ✅ Twitter card preview
+  twitter: {
+    card: "summary_large_image",
+    title: "NuruShop – Health & Truth Marketplace",
+    description:
+      "Explore trusted natural remedies and inspired literature at NuruShop.",
+    images: ["/logo.png"],
+  },
+
+  // ✅ Control what gets indexed
+  robots: {
+    index: true, // allow indexing of main product pages
+    follow: true,
+    // block non-product pages
+    disallow: ["/about", "/contact", "/login", "/register", "/dashboard"],
+  },
 };
 
 export default function RootLayout({

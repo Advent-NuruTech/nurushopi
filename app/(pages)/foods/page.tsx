@@ -11,7 +11,7 @@
    if (!products) {
      return (
        <div className="flex justify-center items-center h-[60vh]">
-         <LoadingSpinner text="Loading Pioneer Writings..." />
+         <LoadingSpinner text="Loading healthy foods..." />
        </div>
      );
    }

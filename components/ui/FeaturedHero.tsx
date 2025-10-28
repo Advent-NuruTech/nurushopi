@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
@@ -24,6 +24,7 @@ interface FeaturedSectionProps {
 export default function FeaturedSection({ products }: FeaturedSectionProps) {
   const { addToCart } = useCart();
   const [currentCategory, setCurrentCategory] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null); // ✅ Ref for manual scroll container
 
   const categories = [
     "foods",
@@ -43,11 +44,11 @@ export default function FeaturedSection({ products }: FeaturedSectionProps) {
       category: cat,
       items: products
         .filter((p) => p.category?.toLowerCase() === cat)
-        .slice(-2), // ✅ only latest 2 items
+        .slice(-2),
     }))
     .filter((group) => group.items.length > 0);
 
-  // Auto-slide every 8 seconds
+  // ✅ Auto-slide every 8 seconds
   useEffect(() => {
     if (featuredByCategory.length === 0) return;
     const timer = setInterval(() => {
@@ -65,6 +66,53 @@ export default function FeaturedSection({ products }: FeaturedSectionProps) {
       image: product.image,
     });
   };
+
+  // ✅ Manual scroll with mouse drag / touch
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+
+    let isDown = false;
+    let startX: number;
+    let scrollLeft: number;
+
+    const startDragging = (e: MouseEvent | TouchEvent) => {
+      isDown = true;
+      startX =
+        "touches" in e ? e.touches[0].pageX - container.offsetLeft : e.pageX - container.offsetLeft;
+      scrollLeft = container.scrollLeft;
+    };
+
+    const stopDragging = () => (isDown = false);
+
+    const onDrag = (e: MouseEvent | TouchEvent) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x =
+        "touches" in e ? e.touches[0].pageX - container.offsetLeft : e.pageX - container.offsetLeft;
+      const walk = (x - startX) * 1.5; // scroll speed
+      container.scrollLeft = scrollLeft - walk;
+    };
+
+    container.addEventListener("mousedown", startDragging);
+    container.addEventListener("mouseleave", stopDragging);
+    container.addEventListener("mouseup", stopDragging);
+    container.addEventListener("mousemove", onDrag);
+
+    container.addEventListener("touchstart", startDragging);
+    container.addEventListener("touchend", stopDragging);
+    container.addEventListener("touchmove", onDrag);
+
+    return () => {
+      container.removeEventListener("mousedown", startDragging);
+      container.removeEventListener("mouseleave", stopDragging);
+      container.removeEventListener("mouseup", stopDragging);
+      container.removeEventListener("mousemove", onDrag);
+      container.removeEventListener("touchstart", startDragging);
+      container.removeEventListener("touchend", stopDragging);
+      container.removeEventListener("touchmove", onDrag);
+    };
+  }, []);
 
   if (!featuredByCategory.length)
     return (
@@ -105,8 +153,11 @@ export default function FeaturedSection({ products }: FeaturedSectionProps) {
               </Link>
             </div>
 
-            {/* ✅ Single Row Scrollable */}
-            <div className="flex gap-4 sm:gap-5 overflow-x-auto px-3 sm:px-5 scrollbar-hide">
+            {/* ✅ Scrollable horizontally + drag-enabled */}
+            <div
+              ref={scrollRef}
+              className="flex gap-4 sm:gap-5 overflow-x-auto px-3 sm:px-5 scrollbar-hide cursor-grab active:cursor-grabbing"
+            >
               {featuredByCategory[currentCategory].items.map((item) => (
                 <motion.div
                   key={item.id}

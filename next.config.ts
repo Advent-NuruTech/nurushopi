@@ -23,6 +23,8 @@ const nextConfig: NextConfig = {
       "*.svg": ["file-loader"],
     },
   },
+  plugins: [require('tailwind-scrollbar-hide')],
+
   // ✅ Ignore build errors from ESLint during deployment
   eslint: {
     ignoreDuringBuilds: true,
@@ -33,5 +35,6 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: false,
   },
 };
+
 
 export default nextConfig;

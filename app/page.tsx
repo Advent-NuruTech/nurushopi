@@ -1,6 +1,7 @@
 import HeroSection from "@/components/ui/HeroSection";
 import FeaturedSection from "@/components/ui/FeaturedSection";
 import FeaturedHero from "@/components/ui/FeaturedHero";
+import Banners from "@/components/ui/Banners"; // ✅ Import the Banners component
 import { getAllProducts } from "@/lib/firestoreHelpers";
 import { Product } from "@/lib/types";
 
@@ -8,7 +9,6 @@ import { Product } from "@/lib/types";
 function serializeFirestoreDoc(doc: any) {
   return JSON.parse(
     JSON.stringify(doc, (key, value) => {
-      // Convert Firestore Timestamp to ISO string
       if (value && typeof value === "object" && value.seconds) {
         return new Date(value.seconds * 1000).toISOString();
       }
@@ -34,8 +34,12 @@ export default async function HomePage() {
 
   return (
     <main>
+      
       <HeroSection />
+      
       <FeaturedHero products={uiProducts} />
+      {/* ✅ Seamless banner placement — removed extra padding */}
+      <Banners />
       <FeaturedSection products={uiProducts} />
     </main>
   );

@@ -193,9 +193,14 @@ export default function ControlPanel() {
                         <Edit className="w-4 h-4" />
                       </Button>
                     </Link>
-                    <Button variant="destructive" size="sm" onClick={() => handleDelete(p.id)}>
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    <Button
+  variant="outline"
+  size="sm"
+  className="border-red-600 text-red-600 hover:bg-red-100"
+  onClick={() => handleDelete(p.id)}
+>
+  <Trash2 className="w-4 h-4" />
+</Button>
                   </td>
                 </tr>
               ))}

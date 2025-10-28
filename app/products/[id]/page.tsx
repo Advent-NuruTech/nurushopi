@@ -1,6 +1,6 @@
 "use client";
 
-import { notFound } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import Image from "next/image";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, collection, query, where, limit, getDocs } from "firebase/firestore";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import React from "react";
 
 interface Product {
   id: string;
@@ -21,14 +22,16 @@ interface Product {
   createdAt?: string;
 }
 
-export default function ProductDetailPage({ params }: { params: { id: string } }) {
-  const { id } = params; // ✅ direct access in client component
+export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  // ✅ Unwrap the params with React.use() (Next.js 15+ requirement)
+  const { id } = React.use(params);
+  const router = useRouter();
+  const { addToCart } = useCart();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [mainImage, setMainImage] = useState<string>("");
   const [loading, setLoading] = useState(true);
-  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -68,7 +71,9 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
           .map((doc) => ({
             id: doc.id,
             ...doc.data(),
-            images: Array.isArray(doc.data().images) ? doc.data().images : [doc.data().imageUrl || "/images/placeholder.png"]
+            images: Array.isArray(doc.data().images)
+              ? doc.data().images
+              : [doc.data().imageUrl || "/images/placeholder.png"],
           })) as Product[];
 
         setRelatedProducts(related);
@@ -163,7 +168,12 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
               Add to Cart
             </Button>
 
-            <Button size="lg" variant="default" className="w-full">
+            <Button
+              size="lg"
+              variant="default"
+              className="w-full"
+              onClick={() => router.push("/checkout")}
+            >
               Buy Now
             </Button>
           </div>

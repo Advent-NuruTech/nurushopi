@@ -1,99 +1,77 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
+import { db } from "@/lib/firebase";
+import { collection, getDocs, orderBy, query } from "firebase/firestore";
 
 interface Banner {
-  id: number;
-  image: string;
-  title?: string;
-  subtitle?: string;
+  id: string;
+  title: string;
+  shortDescription: string;
   link?: string;
+  image: string;
+  createdAt?: any;
 }
 
-const banners: Banner[] = [
-  {
-    id: 1,
-    image: "/images/banner1.jpg",
-    title: "Welcome to NuruShop",
-    subtitle: "Quality products at affordable prices",
-    link: "/products",
-  },
-  {
-    id: 2,
-    image: "/images/banner2.jpg",
-    title: "Shop the Latest Trends",
-    subtitle: "Discover what's new in store today",
-    link: "/new-arrivals",
-  },
-  {
-    id: 3,
-    image: "/images/banner3.jpg",
-    title: "Fast Delivery",
-    subtitle: "Get your orders delivered right to your door",
-    link: "/delivery-info",
-  },
-];
-
 export default function Banners() {
-  const [current, setCurrent] = useState(0);
+  const [banners, setBanners] = useState<Banner[]>([]);
 
-  // Auto-rotate every 5 seconds
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % banners.length);
-    }, 5000);
-    return () => clearInterval(timer);
+    const fetchBanners = async () => {
+      try {
+        const q = query(collection(db, "banners"), orderBy("createdAt", "desc"));
+        const snapshot = await getDocs(q);
+        const data = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...(doc.data() as Omit<Banner, "id">),
+        }));
+        setBanners(data);
+      } catch (error) {
+        console.error("Error fetching banners:", error);
+      }
+    };
+
+    fetchBanners();
   }, []);
 
   return (
-    <div className="relative w-full h-[350px] sm:h-[450px] overflow-hidden rounded-2xl shadow-lg mt-6">
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={banners[current].id}
-          initial={{ opacity: 0, scale: 1.02 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.8 }}
-          className="absolute inset-0"
-        >
-          <Image
-            src={banners[current].image}
-            alt={banners[current].title || "Banner"}
-            fill
-            className="object-cover"
-            priority
-          />
-          <div className="absolute inset-0 bg-black/40 flex flex-col justify-center items-center text-center text-white px-4">
-            <h2 className="text-3xl sm:text-5xl font-bold drop-shadow-lg mb-3">
-              {banners[current].title}
-            </h2>
-            <p className="text-lg sm:text-xl opacity-90 mb-6">
-              {banners[current].subtitle}
-            </p>
-            {banners[current].link && (
-              <a
-                href={banners[current].link}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full transition"
-              >
-                Shop Now
-              </a>
-            )}
-          </div>
-        </motion.div>
-      </AnimatePresence>
-
-      {/* Small dots for manual navigation */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
-        {banners.map((banner, index) => (
-          <button
+    <div className="relative w-full overflow-x-auto scrollbar-hide mt-6 rounded-2xl shadow-lg">
+      <div className="flex gap-4 w-max px-4">
+        {banners.map((banner) => (
+          <motion.div
             key={banner.id}
-            onClick={() => setCurrent(index)}
-            className={`w-3 h-3 rounded-full transition-all ${
-              index === current ? "bg-white w-6" : "bg-white/50"
-            }`}
-          />
+            whileHover={{ scale: 1.02 }}
+            transition={{ duration: 0.3 }}
+            className="relative flex-shrink-0 w-[300px] sm:w-[500px] md:w-[600px] h-[350px] sm:h-[450px] rounded-2xl overflow-hidden shadow-md"
+          >
+            <Image
+              src={banner.image || "/placeholder.jpg"}
+              alt={banner.title || "Banner"}
+              fill
+              className="object-cover"
+              priority
+            />
+            <div className="absolute inset-0 bg-black/40 flex flex-col justify-center items-center text-center text-white px-4">
+              <h2 className="text-2xl sm:text-4xl font-bold drop-shadow-lg mb-3">
+                {banner.title}
+              </h2>
+              <p className="text-base sm:text-lg opacity-90 mb-6">
+                {banner.shortDescription}
+              </p>
+
+              {/* ✅ Fixed Link typing issue */}
+              {banner.link && (
+                <Link href={banner.link as any} passHref legacyBehavior>
+                  <a className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full transition">
+                    Learn More
+                  </a>
+                </Link>
+              )}
+            </div>
+          </motion.div>
         ))}
       </div>
     </div>

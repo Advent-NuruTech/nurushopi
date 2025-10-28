@@ -1,9 +1,9 @@
 'use client';
 
 import { useRef } from 'react';
-import { formatPrice } from '@/lib/formatPrice';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { formatPrice } from '@/lib/formatPrice';
 
 type OrderItem = {
   id: string;
@@ -38,21 +38,53 @@ export default function DownloadReceiptButton({ order }: DownloadReceiptButtonPr
   const handleDownloadPDF = async () => {
     if (!receiptRef.current) return;
 
-    const canvas = await html2canvas(receiptRef.current, { scale: 2 });
-    const imgData = canvas.toDataURL('image/jpg');
-    const pdf = new jsPDF('p', 'mm', 'a4');
+    try {
+      // Wait for DOM render completion
+      await new Promise((r) => setTimeout(r, 300));
 
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const imgProps = pdf.getImageProperties(imgData);
-    const pdfHeight = (imgProps.height * pageWidth) / imgProps.width;
+      // Create high-quality canvas
+      const canvas = await html2canvas(receiptRef.current, {
+        scale: 3, // Higher = sharper PDF
+        useCORS: true, // Allow cross-origin images
+        backgroundColor: '#ffffff',
+        logging: false,
+      });
 
-    pdf.addImage(imgData, 'JPG', 0, 0, pageWidth, pdfHeight);
-    pdf.save(`NURURSHOP_RECEIPT_${order.id.slice(0, 8)}.pdf`);
+      const imgData = canvas.toDataURL('image/jpeg', 1.0);
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+
+      const imgProps = pdf.getImageProperties(imgData);
+      const imgHeight = (imgProps.height * pageWidth) / imgProps.width;
+
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      // Add first page
+      pdf.addImage(imgData, 'JPEG', 0, position, pageWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      // Add more pages if needed
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, position, pageWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      // Save on desktop & mobile (Safari compatible)
+      const filename = `NURURSHOP_RECEIPT_${order.id.slice(0, 8)}.pdf`;
+      pdf.save(filename);
+    } catch (err) {
+      console.error('PDF generation failed:', err);
+      alert('❌ Failed to download receipt. Try again.');
+    }
   };
 
   return (
     <>
-      {/* Hidden receipt layout for rendering */}
+      {/* Hidden receipt layout */}
       <div
         ref={receiptRef}
         style={{
@@ -102,18 +134,10 @@ export default function DownloadReceiptButton({ order }: DownloadReceiptButtonPr
           <h3 style={{ color: '#1e3a8a', borderLeft: '4px solid #1e3a8a', paddingLeft: '8px' }}>
             📦 Order Details
           </h3>
-          <p>
-            <strong>Order ID:</strong> #{order.id.slice(0, 8).toUpperCase()}
-          </p>
-          <p>
-            <strong>Date:</strong> {new Date(order.createdAt).toLocaleString()}
-          </p>
-          <p>
-            <strong>Status:</strong> {order.status}
-          </p>
-          <p>
-            <strong>Total Amount:</strong> {formatPrice(order.totalAmount)}
-          </p>
+          <p><strong>Order ID:</strong> #{order.id.slice(0, 8).toUpperCase()}</p>
+          <p><strong>Date:</strong> {new Date(order.createdAt).toLocaleString()}</p>
+          <p><strong>Status:</strong> {order.status}</p>
+          <p><strong>Total Amount:</strong> {formatPrice(order.totalAmount)}</p>
         </section>
 
         {/* Customer Info */}
@@ -121,28 +145,12 @@ export default function DownloadReceiptButton({ order }: DownloadReceiptButtonPr
           <h3 style={{ color: '#1e3a8a', borderLeft: '4px solid #1e3a8a', paddingLeft: '8px' }}>
             👤 Customer Information
           </h3>
-          <p>
-            <strong>Name:</strong> {order.name}
-          </p>
-          <p>
-            <strong>Phone:</strong> {order.phone}
-          </p>
-          {order.email && (
-            <p>
-              <strong>Email:</strong> {order.email}
-            </p>
-          )}
-          <p>
-            <strong>County:</strong> {order.county}
-          </p>
-          <p>
-            <strong>Locality:</strong> {order.locality}
-          </p>
-          {order.message && (
-            <p>
-              <strong>Message:</strong> "{order.message}"
-            </p>
-          )}
+          <p><strong>Name:</strong> {order.name}</p>
+          <p><strong>Phone:</strong> {order.phone}</p>
+          {order.email && <p><strong>Email:</strong> {order.email}</p>}
+          <p><strong>County:</strong> {order.county}</p>
+          <p><strong>Locality:</strong> {order.locality}</p>
+          {order.message && <p><strong>Message:</strong> "{order.message}"</p>}
         </section>
 
         {/* Items Table */}
@@ -172,12 +180,8 @@ export default function DownloadReceiptButton({ order }: DownloadReceiptButtonPr
                 <tr key={item.id}>
                   <td style={{ padding: '8px', borderBottom: '1px solid #e5e7eb' }}>{i + 1}</td>
                   <td style={{ padding: '8px', borderBottom: '1px solid #e5e7eb' }}>{item.name}</td>
-                  <td style={{ padding: '8px', borderBottom: '1px solid #e5e7eb' }}>
-                    {item.quantity}
-                  </td>
-                  <td style={{ padding: '8px', borderBottom: '1px solid #e5e7eb' }}>
-                    {formatPrice(item.price)}
-                  </td>
+                  <td style={{ padding: '8px', borderBottom: '1px solid #e5e7eb' }}>{item.quantity}</td>
+                  <td style={{ padding: '8px', borderBottom: '1px solid #e5e7eb' }}>{formatPrice(item.price)}</td>
                   <td style={{ padding: '8px', borderBottom: '1px solid #e5e7eb' }}>
                     {formatPrice(item.price * item.quantity)}
                   </td>
@@ -197,7 +201,6 @@ export default function DownloadReceiptButton({ order }: DownloadReceiptButtonPr
           <p>🙏 Thank you for shopping with us!</p>
         </section>
 
-        {/* Footer */}
         <div
           style={{
             textAlign: 'center',

@@ -1,5 +1,4 @@
 'use client';
-
 import { useRef } from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -18,7 +17,6 @@ type Order = {
   userId?: string;
   createdAt: string;
   totalAmount: number;
-  status: string;
   name: string;
   phone: string;
   email?: string;
@@ -37,17 +35,17 @@ export default function DownloadReceiptButton({ order }: DownloadReceiptButtonPr
 
   const handleDownloadPDF = async () => {
     if (!receiptRef.current) return;
-
     try {
-      // Wait for DOM render completion
       await new Promise((r) => setTimeout(r, 300));
 
-      // Create high-quality canvas
       const canvas = await html2canvas(receiptRef.current, {
-        scale: 3, // Higher = sharper PDF
-        useCORS: true, // Allow cross-origin images
+        scale: 2.5,
+        useCORS: true,
         backgroundColor: '#ffffff',
-        logging: false,
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: receiptRef.current.scrollWidth,
+        windowHeight: receiptRef.current.scrollHeight,
       });
 
       const imgData = canvas.toDataURL('image/jpeg', 1.0);
@@ -55,107 +53,131 @@ export default function DownloadReceiptButton({ order }: DownloadReceiptButtonPr
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
 
-      const imgProps = pdf.getImageProperties(imgData);
-      const imgHeight = (imgProps.height * pageWidth) / imgProps.width;
+      const imgWidth = pageWidth;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
       let heightLeft = imgHeight;
       let position = 0;
 
-      // Add first page
-      pdf.addImage(imgData, 'JPEG', 0, position, pageWidth, imgHeight);
+      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
 
-      // Add more pages if needed
+      // ✅ Prevent cut-off issue by careful pagination
       while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
+        position -= pageHeight;
         pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, position, pageWidth, imgHeight);
+        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
         heightLeft -= pageHeight;
       }
 
-      // Save on desktop & mobile (Safari compatible)
-      const filename = `NURURSHOP_RECEIPT_${order.id.slice(0, 8)}.pdf`;
-      pdf.save(filename);
+      pdf.save(`NURURSHOP_RECEIPT_${order.id.slice(0, 8)}.pdf`);
     } catch (err) {
       console.error('PDF generation failed:', err);
-      alert('❌ Failed to download receipt. Try again.');
+      alert('❌ Failed to download receipt. Please try again.');
     }
   };
 
+  const computedTotal =
+    order.totalAmount && order.totalAmount > 0
+      ? order.totalAmount
+      : order.items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+
   return (
     <>
-      {/* Hidden receipt layout */}
+      {/* Hidden but renderable receipt layout */}
       <div
         ref={receiptRef}
         style={{
+          position: 'absolute',
+          left: '-9999px',
           width: '600px',
-          margin: '0 auto',
           background: 'white',
           borderRadius: '12px',
-          boxShadow: '0 0 8px rgba(0,0,0,0.1)',
+          boxShadow: '0 0 10px rgba(0,0,0,0.1)',
           padding: '24px',
           fontFamily: 'Segoe UI, sans-serif',
           color: '#111827',
+          lineHeight: '1.5',
         }}
-        className="hidden print:block"
       >
-        {/* Header */}
+        {/* HEADER */}
         <div
           style={{
-            background: 'linear-gradient(90deg, #1e3a8a, #1d4ed8)',
+            background: 'linear-gradient(90deg, #1e3a8a, #2563eb)',
             color: 'white',
             textAlign: 'center',
             borderRadius: '12px 12px 0 0',
             padding: '20px',
           }}
         >
-          <img
-            src="https://i.imgur.com/9K8F7pA.jpg"
-            alt="NururShop Logo"
-            style={{
-              width: '80px',
-              height: '80px',
-              borderRadius: '50%',
-              margin: '0 auto 10px',
-              objectFit: 'cover',
-              background: 'white',
-              padding: '4px',
-            }}
-          />
-          <h1 style={{ fontSize: '20px', fontWeight: 'bold' }}>NururShop Official Receipt</h1>
-          <p style={{ margin: 0 }}>“Health & Truth. Pick & Pay”</p>
-          <p style={{ fontSize: '12px', opacity: 0.9 }}>
-            Website: <strong>nururshop.xyz</strong> | Email: nurushoponline@gmail.com
+          <h1 style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '4px' }}>
+            NururShop Official Receipt
+          </h1>
+          <p style={{ fontSize: '13px', opacity: 0.95, margin: 0 }}>
+            “Health & Truth. Pick & Pay”
+          </p>
+          <p style={{ fontSize: '12px', opacity: 0.8, marginTop: '4px' }}>
+            Website: <strong>nururshop.xyz</strong> | Email: <strong>nurushoponline@gmail.com</strong>
           </p>
         </div>
 
-        {/* Order Details */}
-        <section style={{ padding: '20px 0', borderBottom: '1px solid #e5e7eb' }}>
-          <h3 style={{ color: '#1e3a8a', borderLeft: '4px solid #1e3a8a', paddingLeft: '8px' }}>
-            📦 Order Details
-          </h3>
-          <p><strong>Order ID:</strong> #{order.id.slice(0, 8).toUpperCase()}</p>
-          <p><strong>Date:</strong> {new Date(order.createdAt).toLocaleString()}</p>
-          <p><strong>Status:</strong> {order.status}</p>
-          <p><strong>Total Amount:</strong> {formatPrice(order.totalAmount)}</p>
+        {/* ORDER + CUSTOMER INFO */}
+        <section
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            gap: '20px',
+            padding: '20px 0',
+            borderBottom: '1px solid #e5e7eb',
+            textAlign: 'left',
+          }}
+        >
+          <div style={{ flex: 1 }}>
+            <h3
+              style={{
+                color: '#1e3a8a',
+                borderLeft: '4px solid #1e3a8a',
+                paddingLeft: '8px',
+                marginBottom: '8px',
+              }}
+            >
+              📦 Order Details
+            </h3>
+            <p><strong>Order ID:</strong> #{order.id.slice(0, 8).toUpperCase()}</p>
+            <p><strong>Date:</strong> {new Date(order.createdAt).toLocaleString()}</p>
+            <p><strong>Total:</strong> {formatPrice(computedTotal)}</p>
+          </div>
+
+          <div style={{ flex: 1 }}>
+            <h3
+              style={{
+                color: '#1e3a8a',
+                borderLeft: '4px solid #1e3a8a',
+                paddingLeft: '8px',
+                marginBottom: '8px',
+              }}
+            >
+              👤 Customer Information
+            </h3>
+            <p><strong>Name:</strong> {order.name}</p>
+            <p><strong>Phone:</strong> {order.phone}</p>
+            {order.email && <p><strong>Email:</strong> {order.email}</p>}
+            <p><strong>County:</strong> {order.county}</p>
+            <p><strong>Locality:</strong> {order.locality}</p>
+          </div>
         </section>
 
-        {/* Customer Info */}
-        <section style={{ padding: '20px 0', borderBottom: '1px solid #e5e7eb' }}>
-          <h3 style={{ color: '#1e3a8a', borderLeft: '4px solid #1e3a8a', paddingLeft: '8px' }}>
-            👤 Customer Information
-          </h3>
-          <p><strong>Name:</strong> {order.name}</p>
-          <p><strong>Phone:</strong> {order.phone}</p>
-          {order.email && <p><strong>Email:</strong> {order.email}</p>}
-          <p><strong>County:</strong> {order.county}</p>
-          <p><strong>Locality:</strong> {order.locality}</p>
-          {order.message && <p><strong>Message:</strong> "{order.message}"</p>}
-        </section>
-
-        {/* Items Table */}
-        <section style={{ padding: '20px 0' }}>
-          <h3 style={{ color: '#1e3a8a', borderLeft: '4px solid #1e3a8a', paddingLeft: '8px' }}>
+        {/* ITEMS */}
+        <section style={{ padding: '20px 0', textAlign: 'left' }}>
+          <h3
+            style={{
+              color: '#1e3a8a',
+              borderLeft: '4px solid #1e3a8a',
+              paddingLeft: '8px',
+            }}
+          >
             🛒 Order Items
           </h3>
           <table
@@ -163,11 +185,13 @@ export default function DownloadReceiptButton({ order }: DownloadReceiptButtonPr
               width: '100%',
               borderCollapse: 'collapse',
               marginTop: '10px',
-              fontSize: '14px',
+              fontSize: '13.5px',
+              textAlign: 'left',
+              pageBreakInside: 'auto',
             }}
           >
             <thead>
-              <tr style={{ background: '#f3f4f6', textAlign: 'left' }}>
+              <tr style={{ background: '#f3f4f6' }}>
                 <th style={{ padding: '8px' }}>#</th>
                 <th style={{ padding: '8px' }}>Item</th>
                 <th style={{ padding: '8px' }}>Qty</th>
@@ -189,11 +213,31 @@ export default function DownloadReceiptButton({ order }: DownloadReceiptButtonPr
               ))}
             </tbody>
           </table>
+
+          <div
+            style={{
+              textAlign: 'right',
+              marginTop: '16px',
+              paddingTop: '8px',
+              fontWeight: 'bold',
+              fontSize: '15px',
+              color: '#1e3a8a',
+              borderTop: '2px solid #e5e7eb',
+            }}
+          >
+            Total: {formatPrice(computedTotal)}
+          </div>
         </section>
 
         {/* Notes */}
-        <section style={{ padding: '20px 0', borderTop: '1px solid #e5e7eb' }}>
-          <h3 style={{ color: '#1e3a8a', borderLeft: '4px solid #1e3a8a', paddingLeft: '8px' }}>
+        <section style={{ padding: '20px 0', borderTop: '1px solid #e5e7eb', textAlign: 'left' }}>
+          <h3
+            style={{
+              color: '#1e3a8a',
+              borderLeft: '4px solid #1e3a8a',
+              paddingLeft: '8px',
+            }}
+          >
             💡 Notes from NururShop
           </h3>
           <p>✅ This is an auto-generated receipt from NururShop.</p>
@@ -206,7 +250,6 @@ export default function DownloadReceiptButton({ order }: DownloadReceiptButtonPr
             textAlign: 'center',
             fontSize: '12px',
             color: '#6b7280',
-            marginTop: '10px',
             borderTop: '1px solid #e5e7eb',
             paddingTop: '10px',
           }}

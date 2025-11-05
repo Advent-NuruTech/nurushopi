@@ -59,54 +59,72 @@ export default function CheckoutPage() {
   };
 
   // ✅ Handle order submission
-  const handleSubmitOrder = async () => {
-    if (cart.length === 0 || total <= 0) {
-      alert("Your cart is empty. Please add products before ordering.");
-      return;
-    }
+const handleSubmitOrder = async () => {
+  if (cart.length === 0 || total <= 0) {
+    alert("Your cart is empty. Please add products before ordering.");
+    return;
+  }
 
-    if (!user) {
-      alert("Please sign in to complete your order.");
-      router.push("/sign-in" as Route);
-      return;
-    }
+  if (!user) {
+    alert("Please sign in to complete your order.");
+    router.push("/sign-in" as Route);
+    return;
+  }
 
-    const { name, phone, county, locality } = formData;
-    if (!name || !phone || !county || !locality) {
-      alert("Please fill in all required fields.");
-      return;
-    }
+  const { name, phone, county, locality } = formData;
+  if (!name || !phone || !county || !locality) {
+    alert("Please fill in all required fields.");
+    return;
+  }
 
-    setIsSubmitting(true);
-    try {
-      const orderData = {
-        userId: user.id,
-        userEmail: user.emailAddresses[0]?.emailAddress,
-        ...formData,
-        items: cart,
-        totalAmount: total,
-        status: "pending",
-        createdAt: new Date().toISOString(),
-      };
+  setIsSubmitting(true);
+  try {
+    const orderData = {
+      userId: user.id,
+      userEmail: user.emailAddresses[0]?.emailAddress,
+      ...formData,
+      items: cart,
+      totalAmount: total,
+      
+      createdAt: new Date().toISOString(),
+    };
 
-      const res = await fetch("/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(orderData),
-      });
+    // ✅ Send to Firestore API
+    const res = await fetch("/api/orders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(orderData),
+    });
 
-      if (!res.ok) throw new Error("Order submission failed");
+    if (!res.ok) throw new Error("Order submission failed");
 
-      setSuccess(true);
-      clearCart();
-    } catch (err) {
-      console.error(err);
-      alert("Something went wrong. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-      setShowForm(false);
-    }
-  };
+    // ✅ Prepare WhatsApp message
+    const productList = cart
+      .map(
+        (item, index) =>
+          `${index + 1}. ${item.name} (x${item.quantity}) — KSh ${(item.price * item.quantity).toFixed(2)} [ID: ${item.id}]`
+      )
+      .join("%0A"); // %0A = line break in WhatsApp URL
+
+    const whatsappMessage = `🛍️ *Receive My Order*%0A--------------------------------%0A*Name:* ${name}%0A*Phone:* ${phone}%0A*County:* ${county}%0A*Locality:* ${locality}%0A--------------------------------%0A${productList}%0A--------------------------------%0A*Total:* KSh ${total.toFixed(2)}%0AThank's for this platform !`;
+
+    // ✅ Send order details to WhatsApp
+    const phoneNumber = "254105178685"; // your WhatsApp number in international format
+    const whatsappURL = `https://wa.me/${phoneNumber}?text=${whatsappMessage}`;
+    window.open(whatsappURL, "_blank"); // opens WhatsApp with message prefilled
+
+    // ✅ Clear cart and show success
+    setSuccess(true);
+    clearCart();
+  } catch (err) {
+    console.error(err);
+    alert("Something went wrong. Please try again.");
+  } finally {
+    setIsSubmitting(false);
+    setShowForm(false);
+  }
+};
+
 
   // ✅ Quantity handlers
   const increaseQuantity = (id: string, current: number) => {

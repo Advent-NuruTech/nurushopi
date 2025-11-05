@@ -133,11 +133,9 @@ export default function ReceivedPageClient() {
                       </div>
                       <div className="text-right flex-shrink-0 ml-4">
                         <div className="font-bold text-lg text-blue-600 dark:text-blue-400">
-                          {formatPrice(o.totalAmount)}
+                          {formatPrice(Number(o.totalAmount))}
                         </div>
-                        <div className="text-sm capitalize font-medium text-yellow-600 dark:text-yellow-400">
-                          {o.status}
-                        </div>
+                     
                       </div>
                     </div>
 

@@ -145,45 +145,70 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           )}
         </div>
 
-        {/* RIGHT SIDE - Info */}
-        <aside>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">
-            {product.name}
-          </h1>
+       {/* RIGHT SIDE - Info */}
+<aside>
+  <div className="space-y-3">
+    <div className="text-3xl font-bold my-4 text-blue-700 dark:text-blue-400">
+      {formatPrice(product.price)}
+    </div>
 
-          <p className="text-slate-600 dark:text-slate-400 mt-2 text-md">
-            {product.shortDescription}
-          </p>
+    {/* Buttons with spacing and improved styling */}
+    <div className="flex flex-wrap gap-3">
+      <Button
+        size="lg"
+        className="w-half bg-white border border-blue-600 text-blue-600 hover:bg-blue-50 dark:bg-gray-900 dark:text-blue-400 dark:border-blue-400 dark:hover:bg-gray-800 transition-all duration-200 rounded-lg shadow-sm"
+        onClick={handleAddToCart}
+      >
+        Add to Cart
+      </Button>
 
-          <div className="text-3xl font-bold my-4 text-blue-700 dark:text-blue-400">
-            {formatPrice(product.price)}
-          </div>
+      <Button
+        size="lg"
+        variant="default"
+        className="w-half bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm transition-all duration-200"
+        onClick={() => router.push('/checkout')}
+      >
+        Buy Now
+      </Button>
+    </div>
+  </div>
 
-          <div className="space-y-3">
-            <Button
-              size="lg"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-              onClick={handleAddToCart}
-            >
-              Add to Cart
-            </Button>
+  <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 mt-6">
+    {product.name}
+  </h1>
 
-            <Button
-              size="lg"
-              variant="default"
-              className="w-full"
-              onClick={() => router.push("/checkout")}
-            >
-              Buy Now
-            </Button>
-          </div>
+  <p className="text-slate-600 dark:text-slate-400 mt-2 text-md">
+    {product.shortDescription}
+  </p>
 
-          <p className="text-sm text-slate-500 mt-6 leading-relaxed">
-            Delivery cost calculated at checkout.
-            <br />
-            <span className="font-medium">Category:</span> {product.category}
-          </p>
 
+
+       
+
+
+
+
+
+
+
+
+
+
+
+
+       
+
+        <p className="text-sm text-slate-600 dark:text-slate-400 mt-6 leading-relaxed border-t border-slate-200 dark:border-slate-700 pt-4">
+  Delivery cost calculated depending on the location. We try to make it as
+  affordable as possible. 
+  <br />
+  <span className="font-medium text-slate-700 dark:text-slate-300">
+    Category:
+  </span>{" "}
+  <span className="bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full text-xs">
+    {product.category}
+  </span>
+</p>
           {/* Full description */}
           {product.description && (
             <div className="mt-6 text-gray-700 dark:text-gray-300">

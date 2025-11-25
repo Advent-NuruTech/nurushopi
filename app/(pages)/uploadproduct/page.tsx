@@ -245,8 +245,7 @@ export default function UploadProductPage() {
           </div>
 
           <p className="text-sm text-slate-500 mt-3">
-            Security note: `/api/products` should validate admin role or Clerk
-            session before writing to Firestore.
+            update more.Thanks for helping to keep NuruShop stocked and diverse!
           </p>
         </form>
       </SignedIn>

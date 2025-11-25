@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { useCart } from "@/context/CartContext";
-import { type Route } from "next";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
@@ -26,6 +25,7 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -36,21 +36,29 @@ export default function CheckoutPage() {
     message: "",
   });
 
-  // ✅ Fetch related products
+  // FETCH RELATED PRODUCTS
   useEffect(() => {
     const fetchRelated = async () => {
       try {
-        const q = query(collection(db, "products"), orderBy("createdAt", "desc"), limit(4));
+        const q = query(
+          collection(db, "products"),
+          orderBy("createdAt", "desc"),
+          limit(4)
+        );
+
         const snap = await getDocs(q);
-        setRelatedProducts(snap.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+        setRelatedProducts(
+          snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+        );
       } catch (err) {
         console.error("Error fetching products:", err);
       }
     };
+
     fetchRelated();
   }, []);
 
-  // ✅ Handle form field changes smoothly
+  // HANDLE INPUT CHANGE
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
@@ -58,89 +66,98 @@ export default function CheckoutPage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ✅ Handle order submission
-const handleSubmitOrder = async () => {
-  if (cart.length === 0 || total <= 0) {
-    alert("Your cart is empty. Please add products before ordering.");
-    return;
-  }
+  // HANDLE ORDER SUBMISSION
+  const handleSubmitOrder = async () => {
+    setErrorMessage("");
 
-  if (!user) {
-    alert("Please sign in to complete your order.");
-    router.push("/sign-in" as Route);
-    return;
-  }
+    if (cart.length === 0 || total <= 0) {
+      setErrorMessage("Your cart is empty. Add items before ordering.");
+      return;
+    }
 
-  const { name, phone, county, locality } = formData;
-  if (!name || !phone || !county || !locality) {
-    alert("Please fill in all required fields.");
-    return;
-  }
+    // 🔐 USER NOT SIGNED IN → REDIRECT TO CLERK SIGN-IN
+    if (!user) {
+      const returnTo = window.location.href;
+      const redirectUrl = encodeURIComponent(returnTo);
 
-  setIsSubmitting(true);
-  try {
-    const orderData = {
-      userId: user.id,
-      userEmail: user.emailAddresses[0]?.emailAddress,
-      ...formData,
-      items: cart,
-      totalAmount: total,
-      
-      createdAt: new Date().toISOString(),
-    };
+      window.location.href =
+        `https://loving-tapir-18.accounts.dev/sign-in?redirect_url=${redirectUrl}`;
 
-    // ✅ Send to Firestore API
-    const res = await fetch("/api/orders", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(orderData),
-    });
+      return;
+    }
 
-    if (!res.ok) throw new Error("Order submission failed");
+    // REQUIRED FIELDS CHECK
+    const { name, phone, county, locality } = formData;
 
-    // ✅ Prepare WhatsApp message
-    const productList = cart
-      .map(
-        (item, index) =>
-          `${index + 1}. ${item.name} (x${item.quantity}) — KSh ${(item.price * item.quantity).toFixed(2)} [ID: ${item.id}]`
-      )
-      .join("%0A"); // %0A = line break in WhatsApp URL
+    if (!name || !phone || !county || !locality) {
+      setErrorMessage("Please fill in all required fields.");
+      return;
+    }
 
-    const whatsappMessage = `🛍️ *Receive My Order*%0A--------------------------------%0A*Name:* ${name}%0A*Phone:* ${phone}%0A*County:* ${county}%0A*Locality:* ${locality}%0A--------------------------------%0A${productList}%0A--------------------------------%0A*Total:* KSh ${total.toFixed(2)}%0AThank's for this platform !`;
+    setIsSubmitting(true);
 
-    // ✅ Send order details to WhatsApp
-    const phoneNumber = "254105178685"; // your WhatsApp number in international format
-    const whatsappURL = `https://wa.me/${phoneNumber}?text=${whatsappMessage}`;
-    window.open(whatsappURL, "_blank"); // opens WhatsApp with message prefilled
+    try {
+      const orderData = {
+        userId: user.id,
+        userEmail: user.emailAddresses[0]?.emailAddress,
+        ...formData,
+        items: cart,
+        totalAmount: total,
+        createdAt: new Date().toISOString(),
+      };
 
-    // ✅ Clear cart and show success
-    setSuccess(true);
-    clearCart();
-  } catch (err) {
-    console.error(err);
-    alert("Something went wrong. Please try again.");
-  } finally {
-    setIsSubmitting(false);
-    setShowForm(false);
-  }
-};
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderData),
+      });
 
+      if (!res.ok) {
+        setErrorMessage("Order submission failed. Try again.");
+        return;
+      }
 
-  // ✅ Quantity handlers
+      // WHATSAPP MESSAGE
+      const productList = cart
+        .map(
+          (item, idx) =>
+            `${idx + 1}. ${item.name} (x${item.quantity}) — KSh ${(item.price * item.quantity).toFixed(
+              2
+            )} [ID: ${item.id}]`
+        )
+        .join("%0A");
+
+      const whatsappMessage = `🛍️ *Receive My Order*%0A--------------------------------%0A*Name:* ${name}%0A*Phone:* ${phone}%0A*County:* ${county}%0A*Locality:* ${locality}%0A--------------------------------%0A${productList}%0A--------------------------------%0A*Total:* KSh ${total.toFixed(
+        2
+      )}%0AThank you!`;
+
+      const phoneNumber = "254105178685";
+      const whatsappURL = `https://wa.me/${phoneNumber}?text=${whatsappMessage}`;
+
+      window.open(whatsappURL, "_blank");
+
+      setSuccess(true);
+      clearCart();
+    } catch (err) {
+      console.error(err);
+      setErrorMessage("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // QUANTITY CONTROL
   const increaseQuantity = (id: string, current: number) => {
     updateQuantity(id, current + 1);
   };
 
   const decreaseQuantity = (id: string, current: number) => {
     const newQty = current - 1;
-    if (newQty <= 0) {
-      removeFromCart(id); // auto remove if zero
-    } else {
-      updateQuantity(id, newQty);
-    }
+    if (newQty <= 0) removeFromCart(id);
+    else updateQuantity(id, newQty);
   };
 
-  // ✅ Success screen
+  // SUCCESS SCREEN
   if (success) {
     return (
       <div className="max-w-2xl mx-auto text-center py-20 px-4">
@@ -152,7 +169,7 @@ const handleSubmitOrder = async () => {
         </p>
         <button
           className="mt-6 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
-          onClick={() => router.push("/")}
+          onClick={() => router.push("/shop")}
         >
           Continue Shopping
         </button>
@@ -160,7 +177,6 @@ const handleSubmitOrder = async () => {
     );
   }
 
-  // ✅ Checkout Page
   return (
     <main className="min-h-screen bg-white dark:bg-gray-900 pt-24 pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
@@ -170,6 +186,7 @@ const handleSubmitOrder = async () => {
           <p className="text-gray-600">Your cart is empty.</p>
         ) : (
           <>
+            {/* CART LIST */}
             <div className="space-y-5">
               {cart.map((item) => (
                 <div
@@ -177,7 +194,7 @@ const handleSubmitOrder = async () => {
                   className="flex flex-col sm:flex-row justify-between items-center border rounded-lg p-4 shadow-sm hover:shadow-md transition bg-white dark:bg-gray-800"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="relative w-20 h-20 flex-shrink-0">
+                    <div className="relative w-20 h-20">
                       <Image
                         src={item.image || "/images/placeholder.png"}
                         alt={item.name}
@@ -201,9 +218,7 @@ const handleSubmitOrder = async () => {
                           <Minus size={14} />
                         </button>
 
-                        <span className="w-10 text-center">
-                          {item.quantity}
-                        </span>
+                        <span className="w-10 text-center">{item.quantity}</span>
 
                         <button
                           onClick={() => increaseQuantity(item.id, item.quantity)}
@@ -230,21 +245,18 @@ const handleSubmitOrder = async () => {
               ))}
             </div>
 
-            {/* Total Section */}
+            {/* TOTAL */}
             <div className="mt-8 border-t pt-6 flex flex-col sm:flex-row items-center justify-between">
               <p className="text-xl font-semibold">
                 Total:{" "}
-                <span className="text-blue-700">
-                  KSh {total.toFixed(2)}
-                </span>
+                <span className="text-blue-700">KSh {total.toFixed(2)}</span>
               </p>
+
               <button
                 onClick={() => {
-                  if (cart.length > 0 && total > 0) setShowForm(true);
-                  else alert("Your cart is empty.");
+                  if (total > 0) setShowForm(true);
                 }}
-                className="mt-5 sm:mt-0 bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
-                disabled={cart.length === 0 || total <= 0}
+                className="mt-5 sm:mt-0 bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition"
               >
                 Place Order
               </button>
@@ -253,31 +265,27 @@ const handleSubmitOrder = async () => {
         )}
       </div>
 
-      {/* Related Products */}
+      {/* RELATED PRODUCTS */}
       {relatedProducts.length > 0 && (
         <section className="max-w-6xl mx-auto mt-16">
-          <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-gray-200">
-            You may also like
-          </h2>
+          <h2 className="text-2xl font-semibold mb-6">You may also like</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
             {relatedProducts.map((product) => (
               <Link
                 key={product.id}
                 href={`/products/${product.id}`}
-                className="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition bg-white dark:bg-gray-800"
+                className="border rounded-lg shadow-sm hover:shadow-md transition bg-white dark:bg-gray-800"
               >
                 <div className="relative w-full h-40">
                   <Image
-                    src={product.images?.[0] || product.imageUrl || "/images/placeholder.png"}
+                    src={product.images?.[0] || "/images/placeholder.png"}
                     alt={product.name}
                     fill
                     className="object-cover"
                   />
                 </div>
                 <div className="p-3">
-                  <h3 className="font-medium text-sm text-gray-900 dark:text-gray-100">
-                    {product.name}
-                  </h3>
+                  <h3 className="font-medium text-sm">{product.name}</h3>
                   <p className="text-blue-700 font-semibold text-sm mt-1">
                     KSh {product.price?.toFixed(2)}
                   </p>
@@ -288,16 +296,20 @@ const handleSubmitOrder = async () => {
         </section>
       )}
 
-      {/* Form Modal */}
+      {/* ERROR MESSAGE */}
+      {errorMessage && (
+        <div className="text-center mt-4 text-red-600 font-medium">
+          {errorMessage}
+        </div>
+      )}
+
+      {/* ORDER FORM MODAL */}
       {showForm && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md shadow-lg">
             <h2 className="text-xl font-semibold mb-4 text-blue-700">
               Complete Your Order
             </h2>
-            <p className="text-gray-600 text-sm mb-4">
-              Please fill this form to finish submitting your order.
-            </p>
 
             <div className="space-y-3">
               <input
@@ -305,62 +317,66 @@ const handleSubmitOrder = async () => {
                 placeholder="Full Name"
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                className="w-full border rounded px-3 py-2"
               />
+
               <input
                 name="phone"
                 placeholder="Phone Number"
                 value={formData.phone}
                 onChange={handleChange}
-                className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                className="w-full border rounded px-3 py-2"
               />
+
               <input
                 name="email"
                 placeholder="Email (optional)"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                className="w-full border rounded px-3 py-2"
               />
+
               <select
                 name="county"
                 value={formData.county}
                 onChange={handleChange}
-                className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                className="w-full border rounded px-3 py-2"
               >
                 <option value="">Select County</option>
                 {counties.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
+                  <option key={c}>{c}</option>
                 ))}
               </select>
+
               <input
                 name="locality"
                 placeholder="Exact Locality (e.g. Nyamasaria, Kisumu)"
                 value={formData.locality}
                 onChange={handleChange}
-                className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                className="w-full border rounded px-3 py-2"
               />
+
               <textarea
                 name="message"
                 placeholder="Special message (optional)"
                 value={formData.message}
                 onChange={handleChange}
-                className="w-full border rounded px-3 py-2 h-20 focus:ring-2 focus:ring-blue-400 outline-none"
+                className="w-full border rounded px-3 py-2 h-20"
               />
             </div>
 
             <div className="mt-6 flex justify-between">
               <button
                 onClick={() => setShowForm(false)}
-                className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
+                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
               >
                 Cancel
               </button>
+
               <button
                 onClick={handleSubmitOrder}
                 disabled={isSubmitting}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
               >
                 {isSubmitting ? "Submitting..." : "Finish Submission"}
               </button>

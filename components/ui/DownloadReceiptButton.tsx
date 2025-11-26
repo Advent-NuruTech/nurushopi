@@ -114,10 +114,10 @@ export default function DownloadReceiptButton({ order }: DownloadReceiptButtonPr
             NururShop Official Receipt
           </h1>
           <p style={{ fontSize: '13px', opacity: 0.95, margin: 0 }}>
-            “Health & Truth. Pick & Pay”
+            “Health & Truth.”
           </p>
           <p style={{ fontSize: '12px', opacity: 0.8, marginTop: '4px' }}>
-            Website: <strong>nururshop.xyz</strong> | Email: <strong>nurushoponline@gmail.com</strong>
+            Website: <strong>nururshop.co.ke</strong> | Email: <strong>nurushoponline@gmail.com</strong>
           </p>
         </div>
 
@@ -238,7 +238,7 @@ export default function DownloadReceiptButton({ order }: DownloadReceiptButtonPr
               paddingLeft: '8px',
             }}
           >
-            💡 Notes from NururShop
+             Notes from NururShop
           </h3>
           <p>✅ This is an auto-generated receipt from NururShop.</p>
           <p>📞 For inquiries, contact <strong>nurushoponline@gmail.com</strong>.</p>

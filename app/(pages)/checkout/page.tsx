@@ -8,12 +8,14 @@ import { db } from "@/lib/firebase";
 import { collection, getDocs, limit, query, orderBy } from "firebase/firestore";
 import Image from "next/image";
 import Link from "next/link";
-import { Minus, Plus } from "lucide-react";
+import { Minus, Plus, AlertCircle, XCircle } from "lucide-react";
+import PhoneInput, { validatePhoneForSubmission } from "@/components/ui/PhoneInput";
 
-const counties = [
-  "Nairobi", "Kisumu", "Mombasa", "Nakuru", "Uasin Gishu", "Kiambu",
-  "Machakos", "Kakamega", "Homabay", "Siaya", "Nandi", "Migori", "Kericho",
-  "Kisii", "Busia", "Vihiga", "Embu", "Murang’a", "Meru", "Bomet", "Other"
+// Common countries for suggestions (you can expand this list)
+const commonCountries = [
+  "Kenya", "Uganda", "Tanzania", "Rwanda", "Ethiopia", "South Africa", 
+  "Nigeria", "Ghana", "United States", "United Kingdom", "Canada", 
+  "Australia", "Germany", "France", "India", "China", "Japan"
 ];
 
 export default function CheckoutPage() {
@@ -26,11 +28,14 @@ export default function CheckoutPage() {
   const [success, setSuccess] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [phoneValid, setPhoneValid] = useState(true);
+  const [showCountrySuggestions, setShowCountrySuggestions] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
     email: "",
+    country: "",
     county: "",
     locality: "",
     message: "",
@@ -60,11 +65,37 @@ export default function CheckoutPage() {
 
   // HANDLE INPUT CHANGE
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    
+    // Show country suggestions when typing in country field
+    if (name === "country" && value.trim()) {
+      setShowCountrySuggestions(true);
+    }
   };
+
+  // Handle phone change from PhoneInput component
+  const handlePhoneChange = (phone: string) => {
+    setFormData(prev => ({ ...prev, phone }));
+  };
+
+  // Handle phone validation change
+  const handlePhoneValidationChange = (isValid: boolean) => {
+    setPhoneValid(isValid);
+  };
+
+  // Handle country selection from suggestions
+  const handleCountrySelect = (country: string) => {
+    setFormData(prev => ({ ...prev, country }));
+    setShowCountrySuggestions(false);
+  };
+
+  // Filter countries based on input
+  const filteredCountries = commonCountries.filter(country =>
+    country.toLowerCase().includes(formData.country.toLowerCase())
+  );
 
   // HANDLE ORDER SUBMISSION
   const handleSubmitOrder = async () => {
@@ -87,20 +118,35 @@ export default function CheckoutPage() {
     }
 
     // REQUIRED FIELDS CHECK
-    const { name, phone, county, locality } = formData;
+    const { name, phone, country, county, locality } = formData;
+    const errors = [];
 
-    if (!name || !phone || !county || !locality) {
-      setErrorMessage("Please fill in all required fields.");
+    if (!name.trim()) errors.push("Name is required");
+    
+    // Validate phone using the component's validation function
+    const phoneValidation = validatePhoneForSubmission(phone, true);
+    if (!phoneValidation.isValid) errors.push(phoneValidation.message);
+    
+    if (!country.trim()) errors.push("Country is required");
+    if (!county.trim()) errors.push("County/State/Province is required");
+    if (!locality.trim()) errors.push("Locality/Address is required");
+
+    if (errors.length > 0) {
+      setErrorMessage(errors.join(", "));
       return;
     }
 
     setIsSubmitting(true);
 
     try {
+      // Use normalized phone number
+      const normalizedPhone = phoneValidation.normalized || phone;
+      
       const orderData = {
         userId: user.id,
         userEmail: user.emailAddresses[0]?.emailAddress,
         ...formData,
+        phone: normalizedPhone,
         items: cart,
         totalAmount: total,
         createdAt: new Date().toISOString(),
@@ -117,7 +163,7 @@ export default function CheckoutPage() {
         return;
       }
 
-      // WHATSAPP MESSAGE
+      // WHATSAPP MESSAGE - Updated to include country
       const productList = cart
         .map(
           (item, idx) =>
@@ -127,7 +173,7 @@ export default function CheckoutPage() {
         )
         .join("%0A");
 
-      const whatsappMessage = `🛍️ *Receive My Order*%0A--------------------------------%0A*Name:* ${name}%0A*Phone:* ${phone}%0A*County:* ${county}%0A*Locality:* ${locality}%0A--------------------------------%0A${productList}%0A--------------------------------%0A*Total:* KSh ${total.toFixed(
+      const whatsappMessage = `🛍️ *Receive My Order*%0A--------------------------------%0A*Name:* ${name}%0A*Phone:* ${normalizedPhone}%0A*Country:* ${country}%0A*County/State:* ${county}%0A*Locality:* ${locality}%0A--------------------------------%0A${productList}%0A--------------------------------%0A*Total:* KSh ${total.toFixed(
         2
       )}%0AThank you!`;
 
@@ -165,7 +211,7 @@ export default function CheckoutPage() {
           ✅ Order placed successfully!
         </h2>
         <p className="text-gray-600 mt-3">
-          You’ll receive a confirmation via WhatsApp or Email soon.
+          You'll receive a confirmation via WhatsApp or Email soon.
         </p>
         <button
           className="mt-6 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
@@ -213,7 +259,7 @@ export default function CheckoutPage() {
                       <div className="flex items-center gap-2 mt-2">
                         <button
                           onClick={() => decreaseQuantity(item.id, item.quantity)}
-                          className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 text-sm"
+                          className="px-2 py-1 bg-gray-200 rounded hover:bg-blue-100 text-blue-700 hover:text-blue-300 text-sm"
                         >
                           <Minus size={14} />
                         </button>
@@ -222,7 +268,7 @@ export default function CheckoutPage() {
 
                         <button
                           onClick={() => increaseQuantity(item.id, item.quantity)}
-                          className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 text-sm"
+                          className="px-2 py-1 bg-gray-200 rounded hover:bg-blue-100 text-blue-700 hover:text-blue-300 text-sm"
                         >
                           <Plus size={14} />
                         </button>
@@ -314,61 +360,107 @@ export default function CheckoutPage() {
             <div className="space-y-3">
               <input
                 name="name"
-                placeholder="Full Name"
+                placeholder="Full Name *"
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full border rounded px-3 py-2"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                required
               />
 
-              <input
-                name="phone"
-                placeholder="Phone Number"
+              {/* Phone Input Component */}
+              <PhoneInput
                 value={formData.phone}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2"
+                onChange={handlePhoneChange}
+                onValidationChange={handlePhoneValidationChange}
+                required={true}
+                placeholder="Phone Number * (e.g., +1 234 567 8900, +44 7911 123456)"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               />
 
               <input
                 name="email"
+                type="email"
                 placeholder="Email (optional)"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full border rounded px-3 py-2"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               />
 
-              <select
+              {/* Country field with suggestions */}
+              <div className="relative">
+                <input
+                  name="country"
+                  placeholder="Country *"
+                  value={formData.country}
+                  onChange={handleChange}
+                  onFocus={() => formData.country.trim() && setShowCountrySuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowCountrySuggestions(false), 200)}
+                  className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  required
+                />
+                {showCountrySuggestions && filteredCountries.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    {filteredCountries.map((country) => (
+                      <button
+                        key={country}
+                        type="button"
+                        onClick={() => handleCountrySelect(country)}
+                        onMouseDown={(e) => e.preventDefault()} // Prevent blur before click
+                        className="w-full text-left px-4 py-2 hover:bg-blue-50 dark:hover:bg-gray-600 transition-colors first:rounded-t-lg last:rounded-b-lg"
+                      >
+                        {country}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* County/State/Province field - manual typing only */}
+              <input
                 name="county"
+                placeholder="County/State/Province *"
                 value={formData.county}
                 onChange={handleChange}
-                className="w-full border rounded px-3 py-2"
-              >
-                <option value="">Select County</option>
-                {counties.map((c) => (
-                  <option key={c}>{c}</option>
-                ))}
-              </select>
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                required
+              />
 
               <input
                 name="locality"
-                placeholder="Exact Locality (e.g. Nyamasaria, Kisumu)"
+                placeholder="Exact Locality/Address * (e.g. Street, City, ZIP Code)"
                 value={formData.locality}
                 onChange={handleChange}
-                className="w-full border rounded px-3 py-2"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                required
               />
 
               <textarea
                 name="message"
-                placeholder="Special message (optional)"
+                placeholder="Special instructions or message (optional)"
                 value={formData.message}
                 onChange={handleChange}
-                className="w-full border rounded px-3 py-2 h-20"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none h-32 resize-none"
               />
             </div>
 
-            <div className="mt-6 flex justify-between">
+            {/* Enhanced Error Display */}
+            {errorMessage && (
+              <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-2">
+                <AlertCircle className="text-red-500 flex-shrink-0" size={18} />
+                <p className="text-red-700 dark:text-red-400 text-sm">{errorMessage}</p>
+                <button
+                  onClick={() => setErrorMessage("")}
+                  className="ml-auto text-red-500 hover:text-red-700"
+                >
+                  <XCircle size={18} />
+                </button>
+              </div>
+            )}
+
+            <div className="mt-6 flex justify-between gap-3">
               <button
                 onClick={() => setShowForm(false)}
-                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-medium"
               >
                 Cancel
               </button>
@@ -376,9 +468,16 @@ export default function CheckoutPage() {
               <button
                 onClick={handleSubmitOrder}
                 disabled={isSubmitting}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
               >
-                {isSubmitting ? "Submitting..." : "Finish Submission"}
+                {isSubmitting ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Submitting...
+                  </span>
+                ) : (
+                  "Finish Submission"
+                )}
               </button>
             </div>
           </div>

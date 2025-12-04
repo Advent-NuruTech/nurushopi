@@ -15,10 +15,8 @@ export default function Footer() {
           {/* Brand Column */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
-                <ShoppingBag className="w-5 h-5 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+            
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-800 to-emerald-600 bg-clip-text text-transparent">
                 NuruShop
               </h3>
             </div>
@@ -152,27 +150,7 @@ export default function Footer() {
 
         </div>
 
-        {/* Newsletter Section */}
-        <div className="mt-12 pt-8 border-t border-slate-200 dark:border-gray-800">
-          <div className="max-w-md mx-auto text-center">
-            <h4 className="text-sm font-semibold text-slate-900 dark:text-white mb-2">
-              Stay Updated
-            </h4>
-            <p className="text-xs text-slate-600 dark:text-gray-400 mb-4">
-              Get exclusive offers and health tips delivered to your inbox
-            </p>
-            <div className="flex gap-2">
-              <input 
-                type="email" 
-                placeholder="your@email.com"
-                className="flex-1 px-4 py-2 text-sm rounded-lg border border-slate-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-              />
-              <button className="px-6 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-200 hover:shadow-lg">
-                Subscribe
-              </button>
-            </div>
-          </div>
-        </div>
+        
 
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-slate-200 dark:border-gray-800">
@@ -181,10 +159,10 @@ export default function Footer() {
               © {currentYear} <span className="font-semibold text-slate-600 dark:text-gray-400">NuruShop</span> — Health & Truth. All Rights Reserved.
             </p>
             <div className="flex gap-6">
-              <a href="" className="hover:text-green-600 dark:hover:text-green-500 transition-colors">
+              <a href="privacy" className="hover:text-green-600 dark:hover:text-green-500 transition-colors">
                 Privacy Policy
               </a>
-              <a href="" className="hover:text-green-600 dark:hover:text-green-500 transition-colors">
+              <a href="terms" className="hover:text-green-600 dark:hover:text-green-500 transition-colors">
                 Terms of Service
               </a>
               <a href="" className="hover:text-green-600 dark:hover:text-green-500 transition-colors">

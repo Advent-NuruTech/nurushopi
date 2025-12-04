@@ -14,7 +14,7 @@ interface Product {
   category: string;
   price: number;
   shortDescription?: string;
-  description?: string; // Allow full description
+  description?: string;
 }
 
 interface FeaturedSectionProps {
@@ -40,9 +40,7 @@ export default function FeaturedSection({ products }: FeaturedSectionProps) {
 
   const featuredByCategory = categories.map((cat) => ({
     category: cat,
-    items: products
-      .filter((p) => p.category?.toLowerCase() === cat)
-      .slice(0, 8),
+    items: products.filter((p) => p.category?.toLowerCase() === cat).slice(0, 8),
   }));
 
   // Auto-slide effect
@@ -76,23 +74,21 @@ export default function FeaturedSection({ products }: FeaturedSectionProps) {
   };
 
   return (
-    <section className="relative w-full min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-100 flex flex-col justify-center items-center px-3 sm:px-6 py-16 overflow-hidden">
-      <div className="absolute inset-0 w-full h-full bg-gradient-to-b from-blue-100 via-white to-blue-50 -z-10" />
-
-      <div className="flex flex-col gap-14 w-full max-w-7xl">
+    <section className="relative w-full px-3 sm:px-6 py-16 bg-white dark:bg-black transition-colors">
+      <div className="flex flex-col gap-14 w-full max-w-7xl mx-auto">
         {featuredByCategory.map(
           (group) =>
             group.items.length > 0 && (
               <div key={group.category} className="w-full">
                 {/* Category Title + View All */}
                 <div className="flex justify-between items-center mb-5 px-2 sm:px-6">
-                  <h3 className="text-xl sm:text-2xl font-semibold capitalize text-blue-700">
+                  <h3 className="text-xl sm:text-2xl font-semibold capitalize text-blue-700 dark:text-blue-400">
                     {group.category.replace(/egw/i, "E.G. White Writings")}
                   </h3>
                   <Link href={{ pathname: `/${group.category}` }}>
                     <Button
                       variant="outline"
-                      className="text-blue-700 border-blue-600 hover:bg-blue-600 hover:text-white transition"
+                      className="text-blue-700 dark:text-blue-300 border-blue-600 dark:border-blue-400 hover:bg-blue-600 hover:text-white dark:hover:text-white"
                     >
                       View All →
                     </Button>
@@ -106,13 +102,10 @@ export default function FeaturedSection({ products }: FeaturedSectionProps) {
                       key={item.id}
                       whileHover={{ scale: 1.03 }}
                       transition={{ duration: 0.3 }}
-                      className="bg-white rounded-xl shadow-md hover:shadow-lg flex flex-col overflow-hidden transition-all duration-300"
+                      className="bg-white dark:bg-gray-900 rounded-xl shadow-md dark:shadow-gray-700 hover:shadow-lg dark:hover:shadow-gray-600 flex flex-col overflow-hidden transition-all duration-300"
                     >
-                      <Link
-                        href={`/products/${item.id}`}
-                        className="flex-grow block"
-                      >
-                        <div className="relative w-full h-40 sm:h-56 bg-white">
+                      <Link href={`/products/${item.id}`} className="flex-grow block">
+                        <div className="relative w-full h-40 sm:h-56 bg-white dark:bg-gray-800">
                           <Image
                             src={item.image}
                             alt={item.name}
@@ -123,24 +116,24 @@ export default function FeaturedSection({ products }: FeaturedSectionProps) {
                         </div>
 
                         <div className="p-3 text-center">
-                          <h4 className="font-semibold text-gray-800 text-sm sm:text-base line-clamp-1">
+                          <h4 className="font-semibold text-black dark:text-white text-sm sm:text-base line-clamp-1">
                             {item.name}
                           </h4>
-                          <p className="text-xs sm:text-sm text-gray-500 mt-1 line-clamp-2">
+                          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
                             {item.shortDescription ||
                               "A premium item to uplift your faith and wellbeing."}
                           </p>
                         </div>
                       </Link>
 
-                      {/* Price + Add Button (same line) */}
+                      {/* Price + Add Button */}
                       <div className="flex justify-between items-center px-3 pb-3">
-                        <p className="text-blue-600 font-bold">
+                        <p className="text-blue-600 dark:text-blue-400 font-bold text-sm">
                           KSh {item.price.toLocaleString()}
                         </p>
                         <Button
                           size="sm"
-                          className="bg-blue-600 hover:bg-blue-700 text-white rounded-full w-9 h-9 flex items-center justify-center text-lg"
+                          className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleAddToCart(item);
@@ -162,7 +155,7 @@ export default function FeaturedSection({ products }: FeaturedSectionProps) {
         <Link href="/shop">
           <Button
             size="lg"
-            className="px-8 py-3 text-lg rounded-full shadow-md bg-blue-700 hover:bg-blue-800 text-white"
+            className="px-8 py-3 text-lg rounded-full shadow-md bg-blue-800 hover:bg-blue-800 dark:bg-white dark:text-black dark:hover:bg-gray-200 dark:hover:text-black transition"
           >
             Explore Full Collection
           </Button>

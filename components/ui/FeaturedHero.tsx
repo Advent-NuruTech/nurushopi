@@ -24,7 +24,7 @@ interface FeaturedSectionProps {
 export default function FeaturedSection({ products }: FeaturedSectionProps) {
   const { addToCart } = useCart();
   const [currentCategory, setCurrentCategory] = useState(0);
-  const scrollRef = useRef<HTMLDivElement>(null); // ✅ Ref for manual scroll container
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const categories = [
     "foods",
@@ -38,7 +38,6 @@ export default function FeaturedSection({ products }: FeaturedSectionProps) {
     "songbooks",
   ];
 
-  // ✅ Only latest 2 per category
   const featuredByCategory = categories
     .map((cat) => ({
       category: cat,
@@ -48,11 +47,14 @@ export default function FeaturedSection({ products }: FeaturedSectionProps) {
     }))
     .filter((group) => group.items.length > 0);
 
-  // ✅ Auto-slide every 8 seconds
+  // Auto-slide every 8s
   useEffect(() => {
-    if (featuredByCategory.length === 0) return;
+    if (!featuredByCategory.length) return;
     const timer = setInterval(() => {
       setCurrentCategory((prev) => (prev + 1) % featuredByCategory.length);
+
+      // Scroll to start of next category
+      if (scrollRef.current) scrollRef.current.scrollLeft = 0;
     }, 8000);
     return () => clearInterval(timer);
   }, [featuredByCategory.length]);
@@ -67,7 +69,7 @@ export default function FeaturedSection({ products }: FeaturedSectionProps) {
     });
   };
 
-  // ✅ Manual scroll with mouse drag / touch
+  // Drag scrolling
   useEffect(() => {
     const container = scrollRef.current;
     if (!container) return;
@@ -76,68 +78,66 @@ export default function FeaturedSection({ products }: FeaturedSectionProps) {
     let startX: number;
     let scrollLeft: number;
 
-    const startDragging = (e: MouseEvent | TouchEvent) => {
+    const start = (e: any) => {
       isDown = true;
       startX =
         "touches" in e ? e.touches[0].pageX - container.offsetLeft : e.pageX - container.offsetLeft;
       scrollLeft = container.scrollLeft;
     };
 
-    const stopDragging = () => (isDown = false);
+    const stop = () => (isDown = false);
 
-    const onDrag = (e: MouseEvent | TouchEvent) => {
+    const move = (e: any) => {
       if (!isDown) return;
       e.preventDefault();
       const x =
         "touches" in e ? e.touches[0].pageX - container.offsetLeft : e.pageX - container.offsetLeft;
-      const walk = (x - startX) * 1.5; // scroll speed
+      const walk = (x - startX) * 1.5;
       container.scrollLeft = scrollLeft - walk;
     };
 
-    container.addEventListener("mousedown", startDragging);
-    container.addEventListener("mouseleave", stopDragging);
-    container.addEventListener("mouseup", stopDragging);
-    container.addEventListener("mousemove", onDrag);
+    container.addEventListener("mousedown", start);
+    container.addEventListener("mouseleave", stop);
+    container.addEventListener("mouseup", stop);
+    container.addEventListener("mousemove", move);
 
-    container.addEventListener("touchstart", startDragging);
-    container.addEventListener("touchend", stopDragging);
-    container.addEventListener("touchmove", onDrag);
+    container.addEventListener("touchstart", start);
+    container.addEventListener("touchend", stop);
+    container.addEventListener("touchmove", move);
 
     return () => {
-      container.removeEventListener("mousedown", startDragging);
-      container.removeEventListener("mouseleave", stopDragging);
-      container.removeEventListener("mouseup", stopDragging);
-      container.removeEventListener("mousemove", onDrag);
-      container.removeEventListener("touchstart", startDragging);
-      container.removeEventListener("touchend", stopDragging);
-      container.removeEventListener("touchmove", onDrag);
+      container.removeEventListener("mousedown", start);
+      container.removeEventListener("mouseleave", stop);
+      container.removeEventListener("mouseup", stop);
+      container.removeEventListener("mousemove", move);
+      container.removeEventListener("touchstart", start);
+      container.removeEventListener("touchend", stop);
+      container.removeEventListener("touchmove", move);
     };
   }, []);
 
   if (!featuredByCategory.length)
     return (
-      <div className="text-center py-20 text-gray-500">
+      <div className="text-center py-10 text-gray-500 dark:text-gray-400">
         Loading featured products...
       </div>
     );
 
   return (
-    <section className="relative w-full bg-gradient-to-b from-blue-50 via-white to-blue-100 px-3 sm:px-6 py-16 overflow-hidden">
-      <div className="absolute inset-0 w-full h-full bg-gradient-to-b from-blue-100 via-white to-blue-50 -z-10" />
-
+    <section className="relative w-full px-3 sm:px-6 py-10 sm:py-12 overflow-hidden bg-white dark:bg-black transition-colors">
       <div className="relative max-w-7xl mx-auto">
         <AnimatePresence mode="wait">
           <motion.div
             key={featuredByCategory[currentCategory].category}
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -50 }}
-            transition={{ duration: 0.8, ease: "easeInOut" }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.6, ease: "easeInOut" }}
             className="w-full"
           >
             {/* Header */}
-            <div className="flex justify-between items-center w-full px-4 sm:px-8 mb-5">
-              <h1 className="text-xl sm:text-2xl font-semibold capitalize text-blue-700">
+            <div className="flex justify-between items-center w-full px-2 sm:px-6 mb-4">
+              <h1 className="text-xl sm:text-2xl font-semibold capitalize text-blue-700 dark:text-blue-400">
                 {featuredByCategory[currentCategory].category.replace(
                   /egw/i,
                   "E.G. White Writings"
@@ -146,53 +146,59 @@ export default function FeaturedSection({ products }: FeaturedSectionProps) {
               <Link href={`/${featuredByCategory[currentCategory].category}` as any}>
                 <Button
                   variant="outline"
-                  className="text-blue-700 border-blue-600 hover:bg-blue-600 hover:text-white"
+                  className="text-blue-700 dark:text-blue-300 border-blue-600 dark:border-blue-400 hover:bg-blue-600 hover:text-white dark:hover:text-white"
                 >
                   View All →
                 </Button>
               </Link>
             </div>
 
-            {/* ✅ Scrollable horizontally + drag-enabled */}
+            {/* Scrollable products with snapping */}
             <div
               ref={scrollRef}
-              className="flex gap-4 sm:gap-5 overflow-x-auto px-3 sm:px-5 scrollbar-hide cursor-grab active:cursor-grabbing"
+              className="flex gap-3 sm:gap-4 overflow-x-auto px-1 sm:px-3 scrollbar-hide cursor-grab active:cursor-grabbing snap-x snap-mandatory"
             >
               {featuredByCategory[currentCategory].items.map((item) => (
                 <motion.div
                   key={item.id}
-                  whileHover={{ scale: 1.03 }}
-                  className="min-w-[180px] sm:min-w-[200px] bg-white rounded-xl shadow-md hover:shadow-lg flex flex-col overflow-hidden transition-all"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  whileHover={{ scale: 1.05 }}
+                  className="min-w-[180px] sm:min-w-[200px] 
+                    bg-white dark:bg-gray-900 
+                    rounded-xl shadow-md dark:shadow-gray-800 
+                    hover:shadow-lg dark:hover:shadow-gray-700 
+                    flex flex-col overflow-hidden transition-all snap-start"
                 >
                   <Link href={`/products/${item.id}`} className="flex-grow block">
-                    <div className="relative w-full h-40 sm:h-44 bg-gray-50 rounded-t-xl overflow-hidden">
+                    <div className="relative w-full h-40 sm:h-44 bg-gray-100 dark:bg-gray-800 rounded-t-xl overflow-hidden">
                       <Image
-                        src={item.image || "/images/placeholder.png"}
+                        src={item.image || "/assets/logo.jpg"}
                         alt={item.name}
                         fill
-                        className="object-cover"
+                        className="object-contain"
                       />
                     </div>
 
-                    <div className="p-3 text-center">
-                      <h4 className="font-semibold text-gray-800 text-sm line-clamp-1">
+                    <div className="p-2 sm:p-3 text-center">
+                      <h4 className="font-semibold text-gray-800 dark:text-gray-100 text-sm line-clamp-1">
                         {item.name}
                       </h4>
-                      <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
                         {item.shortDescription ||
                           "A premium item designed to uplift your body, mind, and spirit."}
                       </p>
                     </div>
                   </Link>
 
-                  {/* ✅ Price Left | Add Button Right */}
-                  <div className="flex items-center justify-between px-3 pb-3">
-                    <p className="text-blue-600 font-bold text-sm">
+                  <div className="flex items-center justify-between px-2 sm:px-3 pb-2">
+                    <p className="text-blue-600 dark:text-blue-400 font-bold text-sm">
                       KSh {item.price.toLocaleString()}
                     </p>
                     <Button
                       size="sm"
-                      className="bg-blue-600 hover:bg-blue-700 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg"
+                      className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg"
                       onClick={(e) => {
                         e.preventDefault();
                         handleAddToCart(item);
@@ -207,16 +213,16 @@ export default function FeaturedSection({ products }: FeaturedSectionProps) {
           </motion.div>
         </AnimatePresence>
 
-        {/* Navigation Dots */}
-        <div className="flex justify-center mt-6 space-x-3">
+        {/* Indicators */}
+        <div className="flex justify-center mt-4 space-x-2">
           {featuredByCategory.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentCategory(index)}
               className={`w-3 h-3 rounded-full transition-all ${
                 index === currentCategory
-                  ? "bg-blue-600 scale-110"
-                  : "bg-gray-300 hover:bg-blue-400"
+                  ? "bg-blue-600 dark:bg-blue-400 scale-110"
+                  : "bg-gray-300 dark:bg-gray-700 hover:bg-blue-400 dark:hover:bg-blue-300"
               }`}
             />
           ))}

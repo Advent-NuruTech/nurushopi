@@ -32,9 +32,9 @@ export default function SearchBar({ showSearch, setShowSearch }: SearchBarProps)
   const searchButtonRef = useRef<HTMLButtonElement>(null);
   const router = useRouter();
 
-  // Close search when clicking outside
+  // Close search on click/touch outside or scroll
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
       const target = e.target as HTMLElement;
       if (
         showSearch &&
@@ -47,11 +47,22 @@ export default function SearchBar({ showSearch, setShowSearch }: SearchBarProps)
       }
     };
 
+    const handleScroll = () => {
+      if (showSearch) setShowSearch(false);
+    };
+
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+    window.addEventListener("scroll", handleScroll, true);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+      window.removeEventListener("scroll", handleScroll, true);
+    };
   }, [showSearch, setShowSearch]);
 
-  // Search Firestore by lowercase name + other fields
+  // Search Firestore
   const searchProducts = useCallback(async (searchTerm: string) => {
     const trimmedQuery = searchTerm.trim().toLowerCase();
     if (!trimmedQuery) {
@@ -109,12 +120,11 @@ export default function SearchBar({ showSearch, setShowSearch }: SearchBarProps)
     router.push(`/products/${result.id}`);
   };
 
-  // Convert price to KSh format
   const formatPrice = (price: number) => `KSh ${price.toLocaleString("en-KE")}`;
 
   return (
     <>
-      {/* 🔍 Search Button */}
+      {/* Search Button */}
       <button
         ref={searchButtonRef}
         onClick={() => setShowSearch(!showSearch)}
@@ -125,7 +135,7 @@ export default function SearchBar({ showSearch, setShowSearch }: SearchBarProps)
         <Search size={22} />
       </button>
 
-      {/* 🧭 Search Dropdown */}
+      {/* Search Dropdown */}
       <AnimatePresence>
         {showSearch && (
           <motion.div
@@ -151,7 +161,7 @@ export default function SearchBar({ showSearch, setShowSearch }: SearchBarProps)
               )}
             </div>
 
-            {/* Results Section */}
+            {/* Results */}
             {searchResults.length > 0 && (
               <div className="mt-2 border-t border-gray-200 dark:border-gray-700 max-h-80 overflow-y-auto">
                 {searchResults.map((result, index) => (
@@ -165,15 +175,9 @@ export default function SearchBar({ showSearch, setShowSearch }: SearchBarProps)
                         : "hover:bg-blue-50 dark:hover:bg-gray-700"
                     }`}
                   >
-                    {/* 🖼️ Image */}
                     {result.image ? (
                       <div className="w-14 h-14 relative flex-shrink-0 rounded-md overflow-hidden border border-gray-200 dark:border-gray-700">
-                        <Image
-                          src={result.image!}
-                          alt={result.name}
-                          fill
-                          className="object-cover"
-                        />
+                        <Image src={result.image} alt={result.name} fill className="object-cover" />
                       </div>
                     ) : (
                       <div className="w-14 h-14 flex-shrink-0 rounded-md bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400 text-sm">
@@ -181,7 +185,6 @@ export default function SearchBar({ showSearch, setShowSearch }: SearchBarProps)
                       </div>
                     )}
 
-                    {/* 📝 Text */}
                     <div className="flex flex-col text-left flex-1">
                       <div className="font-semibold text-gray-800 dark:text-gray-100">
                         {result.name}

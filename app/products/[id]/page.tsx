@@ -183,18 +183,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
 
 
-       
-
-
-
-
-
-
-
-
-
-
-
 
        
 

@@ -23,6 +23,7 @@ type Order = {
   name: string;
   phone: string;
   email?: string;
+  country: string;
   county: string;
   locality: string;
   message?: string;
@@ -155,6 +156,12 @@ export default function ReceivedPageClient() {
                             Phone:
                           </span>{' '}
                           {o.phone}
+                        </p>
+                         <p>
+                          <span className="font-medium text-slate-600 dark:text-slate-400">
+                            Country:
+                          </span>{' '}
+                          {o.country}
                         </p>
                         <p>
                           <span className="font-medium text-slate-600 dark:text-slate-400">

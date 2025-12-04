@@ -6,7 +6,7 @@ import LoadingSpinner from "@/components/ui/LoadingSpinner";
 export const dynamic = "force-dynamic";
 
 export default async function RemediesPage() {
-  const products = await getProductsByCategory("remedies"); // fetch remedies category
+  const products = await getProductsByCategory("herbs"); // fetch remedies category
 
   if (!products) {
     return (

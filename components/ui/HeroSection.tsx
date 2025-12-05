@@ -9,7 +9,10 @@ export default function HeroSection() {
     "E.G. White Books & Pioneer Writings",
     "Faith-Based Learning Resources",
     "Pure Oils, Herbs & Health Foods",
+    "All from trusted and satisfied sources ",
+    "incase you dont find the product of your choice, please contact us directly so that we link you to a trusted seller",
     "Affordable Spiritual & Wellness Products",
+    
     "NuruShop — Health & Truth for Every Home",
     "Handpicked treasures from each category",
   ];

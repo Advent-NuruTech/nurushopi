@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* ---------------------------------
+   🌗 Light / Dark Theme Variables
+----------------------------------*/
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -26,9 +29,49 @@ body {
 }
 
 /* ---------------------------------
-   🔵 Added continuous marquee scroll
+   🔵 Marquee Scroll Animation
+----------------------------------*/
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll {
+  animation: scroll 28s linear infinite;
+  white-space: nowrap;
+  display: inline-flex;
+}
+
+/* ---------------------------------
+   🔵 Floating Particles Animation
+----------------------------------*/
+@keyframes float {
+  0% {
+    transform: translateY(0) translateX(0);
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-70px) translateX(30px);
+    opacity: 0.5;
+  }
+}
+
+.animate-float {
+  animation: float linear infinite;
+}
+
+/* ---------------------------------
+   (Optional) Maintain old marquee class
 ----------------------------------*/
 
+/* Old class for compatibility */
 @keyframes marquee {
   0% {
     transform: translateX(0%);

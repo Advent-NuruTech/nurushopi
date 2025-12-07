@@ -2,39 +2,20 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-
   typedRoutes: true,
-  // ✅ Allow Cloudinary + external images
+
   images: {
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "res.cloudinary.com",
-      },
-      {
-        protocol: "https",
-        hostname: "images.unsplash.com",
-      },
+      { protocol: "https", hostname: "res.cloudinary.com" },
+      { protocol: "https", hostname: "images.unsplash.com" },
     ],
   },
 
-  turbopack: {
-    rules: {
-      "*.svg": ["file-loader"],
-    },
-  },
-  plugins: [require('tailwind-scrollbar-hide')],
-
-  // ✅ Ignore build errors from ESLint during deployment
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-
-  // ✅ TypeScript build optimization
   typescript: {
     ignoreBuildErrors: false,
   },
-};
 
+  experimental: {},
+};
 
 export default nextConfig;

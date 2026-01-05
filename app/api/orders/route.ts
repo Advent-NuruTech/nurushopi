@@ -12,17 +12,63 @@ import {
   where,
   orderBy,
   serverTimestamp,
+  Timestamp,
+  FieldValue,
 } from "firebase/firestore";
 
 // Firestore collection reference
 const ordersCollection = collection(db, "orders");
 
-/**
- * 🟢 Create a new order
- */
+/** 🔹 Type for individual order items */
+interface OrderItem {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  image?: string;
+}
+
+/** 🔹 Type stored in Firestore */
+interface FirestoreOrder {
+  userId: string;
+  userEmail?: string | null;
+  name: string;
+  phone: string;
+  email: string;
+  county: string;
+  locality: string;
+  message: string;
+  items: OrderItem[];
+  totalAmount: number;
+  status: string;
+  createdAt?: Timestamp | FieldValue;
+  updatedAt?: Timestamp | FieldValue;
+}
+
+/** 🔹 Type returned to client */
+interface Order {
+  id: string;
+  userId: string;
+  userEmail?: string | null;
+  name: string;
+  phone: string;
+  email: string;
+  county: string;
+  locality: string;
+  message: string;
+  items: OrderItem[];
+  totalAmount: number;
+  status: string;
+  createdAt: string; // always ISO string
+  updatedAt?: string;
+}
+
+/** 🟢 Create a new order */
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const body: Partial<FirestoreOrder> & { userId?: string; total?: number } =
+      await request.json();
+
     const {
       userId,
       userEmail,
@@ -41,8 +87,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing userId" }, { status: 400 });
     }
 
-    // ✅ Include all checkout form data
-    const newOrder = {
+    const newOrder: FirestoreOrder = {
       userId,
       userEmail: userEmail ?? null,
       name: name ?? "",
@@ -52,7 +97,7 @@ export async function POST(request: Request) {
       locality: locality ?? "",
       message: message ?? "",
       items: items ?? [],
-      totalAmount: total ?? 0, // match field used in received page
+      totalAmount: total ?? 0,
       status: status ?? "pending",
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
@@ -60,19 +105,15 @@ export async function POST(request: Request) {
 
     const docRef = await addDoc(ordersCollection, newOrder);
 
-    return NextResponse.json(
-      { success: true, orderId: docRef.id },
-      { status: 201 }
-    );
-  } catch (err) {
+    return NextResponse.json({ success: true, orderId: docRef.id }, { status: 201 });
+  } catch (err: unknown) {
     console.error("POST /api/orders error", err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    const message = err instanceof Error ? err.message : "Server error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
-/**
- * 🟡 Get all orders or filter by userId
- */
+/** 🟡 Get all orders or filter by userId */
 export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
@@ -87,67 +128,78 @@ export async function GET(request: Request) {
       : query(ordersCollection, orderBy("createdAt", "desc"));
 
     const snap = await getDocs(q);
-    const orders: any[] = [];
 
-    snap.forEach((doc) => {
-      const data = doc.data();
-      orders.push({
-        id: doc.id,
-        ...data,
-        createdAt: data.createdAt?.toDate
-          ? data.createdAt.toDate().toISOString()
-          : new Date().toISOString(),
-      });
+    const orders: Order[] = snap.docs.map((docSnap) => {
+      const data = docSnap.data() as FirestoreOrder;
+
+      const createdAtTs = data.createdAt as Timestamp | FieldValue | undefined;
+      const updatedAtTs = data.updatedAt as Timestamp | FieldValue | undefined;
+
+      return {
+        id: docSnap.id,
+        userId: data.userId,
+        userEmail: data.userEmail ?? null,
+        name: data.name,
+        phone: data.phone,
+        email: data.email,
+        county: data.county,
+        locality: data.locality,
+        message: data.message,
+        items: data.items,
+        totalAmount: data.totalAmount,
+        status: data.status,
+        createdAt:
+          createdAtTs && "toDate" in createdAtTs
+            ? (createdAtTs as Timestamp).toDate().toISOString()
+            : new Date().toISOString(),
+        updatedAt:
+          updatedAtTs && "toDate" in updatedAtTs
+            ? (updatedAtTs as Timestamp).toDate().toISOString()
+            : undefined,
+      };
     });
 
     return NextResponse.json({ orders }, { status: 200 });
-  } catch (err) {
+  } catch (err: unknown) {
     console.error("GET /api/orders error", err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    const message = err instanceof Error ? err.message : "Server error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
-/**
- * 🟠 Update order
- */
+/** 🟠 Update order */
 export async function PUT(request: Request) {
   try {
-    const body = await request.json();
+    const body: { orderId?: string; updates?: Partial<FirestoreOrder>; userId?: string } =
+      await request.json();
     const { orderId, updates, userId } = body;
 
     if (!orderId || !updates) {
-      return NextResponse.json(
-        { error: "Missing orderId or updates" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Missing orderId or updates" }, { status: 400 });
     }
 
     const orderRef = doc(db, "orders", orderId);
     const orderSnap = await getDoc(orderRef);
+
     if (!orderSnap.exists()) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    const orderData = orderSnap.data();
-    if (userId && orderData?.userId !== userId) {
+    const orderData = orderSnap.data() as FirestoreOrder;
+    if (userId && orderData.userId !== userId) {
       return NextResponse.json({ error: "Not authorized" }, { status: 403 });
     }
 
-    await updateDoc(orderRef, {
-      ...updates,
-      updatedAt: serverTimestamp(),
-    });
-
+    await updateDoc(orderRef, { ...updates, updatedAt: serverTimestamp() });
     return NextResponse.json({ success: true }, { status: 200 });
-  } catch (err) {
+  } catch (err: unknown) {
     console.error("PUT /api/orders error", err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    const message = err instanceof Error ? err.message : "Server error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
-/**
- * 🔴 Delete order
- */
+/** 🔴 Delete order */
 export async function DELETE(request: Request) {
   try {
     const url = new URL(request.url);
@@ -155,27 +207,26 @@ export async function DELETE(request: Request) {
     const userId = url.searchParams.get("userId");
 
     if (!orderId || !userId) {
-      return NextResponse.json(
-        { error: "Missing orderId or userId" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Missing orderId or userId" }, { status: 400 });
     }
 
     const orderRef = doc(db, "orders", orderId);
     const orderSnap = await getDoc(orderRef);
+
     if (!orderSnap.exists()) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    const orderData = orderSnap.data();
-    if (orderData?.userId !== userId) {
+    const orderData = orderSnap.data() as FirestoreOrder;
+    if (orderData.userId !== userId) {
       return NextResponse.json({ error: "Not authorized" }, { status: 403 });
     }
 
     await deleteDoc(orderRef);
     return NextResponse.json({ success: true }, { status: 200 });
-  } catch (err) {
+  } catch (err: unknown) {
     console.error("DELETE /api/orders error", err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    const message = err instanceof Error ? err.message : "Server error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

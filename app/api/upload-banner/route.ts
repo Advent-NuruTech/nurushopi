@@ -2,13 +2,20 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
+interface CloudinaryResponse {
+  secure_url?: string;
+  error?: { message?: string };
+  [key: string]: unknown;
+}
+
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
-    const file = formData.get("file") as File;
-    const title = formData.get("title") as string;
-    const link = formData.get("link") as string;
-    const shortDescription = formData.get("shortDescription") as string;
+
+    const file = formData.get("file") as File | null;
+    const title = formData.get("title")?.toString() || "";
+    const link = formData.get("link")?.toString() || "";
+    const shortDescription = formData.get("shortDescription")?.toString() || "";
 
     if (!file) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
@@ -17,7 +24,7 @@ export async function POST(req: Request) {
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
     const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!;
 
-    // Convert file to base64
+    // Convert file to Blob
     const bytes = await file.arrayBuffer();
     const blob = new Blob([bytes]);
 
@@ -34,7 +41,7 @@ export async function POST(req: Request) {
       body: uploadData,
     });
 
-    const uploadRes = await uploadResponse.json();
+    const uploadRes: CloudinaryResponse = await uploadResponse.json();
 
     if (!uploadRes.secure_url) {
       throw new Error(uploadRes.error?.message || "Upload failed");
@@ -50,8 +57,12 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ message: "Banner uploaded successfully ✅" });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Banner upload error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+
+    const message =
+      error instanceof Error ? error.message : "An unknown error occurred";
+
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

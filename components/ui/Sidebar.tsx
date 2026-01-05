@@ -6,21 +6,24 @@ import Link from "next/link";
 import Image from "next/image";
 import { LogIn, ChevronDown, ChevronRight } from "lucide-react";
 import { UserButton, SignInButton, SignedIn, SignedOut } from "@clerk/nextjs";
+import { UrlObject } from "url";
+
+interface Category {
+  name: string;
+  href: string | UrlObject;
+  icon: string;
+}
 
 interface SidebarProps {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
-  categories: Array<{ name: string; href: any; icon: string }>;
-  darkMode: boolean;
-  toggleDarkMode: () => void;
+  categories: Category[];
 }
 
-export default function Sidebar({ 
-  isOpen, 
-  setIsOpen, 
-  categories, 
-  darkMode, 
-  toggleDarkMode 
+export default function Sidebar({
+  isOpen,
+  setIsOpen,
+  categories,
 }: SidebarProps) {
   const [showCategories, setShowCategories] = useState(false);
   const sidebarRef = useRef<HTMLElement>(null);
@@ -29,13 +32,12 @@ export default function Sidebar({
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      
-      // Close sidebar if clicked outside and not on the menu button
+
       if (
         isOpen &&
         sidebarRef.current &&
         !sidebarRef.current.contains(target) &&
-        !target.closest('[data-menu-button]') // Check if click came from menu button
+        !target.closest('[data-menu-button]')
       ) {
         setIsOpen(false);
       }
@@ -45,14 +47,14 @@ export default function Sidebar({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen, setIsOpen]);
 
-  // Close sidebar when route changes
+  // Close sidebar on route change
   useEffect(() => {
     const handleRouteChange = () => setIsOpen(false);
     window.addEventListener("popstate", handleRouteChange);
     return () => window.removeEventListener("popstate", handleRouteChange);
   }, [setIsOpen]);
 
-  // Close sidebar when Escape key is pressed
+  // Close sidebar on Escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isOpen) {
@@ -81,18 +83,14 @@ export default function Sidebar({
             className="fixed inset-0 bg-black/50 z-40 md:hidden"
             onClick={() => setIsOpen(false)}
           />
-          
+
           {/* Sidebar */}
           <motion.aside
             ref={sidebarRef}
             initial={{ x: "-100%" }}
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
-            transition={{ 
-              type: "spring", 
-              stiffness: 300, 
-              damping: 30 
-            }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className="fixed top-0 left-0 h-screen w-80 max-w-[85%] bg-white dark:bg-gray-900 shadow-xl z-50 flex flex-col md:hidden"
             role="dialog"
             aria-label="Main navigation menu"
@@ -116,8 +114,18 @@ export default function Sidebar({
                 className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 aria-label="Close menu"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
@@ -125,8 +133,8 @@ export default function Sidebar({
             {/* Navigation Links */}
             <nav className="flex-1 overflow-y-auto p-6 flex flex-col gap-1">
               {/* Main Links */}
-              <Link 
-                href="/" 
+              <Link
+                href="/"
                 onClick={handleLinkClick}
                 className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium transition-colors"
               >
@@ -134,16 +142,16 @@ export default function Sidebar({
                 Home
               </Link>
 
-              <Link 
-                href="/shop" 
+              <Link
+                href="/shop"
                 onClick={handleLinkClick}
                 className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium transition-colors"
               >
-                 <span className="text-lg">🍔</span>
-                shop
+                <span className="text-lg">🍔</span>
+                Shop
               </Link>
 
-              {/* Categories Section with Dropdown */}
+              {/* Categories Dropdown */}
               <div className="mt-4 mb-2">
                 <button
                   onClick={() => setShowCategories(!showCategories)}
@@ -171,15 +179,20 @@ export default function Sidebar({
                     >
                       <div className="border-l-2 border-gray-200 dark:border-gray-700 pl-4 space-y-1">
                         {categories.map((category, index) => (
-                          <Link 
-                            key={index}
-                            href={category.href} 
-                            onClick={handleLinkClick}
-                            className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 font-medium transition-colors text-sm"
-                          >
-                            <span className="text-base">{category.icon}</span>
-                            {category.name}
-                          </Link>
+                  <Link
+  key={index}
+  href={
+    typeof category.href === "string"
+      ? { pathname: category.href } // convert string to UrlObject
+      : category.href
+  }
+  onClick={handleLinkClick}
+  className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 font-medium transition-colors text-sm"
+>
+  <span className="text-base">{category.icon}</span>
+  {category.name}
+</Link>
+
                         ))}
                       </div>
                     </motion.div>
@@ -188,8 +201,8 @@ export default function Sidebar({
               </div>
 
               {/* Additional Links */}
-              <Link 
-                href="/contact" 
+              <Link
+                href="/contact"
                 onClick={handleLinkClick}
                 className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium transition-colors"
               >
@@ -197,15 +210,14 @@ export default function Sidebar({
                 Contact
               </Link>
 
-              <Link 
-                href="/checkout" 
+              <Link
+                href="/checkout"
                 onClick={handleLinkClick}
                 className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium transition-colors"
               >
                 <span className="text-lg">🛒</span>
                 Cart
               </Link>
-
             </nav>
 
             {/* Footer */}
@@ -218,10 +230,10 @@ export default function Sidebar({
                   <UserButton afterSignOutUrl="/" />
                 </div>
               </SignedIn>
-              
+
               <SignedOut>
                 <SignInButton>
-                  <button 
+                  <button
                     onClick={handleLinkClick}
                     className="flex items-center justify-center gap-3 px-3 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors w-full"
                   >
@@ -231,7 +243,6 @@ export default function Sidebar({
                 </SignInButton>
               </SignedOut>
 
-              {/* Additional Footer Info */}
               <div className="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   NuruShop &copy; {new Date().getFullYear()}

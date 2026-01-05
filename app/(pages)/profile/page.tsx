@@ -74,7 +74,7 @@ export default function ProfilePageClient() {
           </div>
 
           <div className="text-sm text-slate-500">
-            <p>Security note: To change email or password use Clerk's secure account management UI or implement server-side Clerk SDK calls.</p>
+            <p>Security note: To change email or password use Clerk&apos;s secure account management UI or implement server-side Clerk SDK calls.</p>
           </div>
         </div>
       </SignedIn>

@@ -185,7 +185,7 @@ export default function ReceivedPageClient() {
                         )}
                         {o.message && (
                           <p className="col-span-2 mt-1 italic text-slate-500 dark:text-slate-400">
-                            "{o.message}"
+                            &quot;{o.message}&quot;
                           </p>
                         )}
                       </div>

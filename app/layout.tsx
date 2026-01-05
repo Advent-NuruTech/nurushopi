@@ -7,7 +7,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { CartProvider } from "@/context/CartContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { UserProvider } from "@/context/UserContext";
-import logo from "@/assets/logo.jpg"; 
+
 
 export const metadata = {
   title: "NuruShop - Natural Health & Truth Products",

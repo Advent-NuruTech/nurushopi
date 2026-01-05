@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, MouseEvent as ReactMouseEvent, TouchEvent as ReactTouchEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
@@ -12,6 +12,7 @@ interface Product {
   name: string;
   image: string;
   category: string;
+  
   price: number;
   shortDescription?: string;
   description?: string;
@@ -52,8 +53,6 @@ export default function FeaturedSection({ products }: FeaturedSectionProps) {
     if (!featuredByCategory.length) return;
     const timer = setInterval(() => {
       setCurrentCategory((prev) => (prev + 1) % featuredByCategory.length);
-
-      // Scroll to start of next category
       if (scrollRef.current) scrollRef.current.scrollLeft = 0;
     }, 8000);
     return () => clearInterval(timer);
@@ -75,32 +74,38 @@ export default function FeaturedSection({ products }: FeaturedSectionProps) {
     if (!container) return;
 
     let isDown = false;
-    let startX: number;
-    let scrollLeft: number;
+    let startX = 0;
+    let scrollLeft = 0;
 
-    const start = (e: any) => {
+    const start = (e: MouseEvent | TouchEvent) => {
       isDown = true;
       startX =
-        "touches" in e ? e.touches[0].pageX - container.offsetLeft : e.pageX - container.offsetLeft;
+        e instanceof TouchEvent
+          ? e.touches[0].pageX - container.offsetLeft
+          : (e as MouseEvent).pageX - container.offsetLeft;
       scrollLeft = container.scrollLeft;
     };
 
     const stop = () => (isDown = false);
 
-    const move = (e: any) => {
+    const move = (e: MouseEvent | TouchEvent) => {
       if (!isDown) return;
       e.preventDefault();
       const x =
-        "touches" in e ? e.touches[0].pageX - container.offsetLeft : e.pageX - container.offsetLeft;
+        e instanceof TouchEvent
+          ? e.touches[0].pageX - container.offsetLeft
+          : (e as MouseEvent).pageX - container.offsetLeft;
       const walk = (x - startX) * 1.5;
       container.scrollLeft = scrollLeft - walk;
     };
 
+    // Mouse events
     container.addEventListener("mousedown", start);
     container.addEventListener("mouseleave", stop);
     container.addEventListener("mouseup", stop);
     container.addEventListener("mousemove", move);
 
+    // Touch events
     container.addEventListener("touchstart", start);
     container.addEventListener("touchend", stop);
     container.addEventListener("touchmove", move);
@@ -143,7 +148,11 @@ export default function FeaturedSection({ products }: FeaturedSectionProps) {
                   "E.G. White Writings"
                 )}
               </h1>
-              <Link href={`/${featuredByCategory[currentCategory].category}` as any}>
+              <Link
+                href={{
+                  pathname: `/${featuredByCategory[currentCategory].category}`,
+                }}
+              >
                 <Button
                   variant="outline"
                   className="text-blue-700 dark:text-blue-300 border-blue-600 dark:border-blue-400 hover:bg-blue-600 hover:text-white dark:hover:text-white"
@@ -199,7 +208,7 @@ export default function FeaturedSection({ products }: FeaturedSectionProps) {
                     <Button
                       size="sm"
                       className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg"
-                      onClick={(e) => {
+                      onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                         e.preventDefault();
                         handleAddToCart(item);
                       }}

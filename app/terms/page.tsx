@@ -72,7 +72,7 @@ const Terms: React.FC = () => {
       <section>
         <h2 className="text-2xl font-semibold mt-6 mb-2">5. Delivery (Parceling) Policy</h2>
         <ul className="list-disc list-inside space-y-1">
-          <li>Parceling fees are based on distance and the seller's delivery method.</li>
+          <li>Parceling fees are based on distance and the seller&apos;s delivery method.</li>
           <li>Buyers are informed of the delivery fee before making payment.</li>
           <li>Delivery is the responsibility of the seller/product owner.</li>
           <li>Nurushop will confirm the buyer’s exact location before approving delivery.</li>

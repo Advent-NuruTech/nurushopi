@@ -102,7 +102,7 @@ export default function ContactPage() {
 
         {status === 'success' && (
           <div className="text-emerald-600 text-sm mt-2">
-            ✅ Message sent successfully! We'll respond soon.
+            ✅ Message sent successfully! We&apos;ll respond soon.
           </div>
         )}
         {status === 'error' && (

@@ -11,19 +11,30 @@ import Link from "next/link";
 import { Minus, Plus, AlertCircle, XCircle } from "lucide-react";
 import PhoneInput, { validatePhoneForSubmission } from "@/components/ui/PhoneInput";
 
-// Common countries for suggestions (you can expand this list)
+// -------------------- Types --------------------
+type Product = {
+  id: string;
+  name: string;
+  price: number;
+  image?: string;
+  images?: string[];
+  createdAt?: string;
+};
+
+// -------------------- Common Countries --------------------
 const commonCountries = [
-  "Kenya", "Uganda", "Tanzania", "Rwanda", "Ethiopia", "South Africa", 
-  "Nigeria", "Ghana", "United States", "United Kingdom", "Canada", 
+  "Kenya", "Uganda", "Tanzania", "Rwanda", "Ethiopia", "South Africa",
+  "Nigeria", "Ghana", "United States", "United Kingdom", "Canada",
   "Australia", "Germany", "France", "India", "China", "Japan"
 ];
 
+// -------------------- Checkout Page --------------------
 export default function CheckoutPage() {
   const { cart, total, removeFromCart, clearCart, updateQuantity } = useCart();
   const { user } = useUser();
   const router = useRouter();
 
-  const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -41,7 +52,7 @@ export default function CheckoutPage() {
     message: "",
   });
 
-  // FETCH RELATED PRODUCTS
+  // -------------------- Fetch Related Products --------------------
   useEffect(() => {
     const fetchRelated = async () => {
       try {
@@ -50,54 +61,47 @@ export default function CheckoutPage() {
           orderBy("createdAt", "desc"),
           limit(4)
         );
-
         const snap = await getDocs(q);
         setRelatedProducts(
-          snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+          snap.docs.map((doc) => ({ id: doc.id, ...(doc.data() as Omit<Product, "id">) }))
         );
       } catch (err) {
         console.error("Error fetching products:", err);
       }
     };
-
     fetchRelated();
   }, []);
 
-  // HANDLE INPUT CHANGE
+  // -------------------- Handlers --------------------
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    
-    // Show country suggestions when typing in country field
+
     if (name === "country" && value.trim()) {
       setShowCountrySuggestions(true);
     }
   };
 
-  // Handle phone change from PhoneInput component
   const handlePhoneChange = (phone: string) => {
-    setFormData(prev => ({ ...prev, phone }));
+    setFormData((prev) => ({ ...prev, phone }));
   };
 
-  // Handle phone validation change
   const handlePhoneValidationChange = (isValid: boolean) => {
     setPhoneValid(isValid);
   };
 
-  // Handle country selection from suggestions
   const handleCountrySelect = (country: string) => {
-    setFormData(prev => ({ ...prev, country }));
+    setFormData((prev) => ({ ...prev, country }));
     setShowCountrySuggestions(false);
   };
 
-  // Filter countries based on input
-  const filteredCountries = commonCountries.filter(country =>
+  const filteredCountries = commonCountries.filter((country) =>
     country.toLowerCase().includes(formData.country.toLowerCase())
   );
 
-  // HANDLE ORDER SUBMISSION
+  // -------------------- Submit Order --------------------
   const handleSubmitOrder = async () => {
     setErrorMessage("");
 
@@ -106,27 +110,21 @@ export default function CheckoutPage() {
       return;
     }
 
-    // 🔐 USER NOT SIGNED IN → REDIRECT TO CLERK SIGN-IN
     if (!user) {
       const returnTo = window.location.href;
       const redirectUrl = encodeURIComponent(returnTo);
-
-      window.location.href =
-        `https://loving-tapir-18.accounts.dev/sign-in?redirect_url=${redirectUrl}`;
-
+      window.location.href = `https://loving-tapir-18.accounts.dev/sign-in?redirect_url=${redirectUrl}`;
       return;
     }
 
-    // REQUIRED FIELDS CHECK
     const { name, phone, country, county, locality } = formData;
-    const errors = [];
+    const errors: string[] = [];
 
     if (!name.trim()) errors.push("Name is required");
-    
-    // Validate phone using the component's validation function
+
     const phoneValidation = validatePhoneForSubmission(phone, true);
     if (!phoneValidation.isValid) errors.push(phoneValidation.message);
-    
+
     if (!country.trim()) errors.push("Country is required");
     if (!county.trim()) errors.push("County/State/Province is required");
     if (!locality.trim()) errors.push("Locality/Address is required");
@@ -139,9 +137,8 @@ export default function CheckoutPage() {
     setIsSubmitting(true);
 
     try {
-      // Use normalized phone number
       const normalizedPhone = phoneValidation.normalized || phone;
-      
+
       const orderData = {
         userId: user.id,
         userEmail: user.emailAddresses[0]?.emailAddress,
@@ -163,23 +160,17 @@ export default function CheckoutPage() {
         return;
       }
 
-      // WHATSAPP MESSAGE - Updated to include country
       const productList = cart
         .map(
           (item, idx) =>
-            `${idx + 1}. ${item.name} (x${item.quantity}) — KSh ${(item.price * item.quantity).toFixed(
-              2
-            )} [ID: ${item.id}]`
+            `${idx + 1}. ${item.name} (x${item.quantity}) — KSh ${(item.price * item.quantity).toFixed(2)} [ID: ${item.id}]`
         )
         .join("%0A");
 
-      const whatsappMessage = `🛍️ *Receive My Order*%0A--------------------------------%0A*Name:* ${name}%0A*Phone:* ${normalizedPhone}%0A*Country:* ${country}%0A*County/State:* ${county}%0A*Locality:* ${locality}%0A--------------------------------%0A${productList}%0A--------------------------------%0A*Total:* KSh ${total.toFixed(
-        2
-      )}%0AThank you!`;
+      const whatsappMessage = `🛍️ *Receive My Order*%0A--------------------------------%0A*Name:* ${name}%0A*Phone:* ${normalizedPhone}%0A*Country:* ${country}%0A*County/State:* ${county}%0A*Locality:* ${locality}%0A--------------------------------%0A${productList}%0A--------------------------------%0A*Total:* KSh ${total.toFixed(2)}%0AThank you!`;
 
       const phoneNumber = "254105178685";
       const whatsappURL = `https://wa.me/${phoneNumber}?text=${whatsappMessage}`;
-
       window.open(whatsappURL, "_blank");
 
       setSuccess(true);
@@ -192,7 +183,6 @@ export default function CheckoutPage() {
     }
   };
 
-  // QUANTITY CONTROL
   const increaseQuantity = (id: string, current: number) => {
     updateQuantity(id, current + 1);
   };
@@ -203,7 +193,7 @@ export default function CheckoutPage() {
     else updateQuantity(id, newQty);
   };
 
-  // SUCCESS SCREEN
+  // -------------------- Success Screen --------------------
   if (success) {
     return (
       <div className="max-w-2xl mx-auto text-center py-20 px-4">
@@ -211,7 +201,7 @@ export default function CheckoutPage() {
           ✅ Order placed successfully!
         </h2>
         <p className="text-gray-600 mt-3">
-          You'll receive a confirmation via WhatsApp or Email soon.
+          You&apos;ll receive a confirmation via WhatsApp or Email soon.
         </p>
         <button
           className="mt-6 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
@@ -223,6 +213,7 @@ export default function CheckoutPage() {
     );
   }
 
+  // -------------------- Render --------------------
   return (
     <main className="min-h-screen bg-white dark:bg-gray-900 pt-24 pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
@@ -232,7 +223,7 @@ export default function CheckoutPage() {
           <p className="text-gray-600">Your cart is empty.</p>
         ) : (
           <>
-            {/* CART LIST */}
+            {/* Cart Items */}
             <div className="space-y-5">
               {cart.map((item) => (
                 <div
@@ -255,7 +246,6 @@ export default function CheckoutPage() {
                       <p className="text-gray-500 text-sm">
                         KSh {item.price.toFixed(2)}
                       </p>
-
                       <div className="flex items-center gap-2 mt-2">
                         <button
                           onClick={() => decreaseQuantity(item.id, item.quantity)}
@@ -263,9 +253,7 @@ export default function CheckoutPage() {
                         >
                           <Minus size={14} />
                         </button>
-
                         <span className="w-10 text-center">{item.quantity}</span>
-
                         <button
                           onClick={() => increaseQuantity(item.id, item.quantity)}
                           className="px-2 py-1 bg-gray-200 rounded hover:bg-blue-100 text-blue-700 hover:text-blue-300 text-sm"
@@ -275,7 +263,6 @@ export default function CheckoutPage() {
                       </div>
                     </div>
                   </div>
-
                   <div className="flex items-center gap-3 mt-3 sm:mt-0">
                     <p className="font-semibold text-blue-700">
                       KSh {(item.price * item.quantity).toFixed(2)}
@@ -291,17 +278,13 @@ export default function CheckoutPage() {
               ))}
             </div>
 
-            {/* TOTAL */}
+            {/* Total & Place Order */}
             <div className="mt-8 border-t pt-6 flex flex-col sm:flex-row items-center justify-between">
               <p className="text-xl font-semibold">
-                Total:{" "}
-                <span className="text-blue-700">KSh {total.toFixed(2)}</span>
+                Total: <span className="text-blue-700">KSh {total.toFixed(2)}</span>
               </p>
-
               <button
-                onClick={() => {
-                  if (total > 0) setShowForm(true);
-                }}
+                onClick={() => { if (total > 0) setShowForm(true); }}
                 className="mt-5 sm:mt-0 bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition"
               >
                 Place Order
@@ -311,7 +294,7 @@ export default function CheckoutPage() {
         )}
       </div>
 
-      {/* RELATED PRODUCTS */}
+      {/* Related Products */}
       {relatedProducts.length > 0 && (
         <section className="max-w-6xl mx-auto mt-16">
           <h2 className="text-2xl font-semibold mb-6">You may also like</h2>
@@ -333,7 +316,7 @@ export default function CheckoutPage() {
                 <div className="p-3">
                   <h3 className="font-medium text-sm">{product.name}</h3>
                   <p className="text-blue-700 font-semibold text-sm mt-1">
-                    KSh {product.price?.toFixed(2)}
+                    KSh {product.price.toFixed(2)}
                   </p>
                 </div>
               </Link>
@@ -342,14 +325,12 @@ export default function CheckoutPage() {
         </section>
       )}
 
-      {/* ERROR MESSAGE */}
+      {/* Error Message */}
       {errorMessage && (
-        <div className="text-center mt-4 text-red-600 font-medium">
-          {errorMessage}
-        </div>
+        <div className="text-center mt-4 text-red-600 font-medium">{errorMessage}</div>
       )}
 
-      {/* ORDER FORM MODAL */}
+      {/* Order Form Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md shadow-lg">
@@ -367,13 +348,12 @@ export default function CheckoutPage() {
                 required
               />
 
-              {/* Phone Input Component */}
               <PhoneInput
                 value={formData.phone}
                 onChange={handlePhoneChange}
                 onValidationChange={handlePhoneValidationChange}
-                required={true}
-                placeholder="Phone Number * (e.g., +1 234 567 8900, +44 7911 123456)"
+                required
+                placeholder="Phone Number * (e.g., +1 234 567 8900)"
                 className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               />
 
@@ -386,7 +366,7 @@ export default function CheckoutPage() {
                 className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               />
 
-              {/* Country field with suggestions */}
+              {/* Country with suggestions */}
               <div className="relative">
                 <input
                   name="country"
@@ -405,7 +385,7 @@ export default function CheckoutPage() {
                         key={country}
                         type="button"
                         onClick={() => handleCountrySelect(country)}
-                        onMouseDown={(e) => e.preventDefault()} // Prevent blur before click
+                        onMouseDown={(e) => e.preventDefault()}
                         className="w-full text-left px-4 py-2 hover:bg-blue-50 dark:hover:bg-gray-600 transition-colors first:rounded-t-lg last:rounded-b-lg"
                       >
                         {country}
@@ -415,7 +395,6 @@ export default function CheckoutPage() {
                 )}
               </div>
 
-              {/* County/State/Province field - manual typing only */}
               <input
                 name="county"
                 placeholder="County/State/Province *"
@@ -427,7 +406,7 @@ export default function CheckoutPage() {
 
               <input
                 name="locality"
-                placeholder="Exact Locality/Address * (e.g. Street, City, ZIP Code)"
+                placeholder="Exact Locality/Address * (e.g., Street, City, ZIP Code)"
                 value={formData.locality}
                 onChange={handleChange}
                 className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
@@ -457,6 +436,7 @@ export default function CheckoutPage() {
               </div>
             )}
 
+            {/* Form Buttons */}
             <div className="mt-6 flex justify-between gap-3">
               <button
                 onClick={() => setShowForm(false)}
@@ -467,7 +447,7 @@ export default function CheckoutPage() {
 
               <button
                 onClick={handleSubmitOrder}
-                disabled={isSubmitting}
+                disabled={isSubmitting || !phoneValid}
                 className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
               >
                 {isSubmitting ? (

@@ -1,15 +1,24 @@
 "use client";
 
+import React, { useEffect, useState } from "react";
 import { notFound, useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
+import type { Route } from "next";
+
 import { db } from "@/lib/firebase";
-import { doc, getDoc, collection, query, where, limit, getDocs } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  collection,
+  query,
+  where,
+  limit,
+  getDocs,
+} from "firebase/firestore";
 import { formatPrice } from "@/lib/formatPrice";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import React from "react";
 
 interface Product {
   id: string;
@@ -22,9 +31,14 @@ interface Product {
   createdAt?: string;
 }
 
-export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  // ✅ Unwrap the params with React.use() (Next.js 15+ requirement)
+export default function ProductDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  // ✅ Required in Next.js 15+
   const { id } = React.use(params);
+
   const router = useRouter();
   const { addToCart } = useCart();
 
@@ -33,6 +47,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const [mainImage, setMainImage] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
+  /* ---------------- Fetch product ---------------- */
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -40,14 +55,15 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         const snap = await getDoc(ref);
 
         if (!snap.exists()) return notFound();
+
         const data = snap.data();
 
         const fetchedProduct: Product = {
           id: snap.id,
           name: data.name,
           price: data.price,
-          shortDescription: data.shortDescription || "",
-          description: data.description || "",
+          shortDescription: data.shortDescription ?? "",
+          description: data.description ?? "",
           category: data.category,
           images:
             Array.isArray(data.images) && data.images.length > 0
@@ -57,24 +73,31 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         };
 
         setProduct(fetchedProduct);
-        setMainImage(fetchedProduct.images?.[0] || "/images/placeholder.png");
+        setMainImage(fetchedProduct.images![0]);
 
-        // Fetch related products
+        // Related products
         const q = query(
           collection(db, "products"),
           where("category", "==", fetchedProduct.category),
           limit(4)
         );
+
         const relatedSnap = await getDocs(q);
-        const related = relatedSnap.docs
-          .filter((doc) => doc.id !== id)
-          .map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-            images: Array.isArray(doc.data().images)
-              ? doc.data().images
-              : [doc.data().imageUrl || "/images/placeholder.png"],
-          })) as Product[];
+
+        const related: Product[] = relatedSnap.docs
+          .filter((d) => d.id !== id)
+          .map((d) => {
+            const rd = d.data();
+            return {
+              id: d.id,
+              name: rd.name,
+              price: rd.price,
+              category: rd.category,
+              images: Array.isArray(rd.images)
+                ? rd.images
+                : [rd.imageUrl || "/images/placeholder.png"],
+            };
+          });
 
         setRelatedProducts(related);
       } catch (err) {
@@ -88,8 +111,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     fetchProduct();
   }, [id]);
 
+  /* ---------------- Cart ---------------- */
   const handleAddToCart = () => {
     if (!product) return;
+
     addToCart({
       id: product.id,
       name: product.name,
@@ -108,9 +133,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   }
 
   return (
-    <main className="min-h-screen bg-white dark:bg-gray-900 py-10 px-4 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-white dark:bg-gray-900 py-10 px-4">
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* LEFT SIDE - Images */}
+        {/* Images */}
         <div>
           <div className="relative w-full h-[400px] rounded-lg overflow-hidden shadow-md">
             <Image
@@ -122,84 +147,53 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             />
           </div>
 
-          {/* Thumbnails */}
-          {product.images && product.images.length > 1 && (
+          {product.images!.length > 1 && (
             <div className="flex gap-3 mt-4 overflow-x-auto">
-              {product.images.map((img, i) => (
+              {product.images!.map((img, i) => (
                 <button
                   key={i}
                   onClick={() => setMainImage(img)}
-                  className={`relative w-20 h-20 border rounded-md overflow-hidden flex-shrink-0 ${
+                  className={`relative w-20 h-20 border rounded-md overflow-hidden ${
                     mainImage === img ? "ring-2 ring-blue-500" : ""
                   }`}
                 >
-                  <Image
-                    src={img}
-                    alt={`${product.name} ${i + 1}`}
-                    fill
-                    className="object-cover"
-                  />
+                  <Image src={img} alt="" fill className="object-cover" />
                 </button>
               ))}
             </div>
           )}
         </div>
 
-       {/* RIGHT SIDE - Info */}
-<aside>
-  <div className="space-y-3">
-    <div className="text-3xl font-bold my-4 text-blue-700 dark:text-blue-400">
-      {formatPrice(product.price)}
-    </div>
+        {/* Info */}
+        <aside>
+          <div className="text-3xl font-bold text-blue-700 dark:text-blue-400">
+            {formatPrice(product.price)}
+          </div>
 
-    {/* Buttons with spacing and improved styling */}
-    <div className="flex flex-wrap gap-3">
-      <Button
-        size="lg"
-        className="w-half bg-white border border-blue-600 text-blue-600 hover:bg-blue-50 dark:bg-gray-900 dark:text-blue-400 dark:border-blue-400 dark:hover:bg-gray-800 transition-all duration-200 rounded-lg shadow-sm"
-        onClick={handleAddToCart}
-      >
-        Add to Cart
-      </Button>
+          <div className="flex gap-3 mt-4">
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={handleAddToCart}
+            >
+              Add to Cart
+            </Button>
 
-      <Button
-        size="lg"
-        variant="default"
-        className="w-half bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm transition-all duration-200"
-        onClick={() => router.push('/checkout')}
-      >
-        Buy Now
-      </Button>
-    </div>
-  </div>
+            <Button
+              size="lg"
+              onClick={() => router.push("/checkout" as Route)}
+            >
+              Buy Now
+            </Button>
+          </div>
 
-  <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 mt-6">
-    {product.name}
-  </h1>
+          <h1 className="text-3xl font-bold mt-6">{product.name}</h1>
+          <p className="text-slate-600 dark:text-slate-400 mt-2">
+            {product.shortDescription}
+          </p>
 
-  <p className="text-slate-600 dark:text-slate-400 mt-2 text-md">
-    {product.shortDescription}
-  </p>
-
-
-
-
-       
-
-        <p className="text-sm text-slate-600 dark:text-slate-400 mt-6 leading-relaxed border-t border-slate-200 dark:border-slate-700 pt-4">
-  Delivery cost calculated depending on the location. We try to make it as
-  affordable as possible. 
-  <br />
-  <span className="font-medium text-slate-700 dark:text-slate-300">
-    Category:
-  </span>{" "}
-  <span className="bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full text-xs">
-    {product.category}
-  </span>
-</p>
-          {/* Full description */}
           {product.description && (
-            <div className="mt-6 text-gray-700 dark:text-gray-300">
+            <div className="mt-6">
               <h2 className="font-semibold text-lg mb-2">Product Details</h2>
               <p>{product.description}</p>
             </div>
@@ -207,33 +201,36 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         </aside>
       </div>
 
-      {/* RELATED PRODUCTS */}
+      {/* Related */}
       {relatedProducts.length > 0 && (
         <section className="max-w-6xl mx-auto mt-12">
-          <h2 className="text-xl font-semibold mb-5 text-gray-800 dark:text-gray-200">
-            Related Products
-          </h2>
+          <h2 className="text-xl font-semibold mb-5">Related Products</h2>
+
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
-            {relatedProducts.map((rel) => (
-              <Link
-                key={rel.id}
-                href={`/products/${rel.id}`}
-                className="border rounded-md p-3 shadow-sm hover:shadow-md transition"
-              >
-                <div className="relative w-full h-40 rounded overflow-hidden">
-                  <Image
-                    src={rel.images?.[0] || "/images/placeholder.png"}
-                    alt={rel.name}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <h3 className="mt-2 font-medium text-sm">{rel.name}</h3>
-                <p className="text-blue-600 font-semibold text-sm">
-                  {formatPrice(rel.price)}
-                </p>
-              </Link>
-            ))}
+            {relatedProducts.map((rel) => {
+              const href = `/products/${rel.id}` as Route;
+
+              return (
+                <Link
+                  key={rel.id}
+                  href={href}
+                  className="border rounded-md p-3 hover:shadow-md transition"
+                >
+                  <div className="relative w-full h-40 rounded overflow-hidden">
+                    <Image
+                      src={rel.images![0]}
+                      alt={rel.name}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <h3 className="mt-2 font-medium text-sm">{rel.name}</h3>
+                  <p className="text-blue-600 font-semibold text-sm">
+                    {formatPrice(rel.price)}
+                  </p>
+                </Link>
+              );
+            })}
           </div>
         </section>
       )}

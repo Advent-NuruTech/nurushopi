@@ -1,14 +1,28 @@
-// app/(pages)/shop/page.tsx
+import { Product } from "@/lib/types"; // canonical Product type
 import { getAllProducts } from "@/lib/firestoreHelpers";
 import ProductGrid from "@/components/ui/ProductGrid";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { Timestamp } from "firebase/firestore";
 
 export const dynamic = "force-dynamic";
+
+// Type for raw Firestore product (matches Firestore fields)
+interface RawProduct {
+  id: string;
+  name: string;
+  price: number;
+  description?: string;
+  image?: string;         // optional main image
+  images?: string[];      // optional array of images
+  category?: string;
+  slug?: string;
+  createdAt?: Timestamp | string | null;
+}
 
 export default async function ShopPage() {
   const rawProducts = await getAllProducts();
 
-  if (!rawProducts) {
+  if (!rawProducts || rawProducts.length === 0) {
     return (
       <div className="flex justify-center items-center h-[60vh]">
         <LoadingSpinner text="Loading All Products..." />
@@ -16,25 +30,35 @@ export default async function ShopPage() {
     );
   }
 
-  const products = rawProducts.map((p: any) => {
-    let createdAt = null;
+  // Map Firestore data to canonical Product type
+  const products: Product[] = rawProducts.map((p: RawProduct) => {
+    let createdAt: number | string | null = null;
 
     if (p.createdAt) {
-      if (typeof p.createdAt.toMillis === "function") {
+      if (p.createdAt instanceof Timestamp) {
         createdAt = p.createdAt.toMillis();
       } else if (
-        typeof p.createdAt.seconds === "number" &&
-        typeof p.createdAt.nanoseconds === "number"
+        typeof p.createdAt === "object" &&
+        "seconds" in p.createdAt &&
+        "nanoseconds" in p.createdAt
       ) {
         createdAt =
-          p.createdAt.seconds * 1000 + p.createdAt.nanoseconds / 1_000_000;
+          (p.createdAt as Timestamp).seconds * 1000 +
+          (p.createdAt as Timestamp).nanoseconds / 1_000_000;
       } else if (typeof p.createdAt === "string") {
         createdAt = p.createdAt;
       }
     }
 
     return {
-      ...p,
+      id: p.id,
+      name: p.name,
+      price: p.price,
+      description: p.description || "",
+      imageUrl: p.image || "",                          // main image
+      images: p.images || (p.image ? [p.image] : []),  // ensure images array exists
+      category: p.category || "Uncategorized",
+      slug: p.slug,
       createdAt,
     };
   });

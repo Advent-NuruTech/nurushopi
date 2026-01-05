@@ -30,6 +30,7 @@ body {
 
 /* ---------------------------------
    🔵 Marquee Scroll Animation
+   (2× slower for readability)
 ----------------------------------*/
 @keyframes scroll {
   0% {
@@ -41,9 +42,10 @@ body {
 }
 
 .animate-scroll {
-  animation: scroll 28s linear infinite;
+  animation: scroll 56s linear infinite; /* ⬅ slowed down */
   white-space: nowrap;
   display: inline-flex;
+  will-change: transform;
 }
 
 /* ---------------------------------
@@ -68,10 +70,8 @@ body {
 }
 
 /* ---------------------------------
-   (Optional) Maintain old marquee class
+   🔁 Legacy Marquee (Optional)
 ----------------------------------*/
-
-/* Old class for compatibility */
 @keyframes marquee {
   0% {
     transform: translateX(0%);
@@ -82,7 +82,7 @@ body {
 }
 
 .animate-marquee {
-  animation: marquee 12s linear infinite;
+  animation: marquee 58s linear infinite; /* slowed for consistency */
   display: inline-flex;
   white-space: nowrap;
 }

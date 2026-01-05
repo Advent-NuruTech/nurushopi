@@ -19,24 +19,49 @@ export default function HeroSection() {
   ];
 
   return (
-    <section className="relative w-full rounded-lg py-3 px-4 mt-12 sm:mt-14 mb-4 overflow-hidden
-      bg-gradient-to-r from-emerald-50 via-white to-sky-50">
-
-      {/* Glowing Background Effects */}
-      <div className="absolute top-0 left-0 w-48 h-48 bg-emerald-300 opacity-20 blur-3xl rounded-full animate-pulse"></div>
-      <div className="absolute bottom-0 right-0 w-48 h-48 bg-sky-300 opacity-20 blur-3xl rounded-full animate-pulse"></div>
+    <section
+      className="
+        relative
+        w-full
+        rounded-lg
+        py-3
+        px-4
+        mt-12
+        sm:mt-14
+        mb-4
+        overflow-hidden
+        bg-gradient-to-r
+        from-emerald-50
+        via-white
+        to-sky-50
+        dark:from-gray-900
+        dark:via-gray-950
+        dark:to-gray-900
+      "
+    >
+      {/* Soft Background Accents */}
+      <div className="absolute top-0 left-0 w-48 h-48 bg-emerald-400/20 dark:bg-emerald-600/10 blur-3xl rounded-full" />
+      <div className="absolute bottom-0 right-0 w-48 h-48 bg-sky-400/20 dark:bg-sky-600/10 blur-3xl rounded-full" />
 
       {/* Floating Particles */}
       {[...Array(6)].map((_, i) => (
         <div
           key={i}
-          className="absolute w-2 h-2 bg-black/10 rounded-full animate-float"
-          style={{
-            top: `${20 + i * 10}%`,
-            left: `${10 + i * 15}%`,
-            animationDuration: `${14 + i * 3}s`,
-          }}
-        ></div>
+          className="
+            absolute
+            w-2
+            h-2
+            rounded-full
+            bg-black/10
+            dark:bg-white/10
+            animate-float
+          "
+       style={{
+  top: `${20 + i * 10}%`,
+  left: `${10 + i * 15}%`,
+  animationDuration: `${(14 + i * 3) * 2}s`,
+}}
+        />
       ))}
 
       {/* Marquee Text */}
@@ -45,13 +70,24 @@ export default function HeroSection() {
           {[...announcements, ...announcements].map((msg, i) => (
             <span
               key={i}
-              className="text-blue-900 text-2xl sm:text-3xl font-extrabold mx-24 
-                drop-shadow-md hover:scale-105 transition-transform duration-300
-                bg-gradient-to-r from-blue-900 via-emerald-700 to-sky-800 
-                bg-clip-text text-transparent"
-              style={{
-                textShadow: "0 0 20px rgba(59, 130, 246, 0.3)",
-              }}
+              className="
+                mx-24
+                text-2xl
+                sm:text-3xl
+                font-extrabold
+                transition-transform
+                duration-300
+                hover:scale-105
+                bg-gradient-to-r
+                from-blue-800
+                via-emerald-700
+                to-sky-700
+                dark:from-blue-300
+                dark:via-emerald-300
+                dark:to-sky-300
+                bg-clip-text
+                text-transparent
+              "
             >
               {msg}
             </span>

@@ -1,7 +1,9 @@
 import HeroSection from "@/components/ui/HeroSection";
+
 import FeaturedSection from "@/components/ui/FeaturedSection";
 import FeaturedHero from "@/components/ui/FeaturedHero";
-import Banners from "@/components/ui/Banners";
+
+import Bannerss from "@/components/ui/Bannerss";
 import { getAllProducts } from "@/lib/firestoreHelpers";
 import { Product } from "@/lib/types";
 import { Timestamp } from "firebase/firestore";
@@ -13,6 +15,7 @@ function serializeFirestoreDoc<T extends Record<string, unknown>>(doc: T): T {
       if (value instanceof Timestamp) {
         return value.toDate().toISOString();
       }
+
       return value;
     })
   );
@@ -34,11 +37,12 @@ export default async function HomePage() {
 
   return (
     <main>
+      
       <HeroSection />
 
       <FeaturedHero products={uiProducts} />
 
-      <Banners />
+      <Bannerss />
 
       <FeaturedSection products={uiProducts} />
     </main>

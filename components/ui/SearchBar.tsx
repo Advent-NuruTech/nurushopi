@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search } from "lucide-react";
-import { collection, query, where, getDocs, limit } from "firebase/firestore";
+import { collection, query, getDocs, limit } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 import type { Route } from "next";
@@ -24,10 +24,7 @@ interface SearchResult {
   image?: string;
 }
 
-export default function SearchBar({
-  showSearch,
-  setShowSearch,
-}: SearchBarProps) {
+export default function SearchBar({ showSearch, setShowSearch }: SearchBarProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -69,7 +66,7 @@ export default function SearchBar({
     };
   }, [showSearch, setShowSearch]);
 
-  /* ---------------- Firestore search ---------------- */
+  /* ---------------- Firestore search (robust) ---------------- */
   const searchProducts = useCallback(async (searchTerm: string) => {
     const trimmed = searchTerm.trim().toLowerCase();
 
@@ -82,31 +79,41 @@ export default function SearchBar({
 
     try {
       const productsRef = collection(db, "products");
+      const snapshot = await getDocs(query(productsRef, limit(100))); // fetch batch
 
-      const q = query(
-        productsRef,
-        where("name_lowercase", ">=", trimmed),
-        where("name_lowercase", "<=", trimmed + "\uf8ff"),
-        limit(10)
-      );
+      const results: SearchResult[] = snapshot.docs
+        .map((doc) => {
+          const data = doc.data() as {
+            name: string;
+            type?: "product" | "book" | "remedy";
+            category?: string;
+            price?: number;
+            description?: string;
+            imageUrl?: string;
+            images?: string[];
+            name_lowercase?: string;
+          };
 
-      const snapshot = await getDocs(q);
-
-      const results: SearchResult[] = snapshot.docs.map((doc) => {
-        const data = doc.data();
-
-        return {
-          id: doc.id,
-          name: data.name,
-          type: data.type ?? "product",
-          category: data.category ?? "",
-          price: data.price,
-          description: data.description,
-          image:
-            data.imageUrl ??
-            (Array.isArray(data.images) ? data.images[0] : undefined),
-        };
-      });
+          return {
+            id: doc.id,
+            name: data.name,
+            type: data.type ?? "product",
+            category: data.category ?? "",
+            price: data.price,
+            description: data.description,
+            image:
+              data.imageUrl ??
+              (Array.isArray(data.images) ? data.images[0] : undefined),
+            name_lowercase: data.name_lowercase ?? data.name.toLowerCase(),
+          };
+        })
+        // Filter: match any word or partial match
+        .filter((item) =>
+          item.name_lowercase
+            .split(" ")
+            .some((word: string) => word.includes(trimmed))
+        )
+        .slice(0, 10); // limit to 10 results
 
       setSearchResults(results);
     } catch (err) {
@@ -126,13 +133,23 @@ export default function SearchBar({
     return () => clearTimeout(t);
   }, [searchQuery, searchProducts]);
 
-  /* ---------------- Navigation (FIXED) ---------------- */
+  /* ---------------- Navigation ---------------- */
   const handleSearchResultClick = (result: SearchResult) => {
     setSearchQuery("");
     setShowSearch(false);
-
     const path = `/products/${result.id}` as Route;
     router.push(path);
+  };
+
+  /* ---------------- Keyboard navigation ---------------- */
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "ArrowDown") {
+      setActiveIndex((prev) => Math.min(prev + 1, searchResults.length - 1));
+    } else if (e.key === "ArrowUp") {
+      setActiveIndex((prev) => Math.max(prev - 1, 0));
+    } else if (e.key === "Enter" && activeIndex >= 0) {
+      handleSearchResultClick(searchResults[activeIndex]);
+    }
   };
 
   const formatPrice = (price: number) =>
@@ -170,6 +187,7 @@ export default function SearchBar({
                 autoFocus
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleKeyDown}
                 placeholder="Search products, books, or remedies..."
                 className="flex-1 bg-transparent outline-none px-3 py-2 text-gray-700 dark:text-gray-300"
               />

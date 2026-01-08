@@ -15,7 +15,25 @@ export default function HeroSection() {
     "If you want to sell your products with this platform, please reach out to us via phone call only 0759167209",
     "NuruShop — Health & Truth for Every Home",
     "Handpicked treasures from each category",
+    "We are soon launching wholeselling services. if you wish to be a whole seller, contact us via phone call 0105178685",
     "We are here to serve you",
+  ];
+
+  // Array of distinct gradient colors for each announcement
+  const gradients = [
+    "from-rose-500 via-pink-500 to-purple-500",
+    "from-fuchsia-500 via-indigo-500 to-blue-500",
+    "from-teal-400 via-emerald-500 to-lime-400",
+    "from-orange-400 via-yellow-400 to-amber-400",
+    "from-cyan-400 via-sky-500 to-blue-400",
+    "from-green-400 via-emerald-400 to-lime-300",
+    "from-purple-500 via-pink-500 to-rose-400",
+    "from-indigo-500 via-violet-500 to-fuchsia-400",
+    "from-yellow-400 via-orange-400 to-red-400",
+    "from-pink-400 via-rose-500 to-fuchsia-500",
+    "from-sky-400 via-cyan-400 to-teal-400",
+    "from-yellow-400 via-orange-400 to-red-400",
+    "from-lime-400 via-green-400 to-emerald-400",
   ];
 
   return (
@@ -47,51 +65,44 @@ export default function HeroSection() {
       {[...Array(6)].map((_, i) => (
         <div
           key={i}
-          className="
-            absolute
-            w-2
-            h-2
-            rounded-full
-            bg-black/10
-            dark:bg-white/10
-            animate-float
-          "
-       style={{
-  top: `${20 + i * 10}%`,
-  left: `${10 + i * 15}%`,
-  animationDuration: `${(14 + i * 3) * 2}s`,
-}}
+          className="absolute w-2 h-2 rounded-full bg-black/10 dark:bg-white/10 animate-float"
+          style={{
+            top: `${20 + i * 10}%`,
+            left: `${10 + i * 15}%`,
+            animationDuration: `${(14 + i * 3) * 2}s`,
+          }}
         />
       ))}
 
       {/* Marquee Text */}
       <div className="relative max-w-5xl mx-auto flex items-center overflow-hidden py-1">
         <div className="flex whitespace-nowrap animate-scroll">
-          {[...announcements, ...announcements].map((msg, i) => (
-            <span
-              key={i}
-              className="
-                mx-24
-                text-2xl
-                sm:text-3xl
-                font-extrabold
-                transition-transform
-                duration-300
-                hover:scale-105
-                bg-gradient-to-r
-                from-blue-800
-                via-emerald-700
-                to-sky-700
-                dark:from-blue-300
-                dark:via-emerald-300
-                dark:to-sky-300
-                bg-clip-text
-                text-transparent
-              "
-            >
-              {msg}
-            </span>
-          ))}
+          {[...announcements, ...announcements].map((msg, i) => {
+            const gradient = gradients[i % gradients.length];
+            return (
+              <span
+                key={i}
+                className={`
+                  mx-24
+                  text-2xl
+                  sm:text-3xl
+                  font-extrabold
+                  transition-transform
+                  duration-300
+                  hover:scale-110
+                  bg-gradient-to-r ${gradient}
+                  bg-clip-text
+                  text-transparent
+                `}
+                style={{
+                  // Random slight vertical offset per line for modern dynamic feel
+                  transform: `translateY(${Math.sin(i * 2) * 3}px)`,
+                }}
+              >
+                {msg}
+              </span>
+            );
+          })}
         </div>
       </div>
     </section>

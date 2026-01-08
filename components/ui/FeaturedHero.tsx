@@ -12,7 +12,6 @@ interface Product {
   name: string;
   image: string;
   category: string;
-  
   price: number;
   shortDescription?: string;
   description?: string;
@@ -42,21 +41,9 @@ export default function FeaturedSection({ products }: FeaturedSectionProps) {
   const featuredByCategory = categories
     .map((cat) => ({
       category: cat,
-      items: products
-        .filter((p) => p.category?.toLowerCase() === cat)
-        .slice(-2),
+      items: products.filter((p) => p.category?.toLowerCase() === cat),
     }))
     .filter((group) => group.items.length > 0);
-
-  // Auto-slide every 8s
-  useEffect(() => {
-    if (!featuredByCategory.length) return;
-    const timer = setInterval(() => {
-      setCurrentCategory((prev) => (prev + 1) % featuredByCategory.length);
-      if (scrollRef.current) scrollRef.current.scrollLeft = 0;
-    }, 8000);
-    return () => clearInterval(timer);
-  }, [featuredByCategory.length]);
 
   const handleAddToCart = (product: Product) => {
     addToCart({
@@ -68,7 +55,9 @@ export default function FeaturedSection({ products }: FeaturedSectionProps) {
     });
   };
 
-  // Drag scrolling
+  // -----------------------------
+  // Automatic & Manual Infinite Scroll
+  // -----------------------------
   useEffect(() => {
     const container = scrollRef.current;
     if (!container) return;
@@ -77,6 +66,7 @@ export default function FeaturedSection({ products }: FeaturedSectionProps) {
     let startX = 0;
     let scrollLeft = 0;
 
+    // Manual drag handlers
     const start = (e: MouseEvent | TouchEvent) => {
       isDown = true;
       startX =
@@ -97,18 +87,43 @@ export default function FeaturedSection({ products }: FeaturedSectionProps) {
           : (e as MouseEvent).pageX - container.offsetLeft;
       const walk = (x - startX) * 1.5;
       container.scrollLeft = scrollLeft - walk;
+
+      // Optional: wrap around manually
+      if (container.scrollLeft >= container.scrollWidth / 2) {
+        container.scrollLeft = 0;
+      }
+      if (container.scrollLeft <= 0) {
+        container.scrollLeft = container.scrollWidth / 2;
+      }
     };
 
-    // Mouse events
     container.addEventListener("mousedown", start);
     container.addEventListener("mouseleave", stop);
     container.addEventListener("mouseup", stop);
     container.addEventListener("mousemove", move);
-
-    // Touch events
     container.addEventListener("touchstart", start);
     container.addEventListener("touchend", stop);
     container.addEventListener("touchmove", move);
+
+    // Automatic scroll
+    let autoScroll: number;
+    const startAutoScroll = () => {
+      autoScroll = window.setInterval(() => {
+        if (!container) return;
+        container.scrollLeft += 1; // scroll 1px per tick
+        if (container.scrollLeft >= container.scrollWidth / 2) {
+          container.scrollLeft = 0;
+        }
+      }, 10);
+    };
+    startAutoScroll();
+
+    // Pause automatic scroll on drag
+    const pauseAutoScroll = () => window.clearInterval(autoScroll);
+    container.addEventListener("mousedown", pauseAutoScroll);
+    container.addEventListener("touchstart", pauseAutoScroll);
+    container.addEventListener("mouseup", startAutoScroll);
+    container.addEventListener("touchend", startAutoScroll);
 
     return () => {
       container.removeEventListener("mousedown", start);
@@ -118,6 +133,11 @@ export default function FeaturedSection({ products }: FeaturedSectionProps) {
       container.removeEventListener("touchstart", start);
       container.removeEventListener("touchend", stop);
       container.removeEventListener("touchmove", move);
+      container.removeEventListener("mousedown", pauseAutoScroll);
+      container.removeEventListener("touchstart", pauseAutoScroll);
+      container.removeEventListener("mouseup", startAutoScroll);
+      container.removeEventListener("touchend", startAutoScroll);
+      window.clearInterval(autoScroll);
     };
   }, []);
 
@@ -129,7 +149,7 @@ export default function FeaturedSection({ products }: FeaturedSectionProps) {
     );
 
   return (
-    <section className="relative w-full px-3 sm:px-6 py-10 sm:py-12 overflow-hidden bg-white dark:bg-black transition-colors">
+    <section className="relative w-full px-0 sm:px-6 py-4 sm:py-12 overflow-hidden bg-white dark:bg-black transition-colors">
       <div className="relative max-w-7xl mx-auto">
         <AnimatePresence mode="wait">
           <motion.div
@@ -162,14 +182,18 @@ export default function FeaturedSection({ products }: FeaturedSectionProps) {
               </Link>
             </div>
 
-            {/* Scrollable products with snapping */}
+            {/* Infinite scroll container */}
             <div
               ref={scrollRef}
               className="flex gap-3 sm:gap-4 overflow-x-auto px-1 sm:px-3 scrollbar-hide cursor-grab active:cursor-grabbing snap-x snap-mandatory"
             >
-              {featuredByCategory[currentCategory].items.map((item) => (
+              {/* Duplicate items to allow infinite effect */}
+              {[
+                ...featuredByCategory[currentCategory].items,
+                ...featuredByCategory[currentCategory].items,
+              ].map((item, idx) => (
                 <motion.div
-                  key={item.id}
+                  key={`${item.id}-${idx}`}
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
@@ -187,6 +211,8 @@ export default function FeaturedSection({ products }: FeaturedSectionProps) {
                         alt={item.name}
                         fill
                         className="object-contain"
+                        placeholder="blur"
+                        blurDataURL="/assets/logo.jpg"
                       />
                     </div>
 

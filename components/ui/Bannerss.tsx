@@ -35,9 +35,9 @@ export default function Banners() {
   }, []);
 
   return (
-    <section className="relative w-full mt-6">
+    <section className="relative w-full mt-2">
       <div className="w-full overflow-x-auto">
-        <div className="flex flex-row gap-4 px-4 py-3">
+        <div className="flex flex-row gap-4 px-1 py-1">
           {banners.map((banner) => (
             <motion.div
               key={banner.id}

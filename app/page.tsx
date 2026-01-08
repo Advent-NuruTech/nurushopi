@@ -3,6 +3,7 @@ import HeroSection from "@/components/ui/HeroSection";
 import FeaturedSection from "@/components/ui/FeaturedSection";
 import FeaturedHero from "@/components/ui/FeaturedHero";
 
+import NewArrivals from "@/components/ui/NewArrivals";
 import Bannerss from "@/components/ui/Bannerss";
 import { getAllProducts } from "@/lib/firestoreHelpers";
 import { Product } from "@/lib/types";
@@ -30,7 +31,7 @@ export default async function HomePage() {
       serializeFirestoreDoc({
         ...p,
         // Use first image if exists, otherwise fallback to a default avatar
-        image: p.images?.[0] || "/images/avatar.png",
+        image: p.images?.[0] || "/assets/logo.jpg",
         shortDescription: p.shortDescription || p.description || "A quality product from NuruShop.",
       })
   );
@@ -39,7 +40,7 @@ export default async function HomePage() {
     <main>
       
       <HeroSection />
-
+       <NewArrivals />
       <FeaturedHero products={uiProducts} />
 
       <Bannerss />

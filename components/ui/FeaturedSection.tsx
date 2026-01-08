@@ -28,8 +28,9 @@ export default function FeaturedSection({ products }: FeaturedSectionProps) {
   const { addToCart } = useCart();
 
   const categories = [
-    "foods",
     "herbs",
+    "foods",
+    
     "egw",
     "pioneers",
     "authors",
@@ -75,7 +76,7 @@ export default function FeaturedSection({ products }: FeaturedSectionProps) {
   };
 
   return (
-    <section className="relative w-full px-3 sm:px-6 py-16 bg-white dark:bg-black transition-colors">
+    <section className="relative w-full px-0 sm:px-1 py-4 bg-white dark:bg-black transition-colors">
       <div className="flex flex-col gap-14 w-full max-w-7xl mx-auto">
         {featuredByCategory.map(
           (group) =>

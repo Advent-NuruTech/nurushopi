@@ -2,6 +2,17 @@
 
 import { useState } from "react";
 
+function formatText(text: string) {
+  const formatted = text
+    // Bold **text**
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    // Underline __text__
+    .replace(/__(.*?)__/g, "<u>$1</u>")
+    // Numbered points
+    .replace(/(^|\n)(\d+\.\s.*)/g, "<br /><span>$2</span>");
+
+  return formatted;
+}
 export default function UploadBannerPage() {
   const [title, setTitle] = useState("");
   const [shortDescription, setShortDescription] = useState("");
@@ -35,7 +46,10 @@ export default function UploadBannerPage() {
 
   return (
     <div className="max-w-md mx-auto py-10">
-      <h1 className="text-2xl font-bold mb-6 text-center">Upload New Banner</h1>
+      <h1 className="text-2xl font-bold mb-6 text-center">
+        Upload New Banner
+      </h1>
+
       <form
         onSubmit={handleUpload}
         className="flex flex-col gap-4 border p-6 rounded-xl shadow-md bg-white"
@@ -48,14 +62,30 @@ export default function UploadBannerPage() {
           onChange={(e) => setTitle(e.target.value)}
           required
         />
+
         <textarea
-          placeholder="Short Description (max 50 words)"
-          className="border p-2 rounded"
+          placeholder="Short Description (supports **bold**, __underline__, 1. points)"
+          className="border p-2 rounded min-h-[120px]"
           value={shortDescription}
           onChange={(e) => setShortDescription(e.target.value)}
-          maxLength={350}
           required
         />
+
+        {/* Live Preview */}
+        {shortDescription && (
+          <div className="border rounded p-3 bg-gray-50">
+            <p className="text-sm font-semibold mb-1 text-gray-600">
+              Preview
+            </p>
+            <div
+              className="text-sm leading-relaxed"
+              dangerouslySetInnerHTML={{
+                __html: formatText(shortDescription),
+              }}
+            />
+          </div>
+        )}
+
         <input
           type="text"
           placeholder="Link (optional)"
@@ -63,6 +93,7 @@ export default function UploadBannerPage() {
           value={link}
           onChange={(e) => setLink(e.target.value)}
         />
+
         <input
           type="file"
           accept="image/*"
@@ -70,6 +101,7 @@ export default function UploadBannerPage() {
           className="border p-2 rounded"
           required
         />
+
         <button
           type="submit"
           disabled={loading}
@@ -77,10 +109,13 @@ export default function UploadBannerPage() {
         >
           {loading ? "Uploading..." : "Upload Banner"}
         </button>
+
         {message && (
           <p
             className={`text-center mt-2 ${
-              message.includes("success") ? "text-green-600" : "text-red-600"
+              message.includes("success")
+                ? "text-green-600"
+                : "text-red-600"
             }`}
           >
             {message}

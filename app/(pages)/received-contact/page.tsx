@@ -123,7 +123,7 @@ export default function ReceivedContact() {
                   <td className="px-4 py-3">{contact.email || '—'}</td>
                   <td className="px-4 py-3">{contact.phone || '—'}</td>
                   <td className="px-4 py-3 max-w-xs truncate break-words">{contact.message || '—'}</td>
-                  <td className="px-4 py-3 text-slate-500 text-xs">
+                   <td className="px-4 py-3 text-slate-500 text-xs">
                     {formatCreatedAt(contact.createdAt)}
                   </td>
                 </tr>

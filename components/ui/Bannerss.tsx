@@ -15,6 +15,16 @@ interface Banner {
   createdAt?: Timestamp;
 }
 
+/* 🔹 Same formatter as upload page, ESLint-safe */
+function formatText(text: string) {
+  const formatted = text
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // bold
+    .replace(/__(.*?)__/g, "<u>$1</u>") // underline
+    .replace(/(^|\n)(\d+\.\s.*)/g, "<br /><span>$2</span>"); // numbered points
+
+  return formatted;
+}
+
 export default function Banners() {
   const [banners, setBanners] = useState<Banner[]>([]);
 
@@ -61,7 +71,7 @@ export default function Banners() {
                 flex-col
               "
             >
-              {/* IMAGE (75% height) */}
+              {/* IMAGE */}
               <div className="relative w-full h-[75%] bg-gray-100 dark:bg-gray-800">
                 {banner.image ? (
                   <Image
@@ -78,19 +88,23 @@ export default function Banners() {
                 )}
               </div>
 
-              {/* CONTENT (25%) */}
+              {/* CONTENT */}
               <div className="h-[25%] p-3 flex flex-col">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 line-clamp-1">
                   {banner.title}
                 </h3>
 
-                <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mt-1 flex-1">
-                  {banner.shortDescription}
-                </p>
+                {/* 🔹 Formatted description (line-clamp preserved) */}
+                <div
+                  className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mt-1 flex-1 leading-snug"
+                  dangerouslySetInnerHTML={{
+                    __html: formatText(banner.shortDescription),
+                  }}
+                />
 
                 <Link
                   href={`/banners/${banner.id}`}
-                  className="4
+                  className="
                     text-xs
                     font-medium
                     text-blue-600

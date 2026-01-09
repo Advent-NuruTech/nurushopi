@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
@@ -11,6 +13,16 @@ interface Banner {
 
 interface Props {
   params: { id: string };
+}
+
+/* 🔹 Text formatter: bold, underline, numbered points */
+function formatText(text: string) {
+  const formatted = text
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // bold
+    .replace(/__(.*?)__/g, "<u>$1</u>") // underline
+    .replace(/(^|\n)(\d+\.\s.*)/g, "<br /><span>$2</span>"); // numbered points
+
+  return formatted;
 }
 
 export default async function BannerDetailPage({ params }: Props) {
@@ -42,9 +54,13 @@ export default async function BannerDetailPage({ params }: Props) {
           {banner.title}
         </h1>
 
-        <p className="mt-4 text-gray-700 dark:text-gray-300 leading-relaxed">
-          {banner.shortDescription}
-        </p>
+        {/* 🔹 Formatted shortDescription */}
+        <div
+          className="mt-4 text-gray-700 dark:text-gray-300 leading-relaxed text-base"
+          dangerouslySetInnerHTML={{
+            __html: formatText(banner.shortDescription),
+          }}
+        />
       </div>
     </main>
   );

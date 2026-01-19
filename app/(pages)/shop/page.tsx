@@ -1,17 +1,16 @@
-import { Product } from "@/lib/types"; // canonical Product type
-import { getAllProducts } from "@/lib/firestoreHelpers";
-import ProductGrid from "@/components/ui/ProductGrid";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { Timestamp } from "firebase/firestore";
+import { getAllProducts } from "@/lib/firestoreHelpers";
+import Image from "next/image";
+import Link from "next/link";
+import { formatPrice } from "@/lib/formatPrice";
 
 export const dynamic = "force-dynamic";
 
-// Type for raw Firestore product (matches Firestore fields)
+// Type for raw Firestore product
 interface RawProduct {
   id: string;
   name: string;
   price: number;
-  description?: string;
   image?: string;
   images?: string[];
   category?: string;
@@ -19,60 +18,209 @@ interface RawProduct {
   createdAt?: Timestamp | string | null;
 }
 
-export default async function ShopPage() {
-  const rawProducts = await getAllProducts();
+// Canonical Product type without description
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  imageUrl: string;
+  images?: string[];
+  category: string;
+  slug?: string;
+  createdAt?: number | string | null;
+}
 
-  if (!rawProducts || rawProducts.length === 0) {
+export default async function ShopPage() {
+  let products: Product[] = [];
+  
+  try {
+    const rawProducts = await getAllProducts();
+
+    if (!rawProducts || rawProducts.length === 0) {
+      return (
+        <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+          <div className="container mx-auto px-4 py-20">
+            <div className="text-center">
+              <h1 className="text-2xl font-bold text-gray-800 mb-4">No Products Found</h1>
+              <p className="text-gray-600">Check back soon for new arrivals!</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Map Firestore data to Product type
+    products = rawProducts
+      .map((p: RawProduct) => {
+        let createdAt: number | string | null = null;
+
+        if (p.createdAt) {
+          if (p.createdAt instanceof Timestamp) {
+            createdAt = p.createdAt.toMillis();
+          } else if (
+            typeof p.createdAt === "object" &&
+            "seconds" in p.createdAt &&
+            "nanoseconds" in p.createdAt
+          ) {
+            createdAt =
+              (p.createdAt as Timestamp).seconds * 1000 +
+              (p.createdAt as Timestamp).nanoseconds / 1_000_000;
+          } else if (typeof p.createdAt === "string") {
+            createdAt = p.createdAt;
+          }
+        }
+
+        return {
+          id: p.id,
+          name: p.name,
+          price: p.price,
+          imageUrl: p.image || "/images/placeholder.png",
+          images: p.images || (p.image ? [p.image] : []),
+          category: p.category || "Uncategorized",
+          slug: p.slug,
+          createdAt,
+        };
+      })
+      // Sort products by createdAt (newest first)
+      .sort((a, b) => {
+        const timeA = typeof a.createdAt === 'number' ? a.createdAt : 0;
+        const timeB = typeof b.createdAt === 'number' ? b.createdAt : 0;
+        return timeB - timeA; // Descending order (newest first)
+      });
+
+  } catch (error) {
+    console.error("Error loading products:", error);
     return (
-      <div className="flex justify-center items-center h-[60vh]">
-        <LoadingSpinner text="Loading All Products..." />
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+        <div className="container mx-auto px-4 py-20">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-red-600 mb-4">Error Loading Products</h1>
+            <p className="text-gray-600">Please try again later.</p>
+          </div>
+        </div>
       </div>
     );
   }
 
-  // Map Firestore data to canonical Product type
-  const products: Product[] = rawProducts.map((p: RawProduct) => {
-    let createdAt: number | string | null = null;
-
-    if (p.createdAt) {
-      if (p.createdAt instanceof Timestamp) {
-        createdAt = p.createdAt.toMillis();
-      } else if (
-        typeof p.createdAt === "object" &&
-        "seconds" in p.createdAt &&
-        "nanoseconds" in p.createdAt
-      ) {
-        createdAt =
-          (p.createdAt as Timestamp).seconds * 1000 +
-          (p.createdAt as Timestamp).nanoseconds / 1_000_000;
-      } else if (typeof p.createdAt === "string") {
-        createdAt = p.createdAt;
-      }
-    }
-
-    return {
-      id: p.id,
-      name: p.name,
-      price: p.price,
-      description:
-        p.description && p.description !== "undefined"
-          ? p.description
-          : "No description available",
-      imageUrl: p.image || "",
-      images: p.images || (p.image ? [p.image] : []),
-      category: p.category || "Uncategorized",
-      slug: p.slug,
-      createdAt,
-    };
-  });
-
   return (
-    <main className="min-h-screen bg-white dark:bg-gray-900">
-      <ProductGrid
-        products={products}
-        title="Explore Our Full Collection"
-        subtitle="Browse all available products in our store. Find everything you need in one place."
-      />
-    </main>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      {/* Hero Section */}
+      
+
+      {/* Products Grid */}
+      <div className="container mx-auto px-2 sm:px-4 py-8 md:py-12">
+        {/* Stats Bar */}
+        <div className="mb-8 p-4 bg-white rounded-xl shadow-sm border mx-2 sm:mx-0">
+        
+        </div>
+
+        {/* Products Grid - 2 columns on mobile, 3 on tablet, 4 on desktop */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+          {products.map((product) => {
+            const mainImage = product.images?.[0] || product.imageUrl || "/images/placeholder.png";
+            
+            return (
+              <Link
+                key={product.id}
+                href={`/products/${product.slug || product.id}`}
+                className="group bg-white rounded-lg sm:rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-200 hover:border-blue-300 flex flex-col h-full"
+              >
+                {/* Image Container - Maintain aspect ratio, no cropping */}
+                <div className="relative w-full pt-[100%] overflow-hidden bg-gray-100">
+                  <div className="absolute inset-0">
+                    <Image
+                      src={mainImage}
+                      alt={product.name}
+                      fill
+                      className="object-contain p-3 group-hover:scale-105 transition-transform duration-300"
+                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+                      priority={false}
+                    />
+                  </div>
+                  {/* Category Badge */}
+                  <div className="absolute top-2 left-2 sm:top-3 sm:left-3">
+                    <span className="px-2 py-1 sm:px-3 sm:py-1 bg-white/90 backdrop-blur-sm text-xs font-semibold text-gray-800 rounded-full truncate max-w-[100px]">
+                      {product.category}
+                    </span>
+                  </div>
+                  {/* New Badge for recent products */}
+                  {product.createdAt && 
+                    typeof product.createdAt === 'number' && 
+                    Date.now() - product.createdAt < 7 * 24 * 60 * 60 * 1000 && (
+                    <div className="absolute top-2 right-2 sm:top-3 sm:right-3">
+                      <span className="px-2 py-1 sm:px-3 sm:py-1 bg-green-500 text-white text-xs font-semibold rounded-full">
+                        NEW
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Product Info */}
+                <div className="p-3 sm:p-4 flex flex-col flex-1">
+                  <h3 className="font-semibold text-gray-800 text-sm sm:text-base md:text-lg mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors min-h-[2.5em]">
+                    {product.name}
+                  </h3>
+                  
+                  {/* Price Section */}
+                  <div className="mt-auto">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <span className="text-lg sm:text-xl md:text-2xl font-bold text-blue-600">
+                        {formatPrice(product.price)}
+                      </span>
+                      {/* View Button - Hidden on mobile, shown on hover for larger screens */}
+                      <button className="hidden sm:block opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-600 text-white text-xs sm:text-sm font-semibold rounded-lg hover:bg-blue-700 whitespace-nowrap">
+                        View Details
+                      </button>
+                      {/* Mobile view indicator */}
+                      <span className="sm:hidden text-xs text-gray-500 text-right">Tap to view →</span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* Empty State */}
+        {products.length === 0 && (
+          <div className="text-center py-20">
+            <div className="w-24 h-24 mx-auto mb-6 bg-gray-200 rounded-full flex items-center justify-center">
+              <span className="text-4xl">📦</span>
+            </div>
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">No Products Available</h3>
+            <p className="text-gray-500 max-w-md mx-auto">
+              Our store is currently being stocked. Check back soon for amazing products!
+            </p>
+          </div>
+        )}
+
+        {/* Footer Info */}
+        <div className="mt-12 pt-8 border-t border-gray-200">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+            <div className="text-center md:text-left">
+              <div className="w-10 h-10 md:w-12 md:h-12 mx-auto md:mx-0 mb-3 md:mb-4 bg-blue-100 rounded-xl flex items-center justify-center">
+                <span className="text-xl md:text-2xl">🚚</span>
+              </div>
+              <h4 className="font-semibold text-gray-800 mb-1 md:mb-2 text-sm md:text-base">Fast Shipping</h4>
+              <p className="text-gray-600 text-xs md:text-sm">Free shipping on orders over $50</p>
+            </div>
+            <div className="text-center md:text-left">
+              <div className="w-10 h-10 md:w-12 md:h-12 mx-auto md:mx-0 mb-3 md:mb-4 bg-green-100 rounded-xl flex items-center justify-center">
+                <span className="text-xl md:text-2xl">🛡️</span>
+              </div>
+              <h4 className="font-semibold text-gray-800 mb-1 md:mb-2 text-sm md:text-base">Secure Payment</h4>
+              <p className="text-gray-600 text-xs md:text-sm">100% secure & encrypted payments</p>
+            </div>
+            <div className="text-center md:text-left">
+              <div className="w-10 h-10 md:w-12 md:h-12 mx-auto md:mx-0 mb-3 md:mb-4 bg-purple-100 rounded-xl flex items-center justify-center">
+                <span className="text-xl md:text-2xl">💚</span>
+              </div>
+              <h4 className="font-semibold text-gray-800 mb-1 md:mb-2 text-sm md:text-base">Quality Guaranteed</h4>
+              <p className="text-gray-600 text-xs md:text-sm">Premium products with satisfaction guarantee</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

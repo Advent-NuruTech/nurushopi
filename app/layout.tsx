@@ -2,12 +2,10 @@ import "./globals.css";
 import React from "react";
 import Navbar from "@/components/ui/Navbar";
 import Footer from "@/components/ui/Footer";
-import { ClerkProvider } from "@clerk/nextjs";
 
 import { CartProvider } from "@/context/CartContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { UserProvider } from "@/context/UserContext";
-
 
 export const metadata = {
   title: "NuruShop - Natural Health & Truth Products",
@@ -21,18 +19,15 @@ export const metadata = {
     "Ellen White writings",
     "Reformers",
     "Healthy foods",
-"Trusted Books ",
-"Pionners writings",
+    "Trusted Books ",
+    "Pionners writings",
     "Bible truth products",
     "NuruShop",
-
   ],
   authors: [{ name: "NuruShop Team" }],
   icons: {
-    icon: "/assets/logo.jpg", // ✅ favicon/logo path
+    icon: "/assets/logo.jpg",
   },
-
-  // ✅ Open Graph metadata for social media previews
   openGraph: {
     title: "NuruShop – Health & Truth Marketplace",
     description:
@@ -49,8 +44,6 @@ export const metadata = {
     ],
     type: "website",
   },
-
-  // ✅ Twitter card preview
   twitter: {
     card: "summary_large_image",
     title: "NuruShop – Health & Truth Marketplace",
@@ -58,12 +51,9 @@ export const metadata = {
       "Explore trusted natural remedies and inspired literature at NuruShop.",
     images: ["/logo.png"],
   },
-
-  // ✅ Control what gets indexed
   robots: {
-    index: true, // allow indexing of main product pages
+    index: true,
     follow: true,
-    // block non-product pages
     disallow: ["/about", "/contact", "/login", "/register", "/dashboard"],
   },
 };
@@ -76,21 +66,19 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased">
-        <ClerkProvider>
-          <UserProvider>
-            <ThemeProvider>
-              <CartProvider>
-                <div className="min-h-screen flex flex-col">
-                  <Navbar />
-                  <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    {children}
-                  </main>
-                  <Footer />
-                </div>
-              </CartProvider>
-            </ThemeProvider>
-          </UserProvider>
-        </ClerkProvider>
+        <UserProvider>
+          <ThemeProvider>
+            <CartProvider>
+              <div className="min-h-screen flex flex-col">
+                <Navbar />
+                <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                  {children}
+                </main>
+                <Footer />
+              </div>
+            </CartProvider>
+          </ThemeProvider>
+        </UserProvider>
       </body>
     </html>
   );

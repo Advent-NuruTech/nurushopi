@@ -12,8 +12,8 @@ interface RawProduct {
   name: string;
   price: number;
   description?: string;
-  image?: string;         // optional main image
-  images?: string[];      // optional array of images
+  image?: string;
+  images?: string[];
   category?: string;
   slug?: string;
   createdAt?: Timestamp | string | null;
@@ -54,9 +54,12 @@ export default async function ShopPage() {
       id: p.id,
       name: p.name,
       price: p.price,
-      description: p.description || "",
-      imageUrl: p.image || "",                          // main image
-      images: p.images || (p.image ? [p.image] : []),  // ensure images array exists
+      description:
+        p.description && p.description !== "undefined"
+          ? p.description
+          : "No description available",
+      imageUrl: p.image || "",
+      images: p.images || (p.image ? [p.image] : []),
       category: p.category || "Uncategorized",
       slug: p.slug,
       createdAt,

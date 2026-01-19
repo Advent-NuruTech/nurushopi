@@ -5,8 +5,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { LogIn, ChevronDown, ChevronRight } from "lucide-react";
-import { UserButton, SignInButton, SignedIn, SignedOut } from "@clerk/nextjs";
 import { UrlObject } from "url";
+
+import { useAppUser } from "@/context/UserContext";
+import { auth } from "@/lib/firebase";
+import { signOut } from "firebase/auth";
 
 interface Category {
   name: string;
@@ -27,6 +30,13 @@ export default function Sidebar({
 }: SidebarProps) {
   const [showCategories, setShowCategories] = useState(false);
   const sidebarRef = useRef<HTMLElement>(null);
+
+  const { user, isLoading } = useAppUser();
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    setIsOpen(false);
+  };
 
   // Close sidebar when clicking outside
   useEffect(() => {
@@ -179,20 +189,19 @@ export default function Sidebar({
                     >
                       <div className="border-l-2 border-gray-200 dark:border-gray-700 pl-4 space-y-1">
                         {categories.map((category, index) => (
-                  <Link
-  key={index}
-  href={
-    typeof category.href === "string"
-      ? { pathname: category.href } // convert string to UrlObject
-      : category.href
-  }
-  onClick={handleLinkClick}
-  className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 font-medium transition-colors text-sm"
->
-  <span className="text-base">{category.icon}</span>
-  {category.name}
-</Link>
-
+                          <Link
+                            key={index}
+                            href={
+                              typeof category.href === "string"
+                                ? { pathname: category.href }
+                                : category.href
+                            }
+                            onClick={handleLinkClick}
+                            className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 font-medium transition-colors text-sm"
+                          >
+                            <span className="text-base">{category.icon}</span>
+                            {category.name}
+                          </Link>
                         ))}
                       </div>
                     </motion.div>
@@ -222,26 +231,43 @@ export default function Sidebar({
 
             {/* Footer */}
             <div className="border-t border-gray-200 dark:border-gray-700 p-6 bg-gray-50 dark:bg-gray-800 space-y-3">
-              <SignedIn>
+              {!isLoading && user ? (
                 <div className="flex items-center justify-between px-3 py-2">
-                  <span className="text-gray-700 dark:text-gray-300 font-medium">
-                    Account
-                  </span>
-                  <UserButton afterSignOutUrl="/" />
-                </div>
-              </SignedIn>
+                  <div className="flex items-center gap-3">
+                    <Image
+                      src={user.imageUrl || "/assets/logo.jpg"}
+                      alt="User Avatar"
+                      width={32}
+                      height={32}
+                      className="rounded-full object-cover"
+                    />
+                    <div>
+                      <p className="text-gray-700 dark:text-gray-300 font-medium">
+                        {user.name || "User"}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {user.email}
+                      </p>
+                    </div>
+                  </div>
 
-              <SignedOut>
-                <SignInButton>
                   <button
-                    onClick={handleLinkClick}
-                    className="flex items-center justify-center gap-3 px-3 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors w-full"
+                    onClick={handleLogout}
+                    className="px-3 py-1.5 bg-red-600 text-white rounded-md text-sm hover:bg-red-700"
                   >
-                    <LogIn size={20} />
-                    Sign In / Register
+                    Logout
                   </button>
-                </SignInButton>
-              </SignedOut>
+                </div>
+              ) : (
+                <Link
+                  href="/auth/login"
+                  onClick={handleLinkClick}
+                  className="flex items-center justify-center gap-3 px-3 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors w-full"
+                >
+                  <LogIn size={20} />
+                  Sign In / Register
+                </Link>
+              )}
 
               <div className="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
                 <p className="text-xs text-gray-500 dark:text-gray-400">

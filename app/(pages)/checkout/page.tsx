@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { useCart } from "@/context/CartContext";
-import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, limit, query, orderBy } from "firebase/firestore";
@@ -10,6 +9,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, AlertCircle, XCircle } from "lucide-react";
 import PhoneInput, { validatePhoneForSubmission } from "@/components/ui/PhoneInput";
+
+import { auth } from "@/lib/firebase";
+import { onAuthStateChanged, User } from "firebase/auth";
 
 // -------------------- Types --------------------
 type Product = {
@@ -31,7 +33,6 @@ const commonCountries = [
 // -------------------- Checkout Page --------------------
 export default function CheckoutPage() {
   const { cart, total, removeFromCart, clearCart, updateQuantity } = useCart();
-  const { user } = useUser();
   const router = useRouter();
 
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
@@ -42,6 +43,8 @@ export default function CheckoutPage() {
   const [phoneValid, setPhoneValid] = useState(true);
   const [showCountrySuggestions, setShowCountrySuggestions] = useState(false);
 
+  const [user, setUser] = useState<User | null>(null);
+
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -51,6 +54,13 @@ export default function CheckoutPage() {
     locality: "",
     message: "",
   });
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+    });
+    return () => unsubscribe();
+  }, []);
 
   // -------------------- Fetch Related Products --------------------
   useEffect(() => {
@@ -110,13 +120,6 @@ export default function CheckoutPage() {
       return;
     }
 
-    if (!user) {
-      const returnTo = window.location.href;
-      const redirectUrl = encodeURIComponent(returnTo);
-      window.location.href = `https://loving-tapir-18.accounts.dev/sign-in?redirect_url=${redirectUrl}`;
-      return;
-    }
-
     const { name, phone, country, county, locality } = formData;
     const errors: string[] = [];
 
@@ -140,8 +143,8 @@ export default function CheckoutPage() {
       const normalizedPhone = phoneValidation.normalized || phone;
 
       const orderData = {
-        userId: user.id,
-        userEmail: user.emailAddresses[0]?.emailAddress,
+        userId: user?.uid || null,
+        userEmail: user?.email || null,
         ...formData,
         phone: normalizedPhone,
         items: cart,

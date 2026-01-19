@@ -30,14 +30,15 @@ interface OrderItem {
 
 /** 🔹 Type stored in Firestore */
 interface FirestoreOrder {
-  userId: string;
+  userId?: string | null;
   userEmail?: string | null;
   name: string;
   phone: string;
-  email: string;
+  email?: string | null;
+  country: string;
   county: string;
   locality: string;
-  message: string;
+  message?: string;
   items: OrderItem[];
   totalAmount: number;
   status: string;
@@ -48,14 +49,15 @@ interface FirestoreOrder {
 /** 🔹 Type returned to client */
 interface Order {
   id: string;
-  userId: string;
+  userId?: string | null;
   userEmail?: string | null;
   name: string;
   phone: string;
-  email: string;
+  email?: string | null;
+  country: string;
   county: string;
   locality: string;
-  message: string;
+  message?: string;
   items: OrderItem[];
   totalAmount: number;
   status: string;
@@ -66,38 +68,43 @@ interface Order {
 /** 🟢 Create a new order */
 export async function POST(request: Request) {
   try {
-    const body: Partial<FirestoreOrder> & { userId?: string; total?: number } =
-      await request.json();
+    const body: Partial<FirestoreOrder> = await request.json();
 
     const {
       userId,
       userEmail,
       items,
-      total,
+      totalAmount,
       status,
       name,
       phone,
       email,
+      country,
       county,
       locality,
       message,
     } = body;
 
-    if (!userId) {
-      return NextResponse.json({ error: "Missing userId" }, { status: 400 });
+    // Validate required fields
+    if (!name || !phone || !country || !county || !locality || !items || !totalAmount) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
     }
 
     const newOrder: FirestoreOrder = {
-      userId,
+      userId: userId ?? null,
       userEmail: userEmail ?? null,
-      name: name ?? "",
-      phone: phone ?? "",
-      email: email ?? "",
-      county: county ?? "",
-      locality: locality ?? "",
+      name,
+      phone,
+      email: email ?? null,
+      country,
+      county,
+      locality,
       message: message ?? "",
-      items: items ?? [],
-      totalAmount: total ?? 0,
+      items,
+      totalAmount,
       status: status ?? "pending",
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
@@ -137,14 +144,15 @@ export async function GET(request: Request) {
 
       return {
         id: docSnap.id,
-        userId: data.userId,
+        userId: data.userId ?? null,
         userEmail: data.userEmail ?? null,
         name: data.name,
         phone: data.phone,
-        email: data.email,
+        email: data.email ?? null,
+        country: data.country,
         county: data.county,
         locality: data.locality,
-        message: data.message,
+        message: data.message ?? "",
         items: data.items,
         totalAmount: data.totalAmount,
         status: data.status,

@@ -1,7 +1,12 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { useUser } from "@clerk/nextjs";
+import { auth } from "@/lib/firebase";
+import {
+  onAuthStateChanged,
+  User as FirebaseUser,
+  signOut,
+} from "firebase/auth";
 
 interface AppUser {
   id: string;
@@ -13,29 +18,41 @@ interface AppUser {
 interface UserContextType {
   user: AppUser | null;
   isLoading: boolean;
+  logout: () => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
-  const { user: clerkUser, isLoaded } = useUser();
   const [user, setUser] = useState<AppUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const formatUser = (firebaseUser: FirebaseUser | null): AppUser | null => {
+    if (!firebaseUser) return null;
+
+    return {
+      id: firebaseUser.uid,
+      name: firebaseUser.displayName,
+      email: firebaseUser.email,
+      imageUrl: firebaseUser.photoURL,
+    };
+  };
 
   useEffect(() => {
-    if (isLoaded && clerkUser) {
-      setUser({
-        id: clerkUser.id,
-        name: clerkUser.fullName,
-        email: clerkUser.primaryEmailAddress?.emailAddress ?? null,
-        imageUrl: clerkUser.imageUrl ?? null,
-      });
-    } else if (isLoaded && !clerkUser) {
-      setUser(null);
-    }
-  }, [isLoaded, clerkUser]);
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(formatUser(firebaseUser));
+      setIsLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const logout = async () => {
+    await signOut(auth);
+  };
 
   return (
-    <UserContext.Provider value={{ user, isLoading: !isLoaded }}>
+    <UserContext.Provider value={{ user, isLoading, logout }}>
       {children}
     </UserContext.Provider>
   );

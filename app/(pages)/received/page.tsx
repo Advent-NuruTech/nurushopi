@@ -1,10 +1,11 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import { SignedIn, SignedOut, SignInButton, useUser } from '@clerk/nextjs';
-import Image from 'next/image';
-import { formatPrice } from '@/lib/formatPrice';
-import DownloadReceiptButton from '@/components/ui/DownloadReceiptButton'; // Adjust import path as needed
+import React, { useEffect, useState } from "react";
+import Image from "next/image";
+import { formatPrice } from "@/lib/formatPrice";
+import DownloadReceiptButton from "@/components/ui/DownloadReceiptButton";
+import { auth } from "@/lib/firebase";
+import { onAuthStateChanged, User } from "firebase/auth";
 
 type OrderItem = {
   id: string;
@@ -39,25 +40,42 @@ type ContactMessage = {
   createdAt: string;
 };
 
+type ApiOrderResponse = {
+  orders: Order[];
+};
+
+type ApiContactResponse = {
+  messages: ContactMessage[];
+};
+
 export default function ReceivedPageClient() {
-  const { isSignedIn, user } = useUser();
+  const [user, setUser] = useState<User | null>(null);
   const [orders, setOrders] = useState<Order[] | null>(null);
   const [messages, setMessages] = useState<ContactMessage[] | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // 🔥 Firebase auth listener
   useEffect(() => {
-    if (!isSignedIn) return;
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser || null);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
 
     async function fetchData() {
       setLoading(true);
       try {
         const [orRes, msgRes] = await Promise.all([
-          fetch('/api/orders'),
-          fetch('/api/contact'),
+          fetch("/api/orders"),
+          fetch("/api/contact"),
         ]);
 
-        const orJson = orRes.ok ? await orRes.json() : { orders: [] };
-        const msgJson = msgRes.ok ? await msgRes.json() : { messages: [] };
+        const orJson = orRes.ok ? await orRes.json() as ApiOrderResponse : { orders: [] };
+        const msgJson = msgRes.ok ? await msgRes.json() as ApiContactResponse : { messages: [] };
 
         const sortedOrders = (orJson.orders || []).sort(
           (a: Order, b: Order) =>
@@ -67,34 +85,39 @@ export default function ReceivedPageClient() {
         setOrders(sortedOrders);
         setMessages(msgJson.messages || []);
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching data:", err);
       } finally {
         setLoading(false);
       }
     }
 
     fetchData();
-  }, [isSignedIn]);
+  }, [user]);
 
   const overallTotal =
     orders?.reduce((acc, order) => acc + Number(order.totalAmount), 0) || 0;
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Received — Orders & Messages</h1>
+      <h1 className="text-2xl font-bold mb-4">
+        Received — Orders & Messages
+      </h1>
 
-      <SignedOut>
+      {/* NOT SIGNED IN */}
+      {!user && (
         <div className="p-6 border rounded">
           <p className="mb-4">Sign in to view received orders and messages.</p>
-          <SignInButton>
-            <button className="px-4 py-2 bg-sky-600 text-white rounded">
-              Sign in
-            </button>
-          </SignInButton>
+          <a
+            href="/auth/login"
+            className="px-4 py-2 bg-sky-600 text-white rounded"
+          >
+            Sign in
+          </a>
         </div>
-      </SignedOut>
+      )}
 
-      <SignedIn>
+      {/* SIGNED IN */}
+      {user && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* ORDERS SECTION */}
           <section className="p-4 border rounded">
@@ -116,7 +139,7 @@ export default function ReceivedPageClient() {
             {!loading && !orders?.length && (
               <div className="text-slate-500">No orders yet.</div>
             )}
-            {!loading && orders?.length && (
+            {!loading && orders && orders.length > 0 && (
               <div className="space-y-3">
                 {orders.map((o) => (
                   <div
@@ -136,7 +159,6 @@ export default function ReceivedPageClient() {
                         <div className="font-bold text-lg text-blue-600 dark:text-blue-400">
                           {formatPrice(Number(o.totalAmount))}
                         </div>
-                     
                       </div>
                     </div>
 
@@ -148,38 +170,38 @@ export default function ReceivedPageClient() {
                         <p>
                           <span className="font-medium text-slate-600 dark:text-slate-400">
                             Name:
-                          </span>{' '}
+                          </span>{" "}
                           {o.name}
                         </p>
                         <p>
                           <span className="font-medium text-slate-600 dark:text-slate-400">
                             Phone:
-                          </span>{' '}
+                          </span>{" "}
                           {o.phone}
                         </p>
-                         <p>
+                        <p>
                           <span className="font-medium text-slate-600 dark:text-slate-400">
                             Country:
-                          </span>{' '}
+                          </span>{" "}
                           {o.country}
                         </p>
                         <p>
                           <span className="font-medium text-slate-600 dark:text-slate-400">
                             County:
-                          </span>{' '}
+                          </span>{" "}
                           {o.county}
                         </p>
                         <p>
                           <span className="font-medium text-slate-600 dark:text-slate-400">
                             Locality:
-                          </span>{' '}
+                          </span>{" "}
                           {o.locality}
                         </p>
                         {o.email && (
                           <p className="col-span-2">
                             <span className="font-medium text-slate-600 dark:text-slate-400">
                               Email:
-                            </span>{' '}
+                            </span>{" "}
                             {o.email}
                           </p>
                         )}
@@ -239,7 +261,7 @@ export default function ReceivedPageClient() {
             {!loading && !messages?.length && (
               <div className="text-slate-500">No messages yet.</div>
             )}
-            {!loading && messages?.length && (
+            {!loading && messages && messages.length > 0 && (
               <div className="space-y-3">
                 {messages.map((m) => (
                   <div key={m.id} className="p-3 border rounded">
@@ -257,15 +279,15 @@ export default function ReceivedPageClient() {
             )}
           </section>
         </div>
+      )}
 
-        <div className="mt-6 text-sm text-slate-500">
-          <p>
-            Security reminder: Protect `/api/orders` and `/api/contact` on
-            server-side. Verify Clerk sessions and admin roles before returning
-            sensitive data.
-          </p>
-        </div>
-      </SignedIn>
+      <div className="mt-6 text-sm text-slate-500">
+        <p>
+          Security reminder: Protect `/api/orders` and `/api/contact` on
+          server-side. Verify Firebase sessions and admin roles before returning
+          sensitive data.
+        </p>
+      </div>
     </div>
   );
 }

@@ -6,15 +6,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ShoppingCart, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import {
-  UserButton,
-  SignInButton,
-  SignedIn,
-  SignedOut,
-} from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import type { Route } from "next";
+
 import SearchBar from "./SearchBar";
 import Sidebar from "./Sidebar";
-import type { Route } from "next";
+
+import { useAppUser } from "@/context/UserContext";
+import { auth } from "@/lib/firebase";
+import { signOut } from "firebase/auth";
 
 interface Category {
   name: string;
@@ -27,13 +27,15 @@ export default function Navbar() {
   const [showSearch, setShowSearch] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [darkMode, setDarkMode] = useState(true);
+  const [_darkMode, setDarkMode] = useState(true);
   const [isClient, setIsClient] = useState(false);
 
   const { cart } = useCart();
   const cartCount = isClient
     ? cart.reduce((count, item) => count + item.quantity, 0)
     : 0;
+
+  const { user, isLoading } = useAppUser();
 
   useEffect(() => {
     setIsClient(true);
@@ -57,7 +59,7 @@ export default function Navbar() {
     }
   }, [isClient]);
 
-  const toggleDarkMode = () => {
+  const _toggleDarkMode = () => {
     setDarkMode((prev) => {
       const next = !prev;
       document.documentElement.classList.toggle("dark", next);
@@ -75,16 +77,20 @@ export default function Navbar() {
 
   /* ---------------- Categories (typed) ---------------- */
   const categories: Category[] = [
-    { name: "All Remedies", href: "/herbs" as Route, icon: "🌿" },
-    { name: "Food Staffs", href: "/foods" as Route, icon: "🥗" },
-    { name: "EGW", href: "/egw" as Route, icon: "📚" },
-    { name: "Pioneers Literature", href: "/pioneers" as Route, icon: "📜" },
-    { name: "Bible Covers", href: "/covers" as Route, icon: "📕" },
-    { name: "Song Books", href: "/songbooks" as Route, icon: "🎵" },
-    { name: "Other Reliable Authors", href: "/authors" as Route, icon: "✍️" },
-    { name: "Oils", href: "/oils" as Route, icon: "🧴" },
-    { name: "Bibles", href: "/bibles" as Route, icon: "📖" },
+    { name: "All Remedies", href: "/herbs", icon: "🌿" },
+    { name: "Food Staffs", href: "/foods", icon: "🥗" },
+    { name: "EGW", href: "/egw", icon: "📚" },
+    { name: "Pioneers Literature", href: "/pioneers", icon: "📜" },
+    { name: "Bible Covers", href: "/covers", icon: "📕" },
+    { name: "Song Books", href: "/songbooks", icon: "🎵" },
+    { name: "Other Reliable Authors", href: "/authors", icon: "✍️" },
+    { name: "Oils", href: "/oils", icon: "🧴" },
+    { name: "Bibles", href: "/bibles", icon: "📖" },
   ];
+
+  const handleLogout = async () => {
+    await signOut(auth);
+  };
 
   return (
     <nav
@@ -97,7 +103,7 @@ export default function Navbar() {
       <div className="flex items-center justify-between px-4 py-3 max-w-7xl mx-auto">
         {/* Logo */}
         <Link
-          href={"/" as Route}
+          href="/"
           className="flex items-center gap-2 hover:opacity-80 transition"
           aria-label="NuruShop Home"
         >
@@ -116,7 +122,7 @@ export default function Navbar() {
 
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-6 font-medium text-gray-700 dark:text-gray-300">
-          <Link href={"/" as Route} className="hover:text-blue-600">
+          <Link href="/" className="hover:text-blue-600">
             Home
           </Link>
 
@@ -154,11 +160,11 @@ export default function Navbar() {
             </AnimatePresence>
           </div>
 
-          <Link href={"/about" as Route} className="hover:text-blue-600">
+          <Link href="/about" className="hover:text-blue-600">
             About
           </Link>
 
-          <Link href={"/contact" as Route} className="hover:text-blue-600">
+          <Link href="/contact" className="hover:text-blue-600">
             Contact
           </Link>
         </div>
@@ -168,10 +174,7 @@ export default function Navbar() {
           <SearchBar showSearch={showSearch} setShowSearch={setShowSearch} />
 
           {/* Cart */}
-          <Link
-            href={"/checkout" as Route}
-            className="relative p-2 hover:text-blue-600"
-          >
+          <Link href="/checkout" className="relative p-2 hover:text-blue-600">
             <ShoppingCart size={22} />
             {cartCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs min-w-[20px] h-5 rounded-full flex items-center justify-center">
@@ -181,18 +184,34 @@ export default function Navbar() {
           </Link>
 
           {/* Auth (hidden on mobile) */}
-          <div className="hidden md:flex items-center">
-            <SignedIn>
-              <UserButton afterSignOutUrl="/" />
-            </SignedIn>
-
-            <SignedOut>
-              <SignInButton>
-                <button className="px-3 py-1.5 bg-sky-600 text-white rounded-md text-sm hover:bg-sky-700">
-                  Sign in
+          <div className="hidden md:flex items-center gap-2">
+            {!isLoading && user ? (
+              <div className="flex items-center gap-2">
+                <Image
+                  src={user.imageUrl || "/assets/logo.jpg"}
+                  alt="User Avatar"
+                  width={32}
+                  height={32}
+                  className="rounded-full object-cover"
+                />
+                <span className="text-sm font-medium">
+                  {user.name || "User"}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="px-3 py-1.5 bg-red-600 text-white rounded-md text-sm hover:bg-red-700"
+                >
+                  Logout
                 </button>
-              </SignInButton>
-            </SignedOut>
+              </div>
+            ) : (
+              <Link
+                href="/auth/login"
+                className="px-3 py-1.5 bg-sky-600 text-white rounded-md text-sm hover:bg-sky-700"
+              >
+                Sign in
+              </Link>
+            )}
           </div>
 
           {/* Mobile menu */}
@@ -211,7 +230,6 @@ export default function Navbar() {
         isOpen={isOpen}
         setIsOpen={setIsOpen}
         categories={categories}
-
       />
     </nav>
   );

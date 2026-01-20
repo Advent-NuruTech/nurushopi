@@ -1,21 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { formatText } from "@/lib/formatText";
 
-function formatText(text: string) {
-  const formatted = text
-    // Bold **text**
-    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-    // Underline __text__
-    .replace(/__(.*?)__/g, "<u>$1</u>")
-    // Numbered points
-    .replace(/(^|\n)(\d+\.\s.*)/g, "<br /><span>$2</span>");
-
-  return formatted;
-}
 export default function UploadBannerPage() {
   const [title, setTitle] = useState("");
-  const [shortDescription, setShortDescription] = useState("");
+  const [description, setDescription] = useState("");
   const [link, setLink] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
@@ -30,7 +20,7 @@ export default function UploadBannerPage() {
 
     const formData = new FormData();
     formData.append("title", title);
-    formData.append("shortDescription", shortDescription);
+    formData.append("description", description);
     formData.append("link", link);
     formData.append("file", file);
 
@@ -64,23 +54,32 @@ export default function UploadBannerPage() {
         />
 
         <textarea
-          placeholder="Short Description (supports **bold**, __underline__, 1. points)"
-          className="border p-2 rounded min-h-[120px]"
-          value={shortDescription}
-          onChange={(e) => setShortDescription(e.target.value)}
+          placeholder={`Full Description
+Supports:
+## Headings
+**Bold**
+__Underline__
+1. Numbered lists
+- Bullet lists
+
+(Use blank lines for paragraphs)
+`}
+          className="border p-3 rounded min-h-[220px]"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
           required
         />
 
         {/* Live Preview */}
-        {shortDescription && (
-          <div className="border rounded p-3 bg-gray-50">
-            <p className="text-sm font-semibold mb-1 text-gray-600">
-              Preview
+        {description && (
+          <div className="border rounded p-4 bg-gray-50">
+            <p className="text-sm font-semibold mb-2 text-gray-600">
+              Live Preview
             </p>
             <div
-              className="text-sm leading-relaxed"
+              className="prose prose-sm max-w-none"
               dangerouslySetInnerHTML={{
-                __html: formatText(shortDescription),
+                __html: formatText(description),
               }}
             />
           </div>
@@ -111,13 +110,7 @@ export default function UploadBannerPage() {
         </button>
 
         {message && (
-          <p
-            className={`text-center mt-2 ${
-              message.includes("success")
-                ? "text-green-600"
-                : "text-red-600"
-            }`}
-          >
+          <p className="text-center mt-2 text-sm">
             {message}
           </p>
         )}

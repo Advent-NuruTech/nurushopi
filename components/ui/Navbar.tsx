@@ -125,6 +125,9 @@ export default function Navbar() {
           <Link href="/" className="hover:text-blue-600">
             Home
           </Link>
+           <Link href="/shop" className="hover:text-blue-600">
+            Shop
+          </Link>
 
           {/* Categories */}
           <div

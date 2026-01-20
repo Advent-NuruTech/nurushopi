@@ -1,10 +1,7 @@
 export function formatText(text: string): string {
   if (!text) return "";
 
-  let html = text;
-
-  // Escape HTML
-  html = html
+  let html = text
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
@@ -18,13 +15,20 @@ export function formatText(text: string): string {
   // Underline
   html = html.replace(/__(.*?)__/g, "<u>$1</u>");
 
-  // Lists
+  // Lists: Convert each line to <li>
   html = html.replace(/^\d+\.\s+(.*)$/gm, "<li>$1</li>");
   html = html.replace(/^- (.*)$/gm, "<li>$1</li>");
+
+  // Wrap list items into <ul> blocks
   html = html.replace(/(<li>[\s\S]*?<\/li>)/g, "<ul>$1</ul>");
 
   // Paragraphs
-  html = html.replace(/\n\s*\n/g, "</p><p>");
+  html = html
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .map((p) => `<p>${p}</p>`)
+    .join("");
 
-  return `<p>${html}</p>`;
+  return html;
 }

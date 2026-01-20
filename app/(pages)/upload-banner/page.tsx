@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { formatText } from "@/lib/formatText";
+import { useRouter } from "next/navigation";
 
 export default function UploadBannerPage() {
   const [title, setTitle] = useState("");
@@ -10,9 +11,11 @@ export default function UploadBannerPage() {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const router = useRouter();
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!file) return alert("Please select an image.");
 
     setLoading(true);
@@ -31,7 +34,22 @@ export default function UploadBannerPage() {
 
     const data = await res.json();
     setLoading(false);
-    setMessage(data.message || data.error);
+
+    // ✅ Check if upload succeeded
+    if (res.ok && data.id) {
+      setMessage("Banner uploaded successfully!");
+
+      // Clear form
+      setTitle("");
+      setDescription("");
+      setLink("");
+      setFile(null);
+
+      // Optional: redirect to banner detail page
+      router.push(`/banners/${data.id}`);
+    } else {
+      setMessage(data.message || data.error || "Upload failed. Try again.");
+    }
   };
 
   return (
@@ -52,14 +70,7 @@ export default function UploadBannerPage() {
         <input
           type="text"
           placeholder="Banner Title"
-          className="
-            border border-gray-300 dark:border-gray-700
-            bg-white dark:bg-gray-800
-            text-gray-900 dark:text-gray-100
-            placeholder-gray-400 dark:placeholder-gray-500
-            p-2 rounded
-            focus:outline-none focus:ring-2 focus:ring-blue-500
-          "
+          className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
@@ -76,38 +87,20 @@ __Underline__
 
 (Use blank lines for paragraphs)
 `}
-          className="
-            border border-gray-300 dark:border-gray-700
-            bg-white dark:bg-gray-800
-            text-gray-900 dark:text-gray-100
-            placeholder-gray-400 dark:placeholder-gray-500
-            p-3 rounded min-h-[220px]
-            focus:outline-none focus:ring-2 focus:ring-blue-500
-          "
+          className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 p-3 rounded min-h-[220px] focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           required
         />
 
-        {/* Live Preview */}
         {description && (
-          <div
-            className="
-              border border-gray-200 dark:border-gray-700
-              rounded p-4
-              bg-gray-50 dark:bg-gray-800
-            "
-          >
+          <div className="border border-gray-200 dark:border-gray-700 rounded p-4 bg-gray-50 dark:bg-gray-800">
             <p className="text-sm font-semibold mb-2 text-gray-600 dark:text-gray-300">
               Live Preview
             </p>
 
             <div
-              className="
-                prose prose-sm max-w-none
-                text-gray-800 dark:text-gray-100
-                dark:prose-invert
-              "
+              className="prose prose-sm max-w-none text-gray-800 dark:text-gray-100 dark:prose-invert"
               dangerouslySetInnerHTML={{
                 __html: formatText(description),
               }}
@@ -118,14 +111,7 @@ __Underline__
         <input
           type="text"
           placeholder="Link (optional)"
-          className="
-            border border-gray-300 dark:border-gray-700
-            bg-white dark:bg-gray-800
-            text-gray-900 dark:text-gray-100
-            placeholder-gray-400 dark:placeholder-gray-500
-            p-2 rounded
-            focus:outline-none focus:ring-2 focus:ring-blue-500
-          "
+          className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={link}
           onChange={(e) => setLink(e.target.value)}
         />
@@ -134,27 +120,14 @@ __Underline__
           type="file"
           accept="image/*"
           onChange={(e) => setFile(e.target.files?.[0] || null)}
-          className="
-            border border-gray-300 dark:border-gray-700
-            bg-white dark:bg-gray-800
-            text-gray-700 dark:text-gray-200
-            p-2 rounded
-          "
+          className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 p-2 rounded"
           required
         />
 
         <button
           type="submit"
           disabled={loading}
-          className="
-            bg-black dark:bg-white
-            text-white dark:text-black
-            py-2 rounded
-            font-medium
-            hover:opacity-90
-            disabled:opacity-60
-            transition
-          "
+          className="bg-black dark:bg-white text-white dark:text-black py-2 rounded font-medium hover:opacity-90 disabled:opacity-60 transition"
         >
           {loading ? "Uploading..." : "Upload Banner"}
         </button>

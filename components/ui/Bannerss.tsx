@@ -5,7 +5,13 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, orderBy, query, Timestamp } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  orderBy,
+  query,
+  Timestamp,
+} from "firebase/firestore";
 
 interface Banner {
   id: string;
@@ -15,14 +21,14 @@ interface Banner {
   createdAt?: Timestamp;
 }
 
-/* 🔹 Same formatter as upload page, ESLint-safe */
+/* 🔹 Safe lightweight formatter */
 function formatText(text: string) {
-  const formatted = text
-    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // bold
-    .replace(/__(.*?)__/g, "<u>$1</u>") // underline
-    .replace(/(^|\n)(\d+\.\s.*)/g, "<br /><span>$2</span>"); // numbered points
+  if (!text) return "";
 
-  return formatted;
+  return text
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/__(.*?)__/g, "<u>$1</u>")
+    .replace(/\n+/g, " ");
 }
 
 export default function Banners() {
@@ -30,7 +36,10 @@ export default function Banners() {
 
   useEffect(() => {
     const fetchBanners = async () => {
-      const q = query(collection(db, "banners"), orderBy("createdAt", "desc"));
+      const q = query(
+        collection(db, "banners"),
+        orderBy("createdAt", "desc")
+      );
       const snapshot = await getDocs(q);
 
       setBanners(
@@ -45,78 +54,97 @@ export default function Banners() {
   }, []);
 
   return (
-    <section className="relative w-full mt-2">
+    <section className="relative w-full mt-4">
       <div className="w-full overflow-x-auto">
-        <div className="flex flex-row gap-4 px-1 py-1">
+        <div className="flex gap-5 px-2 py-3">
           {banners.map((banner) => (
-            <motion.div
+            <Link
               key={banner.id}
-              whileHover={{ scale: 1.03 }}
-              transition={{ duration: 0.25 }}
-              className="
-                flex-none
-                w-[260px]
-                sm:w-[300px]
-                lg:w-[320px]
-                h-[420px]
-                rounded-2xl
-                overflow-hidden
-                shadow-md
-                bg-white
-                dark:bg-gray-900
-                border
-                border-gray-200
-                dark:border-gray-800
-                flex
-                flex-col
-              "
+              href={`/banners/${banner.id}`}
+              className="flex-none"
             >
-              {/* IMAGE */}
-              <div className="relative w-full h-[75%] bg-gray-100 dark:bg-gray-800">
-                {banner.image ? (
-                  <Image
-                    src={banner.image}
-                    alt={banner.title}
-                    fill
-                    className="object-contain"
-                    sizes="(max-width: 640px) 260px, 320px"
+              <motion.article
+                whileHover={{ y: -4 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+                className="
+                  group
+                  w-[260px]
+                  sm:w-[300px]
+                  lg:w-[320px]
+                  h-[420px]
+                  rounded-2xl
+                  overflow-hidden
+                  bg-white
+                  dark:bg-gray-900
+                  border
+                  border-gray-200
+                  dark:border-gray-800
+                  shadow-sm
+                  hover:shadow-xl
+                  transition-shadow
+                  flex
+                  flex-col
+                "
+              >
+                {/* IMAGE */}
+                <div className="relative w-full h-[72%] bg-gray-100 dark:bg-gray-800">
+                  {banner.image ? (
+                    <Image
+                      src={banner.image}
+                      alt={banner.title}
+                      fill
+                      className="
+                        object-contain
+                        transition-transform
+                        duration-300
+                        group-hover:scale-[1.02]
+                      "
+                      sizes="(max-width: 640px) 260px, 320px"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-sm">
+                      No Image
+                    </div>
+                  )}
+                </div>
+
+                {/* CONTENT */}
+                <div className="flex flex-col p-4 h-[28%]">
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 line-clamp-1">
+                    {banner.title}
+                  </h3>
+
+                  <div
+                    className="
+                      mt-1
+                      text-xs
+                      text-gray-600
+                      dark:text-gray-400
+                      line-clamp-2
+                      leading-snug
+                      flex-1
+                    "
+                    dangerouslySetInnerHTML={{
+                      __html: formatText(banner.shortDescription),
+                    }}
                   />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center text-gray-400">
-                    No Image
-                  </div>
-                )}
-              </div>
 
-              {/* CONTENT */}
-              <div className="h-[25%] p-3 flex flex-col">
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 line-clamp-1">
-                  {banner.title}
-                </h3>
-
-                {/* 🔹 Formatted description (line-clamp preserved) */}
-                <div
-                  className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mt-1 flex-1 leading-snug"
-                  dangerouslySetInnerHTML={{
-                    __html: formatText(banner.shortDescription),
-                  }}
-                />
-
-                <Link
-                  href={`/banners/${banner.id}`}
-                  className="
-                    text-xs
-                    font-medium
-                    text-blue-600
-                    dark:text-blue-400
-                    hover:underline
-                    self-start
-                  "
-                >
-                  Read more →
-                </Link>
-              </div>
-            </motion.div>
+                  <span
+                    className="
+                      mt-2
+                      text-xs
+                      font-medium
+                      text-blue-600
+                      dark:text-blue-400
+                      group-hover:underline
+                      self-start
+                    "
+                  >
+                    View details →
+                  </span>
+                </div>
+              </motion.article>
+            </Link>
           ))}
         </div>
       </div>

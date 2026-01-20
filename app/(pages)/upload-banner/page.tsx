@@ -35,19 +35,31 @@ export default function UploadBannerPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto py-10">
-      <h1 className="text-2xl font-bold mb-6 text-center">
+    <div className="max-w-md mx-auto py-10 px-4">
+      <h1 className="text-2xl font-bold mb-6 text-center text-gray-900 dark:text-gray-100">
         Upload New Banner
       </h1>
 
       <form
         onSubmit={handleUpload}
-        className="flex flex-col gap-4 border p-6 rounded-xl shadow-md bg-white"
+        className="
+          flex flex-col gap-4
+          border border-gray-200 dark:border-gray-800
+          p-6 rounded-xl shadow-md
+          bg-white dark:bg-gray-900
+        "
       >
         <input
           type="text"
           placeholder="Banner Title"
-          className="border p-2 rounded"
+          className="
+            border border-gray-300 dark:border-gray-700
+            bg-white dark:bg-gray-800
+            text-gray-900 dark:text-gray-100
+            placeholder-gray-400 dark:placeholder-gray-500
+            p-2 rounded
+            focus:outline-none focus:ring-2 focus:ring-blue-500
+          "
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
@@ -64,7 +76,14 @@ __Underline__
 
 (Use blank lines for paragraphs)
 `}
-          className="border p-3 rounded min-h-[220px]"
+          className="
+            border border-gray-300 dark:border-gray-700
+            bg-white dark:bg-gray-800
+            text-gray-900 dark:text-gray-100
+            placeholder-gray-400 dark:placeholder-gray-500
+            p-3 rounded min-h-[220px]
+            focus:outline-none focus:ring-2 focus:ring-blue-500
+          "
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           required
@@ -72,12 +91,23 @@ __Underline__
 
         {/* Live Preview */}
         {description && (
-          <div className="border rounded p-4 bg-gray-50">
-            <p className="text-sm font-semibold mb-2 text-gray-600">
+          <div
+            className="
+              border border-gray-200 dark:border-gray-700
+              rounded p-4
+              bg-gray-50 dark:bg-gray-800
+            "
+          >
+            <p className="text-sm font-semibold mb-2 text-gray-600 dark:text-gray-300">
               Live Preview
             </p>
+
             <div
-              className="prose prose-sm max-w-none"
+              className="
+                prose prose-sm max-w-none
+                text-gray-800 dark:text-gray-100
+                dark:prose-invert
+              "
               dangerouslySetInnerHTML={{
                 __html: formatText(description),
               }}
@@ -88,7 +118,14 @@ __Underline__
         <input
           type="text"
           placeholder="Link (optional)"
-          className="border p-2 rounded"
+          className="
+            border border-gray-300 dark:border-gray-700
+            bg-white dark:bg-gray-800
+            text-gray-900 dark:text-gray-100
+            placeholder-gray-400 dark:placeholder-gray-500
+            p-2 rounded
+            focus:outline-none focus:ring-2 focus:ring-blue-500
+          "
           value={link}
           onChange={(e) => setLink(e.target.value)}
         />
@@ -97,20 +134,33 @@ __Underline__
           type="file"
           accept="image/*"
           onChange={(e) => setFile(e.target.files?.[0] || null)}
-          className="border p-2 rounded"
+          className="
+            border border-gray-300 dark:border-gray-700
+            bg-white dark:bg-gray-800
+            text-gray-700 dark:text-gray-200
+            p-2 rounded
+          "
           required
         />
 
         <button
           type="submit"
           disabled={loading}
-          className="bg-black text-white py-2 rounded hover:bg-gray-800"
+          className="
+            bg-black dark:bg-white
+            text-white dark:text-black
+            py-2 rounded
+            font-medium
+            hover:opacity-90
+            disabled:opacity-60
+            transition
+          "
         >
           {loading ? "Uploading..." : "Upload Banner"}
         </button>
 
         {message && (
-          <p className="text-center mt-2 text-sm">
+          <p className="text-center mt-2 text-sm text-gray-700 dark:text-gray-300">
             {message}
           </p>
         )}

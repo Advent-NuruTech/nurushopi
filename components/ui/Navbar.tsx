@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useCart } from "@/context/CartContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ShoppingCart, ChevronDown } from "lucide-react";
+import { Menu, X, ShoppingCart, ChevronDown, User } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -190,19 +190,27 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-2">
             {!isLoading && user ? (
               <div className="flex items-center gap-2">
-                <Image
-                  src={user.imageUrl || "/assets/logo.jpg"}
-                  alt="User Avatar"
-                  width={32}
-                  height={32}
-                  className="rounded-full object-cover"
-                />
-                <span className="text-sm font-medium">
-                  {user.name || "User"}
-                </span>
+                <Link
+                  href="/profile"
+                  className="flex items-center gap-2 p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                  title="User Profile"
+                  aria-label="Open profile"
+                >
+                  <Image
+                    src={user.imageUrl || "/assets/logo.jpg"}
+                    alt="User Avatar"
+                    width={32}
+                    height={32}
+                    className="rounded-full object-cover ring-2 ring-sky-500/30 dark:ring-sky-400/30"
+                  />
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                    {user.name || "User"}
+                  </span>
+                  <User size={16} className="text-gray-500 dark:text-gray-400" />
+                </Link>
                 <button
                   onClick={handleLogout}
-                  className="px-3 py-1.5 bg-red-600 text-white rounded-md text-sm hover:bg-red-700"
+                  className="px-3 py-1.5 bg-red-600 text-white rounded-md text-sm hover:bg-red-700 transition-colors"
                 >
                   Logout
                 </button>

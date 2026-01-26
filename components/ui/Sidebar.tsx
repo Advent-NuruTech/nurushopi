@@ -232,16 +232,20 @@ export default function Sidebar({
             {/* Footer */}
             <div className="border-t border-gray-200 dark:border-gray-700 p-6 bg-gray-50 dark:bg-gray-800 space-y-3">
               {!isLoading && user ? (
-                <div className="flex items-center justify-between px-3 py-2">
-                  <div className="flex items-center gap-3">
+                <div className="space-y-3">
+                  <Link
+                    href="/profile"
+                    onClick={handleLinkClick}
+                    className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors"
+                  >
                     <Image
                       src={user.imageUrl || "/assets/logo.jpg"}
                       alt="User Avatar"
                       width={32}
                       height={32}
-                      className="rounded-full object-cover"
+                      className="rounded-full object-cover ring-2 ring-sky-500/30"
                     />
-                    <div>
+                    <div className="flex-1 text-left">
                       <p className="text-gray-700 dark:text-gray-300 font-medium">
                         {user.name || "User"}
                       </p>
@@ -249,14 +253,22 @@ export default function Sidebar({
                         {user.email}
                       </p>
                     </div>
+                  </Link>
+                  <div className="flex gap-2">
+                    <Link
+                      href="/profile"
+                      onClick={handleLinkClick}
+                      className="flex-1 px-3 py-2 text-center text-sm font-medium text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-900/30 rounded-md hover:bg-sky-100 dark:hover:bg-sky-900/50"
+                    >
+                      Profile
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="px-3 py-2 bg-red-600 text-white rounded-md text-sm hover:bg-red-700"
+                    >
+                      Logout
+                    </button>
                   </div>
-
-                  <button
-                    onClick={handleLogout}
-                    className="px-3 py-1.5 bg-red-600 text-white rounded-md text-sm hover:bg-red-700"
-                  >
-                    Logout
-                  </button>
                 </div>
               ) : (
                 <Link

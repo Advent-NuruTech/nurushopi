@@ -5,12 +5,14 @@ import {
   getDocs,
   addDoc,
   updateDoc,
+  setDoc,
   deleteDoc,
   query,
   where,
   orderBy,
   serverTimestamp,
   Timestamp,
+  increment,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
@@ -51,6 +53,14 @@ export interface ContactMessage {
   phone: string;
   message: string;
   createdAt?: Timestamp;
+}
+
+export interface UserProfile {
+  fullName?: string;
+  phone?: string;
+  address?: string;
+  inviteCount?: number;
+  updatedAt?: Timestamp;
 }
 
 // ----------------------------
@@ -203,6 +213,34 @@ export const getAllOrders = async (): Promise<Order[]> => {
       totalAmount: Number(data.totalAmount ?? data.total ?? 0), // ✅ consistent field
     } as Order;
   });
+};
+
+// ----------------------------
+// 🔹 User Profile Helpers (Firestore)
+// ----------------------------
+
+export const getUserProfile = async (uid: string): Promise<UserProfile | null> => {
+  const ref = doc(db, "users", uid);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return null;
+  return snap.data() as UserProfile;
+};
+
+export const updateUserProfile = async (
+  uid: string,
+  data: Partial<Pick<UserProfile, "fullName" | "phone" | "address">>
+): Promise<void> => {
+  const ref = doc(db, "users", uid);
+  await setDoc(ref, { ...data, updatedAt: serverTimestamp() }, { merge: true });
+};
+
+export const incrementInviteCount = async (uid: string): Promise<void> => {
+  const ref = doc(db, "users", uid);
+  await setDoc(
+    ref,
+    { inviteCount: increment(1), updatedAt: serverTimestamp() },
+    { merge: true }
+  );
 };
 
 // ----------------------------

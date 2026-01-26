@@ -1,25 +1,24 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-// This function can be marked `async` if using `await` inside
+const ADMIN_PUBLIC = ["/admin/login", "/admin/signup"];
+
 export function middleware(request: NextRequest) {
-  // You can add your middleware logic here.
-  // For now, it just continues to the next middleware or the requested page.
+  const path = request.nextUrl.pathname;
+  if (!path.startsWith("/admin")) return NextResponse.next();
+  if (ADMIN_PUBLIC.some((p) => path === p || path.startsWith(p + "?"))) return NextResponse.next();
+
+  const token = request.cookies.get("admin_token")?.value;
+  if (!token && (path === "/admin" || path === "/admin/" || path.startsWith("/admin/dashboard"))) {
+    const login = new URL("/admin/login", request.url);
+    login.searchParams.set("from", path);
+    return NextResponse.redirect(login);
+  }
   return NextResponse.next();
 }
 
-// See "Matching Paths" below to learn more
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
-  ],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };
 
 

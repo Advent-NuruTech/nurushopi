@@ -95,7 +95,7 @@ export default function ControlPanel() {
             Manage all your uploaded products easily.
           </p>
         </div>
-        <Link href="/uploadproduct">
+        <Link href="/admin/dashboard/uploadproduct">
           <Button className="flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg shadow">
             <Plus className="w-4 h-4" />
             Add Product

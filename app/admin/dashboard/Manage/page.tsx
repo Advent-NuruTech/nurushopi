@@ -10,11 +10,11 @@ type LinkItem = {
 export default function ManagementPage() {
   // 🔹 List of management links
   const [links] = useState<LinkItem[]>([
-    { name: "Upload Banner", href: "/upload-banner" },
+    { name: "Upload Banner", href: "/admin/dashboard/upload-banner" },
     { name: "Upload Products Video", href: "/uploadproduct" },
-    { name: "Control", href: "/control" },
-    { name: "Received Contact Messages", href: "/received-contact" },
-    { name: "Received Orders", href: "/received" },
+    { name: "Control", href: "/admin/dashboard/control" },
+    { name: "Received Contact Messages", href: "/admin/dashboard/received-contact" },
+    { name: "Received Orders", href: "/admin/dashboard/received" },
   ]);
 
   return (

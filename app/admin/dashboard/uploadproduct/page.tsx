@@ -67,7 +67,7 @@ export default function UploadProductPage() {
   // 🔒 Redirect to login if not signed in
   useEffect(() => {
     if (!loadingAuth && !user) {
-      window.location.href = "/auth/login?redirectTo=/uploadproduct";
+      window.location.href = "/auth/login?redirectTo=/admin/dashboard/uploadproduct";
     }
   }, [loadingAuth, user]);
 

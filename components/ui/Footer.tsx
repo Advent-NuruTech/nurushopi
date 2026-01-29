@@ -135,8 +135,8 @@ export default function Footer() {
               © {currentYear} <span className="font-semibold text-slate-600 dark:text-gray-400">NuruShop</span> — Health & Truth. All Rights Reserved.
             </p>
             <div className="flex gap-6">
-              <a href="privacy" className="hover:text-green-600 dark:hover:text-green-500 transition-colors">Privacy Policy</a>
-              <a href="terms" className="hover:text-green-600 dark:hover:text-green-500 transition-colors">Terms of Service</a>
+              <a href="/privacy" className="hover:text-green-600 dark:hover:text-green-500 transition-colors">Privacy Policy</a>
+              <a href="/terms" className="hover:text-green-600 dark:hover:text-green-500 transition-colors">Terms of Service</a>
               <a href="" className="hover:text-green-600 dark:hover:text-green-500 transition-colors">Shipping Policy</a>
             </div>
           </div>

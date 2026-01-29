@@ -37,7 +37,7 @@ export default function BannersTab() {
       <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
         <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Banners</h2>
         <Link 
-          href="//admin/dashboard/upload/upload-banner"
+          href="/admin/dashboard/upload-banner"
           
           
           className="px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium"

@@ -5,6 +5,8 @@ import ProductCard from "./ProductCard";
 import { Button } from "@/components/ui/button";
 import { Share2 } from "lucide-react";
 import { Product } from "@/lib/types";
+import { formatPrice } from "@/lib/formatPrice";
+import { getSellingPrice } from "@/lib/pricing";
 
 interface ShareableProductCardProps {
   product: Product;
@@ -14,9 +16,10 @@ export default function ShareableProductCard({ product }: ShareableProductCardPr
   // ✅ Handle product sharing
   const handleShare = async () => {
     const productUrl = `${window.location.origin}/products/${product.id}`;
+    const sellingPrice = getSellingPrice(product);
     const shareData = {
       title: product.name,
-      text: `${product.name} - KSh ${product.price}\n${
+      text: `${product.name} - ${formatPrice(sellingPrice)}\n${
         product.shortDescription || "Check out this great product from NuruShop!"
       }`,
       url: productUrl,

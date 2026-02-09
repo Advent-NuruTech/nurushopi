@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { formatPrice } from "@/lib/formatPrice";
 import { formatCategoryLabel } from "@/lib/categoryUtils";
+import { getDiscountPercent, getOriginalPrice, getSellingPrice } from "@/lib/pricing";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +13,8 @@ interface RawProduct {
   id: string;
   name: string;
   price: number;
+  originalPrice?: number;
+  sellingPrice?: number;
   image?: string;
   images?: string[];
   category?: string;
@@ -24,6 +27,8 @@ interface Product {
   id: string;
   name: string;
   price: number;
+  originalPrice?: number;
+  sellingPrice?: number;
   imageUrl: string;
   images?: string[];
   category: string;
@@ -37,6 +42,7 @@ export default async function ShopPage({
   searchParams?: { category?: string };
 }) {
   let products: Product[] = [];
+  let allProducts: Product[] = [];
   const selectedCategory = searchParams?.category
     ? decodeURIComponent(String(searchParams.category)).toLowerCase().trim()
     : "";
@@ -58,7 +64,7 @@ export default async function ShopPage({
     }
 
     // Map Firestore data to Product type
-    products = rawProducts
+    allProducts = rawProducts
       .map((p: RawProduct) => {
         let createdAt: number | string | null = null;
 
@@ -81,7 +87,12 @@ export default async function ShopPage({
         return {
           id: p.id,
           name: p.name,
-          price: p.price,
+          price: Number(p.sellingPrice ?? p.price ?? 0),
+          sellingPrice: Number(p.sellingPrice ?? p.price ?? 0),
+          originalPrice:
+            typeof p.originalPrice === "number" && Number.isFinite(p.originalPrice)
+              ? p.originalPrice
+              : undefined,
           imageUrl: p.image || "/images/placeholder.png",
           images: p.images || (p.image ? [p.image] : []),
           category: p.category || "Uncategorized",
@@ -96,11 +107,11 @@ export default async function ShopPage({
         return timeB - timeA; // Descending order (newest first)
       });
 
-    if (selectedCategory) {
-      products = products.filter(
-        (p) => (p.category || "").toLowerCase() === selectedCategory
-      );
-    }
+    products = selectedCategory
+      ? allProducts.filter(
+          (p) => (p.category || "").toLowerCase() === selectedCategory
+        )
+      : allProducts;
 
   } catch (error) {
     console.error("Error loading products:", error);
@@ -115,6 +126,12 @@ export default async function ShopPage({
       </div>
     );
   }
+
+  const suggestions = selectedCategory
+    ? allProducts
+        .filter((p) => (p.category || "").toLowerCase() !== selectedCategory)
+        .slice(0, 8)
+    : [];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
@@ -143,6 +160,9 @@ export default async function ShopPage({
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
           {products.map((product) => {
             const mainImage = product.images?.[0] || product.imageUrl || "/images/placeholder.png";
+            const discountPercent = getDiscountPercent(product);
+            const originalPrice = getOriginalPrice(product);
+            const sellingPrice = getSellingPrice(product);
             
             return (
               <Link
@@ -163,21 +183,28 @@ export default async function ShopPage({
                     />
                   </div>
                   {/* Category Badge */}
-                  <div className="absolute top-2 left-2 sm:top-3 sm:left-3">
-                    <span className="px-2 py-1 sm:px-3 sm:py-1 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm text-xs font-semibold text-gray-800 dark:text-gray-200 rounded-full truncate max-w-[100px]">
-                      {product.category}
-                    </span>
-                  </div>
-                  {/* New Badge for recent products */}
-                  {product.createdAt && 
-                    typeof product.createdAt === 'number' && 
-                    Date.now() - product.createdAt < 7 * 24 * 60 * 60 * 1000 && (
-                    <div className="absolute top-2 right-2 sm:top-3 sm:right-3">
-                      <span className="px-2 py-1 sm:px-3 sm:py-1 bg-green-500 text-white text-xs font-semibold rounded-full">
-                        NEW
+                  {!selectedCategory && (
+                    <div className="absolute top-2 left-2 sm:top-3 sm:left-3">
+                      <span className="px-2 py-1 sm:px-3 sm:py-1 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm text-xs font-semibold text-gray-800 dark:text-gray-200 rounded-full truncate max-w-[100px]">
+                        {product.category}
                       </span>
                     </div>
                   )}
+                  <div className="absolute top-2 right-2 sm:top-3 sm:right-3 flex flex-col items-end gap-2">
+                    {discountPercent && (
+                      <span className="px-2 py-1 sm:px-3 sm:py-1 bg-red-600 text-white text-xs font-semibold rounded-full">
+                        {discountPercent}% OFF
+                      </span>
+                    )}
+                    {/* New Badge for recent products */}
+                    {product.createdAt && 
+                      typeof product.createdAt === 'number' && 
+                      Date.now() - product.createdAt < 7 * 24 * 60 * 60 * 1000 && (
+                        <span className="px-2 py-1 sm:px-3 sm:py-1 bg-green-500 text-white text-xs font-semibold rounded-full">
+                          NEW
+                        </span>
+                    )}
+                  </div>
                 </div>
 
                 {/* Product Info */}
@@ -189,9 +216,16 @@ export default async function ShopPage({
                   {/* Price Section */}
                   <div className="mt-auto">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                      <span className="text-lg sm:text-xl md:text-2xl font-bold text-blue-600 dark:text-blue-400">
-                        {formatPrice(product.price)}
-                      </span>
+                      <div className="flex flex-col">
+                        {discountPercent && originalPrice && (
+                          <span className="text-xs text-gray-400 line-through">
+                            {formatPrice(originalPrice)}
+                          </span>
+                        )}
+                        <span className="text-lg sm:text-xl md:text-2xl font-bold text-blue-600 dark:text-blue-400">
+                          {formatPrice(sellingPrice)}
+                        </span>
+                      </div>
                       {/* View Button - Hidden on mobile, shown on hover for larger screens */}
                       <button className="hidden sm:block opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-600 dark:bg-blue-500 text-white text-xs sm:text-sm font-semibold rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 whitespace-nowrap">
                         View Details
@@ -205,6 +239,74 @@ export default async function ShopPage({
             );
           })}
         </div>
+
+        {selectedCategory && suggestions.length > 0 && (
+          <div className="mt-12">
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
+              You may also like
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+              {suggestions.map((product) => {
+                const mainImage = product.images?.[0] || product.imageUrl || "/images/placeholder.png";
+                const discountPercent = getDiscountPercent(product);
+                const originalPrice = getOriginalPrice(product);
+                const sellingPrice = getSellingPrice(product);
+                return (
+                  <Link
+                    key={product.id}
+                    href={`/products/${product.slug || product.id}`}
+                    className="group bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-sm dark:shadow-gray-900 hover:shadow-lg dark:hover:shadow-gray-700 transition-all duration-300 overflow-hidden border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-500 flex flex-col h-full"
+                  >
+                    <div className="relative w-full pt-[100%] overflow-hidden bg-gray-100 dark:bg-gray-700">
+                      <div className="absolute inset-0">
+                        <Image
+                          src={mainImage}
+                          alt={product.name}
+                          fill
+                          className="object-contain p-3 group-hover:scale-105 transition-transform duration-300"
+                          sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+                        />
+                      </div>
+                      <div className="absolute top-2 left-2 sm:top-3 sm:left-3">
+                        <span className="px-2 py-1 sm:px-3 sm:py-1 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm text-xs font-semibold text-gray-800 dark:text-gray-200 rounded-full truncate max-w-[100px]">
+                          {product.category}
+                        </span>
+                      </div>
+                      {discountPercent && (
+                        <div className="absolute top-2 right-2 sm:top-3 sm:right-3">
+                          <span className="px-2 py-1 sm:px-3 sm:py-1 bg-red-600 text-white text-xs font-semibold rounded-full">
+                            {discountPercent}% OFF
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="p-3 sm:p-4 flex flex-col flex-1">
+                      <h3 className="font-semibold text-gray-800 dark:text-gray-200 text-sm sm:text-base md:text-lg mb-2 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors min-h-[2.5em]">
+                        {product.name}
+                      </h3>
+                      <div className="mt-auto">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <div className="flex flex-col">
+                            {discountPercent && originalPrice && (
+                              <span className="text-xs text-gray-400 line-through">
+                                {formatPrice(originalPrice)}
+                              </span>
+                            )}
+                            <span className="text-lg sm:text-xl md:text-2xl font-bold text-blue-600 dark:text-blue-400">
+                              {formatPrice(sellingPrice)}
+                            </span>
+                          </div>
+                          <span className="sm:hidden text-xs text-gray-500 dark:text-gray-400 text-right">Tap to view →</span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Empty State */}
         {products.length === 0 && (

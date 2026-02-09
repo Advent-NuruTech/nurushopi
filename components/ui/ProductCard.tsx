@@ -8,6 +8,8 @@ import { Product } from "@/lib/types";
 import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { formatPrice } from "@/lib/formatPrice";
+import { getDiscountPercent, getOriginalPrice, getSellingPrice } from "@/lib/pricing";
 
 export default function ProductCard({ product }: { product: Product }) {
   const [mainImage, setMainImage] = useState<string>("");
@@ -20,12 +22,16 @@ export default function ProductCard({ product }: { product: Product }) {
     }
   }, [product]);
 
+  const sellingPrice = getSellingPrice(product);
+  const originalPrice = getOriginalPrice(product);
+  const discountPercent = getDiscountPercent(product);
+
   // ✅ Handle add to cart
   const handleAddToCart = () => {
     addToCart({
       id: product.id,
       name: product.name,
-      price: product.price,
+      price: sellingPrice,
       quantity: 1,
       image: mainImage,
     });
@@ -43,8 +49,13 @@ export default function ProductCard({ product }: { product: Product }) {
     <motion.div
       whileHover={{ scale: 1.03 }}
       transition={{ duration: 0.3 }}
-      className="bg-white dark:bg-gray-900 rounded-xl shadow-sm hover:shadow-md flex flex-col overflow-hidden transition-all duration-300 w-full h-full"
+      className="relative bg-white dark:bg-gray-900 rounded-xl shadow-sm hover:shadow-md flex flex-col overflow-hidden transition-all duration-300 w-full h-full"
     >
+      {discountPercent && (
+        <div className="absolute top-2 right-2 z-10 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded-full">
+          {discountPercent}% OFF
+        </div>
+      )}
       {/* ✅ Product Link */}
       <Link href={`/products/${product.id}`} className="flex-grow block">
         {/* ✅ Product Image */}
@@ -72,9 +83,16 @@ export default function ProductCard({ product }: { product: Product }) {
 
       {/* ✅ Price and Add Button */}
       <div className="flex items-center justify-between p-3 border-t border-gray-100 dark:border-gray-800">
-        <p className="text-blue-600 font-bold">
-          KSh {product.price.toLocaleString()}
-        </p>
+        <div className="flex flex-col">
+          {discountPercent && originalPrice && (
+            <span className="text-xs text-gray-400 line-through">
+              {formatPrice(originalPrice)}
+            </span>
+          )}
+          <span className="text-blue-600 font-bold">
+            {formatPrice(sellingPrice)}
+          </span>
+        </div>
 
         <Button
           size="sm"

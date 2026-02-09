@@ -32,7 +32,12 @@ export async function GET(request: Request) {
       return {
         id: d.id,
         name: data.name,
-        price: Number(data.price ?? 0),
+        price: Number(data.sellingPrice ?? data.price ?? 0),
+        sellingPrice: Number(data.sellingPrice ?? data.price ?? 0),
+        originalPrice:
+          typeof data.originalPrice === "number" && Number.isFinite(data.originalPrice)
+            ? Number(data.originalPrice)
+            : undefined,
         category: data.category ?? "",
         description: data.description ?? "",
         shortDescription: data.shortDescription ?? "",
@@ -62,22 +67,26 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { name, price, category, description, shortDescription, images } = body as {
+    const { name, price, sellingPrice, originalPrice, category, description, shortDescription, images } = body as {
       name?: string;
       price?: number;
+      sellingPrice?: number;
+      originalPrice?: number | null;
       category?: string;
       description?: string;
       shortDescription?: string;
       images?: string[];
     };
-    if (!name || price == null) {
+    const finalPrice = sellingPrice ?? price;
+    if (!name || finalPrice == null) {
       return NextResponse.json({ error: "name and price required" }, { status: 400 });
     }
 
     const imgList = Array.isArray(images) ? images.slice(0, 5) : [];
-    await addDoc(collection(db, "products"), {
+    const payload: Record<string, unknown> = {
       name: String(name),
-      price: Number(price),
+      price: Number(finalPrice),
+      sellingPrice: Number(finalPrice),
       category: String(category ?? "").toLowerCase() || "other",
       description: String(description ?? ""),
       shortDescription: String(shortDescription ?? ""),
@@ -85,7 +94,11 @@ export async function POST(request: Request) {
       imageUrl: imgList[0] ?? "",
       createdBy: admin.adminId,
       createdAt: serverTimestamp(),
-    });
+    };
+    if (typeof originalPrice === "number" && Number.isFinite(originalPrice) && originalPrice > 0) {
+      payload.originalPrice = Number(originalPrice);
+    }
+    await addDoc(collection(db, "products"), payload);
     return NextResponse.json({ success: true });
   } catch (e) {
     console.error("Admin product create error:", e);
@@ -100,10 +113,12 @@ export async function PUT(request: Request) {
 
   try {
     const body = await request.json();
-    const { id, name, price, category, description, shortDescription, images } = body as {
+    const { id, name, price, sellingPrice, originalPrice, category, description, shortDescription, images } = body as {
       id?: string;
       name?: string;
       price?: number;
+      sellingPrice?: number;
+      originalPrice?: number | null;
       category?: string;
       description?: string;
       shortDescription?: string;
@@ -123,7 +138,19 @@ export async function PUT(request: Request) {
 
     const updates: Record<string, unknown> = {};
     if (name !== undefined) updates.name = String(name);
-    if (price !== undefined) updates.price = Number(price);
+    if (price !== undefined) {
+      updates.price = Number(price);
+      updates.sellingPrice = Number(price);
+    }
+    if (sellingPrice !== undefined) {
+      updates.price = Number(sellingPrice);
+      updates.sellingPrice = Number(sellingPrice);
+    }
+    if (originalPrice === null) {
+      updates.originalPrice = null;
+    } else if (typeof originalPrice === "number" && Number.isFinite(originalPrice) && originalPrice > 0) {
+      updates.originalPrice = Number(originalPrice);
+    }
     if (category !== undefined) updates.category = String(category).toLowerCase();
     if (description !== undefined) updates.description = String(description);
     if (shortDescription !== undefined) updates.shortDescription = String(shortDescription);

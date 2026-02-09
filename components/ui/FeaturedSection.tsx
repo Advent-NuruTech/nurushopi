@@ -7,6 +7,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
 import { formatCategoryLabel } from "@/lib/categoryUtils";
+import { formatPrice } from "@/lib/formatPrice";
+import { getDiscountPercent, getOriginalPrice, getSellingPrice } from "@/lib/pricing";
 
 interface Product {
   id: string;
@@ -14,6 +16,8 @@ interface Product {
   image: string;
   category: string;
   price: number;
+  originalPrice?: number;
+  sellingPrice?: number;
   
   shortDescription?: string;
   description?: string;
@@ -70,10 +74,11 @@ export default function FeaturedSection({ products, categories = [] }: FeaturedS
   }, []);
 
   const handleAddToCart = (product: Product) => {
+    const sellingPrice = getSellingPrice(product);
     addToCart({
       id: product.id,
       name: product.name,
-      price: product.price,
+      price: sellingPrice,
       quantity: 1,
       image: product.image,
     });
@@ -103,53 +108,70 @@ export default function FeaturedSection({ products, categories = [] }: FeaturedS
 
                 {/* Product Grid */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
-                  {group.items.map((item) => (
-                    <motion.div
-                      key={item.id}
-                      whileHover={{ scale: 1.03 }}
-                      transition={{ duration: 0.3 }}
-                      className="bg-white dark:bg-gray-900 rounded-xl shadow-md dark:shadow-gray-700 hover:shadow-lg dark:hover:shadow-gray-600 flex flex-col overflow-hidden transition-all duration-300"
-                    >
-                      <Link href={`/products/${item.id}`} className="flex-grow block">
-                        <div className="relative w-full h-40 sm:h-56 bg-white dark:bg-gray-800">
-                          <Image
-                            src={item.image}
-                            alt={item.name}
-                            fill
-                            className="object-contain"
-                            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
-                          />
-                        </div>
+                  {group.items.map((item) => {
+                    const discountPercent = getDiscountPercent(item);
+                    const originalPrice = getOriginalPrice(item);
+                    const sellingPrice = getSellingPrice(item);
+                    return (
+                      <motion.div
+                        key={item.id}
+                        whileHover={{ scale: 1.03 }}
+                        transition={{ duration: 0.3 }}
+                        className="relative bg-white dark:bg-gray-900 rounded-xl shadow-md dark:shadow-gray-700 hover:shadow-lg dark:hover:shadow-gray-600 flex flex-col overflow-hidden transition-all duration-300"
+                      >
+                        {discountPercent && (
+                          <div className="absolute top-2 right-2 z-10 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                            {discountPercent}% OFF
+                          </div>
+                        )}
+                        <Link href={`/products/${item.id}`} className="flex-grow block">
+                          <div className="relative w-full h-40 sm:h-56 bg-white dark:bg-gray-800">
+                            <Image
+                              src={item.image}
+                              alt={item.name}
+                              fill
+                              className="object-contain"
+                              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+                            />
+                          </div>
 
-                        <div className="p-3 text-center">
-                          <h4 className="font-semibold text-black dark:text-white text-sm sm:text-base line-clamp-1">
-                            {item.name}
-                          </h4>
-                          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
-                            {item.shortDescription ||
-                              "A premium item to uplift your faith and wellbeing."}
-                          </p>
-                        </div>
-                      </Link>
+                          <div className="p-3 text-center">
+                            <h4 className="font-semibold text-black dark:text-white text-sm sm:text-base line-clamp-1">
+                              {item.name}
+                            </h4>
+                            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
+                              {item.shortDescription ||
+                                "A premium item to uplift your faith and wellbeing."}
+                            </p>
+                          </div>
+                        </Link>
 
-                      {/* Price + Add Button */}
-                      <div className="flex justify-between items-center px-3 pb-3">
-                        <p className="text-blue-600 dark:text-blue-400 font-bold text-sm">
-                          KSh {item.price.toLocaleString()}
-                        </p>
-                        <Button
-                          size="sm"
-                          className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleAddToCart(item);
-                          }}
-                        >
-                          +
-                        </Button>
-                      </div>
-                    </motion.div>
-                  ))}
+                        {/* Price + Add Button */}
+                        <div className="flex justify-between items-center px-3 pb-3">
+                          <div className="flex flex-col">
+                            {discountPercent && originalPrice && (
+                              <span className="text-xs text-gray-400 line-through">
+                                {formatPrice(originalPrice)}
+                              </span>
+                            )}
+                            <span className="text-blue-600 dark:text-blue-400 font-bold text-sm">
+                              {formatPrice(sellingPrice)}
+                            </span>
+                          </div>
+                          <Button
+                            size="sm"
+                            className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAddToCart(item);
+                            }}
+                          >
+                            +
+                          </Button>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
                 </div>
               </div>
             )

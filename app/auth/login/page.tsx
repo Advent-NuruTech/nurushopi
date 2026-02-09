@@ -30,6 +30,9 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirectTo") || "/";
+  const signupHref = redirectTo
+    ? { pathname: "/auth/signup", query: { redirectTo } }
+    : { pathname: "/auth/signup" };
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -114,6 +117,24 @@ function LoginForm() {
             onCloseError={() => setError("")}
             onCloseSuccess={() => setSuccess("")}
           />
+{/* 
+<motion.button
+  onClick={handleGoogleLogin}
+  disabled={loading}
+  whileHover={{ scale: 1.02 }}
+  whileTap={{ scale: 0.98 }}
+  className="w-full border border-gray-300 py-3 rounded-lg font-medium flex items-center justify-center gap-3 hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+>
+  <FcGoogle className="w-5 h-5" />
+  Continue with Google
+</motion.button>
+
+
+       <div className="my-6 flex items-center">
+            <div className="flex-1 h-px bg-gray-300"></div>
+            <span className="mx-4 text-gray-500 text-sm font-medium">OR</span>
+            <div className="flex-1 h-px bg-gray-300"></div>
+          </div>*/}
 
           <form onSubmit={handleEmailLogin}>
             <div className="mb-4">
@@ -193,28 +214,12 @@ function LoginForm() {
             </motion.button>
           </form>
 
-          <div className="my-6 flex items-center">
-            <div className="flex-1 h-px bg-gray-300"></div>
-            <span className="mx-4 text-gray-500 text-sm font-medium">OR</span>
-            <div className="flex-1 h-px bg-gray-300"></div>
-          </div>
-
-          <motion.button
-            onClick={handleGoogleLogin}
-            disabled={loading}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="w-full border border-gray-300 py-3 rounded-lg font-medium flex items-center justify-center gap-3 hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <FcGoogle className="w-5 h-5" />
-            Continue with Google
-          </motion.button>
-
+      
           <div className="mt-6 text-center">
             <p className="text-gray-600">
               Don&apos;t have an account?{" "}
               <Link
-                href="/auth/signup"
+                href={signupHref}
                 className="text-blue-600 hover:text-blue-800 font-semibold"
               >
                 Sign up

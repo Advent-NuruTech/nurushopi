@@ -7,6 +7,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
 import { formatCategoryLabel } from "@/lib/categoryUtils";
+import { formatPrice } from "@/lib/formatPrice";
+import { getDiscountPercent, getOriginalPrice, getSellingPrice } from "@/lib/pricing";
 
 interface Product {
   id: string;
@@ -14,6 +16,8 @@ interface Product {
   image: string;
   category: string;
   price: number;
+  originalPrice?: number;
+  sellingPrice?: number;
   shortDescription?: string;
   description?: string;
 }
@@ -51,10 +55,11 @@ export default function FeaturedSection({ products, categories = [] }: FeaturedS
     .filter((group) => group.items.length > 0);
 
   const handleAddToCart = (product: Product) => {
+    const sellingPrice = getSellingPrice(product);
     addToCart({
       id: product.id,
       name: product.name,
-      price: product.price,
+      price: sellingPrice,
       quantity: 1,
       image: product.image,
     });
@@ -195,59 +200,76 @@ export default function FeaturedSection({ products, categories = [] }: FeaturedS
               {[
                 ...featuredByCategory[currentCategory].items,
                 ...featuredByCategory[currentCategory].items,
-              ].map((item, idx) => (
-                <motion.div
-                  key={`${item.id}-${idx}`}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  whileHover={{ scale: 1.05 }}
-                  className="min-w-[180px] sm:min-w-[200px] 
-                    bg-white dark:bg-gray-900 
-                    rounded-xl shadow-md dark:shadow-gray-800 
-                    hover:shadow-lg dark:hover:shadow-gray-700 
-                    flex flex-col overflow-hidden transition-all snap-start"
-                >
-                  <Link href={`/products/${item.id}`} className="flex-grow block">
-                    <div className="relative w-full h-40 sm:h-44 bg-gray-100 dark:bg-gray-800 rounded-t-xl overflow-hidden">
-                      <Image
-                        src={item.image || "/assets/logo.jpg"}
-                        alt={item.name}
-                        fill
-                        className="object-contain"
-                        placeholder="blur"
-                        blurDataURL="/assets/logo.jpg"
-                      />
-                    </div>
+              ].map((item, idx) => {
+                const discountPercent = getDiscountPercent(item);
+                const originalPrice = getOriginalPrice(item);
+                const sellingPrice = getSellingPrice(item);
+                return (
+                  <motion.div
+                    key={`${item.id}-${idx}`}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    whileHover={{ scale: 1.05 }}
+                    className="relative min-w-[180px] sm:min-w-[200px] 
+                      bg-white dark:bg-gray-900 
+                      rounded-xl shadow-md dark:shadow-gray-800 
+                      hover:shadow-lg dark:hover:shadow-gray-700 
+                      flex flex-col overflow-hidden transition-all snap-start"
+                  >
+                    {discountPercent && (
+                      <div className="absolute top-2 right-2 z-10 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                        {discountPercent}% OFF
+                      </div>
+                    )}
+                    <Link href={`/products/${item.id}`} className="flex-grow block">
+                      <div className="relative w-full h-40 sm:h-44 bg-gray-100 dark:bg-gray-800 rounded-t-xl overflow-hidden">
+                        <Image
+                          src={item.image || "/assets/logo.jpg"}
+                          alt={item.name}
+                          fill
+                          className="object-contain"
+                          placeholder="blur"
+                          blurDataURL="/assets/logo.jpg"
+                        />
+                      </div>
 
-                    <div className="p-2 sm:p-3 text-center">
-                      <h4 className="font-semibold text-gray-800 dark:text-gray-100 text-sm line-clamp-1">
-                        {item.name}
-                      </h4>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
-                        {item.shortDescription ||
-                          "A premium item designed to uplift your body, mind, and spirit."}
-                      </p>
-                    </div>
-                  </Link>
+                      <div className="p-2 sm:p-3 text-center">
+                        <h4 className="font-semibold text-gray-800 dark:text-gray-100 text-sm line-clamp-1">
+                          {item.name}
+                        </h4>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
+                          {item.shortDescription ||
+                            "A premium item designed to uplift your body, mind, and spirit."}
+                        </p>
+                      </div>
+                    </Link>
 
-                  <div className="flex items-center justify-between px-2 sm:px-3 pb-2">
-                    <p className="text-blue-600 dark:text-blue-400 font-bold text-sm">
-                      KSh {item.price.toLocaleString()}
-                    </p>
-                    <Button
-                      size="sm"
-                      className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg"
-                      onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                        e.preventDefault();
-                        handleAddToCart(item);
-                      }}
-                    >
-                      +
-                    </Button>
-                  </div>
-                </motion.div>
-              ))}
+                    <div className="flex items-center justify-between px-2 sm:px-3 pb-2">
+                      <div className="flex flex-col">
+                        {discountPercent && originalPrice && (
+                          <span className="text-xs text-gray-400 line-through">
+                            {formatPrice(originalPrice)}
+                          </span>
+                        )}
+                        <span className="text-blue-600 dark:text-blue-400 font-bold text-sm">
+                          {formatPrice(sellingPrice)}
+                        </span>
+                      </div>
+                      <Button
+                        size="sm"
+                        className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg"
+                        onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                          e.preventDefault();
+                          handleAddToCart(item);
+                        }}
+                      >
+                        +
+                      </Button>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
           </motion.div>
         </AnimatePresence>

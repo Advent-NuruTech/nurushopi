@@ -20,6 +20,7 @@ import {
 import { formatPrice } from "@/lib/formatPrice";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
+import { getDiscountPercent, getOriginalPrice, getSellingPrice } from "@/lib/pricing";
 
 /* =========================
    TYPES
@@ -28,6 +29,8 @@ interface Product {
   id: string;
   name: string;
   price: number;
+  originalPrice?: number;
+  sellingPrice?: number;
   shortDescription?: string;
   description?: string;
   category: string;
@@ -89,7 +92,12 @@ export default function ProductDetailPage({
         const prod: Product = {
           id: snap.id,
           name: String(d.name ?? "Unnamed product"),
-          price: Number(d.price ?? 0),
+          price: Number(d.sellingPrice ?? d.price ?? 0),
+          sellingPrice: Number(d.sellingPrice ?? d.price ?? 0),
+          originalPrice:
+            typeof d.originalPrice === "number" && Number.isFinite(d.originalPrice)
+              ? d.originalPrice
+              : undefined,
           shortDescription: d.shortDescription ?? "",
           description: d.description ?? "",
           category: String(d.category ?? "general"),
@@ -117,7 +125,12 @@ export default function ProductDetailPage({
               return {
                 id: r.id,
                 name: String(rd.name ?? ""),
-                price: Number(rd.price ?? 0),
+                price: Number(rd.sellingPrice ?? rd.price ?? 0),
+                sellingPrice: Number(rd.sellingPrice ?? rd.price ?? 0),
+                originalPrice:
+                  typeof rd.originalPrice === "number" && Number.isFinite(rd.originalPrice)
+                    ? rd.originalPrice
+                    : undefined,
                 category: String(rd.category ?? "general"),
                 images:
                   Array.isArray(rd.images) && rd.images.length > 0
@@ -147,10 +160,11 @@ export default function ProductDetailPage({
   const handleAddToCart = () => {
     if (!product) return;
 
+    const sellingPrice = getSellingPrice(product);
     addToCart({
       id: product.id,
       name: product.name,
-      price: product.price,
+      price: sellingPrice,
       quantity: 1,
       image: mainImage,
     });
@@ -177,6 +191,10 @@ export default function ProductDetailPage({
       </div>
     );
   }
+
+  const discountPercent = getDiscountPercent(product);
+  const originalPrice = getOriginalPrice(product);
+  const sellingPrice = getSellingPrice(product);
 
   /* =========================
      UI
@@ -223,8 +241,20 @@ export default function ProductDetailPage({
 
         {/* ================= DETAILS SECTION ================= */}
         <aside className="space-y-6">
-          <div className="text-3xl font-bold text-blue-700 dark:text-blue-400">
-            {formatPrice(product.price)}
+          <div className="flex items-end gap-3">
+            {discountPercent && originalPrice && (
+              <span className="text-lg text-gray-400 line-through">
+                {formatPrice(originalPrice)}
+              </span>
+            )}
+            <div className="text-3xl font-bold text-blue-700 dark:text-blue-400">
+              {formatPrice(sellingPrice)}
+            </div>
+            {discountPercent && (
+              <span className="px-2 py-1 rounded-full bg-red-600 text-white text-xs font-semibold">
+                {discountPercent}% OFF
+              </span>
+            )}
           </div>
 
           <div className="flex gap-3">
@@ -290,30 +320,47 @@ export default function ProductDetailPage({
           </h2>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
-            {relatedProducts.map((rel) => (
-              <Link
-                key={rel.id}
-                href={`/products/${rel.id}` as Route}
-                className="border rounded-md p-3 hover:shadow-md transition"
-              >
-                <div className="relative w-full h-40 rounded overflow-hidden">
-                  <Image
-                    src={rel.images[0]}
-                    alt={rel.name}
-                    fill
-                    className="object-contain p-2"
-                  />
-                </div>
+            {relatedProducts.map((rel) => {
+              const discountPercent = getDiscountPercent(rel);
+              const originalPrice = getOriginalPrice(rel);
+              const sellingPrice = getSellingPrice(rel);
+              return (
+                <Link
+                  key={rel.id}
+                  href={`/products/${rel.id}` as Route}
+                  className="relative border rounded-md p-3 hover:shadow-md transition"
+                >
+                  {discountPercent && (
+                    <div className="absolute top-2 right-2 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                      {discountPercent}% OFF
+                    </div>
+                  )}
+                  <div className="relative w-full h-40 rounded overflow-hidden">
+                    <Image
+                      src={rel.images[0]}
+                      alt={rel.name}
+                      fill
+                      className="object-contain p-2"
+                    />
+                  </div>
 
-                <h3 className="mt-2 font-medium text-sm">
-                  {rel.name}
-                </h3>
+                  <h3 className="mt-2 font-medium text-sm">
+                    {rel.name}
+                  </h3>
 
-                <p className="text-blue-600 font-semibold text-sm">
-                  {formatPrice(rel.price)}
-                </p>
-              </Link>
-            ))}
+                  <div className="mt-1">
+                    {discountPercent && originalPrice && (
+                      <span className="text-xs text-gray-400 line-through">
+                        {formatPrice(originalPrice)}
+                      </span>
+                    )}
+                    <p className="text-blue-600 font-semibold text-sm">
+                      {formatPrice(sellingPrice)}
+                    </p>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </section>
       )}

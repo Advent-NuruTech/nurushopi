@@ -31,6 +31,9 @@ function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirectTo") || "/";
+  const loginHref = redirectTo
+    ? { pathname: "/auth/login", query: { redirectTo } }
+    : { pathname: "/auth/login" };
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -225,7 +228,7 @@ function SignupForm() {
               )}
             </motion.button>
           </form>
-
+{/* 
           <div className="my-6 flex items-center">
             <div className="flex-1 h-px bg-gray-300"></div>
             <span className="mx-4 text-gray-500 text-sm font-medium">OR</span>
@@ -241,13 +244,13 @@ function SignupForm() {
           >
             <FcGoogle className="w-5 h-5" />
             Continue with Google
-          </motion.button>
+          </motion.button>   */}
 
           <div className="mt-6 text-center">
             <p className="text-gray-600">
               Already have an account?{" "}
               <Link
-                href="/auth/login"
+                href={loginHref}
                 className="text-blue-600 hover:text-blue-800 font-semibold"
               >
                 Sign in

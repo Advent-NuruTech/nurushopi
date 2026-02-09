@@ -19,6 +19,7 @@ import Image from "next/image";
 interface ProductFormData {
   name: string;
   price: number | "";
+  originalPrice: number | "";
   description: string;
   category: string;
   files: FileList | null;
@@ -34,6 +35,7 @@ export default function UploadProductPage() {
   const [formData, setFormData] = useState<ProductFormData>({
     name: "",
     price: "",
+    originalPrice: "",
     description: "",
     category: "",
     files: null
@@ -137,9 +139,15 @@ export default function UploadProductPage() {
         }
       }
 
+      const originalPriceValue =
+        formData.originalPrice === "" ? undefined : Number(formData.originalPrice);
       const payload = {
         name: formData.name,
         price: Number(formData.price),
+        originalPrice:
+          typeof originalPriceValue === "number" && Number.isFinite(originalPriceValue)
+            ? originalPriceValue
+            : undefined,
         description: formData.description,
         shortDescription: formData.description.slice(0, 160),
         category: formData.category,
@@ -172,6 +180,7 @@ export default function UploadProductPage() {
     setFormData({
       name: "",
       price: "",
+      originalPrice: "",
       description: "",
       category: "",
       files: null
@@ -179,6 +188,19 @@ export default function UploadProductPage() {
     setCategoryInput("");
     setProgress(0);
   };
+
+  const sellingPrice =
+    typeof formData.price === "number" && Number.isFinite(formData.price)
+      ? formData.price
+      : 0;
+  const originalPrice =
+    typeof formData.originalPrice === "number" && Number.isFinite(formData.originalPrice)
+      ? formData.originalPrice
+      : 0;
+  const discountPercent =
+    originalPrice > 0 && sellingPrice > 0 && originalPrice > sellingPrice
+      ? Math.round(((originalPrice - sellingPrice) / originalPrice) * 100)
+      : null;
 
   /* ---------- Remove a specific image ---------- */
   const removeImage = (index: number) => {
@@ -251,7 +273,7 @@ export default function UploadProductPage() {
             <label className={`font-semibold mb-2 block ${
               darkMode ? "text-gray-300" : "text-gray-700"
             }`}>
-              Price (KSh)
+              Selling Price (KSh)
             </label>
             <input
               required
@@ -260,7 +282,7 @@ export default function UploadProductPage() {
               onChange={e =>
                 setFormData({
                   ...formData,
-                  price: Number(e.target.value)
+                  price: e.target.value === "" ? "" : Number(e.target.value)
                 })
               }
               className={`w-full p-3 rounded transition-colors duration-300 ${
@@ -269,6 +291,54 @@ export default function UploadProductPage() {
                   : "border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
               } border focus:outline-none focus:ring-2`}
             />
+            <label className={`font-semibold mb-2 block mt-4 ${
+              darkMode ? "text-gray-300" : "text-gray-700"
+            }`}>
+              Original Price (KSh) <span className="text-xs text-gray-400">(optional)</span>
+            </label>
+            <input
+              type="number"
+              value={formData.originalPrice}
+              onChange={e =>
+                setFormData({
+                  ...formData,
+                  originalPrice: e.target.value === "" ? "" : Number(e.target.value)
+                })
+              }
+              className={`w-full p-3 rounded transition-colors duration-300 ${
+                darkMode 
+                  ? "bg-gray-700 border-gray-600 text-gray-100 focus:border-blue-500 focus:ring-blue-500" 
+                  : "border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+              } border focus:outline-none focus:ring-2`}
+            />
+            <div className="mt-3 flex items-center gap-3 text-sm">
+              {discountPercent ? (
+                <>
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${
+                    darkMode ? "bg-red-900/40 text-red-200" : "bg-red-100 text-red-700"
+                  }`}>
+                    {discountPercent}% OFF
+                  </span>
+                  <span className={darkMode ? "text-gray-300" : "text-gray-600"}>
+                    Discount badge preview
+                  </span>
+                </>
+              ) : (
+                <span className={darkMode ? "text-gray-400" : "text-gray-500"}>
+                  No discount badge
+                </span>
+              )}
+            </div>
+            {discountPercent && (
+              <div className="mt-2 flex items-center gap-2 text-sm">
+                <span className="line-through text-gray-400">
+                  KSh {originalPrice.toLocaleString()}
+                </span>
+                <span className="font-semibold text-blue-600">
+                  KSh {sellingPrice.toLocaleString()}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Category */}

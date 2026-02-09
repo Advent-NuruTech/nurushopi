@@ -20,6 +20,8 @@ interface Product {
   id?: string;
   name: string;
   price: number;
+  sellingPrice?: number;
+  originalPrice?: number | null;
   description?: string;
   image?: string;
   category?: string;
@@ -56,7 +58,8 @@ export async function POST(req: Request) {
   try {
     const body: Product = await req.json();
 
-    if (!body.name || !body.price) {
+    const finalPrice = body.sellingPrice ?? body.price;
+    if (!body.name || finalPrice == null) {
       return NextResponse.json(
         { error: "Missing required fields: name or price" },
         { status: 400 }
@@ -65,10 +68,19 @@ export async function POST(req: Request) {
 
     const productData: Omit<Product, "id"> = {
       ...body,
+      price: Number(finalPrice),
+      sellingPrice: Number(finalPrice),
       name_lowercase: body.name.toLowerCase(),
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
+    if (
+      typeof body.originalPrice === "number" &&
+      Number.isFinite(body.originalPrice) &&
+      body.originalPrice > 0
+    ) {
+      productData.originalPrice = Number(body.originalPrice);
+    }
 
     const docRef = await addDoc(collection(db, "products"), productData);
 
@@ -103,6 +115,24 @@ export async function PUT(req: Request) {
 
     if (updates.name) {
       updates.name_lowercase = updates.name.toLowerCase();
+    }
+
+    if (updates.sellingPrice !== undefined) {
+      updates.price = Number(updates.sellingPrice);
+      updates.sellingPrice = Number(updates.sellingPrice);
+    } else if (updates.price !== undefined) {
+      updates.price = Number(updates.price);
+      updates.sellingPrice = Number(updates.price);
+    }
+
+    if (updates.originalPrice === null) {
+      updates.originalPrice = null;
+    } else if (
+      typeof updates.originalPrice === "number" &&
+      Number.isFinite(updates.originalPrice) &&
+      updates.originalPrice > 0
+    ) {
+      updates.originalPrice = Number(updates.originalPrice);
     }
 
     updates.updatedAt = serverTimestamp();

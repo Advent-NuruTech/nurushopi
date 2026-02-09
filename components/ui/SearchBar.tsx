@@ -20,6 +20,8 @@ interface SearchResult {
   type: "product" | "book" | "remedy";
   category: string;
   price?: number;
+  sellingPrice?: number;
+  originalPrice?: number;
   description?: string;
   image?: string;
 }
@@ -88,6 +90,8 @@ export default function SearchBar({ showSearch, setShowSearch }: SearchBarProps)
             type?: "product" | "book" | "remedy";
             category?: string;
             price?: number;
+            sellingPrice?: number;
+            originalPrice?: number;
             description?: string;
             imageUrl?: string;
             images?: string[];
@@ -100,6 +104,8 @@ export default function SearchBar({ showSearch, setShowSearch }: SearchBarProps)
             type: data.type ?? "product",
             category: data.category ?? "",
             price: data.price,
+            sellingPrice: data.sellingPrice ?? data.price,
+            originalPrice: data.originalPrice,
             description: data.description,
             image:
               data.imageUrl ??
@@ -236,9 +242,9 @@ export default function SearchBar({ showSearch, setShowSearch }: SearchBarProps)
                         </div>
                       )}
 
-                      {result.price && (
+                      {(result.sellingPrice ?? result.price) != null && (
                         <div className="text-sm font-bold text-green-600 mt-1">
-                          {formatPrice(result.price)}
+                          {formatPrice(result.sellingPrice ?? result.price ?? 0)}
                         </div>
                       )}
                     </div>

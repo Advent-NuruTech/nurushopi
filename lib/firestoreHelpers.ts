@@ -24,6 +24,8 @@ export interface Product {
   name: string;
   slug?: string;
   price: number;
+  originalPrice?: number;
+  sellingPrice?: number;
   description: string;
   shortDescription?: string;
   category: string;
@@ -121,10 +123,18 @@ export const getAllProducts = async (): Promise<Product[]> => {
   return snapshot.docs.map((docSnap) => {
     const data = docSnap.data();
     const images = (data.images || []).slice(0, 3);
+    const sellingPrice = Number(data.sellingPrice ?? data.price ?? 0);
+    const originalPriceValue = data.originalPrice;
+    const originalPrice =
+      typeof originalPriceValue === "number" && Number.isFinite(originalPriceValue)
+        ? originalPriceValue
+        : undefined;
     return {
       id: docSnap.id,
       name: data.name,
-      price: Number(data.price || 0),
+      price: sellingPrice,
+      sellingPrice,
+      originalPrice,
       category: data.category,
       shortDescription: data.shortDescription,
       description: data.description,
@@ -149,10 +159,18 @@ export const getProductsByCategory = async (
   return snapshot.docs.map((docSnap) => {
     const data = docSnap.data();
     const images = (data.images || []).slice(0, 3);
+    const sellingPrice = Number(data.sellingPrice ?? data.price ?? 0);
+    const originalPriceValue = data.originalPrice;
+    const originalPrice =
+      typeof originalPriceValue === "number" && Number.isFinite(originalPriceValue)
+        ? originalPriceValue
+        : undefined;
     return {
       id: docSnap.id,
       name: data.name,
-      price: Number(data.price || 0),
+      price: sellingPrice,
+      sellingPrice,
+      originalPrice,
       category: data.category,
       shortDescription: data.shortDescription,
       description: data.description,
@@ -171,10 +189,18 @@ export const getProductById = async (id: string): Promise<Product | null> => {
 
   const data = snap.data();
   const images = (data.images || []).slice(0, 3);
+  const sellingPrice = Number(data.sellingPrice ?? data.price ?? 0);
+  const originalPriceValue = data.originalPrice;
+  const originalPrice =
+    typeof originalPriceValue === "number" && Number.isFinite(originalPriceValue)
+      ? originalPriceValue
+      : undefined;
   return {
     id: snap.id,
     name: data.name,
-    price: Number(data.price || 0),
+    price: sellingPrice,
+    sellingPrice,
+    originalPrice,
     category: data.category,
     shortDescription: data.shortDescription,
     description: data.description,

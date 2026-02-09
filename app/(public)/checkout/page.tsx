@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useCart } from "@/context/CartContext";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, limit, query, orderBy } from "firebase/firestore";
 import Image from "next/image";
@@ -12,6 +12,8 @@ import PhoneInput, { validatePhoneForSubmission } from "@/components/ui/PhoneInp
 
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, User } from "firebase/auth";
+
+export const dynamic = "force-dynamic";
 
 // -------------------- Types --------------------
 type Product = {
@@ -31,9 +33,11 @@ const commonCountries = [
 ];
 
 // -------------------- Checkout Page --------------------
-export default function CheckoutPage() {
+function CheckoutContent() {
   const { cart, total, removeFromCart, clearCart, updateQuantity } = useCart();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const step = searchParams.get("step");
 
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,6 +48,7 @@ export default function CheckoutPage() {
   const [showCountrySuggestions, setShowCountrySuggestions] = useState(false);
 
   const [user, setUser] = useState<User | null>(null);
+  const [authReady, setAuthReady] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -58,9 +63,39 @@ export default function CheckoutPage() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       setUser(u);
+      setAuthReady(true);
     });
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    setFormData((prev) => ({
+      ...prev,
+      email: user.email ?? prev.email,
+      name: prev.name || user.displayName || prev.name,
+    }));
+  }, [user]);
+
+  useEffect(() => {
+    if (authReady && !user) {
+      setShowForm(false);
+    }
+  }, [authReady, user]);
+
+  useEffect(() => {
+    if (!authReady) return;
+    if (!user && step === "details") {
+      router.replace(
+        `/auth/login?redirectTo=${encodeURIComponent("/checkout?step=details")}`
+      );
+      return;
+    }
+
+    if (user && step === "details") {
+      setShowForm(true);
+    }
+  }, [user, step, router, authReady]);
 
   // -------------------- Fetch Related Products --------------------
   useEffect(() => {
@@ -111,9 +146,20 @@ export default function CheckoutPage() {
     country.toLowerCase().includes(formData.country.toLowerCase())
   );
 
+  const redirectToAuth = () => {
+    router.push(
+      `/auth/login?redirectTo=${encodeURIComponent("/checkout?step=details")}`
+    );
+  };
+
   // -------------------- Submit Order --------------------
   const handleSubmitOrder = async () => {
     setErrorMessage("");
+
+    if (!user) {
+      redirectToAuth();
+      return;
+    }
 
     if (cart.length === 0 || total <= 0) {
       setErrorMessage("Your cart is empty. Add items before ordering.");
@@ -287,7 +333,14 @@ export default function CheckoutPage() {
                 Total: <span className="text-blue-700">KSh {total.toFixed(2)}</span>
               </p>
               <button
-                onClick={() => { if (total > 0) setShowForm(true); }}
+                onClick={() => {
+                  if (total <= 0) return;
+                  if (!user) {
+                    redirectToAuth();
+                    return;
+                  }
+                  setShowForm(true);
+                }}
                 className="mt-5 sm:mt-0 bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition"
               >
                 Place Order
@@ -334,7 +387,7 @@ export default function CheckoutPage() {
       )}
 
       {/* Order Form Modal */}
-      {showForm && (
+      {showForm && user && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md shadow-lg">
             <h2 className="text-xl font-semibold mb-4 text-blue-700">
@@ -366,8 +419,12 @@ export default function CheckoutPage() {
                 placeholder="Email (optional)"
                 value={formData.email}
                 onChange={handleChange}
+                readOnly={Boolean(user?.email)}
                 className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               />
+              {user?.email && (
+                <p className="text-xs text-gray-500">Signed in as {user.email}</p>
+              )}
 
               {/* Country with suggestions */}
               <div className="relative">
@@ -467,5 +524,19 @@ export default function CheckoutPage() {
         </div>
       )}
     </main>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center text-gray-500">Loading checkout...</div>
+        </div>
+      }
+    >
+      <CheckoutContent />
+    </Suspense>
   );
 }

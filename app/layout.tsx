@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import { UserProvider } from "@/context/UserContext";
 
 export const metadata = {
+  metadataBase: new URL("https://nurushop.co.ke"),
   title: "NuruShop - Natural Health & Truth Products",
   description:
     "Discover NuruShop’s collection of natural remedies,organic foods, herbal products, and spiritual literature inspired by true health and Bible principles.",

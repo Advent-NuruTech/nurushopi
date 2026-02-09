@@ -11,6 +11,8 @@ interface Product {
   id: string;
   name: string;
   price: number;
+  originalPrice?: number | null;
+  sellingPrice?: number;
   category?: string;
   description?: string;
   shortDescription?: string;
@@ -71,7 +73,7 @@ export default function ProductEditPage() {
       .catch(() => setCategories([]));
   }, []);
 
-  const updateField = (key: keyof Product, value: string | number | string[] | undefined) => {
+  const updateField = (key: keyof Product, value: string | number | string[] | null | undefined) => {
     if (!product) return;
     setProduct({ ...product, [key]: value });
   };
@@ -178,6 +180,19 @@ export default function ProductEditPage() {
   if (loading) return <LoadingSpinner text="Loading product…" />;
   if (!product) return <p className="p-6">Product not found.</p>;
 
+  const sellingPrice =
+    typeof product.price === "number" && Number.isFinite(product.price)
+      ? product.price
+      : 0;
+  const originalPrice =
+    typeof product.originalPrice === "number" && Number.isFinite(product.originalPrice)
+      ? product.originalPrice
+      : 0;
+  const discountPercent =
+    originalPrice > 0 && sellingPrice > 0 && originalPrice > sellingPrice
+      ? Math.round(((originalPrice - sellingPrice) / originalPrice) * 100)
+      : null;
+
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-6">
       <h1 className="text-2xl font-bold">Edit Product</h1>
@@ -194,12 +209,48 @@ export default function ProductEditPage() {
         <input
           className="w-full border p-3 rounded"
           type="number"
-          placeholder="Price"
+          placeholder="Selling Price"
           value={product.price}
           onChange={(e) =>
             updateField("price", Number(e.target.value))
           }
         />
+
+        <input
+          className="w-full border p-3 rounded"
+          type="number"
+          placeholder="Original Price (optional)"
+          value={product.originalPrice ?? ""}
+          onChange={(e) =>
+            updateField(
+              "originalPrice",
+              e.target.value === "" ? null : Number(e.target.value)
+            )
+          }
+        />
+
+        <div className="text-sm text-gray-600 flex items-center gap-3">
+          {discountPercent ? (
+            <>
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                {discountPercent}% OFF
+              </span>
+              <span>Discount badge preview</span>
+            </>
+          ) : (
+            <span className="text-gray-500">No discount badge</span>
+          )}
+        </div>
+        {discountPercent && (
+          <div className="flex items-center gap-2 text-sm">
+            <span className="line-through text-gray-400">
+              KSh {originalPrice.toLocaleString()}
+            </span>
+            <span className="font-semibold text-sky-600">
+              KSh {sellingPrice.toLocaleString()}
+            </span>
+          </div>
+        )}
 
         {/* Category picker */}
         <div className="space-y-2">

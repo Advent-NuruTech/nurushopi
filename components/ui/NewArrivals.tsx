@@ -15,17 +15,23 @@ import {
   QueryDocumentSnapshot,
   DocumentData,
 } from "firebase/firestore";
+import { formatPrice } from "@/lib/formatPrice";
+import { getDiscountPercent, getOriginalPrice, getSellingPrice } from "@/lib/pricing";
 
 interface Product {
   id: string;
   name: string;
   price: number;
+  originalPrice?: number;
+  sellingPrice?: number;
   image: string | null;
 }
 
 interface ProductDoc {
   name: string;
   price: number;
+  sellingPrice?: number;
+  originalPrice?: number;
   images?: string[];
   image?: string;
   imageURL?: string;
@@ -75,10 +81,18 @@ export default function NewArrivals() {
             ? d.imageURL.trim()
             : null;
 
+        const sellingPrice = Number(d.sellingPrice ?? d.price ?? 0);
+        const originalPriceValue = d.originalPrice;
+        const originalPrice =
+          typeof originalPriceValue === "number" && Number.isFinite(originalPriceValue)
+            ? originalPriceValue
+            : undefined;
         return {
           id: doc.id,
           name: d.name,
-          price: d.price,
+          price: sellingPrice,
+          sellingPrice,
+          originalPrice,
           image,
         };
       });
@@ -152,41 +166,58 @@ export default function NewArrivals() {
             ref={scrollRef}
             className="flex gap-6 overflow-x-auto scroll-smooth px-10 pb-4"
           >
-            {rotatedProducts.map((product) => (
-              <motion.div
-                key={product.id}
-                whileHover={{ y: -6 }}
-                transition={{ duration: 0.3 }}
-                className="min-w-[240px] bg-white dark:bg-gray-900 rounded-2xl shadow-md hover:shadow-xl flex-shrink-0 overflow-hidden"
-              >
-                <Link href={`/products/${product.id}`}>
-                  <div className="relative w-full h-52 bg-white dark:bg-gray-800">
-                    {product.image ? (
-                      <Image
-                        src={product.image}
-                        alt={product.name}
-                        fill
-                        className="object-contain p-4"
-                        sizes="240px"
-                      />
-                    ) : (
-                      <div className="flex items-center justify-center h-full text-xs text-gray-400">
-                        No image
-                      </div>
-                    )}
-                  </div>
+            {rotatedProducts.map((product) => {
+              const discountPercent = getDiscountPercent(product);
+              const originalPrice = getOriginalPrice(product);
+              const sellingPrice = getSellingPrice(product);
+              return (
+                <motion.div
+                  key={product.id}
+                  whileHover={{ y: -6 }}
+                  transition={{ duration: 0.3 }}
+                  className="relative min-w-[240px] bg-white dark:bg-gray-900 rounded-2xl shadow-md hover:shadow-xl flex-shrink-0 overflow-hidden"
+                >
+                  {discountPercent && (
+                    <div className="absolute top-2 right-2 z-10 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                      {discountPercent}% OFF
+                    </div>
+                  )}
+                  <Link href={`/products/${product.id}`}>
+                    <div className="relative w-full h-52 bg-white dark:bg-gray-800">
+                      {product.image ? (
+                        <Image
+                          src={product.image}
+                          alt={product.name}
+                          fill
+                          className="object-contain p-4"
+                          sizes="240px"
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center h-full text-xs text-gray-400">
+                          No image
+                        </div>
+                      )}
+                    </div>
 
-                  <div className="p-4 text-center">
-                    <h3 className="font-semibold text-sm line-clamp-1">
-                      {product.name}
-                    </h3>
-                    <p className="text-blue-600 font-bold mt-2 text-sm">
-                      KSh {product.price.toLocaleString()}
-                    </p>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
+                    <div className="p-4 text-center">
+                      <h3 className="font-semibold text-sm line-clamp-1">
+                        {product.name}
+                      </h3>
+                      <div className="mt-2 flex flex-col items-center">
+                        {discountPercent && originalPrice && (
+                          <span className="text-xs text-gray-400 line-through">
+                            {formatPrice(originalPrice)}
+                          </span>
+                        )}
+                        <span className="text-blue-600 font-bold text-sm">
+                          {formatPrice(sellingPrice)}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                </motion.div>
+              );
+            })}
 
             {loading && (
               <div className="min-w-[240px] flex items-center justify-center text-gray-400">

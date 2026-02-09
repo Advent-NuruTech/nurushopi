@@ -13,6 +13,8 @@ export interface Product {
   description?: string;
   shortDescription?: string;
   price: number;
+  originalPrice?: number;
+  sellingPrice?: number;
   images: string[]; // Up to 3 images per product
   
   category: string;

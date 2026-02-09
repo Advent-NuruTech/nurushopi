@@ -16,10 +16,14 @@ import {
   limit,
   getDocs,
 } from "firebase/firestore";
+
 import { formatPrice } from "@/lib/formatPrice";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
 
+/* =========================
+   TYPES
+========================= */
 interface Product {
   id: string;
   name: string;
@@ -31,6 +35,9 @@ interface Product {
   createdAt?: string;
 }
 
+/* =========================
+   COMPONENT
+========================= */
 export default function ProductDetailPage({
   params,
 }: {
@@ -46,8 +53,19 @@ export default function ProductDetailPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [showFullDescription, setShowFullDescription] = useState(false);
+
   /* =========================
-     FETCH PRODUCT (SAFE)
+     DESCRIPTION LIMITER
+  ========================= */
+  const getShortDescription = (text: string, words = 60) => {
+    const parts = text.split(" ");
+    if (parts.length <= words) return text;
+    return parts.slice(0, words).join(" ") + "...";
+  };
+
+  /* =========================
+     FETCH PRODUCT
   ========================= */
   useEffect(() => {
     if (!id) return;
@@ -82,7 +100,7 @@ export default function ProductDetailPage({
         setProduct(prod);
         setMainImage(images[0]);
 
-        /* ---- Related products ---- */
+        /* Related products */
         const relatedSnap = await getDocs(
           query(
             collection(db, "products"),
@@ -100,7 +118,7 @@ export default function ProductDetailPage({
                 id: r.id,
                 name: String(rd.name ?? ""),
                 price: Number(rd.price ?? 0),
-                category: rd.category,
+                category: String(rd.category ?? "general"),
                 images:
                   Array.isArray(rd.images) && rd.images.length > 0
                     ? rd.images
@@ -108,9 +126,13 @@ export default function ProductDetailPage({
               };
             })
         );
-      } catch (e) {
+      } catch (e: unknown) {
         console.error(e);
-        setError("Unable to load product");
+        setError(
+          e instanceof Error
+            ? e.message
+            : "Unable to load product"
+        );
       } finally {
         setLoading(false);
       }
@@ -124,6 +146,7 @@ export default function ProductDetailPage({
   ========================= */
   const handleAddToCart = () => {
     if (!product) return;
+
     addToCart({
       id: product.id,
       name: product.name,
@@ -156,24 +179,25 @@ export default function ProductDetailPage({
   }
 
   /* =========================
-     UI (COLORS UNCHANGED)
+     UI
   ========================= */
   return (
     <main className="min-h-screen bg-white dark:bg-gray-900 py-20 px-4">
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10">
-
-        {/* IMAGES */}
+        {/* ================= IMAGE SECTION ================= */}
         <section>
-          <div className="relative w-full h-[420px] rounded-lg overflow-hidden shadow-md">
+          {/* Main image */}
+          <div className="relative w-full h-[420px] rounded-lg overflow-hidden shadow-md bg-white dark:bg-gray-800">
             <Image
               src={mainImage}
               alt={product.name}
               fill
-              className="object-cover"
+              className="object-contain p-4"
               priority
             />
           </div>
 
+          {/* Thumbnails */}
           {product.images.length > 1 && (
             <div className="flex gap-3 mt-4 overflow-x-auto">
               {product.images.map((img, i) => (
@@ -185,14 +209,19 @@ export default function ProductDetailPage({
                     mainImage === img ? "ring-2 ring-blue-500" : ""
                   }`}
                 >
-                  <Image src={img} alt="" fill className="object-cover" />
+                  <Image
+                    src={img}
+                    alt=""
+                    fill
+                    className="object-contain p-1"
+                  />
                 </button>
               ))}
             </div>
           )}
         </section>
 
-        {/* DETAILS */}
+        {/* ================= DETAILS SECTION ================= */}
         <aside className="space-y-6">
           <div className="text-3xl font-bold text-blue-700 dark:text-blue-400">
             {formatPrice(product.price)}
@@ -202,13 +231,18 @@ export default function ProductDetailPage({
             <Button size="lg" variant="outline" onClick={handleAddToCart}>
               Add to Cart
             </Button>
-            <Button size="lg" onClick={() => router.push("/checkout" as Route)}>
+
+            <Button
+              size="lg"
+              onClick={() => router.push("/checkout" as Route)}
+            >
               Buy Now
             </Button>
           </div>
 
           <div>
             <h1 className="text-3xl font-bold">{product.name}</h1>
+
             {product.shortDescription && (
               <p className="text-slate-600 dark:text-slate-400 mt-2">
                 {product.shortDescription}
@@ -216,20 +250,39 @@ export default function ProductDetailPage({
             )}
           </div>
 
+          {/* ===== Description with Read More ===== */}
           {product.description && (
-            <section className="pt-4 border-t">
-              <h2 className="font-semibold text-lg mb-2">
+            <section className="pt-6 border-t">
+              <h2 className="font-semibold text-lg mb-3">
                 Product Details
               </h2>
-              <p className="leading-relaxed text-slate-700 dark:text-slate-300">
-                {product.description}
-              </p>
+
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 leading-relaxed text-slate-700 dark:text-slate-300">
+                <p className="whitespace-pre-line">
+                  {showFullDescription
+                    ? product.description
+                    : getShortDescription(product.description)}
+                </p>
+
+                {product.description.split(" ").length > 60 && (
+                  <button
+                    onClick={() =>
+                      setShowFullDescription(!showFullDescription)
+                    }
+                    className="mt-3 text-blue-600 font-medium hover:underline"
+                  >
+                    {showFullDescription
+                      ? "Read less"
+                      : "Read more"}
+                  </button>
+                )}
+              </div>
             </section>
           )}
         </aside>
       </div>
 
-      {/* RELATED PRODUCTS */}
+      {/* ================= RELATED PRODUCTS ================= */}
       {relatedProducts.length > 0 && (
         <section className="max-w-6xl mx-auto mt-16">
           <h2 className="text-xl font-semibold mb-6">
@@ -248,12 +301,14 @@ export default function ProductDetailPage({
                     src={rel.images[0]}
                     alt={rel.name}
                     fill
-                    className="object-cover"
+                    className="object-contain p-2"
                   />
                 </div>
+
                 <h3 className="mt-2 font-medium text-sm">
                   {rel.name}
                 </h3>
+
                 <p className="text-blue-600 font-semibold text-sm">
                   {formatPrice(rel.price)}
                 </p>

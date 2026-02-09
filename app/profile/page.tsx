@@ -10,13 +10,12 @@ import {
   UserCircle, 
   Package, 
   Settings, 
-  Bell, 
   Gift,
   ChevronRight,
   CheckCircle,
   Clock,
-  Truck,
-  Home
+  Home,
+  MessageSquare
 } from "lucide-react";
 import ProfileOverview from "./components/ProfileOverview";
 import ManageOrders from "./components/ManageOrders";
@@ -26,6 +25,7 @@ import MessageToast from "./components/MessageToast";
 import OrderDetailsModal from "./components/OrderDetailsModal";
 import ConfirmSaveModal from "./components/ConfirmSaveModal";
 import AuthRequired from "./components/AuthRequired";
+import MessagesPanel from "./components/MessagesPanel";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { useProfileData } from "./hooks/useProfileData";
 import { useOrders } from "./hooks/useOrders";
@@ -41,6 +41,7 @@ export default function ProfilePage() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [greeting, setGreeting] = useState("");
+  const [unreadMessages, setUnreadMessages] = useState(0);
 
   // Adapt the context user to match our local type
   const appUser = adaptAppUser(contextUser);
@@ -87,6 +88,21 @@ export default function ProfilePage() {
     deliveredOrders,
   } = useOrders({ uid, orderFilter });
 
+  useEffect(() => {
+    if (!uid) return;
+    fetch(`/api/messages?userId=${uid}`)
+      .then((r) => r.json())
+      .then((d) => {
+        const msgs = d.messages ?? [];
+        const count = msgs.filter(
+          (m: { recipientId?: string; readAt?: unknown }) =>
+            m.recipientId === uid && !m.readAt
+        ).length;
+        setUnreadMessages(count);
+      })
+      .catch(() => setUnreadMessages(0));
+  }, [uid]);
+
   // Load profile when uid changes
   useEffect(() => {
     if (uid) {
@@ -120,6 +136,7 @@ export default function ProfilePage() {
   const tabs = [
     { id: "overview", label: "Overview", icon: UserCircle },
     { id: "orders", label: "My Orders", icon: Package },
+    { id: "messages", label: "Messages", icon: MessageSquare },
     { id: "profile", label: "Edit Profile", icon: Settings },
     { id: "invite", label: "Invite Friends", icon: Gift },
   ];
@@ -210,6 +227,11 @@ export default function ProfilePage() {
                 {tab.id === "orders" && pendingOrders > 0 && (
                   <span className="ml-2 bg-amber-500 text-white text-xs px-2 py-1 rounded-full">
                     {pendingOrders}
+                  </span>
+                )}
+                {tab.id === "messages" && unreadMessages > 0 && (
+                  <span className="ml-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                    {unreadMessages}
                   </span>
                 )}
               </button>
@@ -314,6 +336,14 @@ export default function ProfilePage() {
               orderFilter={orderFilter}
               onFilterChange={setOrderFilter}
               onViewDetails={setSelectedOrder}
+            />
+          )}
+
+          {activeTab === "messages" && uid && (
+            <MessagesPanel
+              userId={uid}
+              displayName={displayName}
+              onUnreadChange={setUnreadMessages}
             />
           )}
 

@@ -14,7 +14,7 @@ import { signOut } from "firebase/auth";
 interface Category {
   name: string;
   href: string | UrlObject;
-  icon: string;
+  icon?: string;
 }
 
 interface SidebarProps {
@@ -168,7 +168,6 @@ export default function Sidebar({
                   className="flex items-center justify-between w-full px-3 py-3 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-lg">📦</span>
                     <span>Categories</span>
                   </div>
                   {showCategories ? (
@@ -199,7 +198,6 @@ export default function Sidebar({
                             onClick={handleLinkClick}
                             className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 font-medium transition-colors text-sm"
                           >
-                            <span className="text-base">{category.icon}</span>
                             {category.name}
                           </Link>
                         ))}

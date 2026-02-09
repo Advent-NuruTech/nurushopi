@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
+import { formatCategoryLabel } from "@/lib/categoryUtils";
 
 interface Product {
   id: string;
@@ -17,31 +18,35 @@ interface Product {
   description?: string;
 }
 
-interface FeaturedSectionProps {
-  products: Product[];
+interface Category {
+  name: string;
+  slug: string;
 }
 
-export default function FeaturedSection({ products }: FeaturedSectionProps) {
+interface FeaturedSectionProps {
+  products: Product[];
+  categories?: Category[];
+}
+
+export default function FeaturedSection({ products, categories = [] }: FeaturedSectionProps) {
   const { addToCart } = useCart();
   const [currentCategory, setCurrentCategory] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const categories = [
-    "foods",
-    "herbs",
-    "egw",
-    "pioneers",
-    "authors",
-    "oils",
-    "covers",
-    "bibles",
-    "songbooks",
-  ];
+  const derivedCategories: Category[] = Array.from(
+    new Set(
+      products
+        .map((p) => p.category?.toLowerCase().trim())
+        .filter((c): c is string => Boolean(c))
+    )
+  ).map((slug) => ({ slug, name: formatCategoryLabel(slug) }));
 
-  const featuredByCategory = categories
+  const categoryList = categories.length ? categories : derivedCategories;
+
+  const featuredByCategory = categoryList
     .map((cat) => ({
       category: cat,
-      items: products.filter((p) => p.category?.toLowerCase() === cat),
+      items: products.filter((p) => p.category?.toLowerCase() === cat.slug),
     }))
     .filter((group) => group.items.length > 0);
 
@@ -153,7 +158,7 @@ export default function FeaturedSection({ products }: FeaturedSectionProps) {
       <div className="relative max-w-7xl mx-auto">
         <AnimatePresence mode="wait">
           <motion.div
-            key={featuredByCategory[currentCategory].category}
+            key={featuredByCategory[currentCategory].category.slug}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
@@ -163,14 +168,13 @@ export default function FeaturedSection({ products }: FeaturedSectionProps) {
             {/* Header */}
             <div className="flex justify-between items-center w-full px-2 sm:px-6 mb-4">
               <h1 className="text-xl sm:text-2xl font-semibold capitalize text-blue-700 dark:text-blue-400">
-                {featuredByCategory[currentCategory].category.replace(
-                  /egw/i,
-                  "E.G. White Writings"
-                )}
+                {featuredByCategory[currentCategory].category.name ||
+                  formatCategoryLabel(featuredByCategory[currentCategory].category.slug)}
               </h1>
               <Link
                 href={{
-                  pathname: `/${featuredByCategory[currentCategory].category}`,
+                  pathname: "/shop",
+                  query: { category: featuredByCategory[currentCategory].category.slug },
                 }}
               >
                 <Button

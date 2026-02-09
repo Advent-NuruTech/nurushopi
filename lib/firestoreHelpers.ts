@@ -32,6 +32,16 @@ export interface Product {
   createdAt?: Timestamp;
 }
 
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  icon?: string;
+  description?: string;
+  createdAt?: Timestamp;
+  updatedAt?: Timestamp;
+}
+
 export interface Order {
   id?: string;
   userId: string;
@@ -42,7 +52,7 @@ export interface Order {
     quantity: number;
   }[];
   totalAmount: number;
-  status?: "pending" | "received" | "cancelled";
+  status?: "pending" | "shipped" | "received" | "cancelled";
   createdAt?: Timestamp;
 }
 
@@ -64,10 +74,31 @@ export interface UserProfile {
 }
 
 // ----------------------------
-// 🔹 Product Helpers
+// Category Helpers
 // ----------------------------
 
-// ✅ Add new product
+export const getAllCategories = async (): Promise<Category[]> => {
+  const q = query(collection(db, "categories"), orderBy("name_lowercase", "asc"));
+  const snapshot = await getDocs(q);
+
+  return snapshot.docs.map((docSnap) => {
+    const data = docSnap.data();
+    return {
+      id: docSnap.id,
+      name: data.name ?? "",
+      slug: data.slug ?? "",
+      icon: data.icon ?? undefined,
+      description: data.description ?? undefined,
+      createdAt: data.createdAt,
+      updatedAt: data.updatedAt,
+    } as Category;
+  });
+};
+
+// ----------------------------
+// Product Helpers
+// ----------------------------
+
 export const addProduct = async (
   data: Omit<Product, "id" | "imageUrl"> & { images: string[] }
 ): Promise<string> => {
@@ -264,3 +295,4 @@ export const getAllMessages = async (): Promise<ContactMessage[]> => {
     ...(docSnap.data() as ContactMessage),
   }));
 };
+

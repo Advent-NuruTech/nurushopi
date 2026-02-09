@@ -22,6 +22,7 @@ const ordersCollection = collection(db, "orders");
 /** 🔹 Type for individual order items */
 interface OrderItem {
   id: string;
+  productId?: string;
   name: string;
   price: number;
   quantity: number;
@@ -111,6 +112,56 @@ export async function POST(request: Request) {
     };
 
     const docRef = await addDoc(ordersCollection, newOrder);
+
+    try {
+      const notificationsRef = collection(db, "notifications");
+
+      const adminsSnap = await getDocs(
+        query(collection(db, "admins"), where("role", "==", "senior"))
+      );
+      const seniorIds = new Set<string>();
+      adminsSnap.forEach((d) => seniorIds.add(d.id));
+
+      const productIds = Array.from(
+        new Set(
+          (items ?? [])
+            .map((it) => it.productId || it.id)
+            .filter((id): id is string => Boolean(id))
+        )
+      );
+
+      const uploaderIds = new Set<string>();
+      if (productIds.length) {
+        const snaps = await Promise.all(
+          productIds.map((pid) => getDoc(doc(db, "products", pid)))
+        );
+        snaps.forEach((snap) => {
+          if (!snap.exists()) return;
+          const createdBy = snap.data()?.createdBy as string | undefined;
+          if (createdBy) uploaderIds.add(createdBy);
+        });
+      }
+
+      const recipientIds = new Set<string>([...seniorIds, ...uploaderIds]);
+      const bodyText = `${name} placed a new order (${items?.length ?? 0} items).`;
+
+      await Promise.all(
+        Array.from(recipientIds).map((adminId) =>
+          addDoc(notificationsRef, {
+            recipientType: "admin",
+            recipientId: adminId,
+            type: "order",
+            title: "New order placed",
+            body: bodyText,
+            relatedId: docRef.id,
+            readAt: null,
+            createdAt: serverTimestamp(),
+          })
+        )
+      );
+    } catch (notifyError) {
+      console.error("Order notification error:", notifyError);
+    }
 
     return NextResponse.json({ success: true, orderId: docRef.id }, { status: 201 });
   } catch (err: unknown) {

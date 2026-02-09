@@ -3,16 +3,48 @@
 import { useState } from "react";
 import { formatText } from "@/lib/formatText";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function UploadBannerPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [link, setLink] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const router = useRouter();
 
+  /* ---------------- Upload image ---------------- */
+  async function uploadImage(file: File): Promise<string> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data: { url?: string } = await res.json();
+
+    if (!data.url) throw new Error("Upload failed");
+
+    setImageUrl(data.url);
+    return data.url;
+  }
+
+  /* ---------------- Normalize link ---------------- */
+  function normalizeLink(rawLink: string) {
+    const trimmed = rawLink.trim();
+    if (!trimmed) return "";
+    if (!trimmed.startsWith("http://") && !trimmed.startsWith("https://")) {
+      return `https://${trimmed}`;
+    }
+    return trimmed;
+  }
+
+  /* ---------------- Handle form submission ---------------- */
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -21,34 +53,47 @@ export default function UploadBannerPage() {
     setLoading(true);
     setMessage("");
 
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("description", description);
-    formData.append("link", link);
-    formData.append("file", file);
+    try {
+      // Upload image
+      const uploadedUrl = await uploadImage(file);
 
-    const res = await fetch("/api/upload-banner", {
-      method: "POST",
-      body: formData,
-    });
+      const finalLink = normalizeLink(link);
 
-    const data = await res.json();
-    setLoading(false);
+      const res = await fetch("/api/admin/banners", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          shortDescription: description,
+          link: finalLink,
+          imageUrl: uploadedUrl,
+        }),
+      });
 
-    // ✅ Check if upload succeeded
-    if (res.ok && data.id) {
+      const data: { success?: boolean; message?: string; id?: string } =
+        await res.json();
+
+      if (!data.success) {
+        throw new Error(data.message || "Upload failed");
+      }
+
       setMessage("Banner uploaded successfully!");
-
-      // Clear form
       setTitle("");
       setDescription("");
       setLink("");
       setFile(null);
+      setImageUrl(null);
 
-      // Optional: redirect to banner detail page
       router.push(`/banners/${data.id}`);
-    } else {
-      setMessage(data.message || data.error || "Upload failed. Try again.");
+    } catch (e: unknown) {
+      console.error(e);
+
+      const errorMessage =
+        e instanceof Error ? e.message : "Upload failed. Try again.";
+
+      setMessage(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -60,47 +105,34 @@ export default function UploadBannerPage() {
 
       <form
         onSubmit={handleUpload}
-        className="
-          flex flex-col gap-4
-          border border-gray-200 dark:border-gray-800
-          p-6 rounded-xl shadow-md
-          bg-white dark:bg-gray-900
-        "
+        className="flex flex-col gap-4 border border-gray-200 dark:border-gray-800 p-6 rounded-xl shadow-md bg-white dark:bg-gray-900"
       >
+        {/* Title */}
         <input
           type="text"
           placeholder="Banner Title"
-          className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
         />
 
+        {/* Description */}
         <textarea
-          placeholder={`Full Description
-Supports:
-## Headings
-**Bold**
-__Underline__
-1. Numbered lists
-- Bullet lists
-
-(Use blank lines for paragraphs)
-`}
-          className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 p-3 rounded min-h-[220px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Full Description..."
+          className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-3 rounded min-h-[220px] focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           required
         />
 
+        {/* Preview */}
         {description && (
           <div className="border border-gray-200 dark:border-gray-700 rounded p-4 bg-gray-50 dark:bg-gray-800">
-            <p className="text-sm font-semibold mb-2 text-gray-600 dark:text-gray-300">
-              Live Preview
-            </p>
+            <p className="text-sm font-semibold mb-2">Live Preview</p>
 
             <div
-              className="prose prose-sm max-w-none text-gray-800 dark:text-gray-100 dark:prose-invert"
+              className="prose prose-sm max-w-none dark:prose-invert"
               dangerouslySetInnerHTML={{
                 __html: formatText(description),
               }}
@@ -108,34 +140,50 @@ __Underline__
           </div>
         )}
 
+        {/* Link */}
         <input
           type="text"
           placeholder="Link (optional)"
-          className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={link}
           onChange={(e) => setLink(e.target.value)}
         />
 
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setFile(e.target.files?.[0] || null)}
-          className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 p-2 rounded"
-          required
-        />
+        {/* Image */}
+        <div>
+          <p className="mb-2">Banner Image</p>
 
+          {imageUrl && (
+            <div className="relative mb-2 w-full h-48">
+              <Image
+                src={imageUrl}
+                alt="banner preview"
+                fill
+                className="rounded object-cover"
+              />
+            </div>
+          )}
+
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setFile(e.target.files?.[0] || null)}
+            className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 p-2 rounded"
+            required
+          />
+        </div>
+
+        {/* Submit */}
         <button
           type="submit"
           disabled={loading}
-          className="bg-black dark:bg-white text-white dark:text-black py-2 rounded font-medium hover:opacity-90 disabled:opacity-60 transition"
+          className="bg-blue-600 text-white py-2 rounded font-medium hover:opacity-90 disabled:opacity-60 transition"
         >
           {loading ? "Uploading..." : "Upload Banner"}
         </button>
 
         {message && (
-          <p className="text-center mt-2 text-sm text-gray-700 dark:text-gray-300">
-            {message}
-          </p>
+          <p className="text-center mt-2 text-sm">{message}</p>
         )}
       </form>
     </div>

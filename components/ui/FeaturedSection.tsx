@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
+import { formatCategoryLabel } from "@/lib/categoryUtils";
 
 interface Product {
   id: string;
@@ -18,31 +19,34 @@ interface Product {
   description?: string;
 }
 
-interface FeaturedSectionProps {
-  products: Product[];
+interface Category {
+  name: string;
+  slug: string;
 }
 
-export default function FeaturedSection({ products }: FeaturedSectionProps) {
+interface FeaturedSectionProps {
+  products: Product[];
+  categories?: Category[];
+}
+
+export default function FeaturedSection({ products, categories = [] }: FeaturedSectionProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isScrolling, setIsScrolling] = useState(false);
   const { addToCart } = useCart();
 
-  const categories = [
-    "herbs",
-    "foods",
-    
-    "egw",
-    "pioneers",
-    "authors",
-    "oils",
-    "covers",
-    "bibles",
-    "songbooks",
-  ];
+  const derivedCategories: Category[] = Array.from(
+    new Set(
+      products
+        .map((p) => p.category?.toLowerCase().trim())
+        .filter((c): c is string => Boolean(c))
+    )
+  ).map((slug) => ({ slug, name: formatCategoryLabel(slug) }));
 
-  const featuredByCategory = categories.map((cat) => ({
+  const categoryList = categories.length ? categories : derivedCategories;
+
+  const featuredByCategory = categoryList.map((cat) => ({
     category: cat,
-    items: products.filter((p) => p.category?.toLowerCase() === cat).slice(0, 8),
+    items: products.filter((p) => p.category?.toLowerCase() === cat.slug).slice(0, 8),
   }));
 
   // Auto-slide effect
@@ -81,13 +85,13 @@ export default function FeaturedSection({ products }: FeaturedSectionProps) {
         {featuredByCategory.map(
           (group) =>
             group.items.length > 0 && (
-              <div key={group.category} className="w-full">
+              <div key={group.category.slug} className="w-full">
                 {/* Category Title + View All */}
                 <div className="flex justify-between items-center mb-5 px-2 sm:px-6">
                   <h3 className="text-xl sm:text-2xl font-semibold capitalize text-blue-700 dark:text-blue-400">
-                    {group.category.replace(/egw/i, "E.G. White Writings")}
+                    {group.category.name || formatCategoryLabel(group.category.slug)}
                   </h3>
-                  <Link href={{ pathname: `/${group.category}` }}>
+                  <Link href={{ pathname: "/shop", query: { category: group.category.slug } }}>
                     <Button
                       variant="outline"
                       className="text-blue-700 dark:text-blue-300 border-blue-600 dark:border-blue-400 hover:bg-blue-600 hover:text-white dark:hover:text-white"

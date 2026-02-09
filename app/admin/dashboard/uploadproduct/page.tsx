@@ -1,164 +1,117 @@
 "use client";
 
 import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
-import { auth } from "@/lib/firebase";
-import { onAuthStateChanged, User } from "firebase/auth";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Upload, 
-  Loader2, 
-  CheckCircle, 
-  XCircle, 
+import {
+  Loader2,
+  CheckCircle,
+  XCircle,
   Image as ImageIcon,
   Tag,
   FileText,
-  DollarSign,
   Package,
-  AlertCircle
+  X,
+  Upload
 } from "lucide-react";
-
-type ProductCategory = 
-  | "herbs" 
-  | "oils" 
-  | "foods" 
-  | "egw" 
-  | "pioneers" 
-  | "authors" 
-  | "bibles" 
-  | "covers" 
-  | "songbooks";
+import { slugifyCategory } from "@/lib/categoryUtils";
+import Image from "next/image";
 
 interface ProductFormData {
   name: string;
   price: number | "";
-  shortDescription: string;
-  category: ProductCategory;
+  description: string;
+  category: string;
   files: FileList | null;
 }
 
-type UploadStatus = "idle" | "uploading" | "success" | "error";
+interface CategoryOption {
+  id: string;
+  name: string;
+  slug: string;
+}
 
 export default function UploadProductPage() {
   const [formData, setFormData] = useState<ProductFormData>({
     name: "",
     price: "",
-    shortDescription: "",
-    category: "herbs",
+    description: "",
+    category: "",
     files: null
   });
 
-  const [status, setStatus] = useState<UploadStatus>("idle");
-  const [progress, setProgress] = useState<number>(0);
-  const [user, setUser] = useState<User | null>(null);
-  const [loadingAuth, setLoadingAuth] = useState(true);
+  const [categories, setCategories] = useState<CategoryOption[]>([]);
+  const [categoryInput, setCategoryInput] = useState("");
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
-  const [dragActive, setDragActive] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [status, setStatus] = useState<"idle" | "uploading" | "success" | "error">("idle");
+  const [progress, setProgress] = useState(0);
+  const [darkMode, setDarkMode] = useState(false);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
-  // 🔥 Firebase Auth listener
+  /* ---------- Detect system dark mode ---------- */
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      setLoadingAuth(false);
-    });
-    return () => unsubscribe();
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    setDarkMode(mediaQuery.matches);
+
+    const handler = (e: MediaQueryListEvent) => setDarkMode(e.matches);
+    mediaQuery.addEventListener("change", handler);
+    return () => mediaQuery.removeEventListener("change", handler);
   }, []);
 
-  // 🔒 Redirect to login if not signed in
+  /* ---------- Load categories ---------- */
   useEffect(() => {
-    if (!loadingAuth && !user) {
-      window.location.href = "/auth/login?redirectTo=/admin/dashboard/uploadproduct";
-    }
-  }, [loadingAuth, user]);
+    fetch("/api/admin/categories", { credentials: "include" })
+      .then(r => r.json())
+      .then(d => setCategories(d.categories ?? []))
+      .catch(() => setCategories([]));
+  }, []);
 
-  const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = "Product name is required";
-    }
-
-    if (!formData.price) {
-      newErrors.price = "Price is required";
-    } else if (Number(formData.price) <= 0) {
-      newErrors.price = "Price must be greater than 0";
-    }
-
-    if (!formData.shortDescription.trim()) {
-      newErrors.shortDescription = "Description is required";
-    } else if (formData.shortDescription.length < 10) {
-      newErrors.shortDescription = "Description must be at least 10 characters";
-    }
-
-    if (formData.files && formData.files.length > 3) {
-      newErrors.files = "Maximum 3 images allowed";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      setFormData(prev => ({ ...prev, files: e.dataTransfer.files }));
-      setErrors(prev => ({ ...prev, files: "" }));
-    }
-  };
-
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({ ...prev, files: e.target.files }));
-    setErrors(prev => ({ ...prev, files: "" }));
-  };
-
-  const removeFile = (index: number) => {
-    if (!formData.files) return;
-    
-    const dt = new DataTransfer();
-    for (let i = 0; i < formData.files.length; i++) {
-      if (i !== index) dt.items.add(formData.files[i]);
-    }
-    
-    setFormData(prev => ({ ...prev, files: dt.files.length > 0 ? dt.files : null }));
-  };
-
-  const handleInputChange = (field: keyof Omit<ProductFormData, 'files'>) => (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const value = field === 'price' 
-      ? (e.target.value === "" ? "" : Number(e.target.value))
-      : e.target.value;
-    
-    setFormData(prev => ({ 
-      ...prev, 
-      [field]: value 
+  /* ---------- Category logic ---------- */
+  const handleCategorySelect = (value: string) => {
+    setCategoryInput(value);
+    setFormData(prev => ({
+      ...prev,
+      category: slugifyCategory(value)
     }));
-    
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: "" }));
+  };
+
+  const handleCategoryTyping = (value: string) => {
+    setCategoryInput(value);
+    setFormData(prev => ({
+      ...prev,
+      category: slugifyCategory(value)
+    }));
+  };
+
+  /* ---------- File selection with preview ---------- */
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    setFormData(prev => ({ ...prev, files }));
+
+    // Create preview URLs for selected images
+    if (files) {
+      const previews: string[] = [];
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const previewUrl = URL.createObjectURL(file);
+        previews.push(previewUrl);
+      }
+      setImagePreviews(previews);
+    } else {
+      setImagePreviews([]);
     }
   };
 
+  /* ---------- Clean up preview URLs ---------- */
+  useEffect(() => {
+    const previews = imagePreviews;
+    return () => {
+      previews.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, [imagePreviews]);
+
+  /* ---------- Upload ---------- */
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
 
     setStatus("uploading");
     setProgress(0);
@@ -167,443 +120,557 @@ export default function UploadProductPage() {
     try {
       const uploaded: string[] = [];
 
-      // Upload files to Cloudinary
-      if (formData.files && formData.files.length > 0) {
+      if (formData.files) {
         for (let i = 0; i < formData.files.length; i++) {
-          const formDataObj = new FormData();
-          formDataObj.append("file", formData.files[i]);
+          const fd = new FormData();
+          fd.append("file", formData.files[i]);
 
-          const xhr = new XMLHttpRequest();
-          const uploadPromise = new Promise<string>((resolve, reject) => {
-            xhr.open("POST", "/api/upload");
-
-            xhr.upload.onprogress = (event) => {
-              if (event.lengthComputable) {
-                const percent = Math.round((event.loaded / event.total) * 100);
-                const progressPerFile = percent / formData.files!.length;
-                const baseProgress = (i * 100) / formData.files!.length;
-                setProgress(baseProgress + progressPerFile);
-              }
-            };
-
-            xhr.onload = () => {
-              if (xhr.status === 200) {
-                const result = JSON.parse(xhr.responseText);
-                uploaded.push(result.url);
-                setUploadedImages(prev => [...prev, result.url]);
-                resolve(result.url);
-              } else {
-                reject(new Error(`Upload failed (${xhr.status})`));
-              }
-            };
-
-            xhr.onerror = () => reject(new Error("Upload failed"));
-            xhr.send(formDataObj);
+          const res = await fetch("/api/upload", {
+            method: "POST",
+            body: fd,
           });
 
-          await uploadPromise;
+          const result = await res.json();
+          uploaded.push(result.url);
+          setUploadedImages([...uploaded]);
+          setProgress(((i + 1) / formData.files.length) * 100);
         }
       }
 
-      // Save product to Firestore
       const payload = {
         name: formData.name,
         price: Number(formData.price),
-        shortDescription: formData.shortDescription,
+        description: formData.description,
+        shortDescription: formData.description.slice(0, 160),
         category: formData.category,
         images: uploaded,
-        createdAt: new Date().toISOString(),
-        createdBy: user?.uid,
+        coverImage: uploaded[0] || null // first image becomes homepage image
       };
 
-      const response = await fetch("/api/products", {
+      const response = await fetch("/api/admin/products", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      if (!response.ok) throw new Error("Failed to create product record");
+      if (!response.ok) throw new Error();
 
       setStatus("success");
       setProgress(100);
 
-      // Reset form after successful upload
-      setTimeout(() => {
-        setFormData({
-          name: "",
-          price: "",
-          shortDescription: "",
-          category: "herbs",
-          files: null
-        });
-        setUploadedImages([]);
-        setStatus("idle");
-      }, 2000);
-
-    } catch (error) {
-      console.error("Error creating product:", error);
+    } catch {
       setStatus("error");
     }
   }
 
-  const categoryOptions: { value: ProductCategory; label: string; icon: React.ReactNode }[] = [
-    { value: "herbs", label: "Remedies", icon: "🌿" },
-    { value: "oils", label: "Oils", icon: "🧴" },
-    { value: "foods", label: "Foods", icon: "🥗" },
-    { value: "egw", label: "EGW Books", icon: "📚" },
-    { value: "pioneers", label: "Pioneer Books", icon: "📜" },
-    { value: "authors", label: "Other Authors", icon: "✍️" },
-    { value: "bibles", label: "Bibles", icon: "📖" },
-    { value: "covers", label: "Covers", icon: "📕" },
-    { value: "songbooks", label: "Song Books", icon: "🎵" },
-  ];
+  /* ---------- Reset form after success ---------- */
+  const handleReset = () => {
+    setStatus("idle");
+    setUploadedImages([]);
+    setImagePreviews([]);
+    setFormData({
+      name: "",
+      price: "",
+      description: "",
+      category: "",
+      files: null
+    });
+    setCategoryInput("");
+    setProgress(0);
+  };
 
-  if (loadingAuth) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-blue-50">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto text-blue-600" />
-          <p className="mt-2 text-gray-600">Checking authentication...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return null; // Will redirect in useEffect
-  }
+  /* ---------- Remove a specific image ---------- */
+  const removeImage = (index: number) => {
+    if (!formData.files) return;
+    
+    const dt = new DataTransfer();
+    const filesArray = Array.from(formData.files);
+    filesArray.splice(index, 1);
+    
+    filesArray.forEach(file => dt.items.add(file));
+    
+    const newFiles = dt.files;
+    setFormData(prev => ({ ...prev, files: newFiles }));
+    
+    // Update previews
+    const newPreviews = [...imagePreviews];
+    newPreviews.splice(index, 1);
+    setImagePreviews(newPreviews);
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8 px-4">
+    <div className={`min-h-screen transition-colors duration-300 py-8 px-4 ${
+      darkMode 
+        ? "bg-gray-900 text-gray-100" 
+        : "bg-gray-50 text-gray-900"
+    }`}>
       <div className="max-w-4xl mx-auto">
+        
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8 text-center"
-        >
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Upload New Product
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold">
+            Upload Product
           </h1>
-          <p className="text-gray-600 mt-2">
-            Add products to the NuruShop inventory
-          </p>
-        </motion.div>
+        </div>
 
-        {/* Progress Indicator */}
-        {status === "uploading" && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="mb-6 bg-white rounded-xl p-6 shadow-lg border"
-          >
-            <div className="flex items-center gap-3 mb-4">
-              <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
-              <h3 className="font-semibold">Uploading Product...</h3>
-            </div>
-            <div className="w-full bg-gray-200 h-3 rounded-full overflow-hidden">
-              <motion.div
-                className="bg-gradient-to-r from-blue-500 to-purple-500 h-full rounded-full"
-                initial={{ width: "0%" }}
-                animate={{ width: `${progress}%` }}
-                transition={{ duration: 0.3 }}
-              />
-            </div>
-            <p className="text-sm text-gray-500 mt-2 text-right">{Math.round(progress)}%</p>
-          </motion.div>
-        )}
-
-        {/* Success Message */}
-        <AnimatePresence>
-          {status === "success" && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="mb-6 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-6 shadow-lg"
-            >
-              <div className="flex items-center gap-3">
-                <CheckCircle className="w-6 h-6 text-green-600" />
-                <div>
-                  <h3 className="font-semibold text-green-800">Product Created Successfully!</h3>
-                  <p className="text-green-600 text-sm mt-1">
-                    Your product has been added to the inventory.
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Error Message */}
-        <AnimatePresence>
-          {status === "error" && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="mb-6 bg-gradient-to-r from-red-50 to-rose-50 border border-red-200 rounded-xl p-6 shadow-lg"
-            >
-              <div className="flex items-center gap-3">
-                <XCircle className="w-6 h-6 text-red-600" />
-                <div>
-                  <h3 className="font-semibold text-red-800">Upload Failed</h3>
-                  <p className="text-red-600 text-sm mt-1">
-                    There was an error uploading your product. Please try again.
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Product Form */}
         <motion.form
           onSubmit={handleSubmit}
+          className={`rounded-xl shadow-lg border p-8 space-y-6 transition-colors duration-300 ${
+            darkMode 
+              ? "bg-gray-800 border-gray-700" 
+              : "bg-white border-gray-200"
+          }`}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="space-y-6 p-8 bg-white rounded-2xl shadow-xl border border-gray-200"
+          transition={{ duration: 0.3 }}
         >
-          {/* Product Name */}
+
+          {/* Name */}
           <div>
-            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-              <Tag className="w-4 h-4" />
+            <label className={`font-semibold flex gap-2 mb-2 ${
+              darkMode ? "text-gray-300" : "text-gray-700"
+            }`}>
+              <Tag size={16} className={darkMode ? "text-blue-400" : "text-blue-600"} /> 
               Product Name
             </label>
             <input
-              value={formData.name}
-              onChange={handleInputChange('name')}
               required
-              className={`block w-full border rounded-lg px-4 py-3 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${errors.name ? 'border-red-500' : 'border-gray-300'}`}
-              placeholder="e.g., Pure Organic Olive Oil"
+              value={formData.name}
+              onChange={e => setFormData({ ...formData, name: e.target.value })}
+              className={`w-full p-3 rounded transition-colors duration-300 ${
+                darkMode 
+                  ? "bg-gray-700 border-gray-600 text-gray-100 focus:border-blue-500 focus:ring-blue-500" 
+                  : "border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+              } border focus:outline-none focus:ring-2`}
             />
-            {errors.name && (
-              <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-                <AlertCircle className="w-4 h-4" /> {errors.name}
-              </p>
-            )}
           </div>
 
-          {/* Price and Category in Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Price */}
-            <div>
-              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-                <DollarSign className="w-4 h-4" />
-                Price (KSh)
-              </label>
-              <input
-                type="number"
-                value={formData.price}
-                onChange={handleInputChange('price')}
-                required
-                min="0"
-                step="0.01"
-                className={`block w-full border rounded-lg px-4 py-3 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${errors.price ? 'border-red-500' : 'border-gray-300'}`}
-                placeholder="e.g., 850"
-              />
-              {errors.price && (
-                <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-                  <AlertCircle className="w-4 h-4" /> {errors.price}
-                </p>
-              )}
-            </div>
+          {/* Price */}
+          <div>
+            <label className={`font-semibold mb-2 block ${
+              darkMode ? "text-gray-300" : "text-gray-700"
+            }`}>
+              Price (KSh)
+            </label>
+            <input
+              required
+              type="number"
+              value={formData.price}
+              onChange={e =>
+                setFormData({
+                  ...formData,
+                  price: Number(e.target.value)
+                })
+              }
+              className={`w-full p-3 rounded transition-colors duration-300 ${
+                darkMode 
+                  ? "bg-gray-700 border-gray-600 text-gray-100 focus:border-blue-500 focus:ring-blue-500" 
+                  : "border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+              } border focus:outline-none focus:ring-2`}
+            />
+          </div>
 
-            {/* Category */}
-            <div>
-              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-                <Package className="w-4 h-4" />
-                Category
-              </label>
-              <select
-                value={formData.category}
-                onChange={handleInputChange('category')}
-                className="block w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
-              >
-                {categoryOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.icon} {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+          {/* Category */}
+          <div>
+            <label className={`font-semibold flex gap-2 mb-2 ${
+              darkMode ? "text-gray-300" : "text-gray-700"
+            }`}>
+              <Package size={16} className={darkMode ? "text-blue-400" : "text-blue-600"} /> 
+              Category
+            </label>
+
+            <select
+              value={categoryInput}
+              onChange={e => handleCategorySelect(e.target.value)}
+              className={`w-full p-3 rounded mb-2 transition-colors duration-300 ${
+                darkMode 
+                  ? "bg-gray-700 border-gray-600 text-gray-100 focus:border-blue-500 focus:ring-blue-500" 
+                  : "border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+              } border focus:outline-none focus:ring-2`}
+            >
+              <option value="" className={darkMode ? "bg-gray-700" : "bg-white"}>
+                Select category
+              </option>
+              {categories.map(c => (
+                <option 
+                  key={c.id} 
+                  value={c.slug}
+                  className={darkMode ? "bg-gray-700" : "bg-white"}
+                >
+                  {c.name}
+                </option>
+              ))}
+            </select>
+
+            <input
+              placeholder="Or type new category"
+              value={categoryInput}
+              onChange={e => handleCategoryTyping(e.target.value)}
+              className={`w-full p-3 rounded transition-colors duration-300 ${
+                darkMode 
+                  ? "bg-gray-700 border-gray-600 text-gray-100 focus:border-blue-500 focus:ring-blue-500" 
+                  : "border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+              } border focus:outline-none focus:ring-2`}
+            />
           </div>
 
           {/* Description */}
           <div>
-            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-              <FileText className="w-4 h-4" />
-              Short Description
+            <label className={`font-semibold flex gap-2 mb-2 ${
+              darkMode ? "text-gray-300" : "text-gray-700"
+            }`}>
+              <FileText size={16} className={darkMode ? "text-blue-400" : "text-blue-600"} /> 
+              Product Description
             </label>
+
             <textarea
-              value={formData.shortDescription}
-              onChange={handleInputChange('shortDescription')}
-              required
-              rows={3}
-              className={`block w-full border rounded-lg px-4 py-3 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all resize-none ${errors.shortDescription ? 'border-red-500' : 'border-gray-300'}`}
-              placeholder="Describe your product in a few sentences..."
-              maxLength={200}
+              rows={8}
+              value={formData.description}
+              onChange={e =>
+                setFormData({ ...formData, description: e.target.value })
+              }
+              placeholder="Write product description with paragraphs..."
+              className={`w-full p-3 rounded leading-relaxed resize-y transition-colors duration-300 ${
+                darkMode 
+                  ? "bg-gray-700 border-gray-600 text-gray-100 focus:border-blue-500 focus:ring-blue-500" 
+                  : "border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+              } border focus:outline-none focus:ring-2`}
             />
-            {errors.shortDescription && (
-              <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-                <AlertCircle className="w-4 h-4" /> {errors.shortDescription}
-              </p>
-            )}
-            <p className="mt-1 text-xs text-gray-400 text-right">
-              {formData.shortDescription.length}/200 characters
-            </p>
           </div>
 
-          {/* Image Upload */}
+          {/* Images */}
           <div>
-            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-              <ImageIcon className="w-4 h-4" />
+            <label className={`font-semibold flex gap-2 mb-2 ${
+              darkMode ? "text-gray-300" : "text-gray-700"
+            }`}>
+              <ImageIcon size={16} className={darkMode ? "text-blue-400" : "text-blue-600"} /> 
               Product Images
             </label>
-            
-            {/* Drag and Drop Area */}
-            <div
-              onDragEnter={handleDrag}
-              onDragLeave={handleDrag}
-              onDragOver={handleDrag}
-              onDrop={handleDrop}
-              className={`border-2 border-dashed rounded-xl p-8 text-center transition-all cursor-pointer ${
-                dragActive 
-                  ? 'border-blue-500 bg-blue-50' 
-                  : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'
-              } ${errors.files ? 'border-red-500' : ''}`}
-              onClick={() => document.getElementById('file-upload')?.click()}
-            >
+
+            <div className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors duration-300 ${
+              darkMode 
+                ? "border-gray-600 hover:border-blue-500 bg-gray-700/50" 
+                : "border-gray-300 hover:border-blue-500 bg-gray-50"
+            }`}>
               <input
-                id="file-upload"
                 type="file"
                 accept="image/*"
                 multiple
                 onChange={handleFileChange}
                 className="hidden"
+                id="file-upload"
               />
-              <Upload className="w-12 h-12 mx-auto text-gray-400 mb-3" />
-              <p className="text-gray-700 font-medium">
-                Drag & drop images here, or click to browse
-              </p>
-              <p className="text-sm text-gray-500 mt-1">
-                Upload up to 3 images (PNG, JPG, WEBP)
-              </p>
-              <p className="text-xs text-gray-400 mt-2">
-                Recommended: 1200×800 pixels
-              </p>
+              <label
+                htmlFor="file-upload"
+                className="cursor-pointer flex flex-col items-center gap-2"
+              >
+                <Upload size={24} className={darkMode ? "text-gray-400" : "text-gray-500"} />
+                <span className={darkMode ? "text-gray-300" : "text-gray-700"}>
+                  Click to upload images
+                </span>
+                <span className={`text-sm ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
+                  or drag and drop
+                </span>
+              </label>
             </div>
 
-            {errors.files && (
-              <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-                <AlertCircle className="w-4 h-4" /> {errors.files}
-              </p>
-            )}
+            <p className={`text-sm mt-2 ${
+              darkMode ? "text-gray-400" : "text-gray-500"
+            }`}>
+              First image becomes homepage image.
+            </p>
 
-            {/* Selected Files Preview */}
-            {formData.files && formData.files.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                className="mt-4"
-              >
-                <p className="text-sm font-medium text-gray-700 mb-2">
-                  Selected Files ({formData.files.length}/3):
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                  {Array.from(formData.files).map((file, index) => (
-                    <div
-                      key={index}
-                      className="relative group border rounded-lg p-3 bg-gray-50"
+            {/* Image Previews */}
+            {imagePreviews.length > 0 && (
+              <div className="mt-4">
+                <h3 className={`font-medium mb-3 ${
+                  darkMode ? "text-gray-300" : "text-gray-700"
+                }`}>
+                  Selected Images ({imagePreviews.length})
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {imagePreviews.map((preview, index) => (
+                    <div 
+                      key={index} 
+                      className={`relative rounded-lg overflow-hidden border-2 transition-all duration-300 ${
+                        index === 0 
+                          ? darkMode 
+                            ? "border-green-500" 
+                            : "border-green-400"
+                          : darkMode 
+                            ? "border-gray-600" 
+                            : "border-gray-300"
+                      }`}
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gray-200 rounded flex items-center justify-center">
-                          <ImageIcon className="w-5 h-5 text-gray-500" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">
-                            {file.name}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {(file.size / 1024).toFixed(1)} KB
-                          </p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => removeFile(index)}
-                          className="text-gray-400 hover:text-red-500"
-                        >
-                          <XCircle className="w-5 h-5" />
-                        </button>
+                      <div className="aspect-square overflow-hidden relative">
+                        <Image
+                          src={preview}
+                          alt={`Preview ${index + 1}`}
+                          fill
+                          sizes="(max-width: 768px) 50vw, 25vw"
+                          className="object-cover"
+                        />
                       </div>
+                      
+                      {/* Image number and homepage badge */}
+                      <div className={`absolute top-2 left-2 px-2 py-1 rounded text-xs font-semibold ${
+                        darkMode ? "bg-gray-800/90 text-gray-100" : "bg-white/90 text-gray-800"
+                      }`}>
+                        {index + 1}
+                      </div>
+                      
+                      {/* Remove button */}
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className={`absolute top-2 right-2 p-1 rounded-full ${
+                          darkMode 
+                            ? "bg-gray-800/90 text-gray-100 hover:bg-gray-700" 
+                            : "bg-white/90 text-gray-800 hover:bg-gray-100"
+                        }`}
+                      >
+                        <X size={14} />
+                      </button>
+                      
+                      {/* Homepage indicator */}
+                      {index === 0 && (
+                        <div className={`absolute bottom-0 left-0 right-0 py-1 text-center text-xs font-medium ${
+                          darkMode 
+                            ? "bg-green-600/90 text-gray-100" 
+                            : "bg-green-500/90 text-white"
+                        }`}>
+                          Homepage Image
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
-              </motion.div>
-            )}
-
-            {/* Uploaded Images Preview */}
-            {uploadedImages.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                className="mt-4"
-              >
-                <p className="text-sm font-medium text-green-600 mb-2">
-                  Uploaded Successfully:
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                  {uploadedImages.map((url, index) => (
-                    <div
-                      key={index}
-                      className="relative border border-green-200 rounded-lg overflow-hidden bg-green-50"
-                    >
-                      <div className="p-3">
-                        <div className="flex items-center gap-2 text-green-600">
-                          <CheckCircle className="w-4 h-4" />
-                          <p className="text-sm truncate">Image {index + 1}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
+              </div>
             )}
           </div>
 
           {/* Submit Button */}
-          <div className="pt-4">
-            <button
-              type="submit"
-              disabled={status === "uploading"}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {status === "uploading" ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Uploading...
-                </>
-              ) : (
-                <>
-                  <Upload className="w-5 h-5" />
-                  Create Product
-                </>
-              )}
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={status === "uploading" || imagePreviews.length === 0}
+            className={`w-full py-3 rounded font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
+              darkMode 
+                ? "bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500" 
+                : "bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500"
+            } focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+              darkMode ? "focus:ring-offset-gray-900" : "focus:ring-offset-white"
+            }`}
+          >
+            {status === "uploading" ? (
+              <span className="flex items-center justify-center gap-2">
+                <Loader2 className="animate-spin" size={20} />
+                Uploading Product...
+              </span>
+            ) : (
+              "Create Product"
+            )}
+          </button>
 
-          {/* Help Text */}
-          <div className="text-center pt-4 border-t">
-            <p className="text-sm text-gray-500">
-              Make sure all information is accurate before submitting.
-            </p>
-            <p className="text-xs text-gray-400 mt-1">
-              Product will be reviewed before appearing in the shop.
-            </p>
-          </div>
         </motion.form>
       </div>
+
+      {/* Upload Overlay Modal */}
+      <AnimatePresence>
+        {(status === "uploading" || status === "success" || status === "error") && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-colors duration-300 ${
+              darkMode ? "bg-gray-900/90" : "bg-white/90"
+            } backdrop-blur-sm`}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className={`w-full max-w-md rounded-2xl shadow-2xl p-8 transition-colors duration-300 ${
+                darkMode 
+                  ? "bg-gray-800 border border-gray-700" 
+                  : "bg-white border border-gray-200"
+              }`}
+            >
+              {status === "uploading" && (
+                <div className="text-center space-y-6">
+                  <div className="relative w-20 h-20 mx-auto">
+                    <Loader2 className="w-full h-full animate-spin text-blue-500" />
+                  </div>
+                  
+                  <div>
+                    <h3 className={`text-xl font-semibold mb-2 ${
+                      darkMode ? "text-gray-100" : "text-gray-900"
+                    }`}>
+                      Uploading Product
+                    </h3>
+                    <p className={`mb-4 ${
+                      darkMode ? "text-gray-400" : "text-gray-600"
+                    }`}>
+                      Please wait while we upload your product...
+                    </p>
+                  </div>
+
+                  {/* Progress bar */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className={darkMode ? "text-gray-400" : "text-gray-600"}>
+                        Uploading images...
+                      </span>
+                      <span className={`font-medium ${
+                        darkMode ? "text-blue-400" : "text-blue-600"
+                      }`}>
+                        {Math.round(progress)}%
+                      </span>
+                    </div>
+                    <div className={`h-2 rounded-full overflow-hidden ${
+                      darkMode ? "bg-gray-700" : "bg-gray-200"
+                    }`}>
+                      <motion.div
+                        className={`h-full ${
+                          darkMode ? "bg-blue-500" : "bg-blue-600"
+                        }`}
+                        initial={{ width: "0%" }}
+                        animate={{ width: `${progress}%` }}
+                        transition={{ duration: 0.3 }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Uploaded images preview */}
+                  {uploadedImages.length > 0 && (
+                    <div className="mt-4">
+                      <p className={`text-sm mb-2 ${
+                        darkMode ? "text-gray-400" : "text-gray-600"
+                      }`}>
+                        Uploaded {uploadedImages.length} of {formData.files?.length || 0} images
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {status === "success" && (
+                <div className="text-center space-y-6">
+                  <div className="w-20 h-20 mx-auto rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                    <CheckCircle className="w-12 h-12 text-green-600 dark:text-green-400" />
+                  </div>
+                  
+                  <div>
+                    <h3 className={`text-2xl font-bold mb-2 ${
+                      darkMode ? "text-gray-100" : "text-gray-900"
+                    }`}>
+                      Product Uploaded!
+                    </h3>
+                    <p className={`mb-2 ${
+                      darkMode ? "text-gray-400" : "text-gray-600"
+                    }`}>
+                      Your product has been successfully uploaded to the store.
+                    </p>
+                    <p className={`text-sm ${
+                      darkMode ? "text-gray-500" : "text-gray-500"
+                    }`}>
+                      &quot;{formData.name}&quot; is now live
+                    </p>
+                  </div>
+
+                  {/* Uploaded images preview */}
+                  {uploadedImages.length > 0 && (
+                    <div className="mt-4">
+                      <p className={`text-sm font-medium mb-2 ${
+                        darkMode ? "text-gray-300" : "text-gray-700"
+                      }`}>
+                        Uploaded Images:
+                      </p>
+                      <div className="grid grid-cols-3 gap-2">
+                        {uploadedImages.slice(0, 3).map((url, index) => (
+                          <div key={index} className="aspect-square rounded overflow-hidden relative">
+                            <Image
+                              src={url}
+                              alt={`Uploaded ${index + 1}`}
+                              fill
+                              sizes="(max-width: 768px) 33vw, 100px"
+                              className="object-cover"
+                            />
+                          </div>
+                        ))}
+                        {uploadedImages.length > 3 && (
+                          <div className={`aspect-square rounded flex items-center justify-center ${
+                            darkMode ? "bg-gray-700" : "bg-gray-100"
+                          }`}>
+                            <span className={darkMode ? "text-gray-400" : "text-gray-600"}>
+                              +{uploadedImages.length - 3}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={handleReset}
+                    className={`w-full py-3 rounded-lg font-semibold transition-all duration-300 ${
+                      darkMode 
+                        ? "bg-blue-600 hover:bg-blue-700 text-white" 
+                        : "bg-blue-600 hover:bg-blue-700 text-white"
+                    }`}
+                  >
+                    Upload Another Product
+                  </button>
+                </div>
+              )}
+
+              {status === "error" && (
+                <div className="text-center space-y-6">
+                  <div className="w-20 h-20 mx-auto rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                    <XCircle className="w-12 h-12 text-red-600 dark:text-red-400" />
+                  </div>
+                  
+                  <div>
+                    <h3 className={`text-2xl font-bold mb-2 ${
+                      darkMode ? "text-gray-100" : "text-gray-900"
+                    }`}>
+                      Upload Failed
+                    </h3>
+                    <p className={`mb-4 ${
+                      darkMode ? "text-gray-400" : "text-gray-600"
+                    }`}>
+                      There was an error uploading your product. Please try again.
+                    </p>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setStatus("idle")}
+                      className={`flex-1 py-3 rounded-lg font-semibold border transition-colors duration-300 ${
+                        darkMode 
+                          ? "border-gray-600 text-gray-300 hover:bg-gray-700" 
+                          : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                      }`}
+                    >
+                      Go Back
+                    </button>
+                    <button
+                      onClick={handleSubmit}
+                      className={`flex-1 py-3 rounded-lg font-semibold transition-all duration-300 ${
+                        darkMode 
+                          ? "bg-blue-600 hover:bg-blue-700 text-white" 
+                          : "bg-blue-600 hover:bg-blue-700 text-white"
+                      }`}
+                    >
+                      Try Again
+                    </button>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

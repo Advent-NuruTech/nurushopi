@@ -19,7 +19,7 @@ import { signOut } from "firebase/auth";
 interface Category {
   name: string;
   href: Route;
-  icon: string;
+  icon?: string;
 }
 
 export default function Navbar() {
@@ -29,6 +29,7 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [_darkMode, setDarkMode] = useState(true);
   const [isClient, setIsClient] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   const { cart } = useCart();
   const cartCount = isClient
@@ -75,18 +76,19 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  /* ---------------- Categories (typed) ---------------- */
-  const categories: Category[] = [
-    { name: "All Remedies", href: "/herbs", icon: "🌿" },
-    { name: "Food Staffs", href: "/foods", icon: "🥗" },
-    { name: "EGW", href: "/egw", icon: "📚" },
-    { name: "Pioneers Literature", href: "/pioneers", icon: "📜" },
-    { name: "Bible Covers", href: "/covers", icon: "📕" },
-    { name: "Song Books", href: "/songbooks", icon: "🎵" },
-    { name: "Other Reliable Authors", href: "/authors", icon: "✍️" },
-    { name: "Oils", href: "/oils", icon: "🧴" },
-    { name: "Bibles", href: "/bibles", icon: "📖" },
-  ];
+  useEffect(() => {
+    fetch("/api/categories")
+      .then((r) => r.json())
+      .then((data) => {
+        const items = (data.categories ?? []).map((c: { name: string; slug: string; icon?: string }) => ({
+          name: c.name,
+          href: `/shop?category=${encodeURIComponent(c.slug)}`,
+          icon: c.icon,
+        }));
+        setCategories(items);
+      })
+      .catch(() => setCategories([]));
+  }, []);
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -154,7 +156,7 @@ export default function Navbar() {
                       href={cat.href}
                       className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 dark:hover:bg-gray-700"
                     >
-                      <span>{cat.icon}</span>
+                      <span>{cat.icon || "📦"}</span>
                       <span>{cat.name}</span>
                     </Link>
                   ))}

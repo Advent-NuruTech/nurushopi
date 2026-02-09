@@ -1,13 +1,10 @@
-export type Category =
-| 'herbs'
-| 'oils'
-| 'egw'
-| 'pioneers'
-| 'authors'
-| 'bibles'
-| 'covers'
-| 'songbooks'
-| 'other';
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  icon?: string;
+  description?: string;
+}
 
 
 export interface Product {

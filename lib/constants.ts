@@ -12,17 +12,6 @@ export const PAYMENT_INFO = {
   mpesaNumber: "0759167209",
 };
 
-export const CATEGORIES = [
-  "foods",
-  "herbs",
-  "oils",
-  "egw",
-  "pioneers",
-  "authors",
-  "bibles",
-  "covers",
-  "songbooks",
-];
 
 export const FEATURED_NOTE =
   "Explore our best picks from each category — all natural, faith-inspired, and affordable.";
@@ -35,3 +24,4 @@ export const DELIVERY_POLICY = {
 export const SECURITY_POLICY = {
   note: "Your data and transactions are safe. We never ask for personal info unrelated to business. Communication is encrypted.",
 };
+

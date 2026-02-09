@@ -10,6 +10,8 @@ import ProductsTab from "./components/ProductsTab";
 import OrdersTab from "./components/OrdersTab";
 import BannersTab from "./components/BannersTab";
 import ContactsTab from "./components/ContactsTab";
+import CategoriesTab from "./components/CategoriesTab";
+import MessagesTab from "./components/MessagesTab";
 import { Admin, TabId } from "./components/types";
 
 export default function AdminDashboardPage() {
@@ -52,10 +54,12 @@ export default function AdminDashboardPage() {
     <AdminLayout admin={admin} currentTab={tab} onTabChange={setTab}>
       {tab === "invite" && admin.role === "senior" && <InviteTab />}
       {tab === "admins" && admin.role === "senior" && <AdminsTab />}
+      {tab === "categories" && admin.role === "senior" && <CategoriesTab />}
       {tab === "products" && <ProductsTab adminId={admin.adminId} role={admin.role} />}
       {tab === "orders" && <OrdersTab adminId={admin.adminId} role={admin.role} />}
       {tab === "banners" && admin.role === "senior" && <BannersTab />}
       {tab === "contacts" && admin.role === "senior" && <ContactsTab />}
+      {tab === "messages" && <MessagesTab adminId={admin.adminId} role={admin.role} />}
     </AdminLayout>
   );
 }

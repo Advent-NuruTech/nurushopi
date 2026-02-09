@@ -104,20 +104,13 @@ export async function GET(request: Request) {
 }
 
 /**
- * PUT: approve / cancel order (senior admin only)
+ * PUT: update order status
  * Body: { orderId, status }
  */
 export async function PUT(request: Request) {
   const admin = await getAdminFromRequest(request);
   if (!admin) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  if (admin.role !== "senior") {
-    return NextResponse.json(
-      { error: "Only Senior Admin can approve orders" },
-      { status: 403 }
-    );
   }
 
   try {
@@ -138,6 +131,41 @@ export async function PUT(request: Request) {
 
     if (!snap.exists()) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+
+    if (admin.role === "sub") {
+      if (status !== "shipped") {
+        return NextResponse.json(
+          { error: "Sub Admin can only mark orders as shipped" },
+          { status: 403 }
+        );
+      }
+
+      const productsSnap = await getDocs(
+        query(collection(db, "products"), where("createdBy", "==", admin.adminId))
+      );
+      const productIds = new Set<string>();
+      productsSnap.forEach((d) => productIds.add(d.id));
+
+      const data = snap.data();
+      const items =
+        (data.items ?? []) as { id?: string; productId?: string }[];
+      const ownsAny = items.some(
+        (it) => (it.id && productIds.has(it.id)) || (it.productId && productIds.has(it.productId))
+      );
+      if (!ownsAny) {
+        return NextResponse.json(
+          { error: "You can only update orders containing your products" },
+          { status: 403 }
+        );
+      }
+
+      await updateDoc(ref, {
+        status: "shipped",
+        shippedBy: admin.adminId,
+        updatedAt: serverTimestamp(),
+      });
+      return NextResponse.json({ success: true });
     }
 
     const updates: Record<string, unknown> = {

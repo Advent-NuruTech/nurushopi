@@ -30,7 +30,7 @@ export default function ManageOrders({
           Manage Orders
         </h2>
         <div className="flex flex-wrap gap-2 mb-6">
-          {(["all", "pending", "received", "cancelled"] as const).map((filter) => (
+          {(["all", "pending", "shipped", "received", "cancelled"] as const).map((filter) => (
             <button
               key={filter}
               type="button"

@@ -3,6 +3,7 @@ import { getAllProducts } from "@/lib/firestoreHelpers";
 import Image from "next/image";
 import Link from "next/link";
 import { formatPrice } from "@/lib/formatPrice";
+import { formatCategoryLabel } from "@/lib/categoryUtils";
 
 export const dynamic = "force-dynamic";
 
@@ -30,8 +31,15 @@ interface Product {
   createdAt?: number | string | null;
 }
 
-export default async function ShopPage() {
+export default async function ShopPage({
+  searchParams,
+}: {
+  searchParams?: { category?: string };
+}) {
   let products: Product[] = [];
+  const selectedCategory = searchParams?.category
+    ? decodeURIComponent(String(searchParams.category)).toLowerCase().trim()
+    : "";
   
   try {
     const rawProducts = await getAllProducts();
@@ -88,6 +96,12 @@ export default async function ShopPage() {
         return timeB - timeA; // Descending order (newest first)
       });
 
+    if (selectedCategory) {
+      products = products.filter(
+        (p) => (p.category || "").toLowerCase() === selectedCategory
+      );
+    }
+
   } catch (error) {
     console.error("Error loading products:", error);
     return (
@@ -113,6 +127,17 @@ export default async function ShopPage() {
         <div className="mb-8 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm dark:shadow-gray-900 border border-gray-200 dark:border-gray-700 mx-2 sm:mx-0">
         
         </div>
+
+        {selectedCategory && (
+          <div className="mb-6 mx-2 sm:mx-0 flex items-center justify-between rounded-lg border border-blue-200 bg-blue-50 text-blue-700 px-4 py-3">
+            <span className="text-sm font-medium">
+              Showing category: {formatCategoryLabel(selectedCategory)}
+            </span>
+            <Link href="/shop" className="text-sm font-semibold hover:underline">
+              Clear
+            </Link>
+          </div>
+        )}
 
         {/* Products Grid - 2 columns on mobile, 3 on tablet, 4 on desktop */}
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">

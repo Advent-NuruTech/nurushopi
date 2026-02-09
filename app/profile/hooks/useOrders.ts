@@ -47,7 +47,7 @@ export function useOrders({ uid, orderFilter }: UseOrdersProps) {
   });
 
   const totalOrders = orders.length;
-  const pendingOrders = orders.filter((o) => o.status === "pending").length;
+  const pendingOrders = orders.filter((o) => o.status === "pending" || o.status === "shipped").length;
   const deliveredOrders = orders.filter((o) => o.status === "received").length;
 
   return {

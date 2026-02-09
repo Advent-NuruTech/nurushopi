@@ -1,18 +1,16 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
+import { collection, getDocs, doc, deleteDoc, query, where } from "firebase/firestore";
 import { getAdminFromRequest } from "@/lib/adminAuth";
 
 /** GET: list all admins (senior only) */
 export async function GET(request: Request) {
   const admin = await getAdminFromRequest(request);
   if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (admin.role !== "senior") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
   try {
-    const snap = await getDocs(collection(db, "admins"));
+    const snap = admin.role === "senior"
+      ? await getDocs(collection(db, "admins"))
+      : await getDocs(query(collection(db, "admins"), where("role", "==", "senior")));
     const admins = snap.docs.map((d) => {
       const data = d.data();
       return {

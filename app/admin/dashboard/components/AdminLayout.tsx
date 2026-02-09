@@ -3,17 +3,9 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import {
-  LayoutDashboard,
-  UserPlus,
-  Users,
-  Package,
-  ShoppingCart,
-  Image as ImageIcon,
-  MessageSquare,
-  LogOut,
-} from "lucide-react";
+import { LayoutDashboard, LogOut } from "lucide-react";
 import { Admin, TabId, TABS_SENIOR, TABS_SUB } from "./types";
+import NotificationsBell from "./NotificationsBell";
 
 interface AdminLayoutProps {
   admin: Admin;
@@ -53,6 +45,7 @@ export default function AdminLayout({ admin, currentTab, onTabChange, children }
             >
               View site
             </Link>
+            <NotificationsBell />
             <button
               onClick={handleLogout}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 text-sm"

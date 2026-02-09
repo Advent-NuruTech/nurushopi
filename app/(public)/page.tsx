@@ -5,9 +5,11 @@ import FeaturedHero from "@/components/ui/FeaturedHero";
 
 import NewArrivals from "@/components/ui/NewArrivals";
 import Bannerss from "@/components/ui/Bannerss";
-import { getAllProducts } from "@/lib/firestoreHelpers";
+import { getAllProducts, getAllCategories } from "@/lib/firestoreHelpers";
 import { Product } from "@/lib/types";
 import { Timestamp } from "firebase/firestore";
+
+export const dynamic = "force-dynamic";
 
 // 🔹 Type-safe helper to convert Firestore Timestamps to ISO strings
 function serializeFirestoreDoc<T extends Record<string, unknown>>(doc: T): T {
@@ -23,7 +25,10 @@ function serializeFirestoreDoc<T extends Record<string, unknown>>(doc: T): T {
 }
 
 export default async function HomePage() {
-  const products: Product[] = await getAllProducts();
+  const [products, categories] = await Promise.all([
+    getAllProducts(),
+    getAllCategories(),
+  ]);
 
   // 🔹 Map Firestore products to UI-safe format compatible with Featured components
   const uiProducts: (Product & { image: string; shortDescription: string })[] = products.map(
@@ -41,11 +46,17 @@ export default async function HomePage() {
       
       <HeroSection />
        <NewArrivals />
-      <FeaturedHero products={uiProducts} />
+      <FeaturedHero
+        products={uiProducts}
+        categories={categories.map((c) => ({ name: c.name, slug: c.slug }))}
+      />
 
       <Bannerss />
 
-      <FeaturedSection products={uiProducts} />
+      <FeaturedSection
+        products={uiProducts}
+        categories={categories.map((c) => ({ name: c.name, slug: c.slug }))}
+      />
     </main>
   );
 }

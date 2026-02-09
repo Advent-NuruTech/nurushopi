@@ -40,6 +40,16 @@ export default function OrdersTab({ role }: OrdersTabProps) {
     if (res.ok) setOrders((o) => o.map((x) => (x.id === orderId ? { ...x, status: "received" } : x)));
   };
 
+  const markShipped = async (orderId: string) => {
+    const res = await fetch("/api/admin/orders", {
+      method: "PUT",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderId, status: "shipped" }),
+    });
+    if (res.ok) setOrders((o) => o.map((x) => (x.id === orderId ? { ...x, status: "shipped" } : x)));
+  };
+
   if (loading) return <LoadingSpinner text="Loading orders…" />;
 
   return (
@@ -48,8 +58,8 @@ export default function OrdersTab({ role }: OrdersTabProps) {
         <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Orders</h2>
         <p className="text-sm text-slate-500 dark:text-slate-400">
           {role === "sub" 
-            ? "Orders that include your products." 
-            : "All orders. Only Super Admin can approve."}
+            ? "Orders that include your products. You can mark shipped only." 
+            : "All orders. Senior Admin approves orders."}
         </p>
       </div>
       <div className="overflow-x-auto">
@@ -60,7 +70,7 @@ export default function OrdersTab({ role }: OrdersTabProps) {
               <th className="px-4 py-3">Customer</th>
               <th className="px-4 py-3">Total</th>
               <th className="px-4 py-3">Status</th>
-              {role === "senior" && <th className="px-4 py-3">Actions</th>}
+              <th className="px-4 py-3">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -75,25 +85,35 @@ export default function OrdersTab({ role }: OrdersTabProps) {
                   <span className={`px-2 py-1 rounded text-xs font-medium ${
                     o.status === "received" 
                       ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300" 
-                      : o.status === "cancelled" 
-                        ? "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300" 
-                        : "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300"
+                      : o.status === "shipped"
+                        ? "bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300"
+                        : o.status === "cancelled" 
+                          ? "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300" 
+                          : "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300"
                   }`}>
-                    {o.status === "received" ? "Approved" : o.status}
+                    {o.status === "received" ? "Approved" : o.status === "shipped" ? "Shipped" : o.status}
                   </span>
                 </td>
-                {role === "senior" && (
-                  <td className="px-4 py-3">
-                    {o.status !== "received" && o.status !== "cancelled" && (
+                <td className="px-4 py-3">
+                  <div className="flex flex-wrap gap-2">
+                    {role === "sub" && (
                       <button
-                        onClick={() => approve(o.id)}
-                        className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm"
+                        onClick={() => markShipped(o.id)}
+                        disabled={o.status === "received" || o.status === "cancelled" || o.status === "shipped"}
+                        className="px-3 py-1 rounded-lg bg-sky-600 hover:bg-sky-700 disabled:opacity-60 text-white text-sm"
                       >
-                        Approve
+                        Mark Shipped
                       </button>
                     )}
-                  </td>
-                )}
+                    <button
+                      onClick={() => approve(o.id)}
+                      disabled={role !== "senior" || o.status === "received" || o.status === "cancelled"}
+                      className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white text-sm"
+                    >
+                      Approve
+                    </button>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>

@@ -7,7 +7,6 @@ import { Menu, X, ShoppingCart, ChevronDown, User } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import type { Route } from "next";
 
 import SearchBar from "./SearchBar";
 import Sidebar from "./Sidebar";
@@ -18,7 +17,8 @@ import { signOut } from "firebase/auth";
 
 interface Category {
   name: string;
-  href: Route;
+  href: string;
+  query?: Record<string, string>;
   icon?: string;
 }
 
@@ -82,7 +82,8 @@ export default function Navbar() {
       .then((data) => {
         const items = (data.categories ?? []).map((c: { name: string; slug: string; icon?: string }) => ({
           name: c.name,
-          href: `/shop?category=${encodeURIComponent(c.slug)}`,
+          href: "/shop",
+          query: { category: c.slug },
           icon: c.icon,
         }));
         setCategories(items);
@@ -153,7 +154,7 @@ export default function Navbar() {
                   {categories.map((cat) => (
                     <Link
                       key={cat.name}
-                      href={cat.href}
+                      href={{ pathname: cat.href, query: cat.query }}
                       className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 dark:hover:bg-gray-700"
                     >
                       <span>{cat.icon || "📦"}</span>

@@ -4,16 +4,15 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import { LogIn, ChevronDown, ChevronRight } from "lucide-react";
-import { UrlObject } from "url";
-
+import { LogIn, ChevronDown, ChevronRight, Package } from "lucide-react";
 import { useAppUser } from "@/context/UserContext";
 import { auth } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
 
 interface Category {
   name: string;
-  href: string | UrlObject;
+  href: string; // "/shop"
+  query?: Record<string, string>; // e.g. { category: "beverages" }
   icon?: string;
 }
 
@@ -23,14 +22,9 @@ interface SidebarProps {
   categories: Category[];
 }
 
-export default function Sidebar({
-  isOpen,
-  setIsOpen,
-  categories,
-}: SidebarProps) {
+export default function Sidebar({ isOpen, setIsOpen, categories }: SidebarProps) {
   const [showCategories, setShowCategories] = useState(false);
   const sidebarRef = useRef<HTMLElement>(null);
-
   const { user, isLoading } = useAppUser();
 
   const handleLogout = async () => {
@@ -38,48 +32,31 @@ export default function Sidebar({
     setIsOpen(false);
   };
 
-  // Close sidebar when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-
-      if (
-        isOpen &&
-        sidebarRef.current &&
-        !sidebarRef.current.contains(target) &&
-        !target.closest('[data-menu-button]')
-      ) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isOpen, setIsOpen]);
-
-  // Close sidebar on route change
-  useEffect(() => {
-    const handleRouteChange = () => setIsOpen(false);
-    window.addEventListener("popstate", handleRouteChange);
-    return () => window.removeEventListener("popstate", handleRouteChange);
-  }, [setIsOpen]);
-
-  // Close sidebar on Escape key
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
-  }, [isOpen, setIsOpen]);
-
   const handleLinkClick = () => {
     setIsOpen(false);
     setShowCategories(false);
   };
+
+  // Close sidebar on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (isOpen && sidebarRef.current && !sidebarRef.current.contains(target) && !target.closest('[data-menu-button]')) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen]);
+
+  // Close on Escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen) setIsOpen(false);
+    };
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [isOpen]);
 
   return (
     <AnimatePresence>
@@ -124,32 +101,20 @@ export default function Sidebar({
                 className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 aria-label="Close menu"
               >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
 
             {/* Navigation Links */}
             <nav className="flex-1 overflow-y-auto p-6 flex flex-col gap-1">
-              {/* Main Links */}
               <Link
                 href="/"
                 onClick={handleLinkClick}
                 className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium transition-colors"
               >
-                <span className="text-lg">🏠</span>
-                Home
+                <span className="text-lg">🏠</span> Home
               </Link>
 
               <Link
@@ -157,24 +122,26 @@ export default function Sidebar({
                 onClick={handleLinkClick}
                 className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium transition-colors"
               >
-                <span className="text-lg">🍔</span>
-                Shop
+                <span className="text-lg">🛍️</span> Shop
               </Link>
 
-              {/* Categories Dropdown */}
+              <Link
+                href="/myoders"
+                onClick={handleLinkClick}
+                className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium transition-colors"
+              >
+                <Package size={18} className="text-gray-500" />
+                My Orders
+              </Link>
+
+              {/* Categories */}
               <div className="mt-4 mb-2">
                 <button
                   onClick={() => setShowCategories(!showCategories)}
                   className="flex items-center justify-between w-full px-3 py-3 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium transition-colors"
                 >
-                  <div className="flex items-center gap-3">
-                    <span>Categories</span>
-                  </div>
-                  {showCategories ? (
-                    <ChevronDown size={16} className="text-gray-500" />
-                  ) : (
-                    <ChevronRight size={16} className="text-gray-500" />
-                  )}
+                  <span>Categories</span>
+                  {showCategories ? <ChevronDown size={16} className="text-gray-500" /> : <ChevronRight size={16} className="text-gray-500" />}
                 </button>
 
                 <AnimatePresence>
@@ -187,34 +154,34 @@ export default function Sidebar({
                       className="ml-6 mt-2 overflow-hidden"
                     >
                       <div className="border-l-2 border-gray-200 dark:border-gray-700 pl-4 space-y-1">
-                        {categories.map((category, index) => (
-                          <Link
-                            key={index}
-                            href={
-                              typeof category.href === "string"
-                                ? { pathname: category.href }
-                                : category.href
-                            }
-                            onClick={handleLinkClick}
-                            className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 font-medium transition-colors text-sm"
-                          >
-                            {category.name}
-                          </Link>
-                        ))}
+                        {categories.map((category) => {
+                          const categoryHref = category.query
+                            ? { pathname: category.href, query: category.query }
+                            : { pathname: category.href };
+                          return (
+                            <Link
+                              key={category.name}
+                              href={categoryHref}
+                              onClick={handleLinkClick}
+                              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 font-medium transition-colors text-sm"
+                            >
+                              {category.icon && <span>{category.icon}</span>}
+                              {category.name}
+                            </Link>
+                          );
+                        })}
                       </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
 
-              {/* Additional Links */}
               <Link
                 href="/contact"
                 onClick={handleLinkClick}
                 className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium transition-colors"
               >
-                <span className="text-lg">📞</span>
-                Contact
+                <span className="text-lg">📞</span> Contact
               </Link>
 
               <Link
@@ -222,8 +189,7 @@ export default function Sidebar({
                 onClick={handleLinkClick}
                 className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium transition-colors"
               >
-                <span className="text-lg">🛒</span>
-                Cart
+                <span className="text-lg">🛒</span> Cart
               </Link>
             </nav>
 
@@ -244,12 +210,8 @@ export default function Sidebar({
                       className="rounded-full object-cover ring-2 ring-sky-500/30"
                     />
                     <div className="flex-1 text-left">
-                      <p className="text-gray-700 dark:text-gray-300 font-medium">
-                        {user.name || "User"}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {user.email}
-                      </p>
+                      <p className="text-gray-700 dark:text-gray-300 font-medium">{user.name || "User"}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
                     </div>
                   </Link>
                   <div className="flex gap-2">
@@ -280,12 +242,8 @@ export default function Sidebar({
               )}
 
               <div className="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  NuruShop &copy; {new Date().getFullYear()}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  Health & Truth
-                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">NuruShop &copy; {new Date().getFullYear()}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Health & Truth</p>
               </div>
             </div>
           </motion.aside>

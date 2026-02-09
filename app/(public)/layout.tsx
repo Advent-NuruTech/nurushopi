@@ -71,7 +71,7 @@ export default function RootLayout({
             <CartProvider>
               <div className="min-h-screen flex flex-col">
                 <Navbar />
-                <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <main className="flex-1 container mx-auto px-1 sm:px-1 lg:px-4 py-4">
                   {children}
                 </main>
                 <Footer />

@@ -87,7 +87,7 @@ export default function FeaturedSection({ products, categories = [] }: FeaturedS
             group.items.length > 0 && (
               <div key={group.category.slug} className="w-full">
                 {/* Category Title + View All */}
-                <div className="flex justify-between items-center mb-5 px-2 sm:px-6">
+                <div className="flex justify-between items-center mb-5 px-1 sm:px-3">
                   <h3 className="text-xl sm:text-2xl font-semibold capitalize text-blue-700 dark:text-blue-400">
                     {group.category.name || formatCategoryLabel(group.category.slug)}
                   </h3>

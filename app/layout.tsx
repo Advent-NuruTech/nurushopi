@@ -1,20 +1,20 @@
 import "./globals.css";
-import React from "react";
+import React, { ReactNode } from "react";
 
 import { CartProvider } from "@/context/CartContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { UserProvider } from "@/context/UserContext";
+
 export const metadata = {
   metadataBase: new URL("https://nurushop.co.ke"),
 
   title: {
-    default:
-      "NuruShop | Health & Truth Marketplace ",
+    default: "NuruShop | Health & Truth Marketplace",
     template: "%s | NuruShop",
   },
 
   description:
-    "NuruShop is  trusted marketplace for natural organic health products, organic foods, herbal products, and faith-inspired spiritual literature. Discover healing, wellness, and truth through natural living and Bible-based resources.",
+    "NuruShop is a trusted marketplace for natural organic health products, organic foods, herbal products, and faith-inspired spiritual literature. Discover healing, wellness, and truth through natural living and Bible-based resources.",
 
   keywords: [
     "NuruShop",
@@ -51,8 +51,7 @@ export const metadata = {
   },
 
   openGraph: {
-    title:
-      "NuruShop –  Health & Truth Marketplace",
+    title: "NuruShop – Health & Truth Marketplace",
     description:
       "Shop trusted natural remedies, organic foods, herbal wellness products, and inspiring spiritual literature. Bringing health, healing, and truth to every home.",
     url: "https://nurushop.co.ke",
@@ -71,8 +70,7 @@ export const metadata = {
 
   twitter: {
     card: "summary_large_image",
-    title:
-      "NuruShop – Health & Truth Marketplace",
+    title: "NuruShop – Health & Truth Marketplace",
     description:
       "Discover natural healing products, organic foods, and inspiring spiritual books at NuruShop.",
     images: ["/assets/logo.jpg"],
@@ -92,3 +90,17 @@ export const metadata = {
 
   category: "health and wellness",
 };
+
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body className="bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased">
+        <UserProvider>
+          <ThemeProvider>
+            <CartProvider>{children}</CartProvider>
+          </ThemeProvider>
+        </UserProvider>
+      </body>
+    </html>
+  );
+}

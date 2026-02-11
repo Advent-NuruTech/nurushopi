@@ -1,9 +1,10 @@
 import "./globals.css";
-import React, { ReactNode } from "react";
+import React, { ReactNode, Suspense } from "react";
 
 import { CartProvider } from "@/context/CartContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { UserProvider } from "@/context/UserContext";
+import ReferralTracker from "@/components/ReferralTracker";
 
 export const metadata = {
   metadataBase: new URL("https://nurushop.co.ke"),
@@ -96,6 +97,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <body className="bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased">
         <UserProvider>
+          <Suspense fallback={null}>
+            <ReferralTracker />
+          </Suspense>
           <ThemeProvider>
             <CartProvider>{children}</CartProvider>
           </ThemeProvider>

@@ -18,7 +18,7 @@ export default function ProductCard({ product }: { product: Product }) {
   // ✅ Set main image safely
   useEffect(() => {
     if (product) {
-      setMainImage(product.images?.[0] || "/images/placeholder.png");
+      setMainImage(product.images?.[0] || "/assets/logo.jpg");
     }
   }, [product]);
 

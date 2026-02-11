@@ -44,6 +44,7 @@ export default function UploadProductPage() {
   const [categories, setCategories] = useState<CategoryOption[]>([]);
   const [categoryInput, setCategoryInput] = useState("");
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [uploadedPublicIds, setUploadedPublicIds] = useState<string[]>([]);
   const [status, setStatus] = useState<"idle" | "uploading" | "success" | "error">("idle");
   const [progress, setProgress] = useState(0);
   const [darkMode, setDarkMode] = useState(false);
@@ -121,6 +122,7 @@ export default function UploadProductPage() {
 
     try {
       const uploaded: string[] = [];
+      const publicIds: string[] = [];
 
       if (formData.files) {
         for (let i = 0; i < formData.files.length; i++) {
@@ -134,7 +136,9 @@ export default function UploadProductPage() {
 
           const result = await res.json();
           uploaded.push(result.url);
+          if (result.public_id) publicIds.push(result.public_id);
           setUploadedImages([...uploaded]);
+          setUploadedPublicIds([...publicIds]);
           setProgress(((i + 1) / formData.files.length) * 100);
         }
       }
@@ -152,6 +156,7 @@ export default function UploadProductPage() {
         shortDescription: formData.description.slice(0, 160),
         category: formData.category,
         images: uploaded,
+        imagePublicIds: publicIds,
         coverImage: uploaded[0] || null // first image becomes homepage image
       };
 
@@ -176,6 +181,7 @@ export default function UploadProductPage() {
   const handleReset = () => {
     setStatus("idle");
     setUploadedImages([]);
+    setUploadedPublicIds([]);
     setImagePreviews([]);
     setFormData({
       name: "",

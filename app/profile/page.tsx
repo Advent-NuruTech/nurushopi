@@ -26,6 +26,7 @@ import OrderDetailsModal from "./components/OrderDetailsModal";
 import ConfirmSaveModal from "./components/ConfirmSaveModal";
 import AuthRequired from "./components/AuthRequired";
 import MessagesPanel from "./components/MessagesPanel";
+import WalletTab from "./components/WalletTab";
 //import QuickReorder from "./components/QuickReorder";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 
@@ -130,6 +131,7 @@ export default function ProfilePage() {
       { id: "orders", label: "Orders", icon: Package },
       { id: "messages", label: "Messages", icon: MessageSquare },
       //{ id: "reorder", label: "Quick Reorder", icon: ShoppingBag },
+      { id: "wallet", label: "Wallet", icon: ShoppingBag },
       { id: "profile", label: "Profile", icon: Settings },
       { id: "invite", label: "Invite", icon: Gift },
       { id: "shop", label: "Shop", icon: Store },
@@ -260,6 +262,10 @@ export default function ProfilePage() {
           />
         )}
 
+        {activeTab === "wallet" && uid && (
+          <WalletTab userId={uid} />
+        )}
+
      {/*
 {activeTab === "reorder" && (
   <QuickReorder orders={filteredOrders} />
@@ -308,6 +314,8 @@ export default function ProfilePage() {
           <OrderDetailsModal
             order={selectedOrder}
             onClose={() => setSelectedOrder(null)}
+            userId={uid}
+            userName={displayName}
           />
         )}
       </AnimatePresence>

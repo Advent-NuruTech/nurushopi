@@ -1,11 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { X, CheckCircle2, XCircle, ExternalLink } from "lucide-react";
 import { formatPrice } from "@/lib/formatPrice";
 import { statusLabel, statusBadgeClass } from "./orderUtils";
-// In OrderDetailsModal.tsx
 import ReceiptDownloadButton from "./ReceiptDownloadButton";
 
 import type { ApiOrder } from "../types";
@@ -13,9 +12,126 @@ import type { ApiOrder } from "../types";
 interface OrderDetailsModalProps {
   order: ApiOrder | null;
   onClose: () => void;
+  userId?: string | null;
+  userName?: string;
 }
 
-export default function OrderDetailsModal({ order, onClose }: OrderDetailsModalProps) {
+type ExistingReview = {
+  id: string;
+  productId: string;
+  message: string;
+  status?: string;
+};
+
+export default function OrderDetailsModal({
+  order,
+  onClose,
+  userId,
+  userName,
+}: OrderDetailsModalProps) {
+  // ALL HOOKS MUST BE CALLED AT THE TOP LEVEL, UNCONDITIONALLY
+  const [existingReviews, setExistingReviews] = useState<Record<string, ExistingReview>>({});
+  const [reviewInputs, setReviewInputs] = useState<Record<string, string>>({});
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewsSubmitting, setReviewsSubmitting] = useState(false);
+  const [reviewMessage, setReviewMessage] = useState<string | null>(null);
+
+  // useMemo must be called unconditionally
+  const productItems = useMemo(() => {
+    // If no order, return empty array
+    if (!order) return [];
+    return (order.items ?? []).map((item) => ({
+      productId: item.productId || item.id,
+      name: item.name,
+    })).filter((it) => it.productId);
+  }, [order]);
+
+  const hasAnyReview = Object.keys(existingReviews).length > 0;
+
+  // useEffect must be called unconditionally
+  useEffect(() => {
+    // Guard clause inside the effect, not conditional hook call
+    if (!order?.id || !userId) {
+      return;
+    }
+    
+    setReviewMessage(null);
+    setReviewInputs({});
+    setReviewsLoading(true);
+    
+    fetch(`/api/reviews?orderId=${order.id}&userId=${userId}`)
+      .then((r) => r.json())
+      .then((d) => {
+        const list = Array.isArray(d.reviews) ? d.reviews : [];
+        const map: Record<string, ExistingReview> = {};
+        list.forEach((r: ExistingReview & { productId?: string }) => {
+          if (r.productId) map[r.productId] = r;
+        });
+        setExistingReviews(map);
+      })
+      .catch(() => setExistingReviews({}))
+      .finally(() => setReviewsLoading(false));
+  }, [order?.id, userId]);
+
+  const handleSubmitReviews = async () => {
+    if (!order || !userId || !userName) return;
+    
+    const reviews = productItems
+      .map((item) => ({
+        productId: item.productId,
+        productName: item.name,
+        message: reviewInputs[item.productId] ?? "",
+      }))
+      .filter((r) => r.message.trim().length > 0);
+
+    if (!reviews.length) {
+      setReviewMessage("Please write at least one review before submitting.");
+      return;
+    }
+
+    setReviewsSubmitting(true);
+    setReviewMessage(null);
+    
+    try {
+      const res = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          userName,
+          orderId: order.id,
+          reviews,
+        }),
+      });
+      
+      if (!res.ok) {
+        setReviewMessage("Failed to submit reviews. Please try again.");
+        return;
+      }
+      
+      setReviewInputs({});
+      const data = await res.json();
+      
+      if (data.created === 0) {
+        setReviewMessage("Reviews were already submitted for these products.");
+      } else {
+        setReviewMessage("Thank you! Your reviews were sent for approval.");
+      }
+      
+      const refreshed = await fetch(`/api/reviews?orderId=${order.id}&userId=${userId}`);
+      const refreshedData = await refreshed.json();
+      const list = Array.isArray(refreshedData.reviews) ? refreshedData.reviews : [];
+      const map: Record<string, ExistingReview> = {};
+      list.forEach((r: ExistingReview & { productId?: string }) => {
+        if (r.productId) map[r.productId] = r;
+      });
+      setExistingReviews(map);
+    } finally {
+      setReviewsSubmitting(false);
+    }
+  };
+
+  // Early return AFTER all hooks
   if (!order) return null;
 
   return (
@@ -94,22 +210,89 @@ export default function OrderDetailsModal({ order, onClose }: OrderDetailsModalP
               ))}
             </ul>
           </div>
+
+          {order.status === "received" && userId && !hasAnyReview && (
+            <div className="mt-6 border-t border-slate-200 dark:border-slate-800 pt-4">
+              <h4 className="text-sm font-semibold text-slate-900 dark:text-white mb-2">
+                Your order was delivered. Kindly share your experience.
+              </h4>
+              {reviewsLoading ? (
+                <p className="text-sm text-slate-500">Loading review form...</p>
+              ) : (
+                <div className="space-y-4">
+                  {productItems.map((item) => {
+                    const existing = existingReviews[item.productId];
+                    return (
+                      <div key={item.productId} className="border rounded-lg p-3 bg-slate-50 dark:bg-slate-800/60">
+                        <p className="text-sm font-medium text-slate-900 dark:text-white">
+                          {item.name}
+                        </p>
+                        {existing ? (
+                          <p className="text-xs text-slate-500 mt-1">
+                            Review status: {existing.status ?? "pending"}
+                          </p>
+                        ) : (
+                          <p className="text-xs text-slate-500 mt-1">
+                            How was your experience with {item.name}?
+                          </p>
+                        )}
+
+                        {existing ? (
+                          <p className="text-sm text-slate-700 dark:text-slate-300 mt-2">
+                            {existing.message}
+                          </p>
+                        ) : (
+                          <textarea
+                            rows={3}
+                            value={reviewInputs[item.productId] ?? ""}
+                            onChange={(e) =>
+                              setReviewInputs((prev) => ({
+                                ...prev,
+                                [item.productId]: e.target.value,
+                              }))
+                            }
+                            placeholder="Write your message here..."
+                            className="mt-2 w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2 text-sm"
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
+
+                  {reviewMessage && (
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
+                      {reviewMessage}
+                    </p>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={handleSubmitReviews}
+                    disabled={reviewsSubmitting}
+                    className="w-full bg-sky-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-sky-700 disabled:opacity-60"
+                  >
+                    {reviewsSubmitting ? "Submitting..." : "Submit Reviews"}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
         <div className="p-6 border-t border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row justify-between items-center gap-4">
-  <Link
-    href="/shop"
-    className="inline-flex items-center gap-2 text-sky-600 dark:text-sky-400 font-medium hover:underline"
-    onClick={onClose}
-  >
-    Continue shopping
-    <ExternalLink size={16} />
-  </Link>
-  
-  <ReceiptDownloadButton 
-    order={order} 
-    disabled={order.status !== "received"} 
-  />
-</div>
+          <Link
+            href="/shop"
+            className="inline-flex items-center gap-2 text-sky-600 dark:text-sky-400 font-medium hover:underline"
+            onClick={onClose}
+          >
+            Continue shopping
+            <ExternalLink size={16} />
+          </Link>
+          
+          <ReceiptDownloadButton 
+            order={order} 
+            disabled={order.status !== "received"} 
+          />
+        </div>
       </div>
     </div>
   );

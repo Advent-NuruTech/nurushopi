@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import type { Route } from "next";
 
 interface NotificationItem {
   id: string;
@@ -24,6 +25,18 @@ const toDisplayDate = (value: unknown): string => {
     return new Date((value as { seconds: number }).seconds * 1000).toLocaleString();
   }
   return "";
+};
+
+const getNotificationRoute = (n: NotificationItem): Route | null => {
+  if (!n.relatedId) return null;
+  const encoded = encodeURIComponent(n.relatedId);
+  if (n.type === "order") {
+    return `/admin/dashboard?tab=orders&orderId=${encoded}` as Route;
+  }
+  if (n.type === "message") {
+    return `/admin/dashboard/messages/${encoded}` as Route;
+  }
+  return `/admin/dashboard/notifications` as Route;
 };
 
 export default function NotificationsPage() {
@@ -53,9 +66,10 @@ export default function NotificationsPage() {
       loadNotifications();
     }
 
-    // Navigate to the related message page if there is a relatedId
-    if (notification.relatedId) {
-      router.push(`/admin/dashboard/messages/${notification.relatedId}`);
+    // Navigate to the related page if there is a relatedId
+    const route = getNotificationRoute(notification);
+    if (route) {
+      router.push(route);
     }
   };
 

@@ -138,7 +138,7 @@ export default function OrderList({ userId }: { userId: string }) {
               <div key={idx} className="flex items-center gap-3">
                 <div className="relative w-16 h-16">
                   <Image
-                    src={it.image || "/images/placeholder.png"}
+                    src={it.image || "/assets/logo.jpg"}
                     alt={it.name}
                     fill
                     className="object-cover rounded"

@@ -25,6 +25,8 @@ export default function MyOrdersPage() {
   }, []);
 
   const uid = firebaseUser?.uid ?? contextUser?.id ?? null;
+  const displayName =
+    contextUser?.name || firebaseUser?.displayName || "User";
   const { filteredOrders, ordersLoading } = useOrders({ uid, orderFilter });
 
   if (isLoading) {
@@ -58,6 +60,8 @@ export default function MyOrdersPage() {
       <OrderDetailsModal
         order={selectedOrder}
         onClose={() => setSelectedOrder(null)}
+        userId={uid}
+        userName={displayName}
       />
     </div>
   );

@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from "react";
 import { Bell } from "lucide-react";
 import { useRouter } from "next/navigation";
+import type { Route } from "next";
 import { useNotifications } from "../context/NotificationsContext";
 
 /* ---------- Notification Type ---------- */
@@ -10,6 +11,7 @@ interface NotificationItem {
   id: string;
   readAt?: unknown;
   relatedId?: string;
+  type?: string;
   senderName?: string;
   userName?: string;
   title?: string;
@@ -48,6 +50,24 @@ const toDisplayDate = (value: unknown): string => {
   return "";
 };
 
+const getNotificationRoute = (n: NotificationItem): Route | null => {
+  if (!n.relatedId) return null;
+  const encoded = encodeURIComponent(n.relatedId);
+  if (n.type === "order") {
+    return `/admin/dashboard?tab=orders&orderId=${encoded}` as Route;
+  }
+  if (n.type === "message") {
+    return `/admin/dashboard/messages/${encoded}` as Route;
+  }
+  if (n.type === "review") {
+    return `/admin/dashboard?tab=reviews&reviewId=${encoded}` as Route;
+  }
+  if (n.type === "wallet") {
+    return `/admin/dashboard?tab=redemptions&redemptionId=${encoded}` as Route;
+  }
+  return `/admin/dashboard/notifications` as Route;
+};
+
 export default function NotificationsBell() {
   const [open, setOpen] = useState(false);
 
@@ -71,8 +91,9 @@ export default function NotificationsBell() {
   const handleNotificationClick = async (n: NotificationItem) => {
     if (!n.readAt) await markRead(n.id);
 
-    if (n.relatedId) {
-      router.push(`/admin/dashboard/messages/${n.relatedId}`);
+    const route = getNotificationRoute(n);
+    if (route) {
+      router.push(route);
       setOpen(false);
     }
   };
@@ -89,9 +110,9 @@ export default function NotificationsBell() {
         <Bell size={18} />
 
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs min-w-[18px] h-[18px] rounded-full flex items-center justify-center px-1">
-            {unreadCount > 99 ? "99+" : unreadCount}
-          </span>
+          <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs h-[18px] rounded-full flex items-center justify-center px-2 min-w-[18px]">
+  {unreadCount}
+</span>
         )}
       </button>
 

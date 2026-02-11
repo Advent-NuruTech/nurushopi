@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import type { Route } from "next";
@@ -21,6 +21,7 @@ import { formatPrice } from "@/lib/formatPrice";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
 import { getDiscountPercent, getOriginalPrice, getSellingPrice } from "@/lib/pricing";
+import FormattedDescription from "@/components/ui/FormattedDescription";
 
 /* =========================
    TYPES
@@ -38,15 +39,19 @@ interface Product {
   createdAt?: string;
 }
 
+interface Review {
+  id: string;
+  userName: string;
+  message: string;
+  createdAt?: string;
+}
+
 /* =========================
    COMPONENT
 ========================= */
-export default function ProductDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const { id } = params;
+export default function ProductDetailPage() {
+  const params = useParams<{ id: string }>();
+  const id = typeof params?.id === "string" ? params.id : "";
   const router = useRouter();
   const { addToCart } = useCart();
 
@@ -55,8 +60,26 @@ export default function ProductDetailPage({
   const [mainImage, setMainImage] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
 
-  const [showFullDescription, setShowFullDescription] = useState(false);
+  const reviewDate = (value: unknown) => {
+    if (!value) return "";
+    if (typeof value === "string" || typeof value === "number") {
+      return new Date(value).toLocaleDateString();
+    }
+    if (typeof value === "object" && value && "toDate" in value) {
+      const d = (value as { toDate: () => Date }).toDate();
+      return d.toLocaleDateString();
+    }
+    if (typeof value === "object" && value && "seconds" in value) {
+      const s = (value as { seconds: number }).seconds;
+      return new Date(s * 1000).toLocaleDateString();
+    }
+    return "";
+  };
+
+  const [isDescriptionOpen, setIsDescriptionOpen] = useState(false);
 
   /* =========================
      DESCRIPTION LIMITER
@@ -87,7 +110,7 @@ export default function ProductDetailPage({
         const images =
           Array.isArray(d.images) && d.images.length > 0
             ? d.images
-            : [d.imageUrl || "/images/placeholder.png"];
+            : [d.imageUrl || "/assets/logo.jpg"];
 
         const prod: Product = {
           id: snap.id,
@@ -135,7 +158,7 @@ export default function ProductDetailPage({
                 images:
                   Array.isArray(rd.images) && rd.images.length > 0
                     ? rd.images
-                    : [rd.imageUrl || "/images/placeholder.png"],
+                    : [rd.imageUrl || "/assets/logo.jpg"],
               };
             })
         );
@@ -152,6 +175,16 @@ export default function ProductDetailPage({
     };
 
     load();
+  }, [id]);
+
+  useEffect(() => {
+    if (!id) return;
+    setReviewsLoading(true);
+    fetch(`/api/reviews?productId=${encodeURIComponent(id)}`)
+      .then((r) => r.json())
+      .then((d) => setReviews(d.reviews ?? []))
+      .catch(() => setReviews([]))
+      .finally(() => setReviewsLoading(false));
   }, [id]);
 
   /* =========================
@@ -280,7 +313,7 @@ export default function ProductDetailPage({
             )}
           </div>
 
-          {/* ===== Description with Read More ===== */}
+          {/* ===== Description Preview ===== */}
           {product.description && (
             <section className="pt-6 border-t">
               <h2 className="font-semibold text-lg mb-3">
@@ -288,22 +321,14 @@ export default function ProductDetailPage({
               </h2>
 
               <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 leading-relaxed text-slate-700 dark:text-slate-300">
-                <p className="whitespace-pre-line">
-                  {showFullDescription
-                    ? product.description
-                    : getShortDescription(product.description)}
-                </p>
+                <p>{getShortDescription(product.description)}</p>
 
                 {product.description.split(" ").length > 60 && (
                   <button
-                    onClick={() =>
-                      setShowFullDescription(!showFullDescription)
-                    }
+                    onClick={() => setIsDescriptionOpen(true)}
                     className="mt-3 text-blue-600 font-medium hover:underline"
                   >
-                    {showFullDescription
-                      ? "Read less"
-                      : "Read more"}
+                    Read full description
                   </button>
                 )}
               </div>
@@ -363,6 +388,52 @@ export default function ProductDetailPage({
             })}
           </div>
         </section>
+      )}
+
+      {reviews.length > 0 && (
+        <section className="max-w-6xl mx-auto mt-16">
+          <h2 className="text-xl font-semibold mb-4">
+            What people say about this product
+          </h2>
+          <div className="grid gap-4 md:grid-cols-2">
+            {reviews.map((r) => (
+              <div
+                key={r.id}
+                className="border rounded-xl p-4 bg-white dark:bg-slate-900"
+              >
+                <p className="text-sm text-slate-500">
+                  {reviewDate(r.createdAt)}
+                </p>
+                <p className="font-semibold text-slate-900 dark:text-white">{r.userName}</p>
+                <p className="text-slate-700 dark:text-slate-300 mt-2">{r.message}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Description Modal */}
+      {isDescriptionOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-gray-900 w-full max-w-3xl rounded-2xl shadow-xl overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                {product.name} — Description
+              </h3>
+              <button
+                onClick={() => setIsDescriptionOpen(false)}
+                className="text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+              >
+                Close
+              </button>
+            </div>
+            <div className="p-6 max-h-[70vh] overflow-y-auto">
+              <div className="text-slate-700 dark:text-slate-300 leading-relaxed">
+                <FormattedDescription text={product.description ?? ""} />
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </main>
   );

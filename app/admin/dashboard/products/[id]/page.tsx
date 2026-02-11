@@ -17,6 +17,7 @@ interface Product {
   description?: string;
   shortDescription?: string;
   images?: string[];
+  imagePublicIds?: string[];
 }
 
 interface CategoryOption {
@@ -53,6 +54,7 @@ export default function ProductEditPage() {
           setProduct({
             ...found,
             images: found.images ?? [],
+            imagePublicIds: found.imagePublicIds ?? [],
           });
 
           setCategoryInput(found.category ?? "");
@@ -108,8 +110,10 @@ export default function ProductEditPage() {
 
       const imgs = [...(product.images ?? [])];
       imgs[index] = result.url;
+      const publicIds = [...(product.imagePublicIds ?? [])];
+      publicIds[index] = result.public_id ?? publicIds[index];
 
-      setProduct({ ...product, images: imgs });
+      setProduct({ ...product, images: imgs, imagePublicIds: publicIds });
     } finally {
       setUploadingIndex(null);
     }
@@ -131,6 +135,7 @@ export default function ProductEditPage() {
     setProduct({
       ...product,
       images: [...(product.images ?? []), result.url],
+      imagePublicIds: [...(product.imagePublicIds ?? []), result.public_id].filter(Boolean),
     });
   };
 
@@ -139,8 +144,10 @@ export default function ProductEditPage() {
 
     const imgs = [...(product.images ?? [])];
     imgs.splice(index, 1);
+    const publicIds = [...(product.imagePublicIds ?? [])];
+    publicIds.splice(index, 1);
 
-    setProduct({ ...product, images: imgs });
+    setProduct({ ...product, images: imgs, imagePublicIds: publicIds });
   };
 
   /* ---------------- Save ---------------- */

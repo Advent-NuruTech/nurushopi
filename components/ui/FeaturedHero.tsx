@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import SectionHeader from "@/components/ui/SectionHeader";
 import { useCart } from "@/context/CartContext";
 import { formatCategoryLabel } from "@/lib/categoryUtils";
 import { formatPrice } from "@/lib/formatPrice";
@@ -115,26 +116,6 @@ export default function FeaturedSection({ products, categories = [] }: FeaturedS
     container.addEventListener("touchend", stop);
     container.addEventListener("touchmove", move);
 
-    // Automatic scroll
-    let autoScroll: number;
-    const startAutoScroll = () => {
-      autoScroll = window.setInterval(() => {
-        if (!container) return;
-        container.scrollLeft += 1; // scroll 1px per tick
-        if (container.scrollLeft >= container.scrollWidth / 2) {
-          container.scrollLeft = 0;
-        }
-      }, 10);
-    };
-    startAutoScroll();
-
-    // Pause automatic scroll on drag
-    const pauseAutoScroll = () => window.clearInterval(autoScroll);
-    container.addEventListener("mousedown", pauseAutoScroll);
-    container.addEventListener("touchstart", pauseAutoScroll);
-    container.addEventListener("mouseup", startAutoScroll);
-    container.addEventListener("touchend", startAutoScroll);
-
     return () => {
       container.removeEventListener("mousedown", start);
       container.removeEventListener("mouseleave", stop);
@@ -143,11 +124,6 @@ export default function FeaturedSection({ products, categories = [] }: FeaturedS
       container.removeEventListener("touchstart", start);
       container.removeEventListener("touchend", stop);
       container.removeEventListener("touchmove", move);
-      container.removeEventListener("mousedown", pauseAutoScroll);
-      container.removeEventListener("touchstart", pauseAutoScroll);
-      container.removeEventListener("mouseup", startAutoScroll);
-      container.removeEventListener("touchend", startAutoScroll);
-      window.clearInterval(autoScroll);
     };
   }, []);
 
@@ -157,6 +133,8 @@ export default function FeaturedSection({ products, categories = [] }: FeaturedS
         Loading featured products...
       </div>
     );
+
+  const categorySlug = featuredByCategory[currentCategory].category.slug;
 
   return (
     <section className="relative w-full px-0 sm:px-6 py-4 sm:py-12 overflow-hidden bg-white dark:bg-black transition-colors">
@@ -171,30 +149,37 @@ export default function FeaturedSection({ products, categories = [] }: FeaturedS
             className="w-full"
           >
             {/* Header */}
-            <div className="flex justify-between items-center w-full px-2 sm:px-6 mb-4">
-              <h1 className="text-xl sm:text-2xl font-semibold capitalize text-blue-700 dark:text-blue-400">
-                {featuredByCategory[currentCategory].category.name ||
-                  formatCategoryLabel(featuredByCategory[currentCategory].category.slug)}
-              </h1>
-              <Link
-                href={{
-                  pathname: "/shop",
-                  query: { category: featuredByCategory[currentCategory].category.slug },
-                }}
-              >
-                <Button
-                  variant="outline"
-                  className="text-blue-700 dark:text-blue-300 border-blue-600 dark:border-blue-400 hover:bg-blue-600 hover:text-white dark:hover:text-white"
+            <div className="w-full px-2 sm:px-6 mb-3">
+              <SectionHeader
+                title={
+                  featuredByCategory[currentCategory].category.name ||
+                  formatCategoryLabel(categorySlug)
+                }
+                href={`/shop?category=${encodeURIComponent(categorySlug)}`}
+              />
+            </div>
+
+            {/* Category Tabs */}
+            <div className="flex gap-2 overflow-x-auto px-2 sm:px-6 pb-2 scrollbar-hide">
+              {featuredByCategory.map((group, idx) => (
+                <button
+                  key={group.category.slug}
+                  onClick={() => setCurrentCategory(idx)}
+                  className={`px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap border transition ${
+                    idx === currentCategory
+                      ? "bg-blue-600 text-white border-blue-600"
+                      : "bg-white dark:bg-gray-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-blue-400"
+                  }`}
                 >
-                  View All →
-                </Button>
-              </Link>
+                  {group.category.name || formatCategoryLabel(group.category.slug)}
+                </button>
+              ))}
             </div>
 
             {/* Infinite scroll container */}
             <div
               ref={scrollRef}
-              className="flex gap-3 sm:gap-4 overflow-x-auto px-1 sm:px-3 scrollbar-hide cursor-grab active:cursor-grabbing snap-x snap-mandatory"
+              className="flex gap-3 sm:gap-4 overflow-x-auto px-1 sm:px-3 scrollbar-hide scroll-smooth cursor-grab active:cursor-grabbing snap-x snap-mandatory"
             >
               {/* Duplicate items to allow infinite effect */}
               {[

@@ -20,17 +20,24 @@ interface FilterState {
   search: string;
 }
 
+type AdminWithStats = Admin & {
+  productCount?: number;
+  productValue?: number;
+  salesTotal?: number;
+};
+
 export default function AdminsTab() {
-  const [admins, setAdmins] = useState<Admin[]>([]);
-  const [filteredAdmins, setFilteredAdmins] = useState<Admin[]>([]);
+  const [admins, setAdmins] = useState<AdminWithStats[]>([]);
+  const [filteredAdmins, setFilteredAdmins] = useState<AdminWithStats[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedAdmin, setExpandedAdmin] = useState<string | null>(null);
+  const [totals, setTotals] = useState<{ totalProducts?: number; totalSales?: number }>({});
   const [filters, setFilters] = useState<FilterState>({
     role: "all",
     search: ""
   });
 
-  const applyFilters = useCallback((adminList: Admin[], filterState: FilterState) => {
+  const applyFilters = useCallback((adminList: AdminWithStats[], filterState: FilterState) => {
     let result = [...adminList];
     
     if (filterState.role !== "all") {
@@ -54,6 +61,7 @@ export default function AdminsTab() {
       .then((d) => {
         const adminsList = d.admins ?? [];
         setAdmins(adminsList);
+        setTotals(d.totals ?? {});
         applyFilters(adminsList, filters);
       })
       .finally(() => setLoading(false));
@@ -99,7 +107,7 @@ export default function AdminsTab() {
   return (
     <div className="space-y-6">
       {/* Header Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
         <div className="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-4">
           <div className="flex items-center justify-between">
             <div>
@@ -144,6 +152,34 @@ export default function AdminsTab() {
             </div>
             <div className="p-2 bg-white rounded-lg">
               <UserCheck className="w-6 h-6 text-emerald-600" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-r from-sky-50 to-sky-100 border border-sky-200 rounded-xl p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-sky-700">Total Products</p>
+              <p className="text-2xl font-bold text-sky-900 mt-1">
+                {Number(totals.totalProducts ?? 0).toLocaleString()}
+              </p>
+            </div>
+            <div className="p-2 bg-white rounded-lg">
+              <UserCheck className="w-6 h-6 text-sky-600" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-purple-700">Total Sales</p>
+              <p className="text-2xl font-bold text-purple-900 mt-1">
+                {Math.round(Number(totals.totalSales ?? 0)).toLocaleString()}
+              </p>
+            </div>
+            <div className="p-2 bg-white rounded-lg">
+              <UserCheck className="w-6 h-6 text-purple-600" />
             </div>
           </div>
         </div>
@@ -194,6 +230,9 @@ export default function AdminsTab() {
                 <tr>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Admin</th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Role</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Products</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Product Value</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Sales</th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
                 </tr>
@@ -235,6 +274,15 @@ export default function AdminsTab() {
                           </>
                         )}
                       </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-700">
+                      {admin.productCount ?? 0}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-700">
+                      {Math.round(Number(admin.productValue ?? 0)).toLocaleString()}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-700">
+                      {Math.round(Number(admin.salesTotal ?? 0)).toLocaleString()}
                     </td>
                     <td className="px-6 py-4">
                       <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">

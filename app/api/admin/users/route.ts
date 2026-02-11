@@ -8,14 +8,35 @@ export async function GET(request: Request) {
   if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
-    const snap = await getDocs(collection(db, "users"));
-    const users = snap.docs.map((d) => {
+    const [usersSnap, ordersSnap] = await Promise.all([
+      getDocs(collection(db, "users")),
+      getDocs(collection(db, "orders")),
+    ]);
+
+    const orderStats = new Map<string, { count: number; spend: number }>();
+    ordersSnap.forEach((o) => {
+      const data = o.data() as Record<string, unknown>;
+      const userId = String(data.userId ?? "");
+      if (!userId) return;
+      const current = orderStats.get(userId) ?? { count: 0, spend: 0 };
+      current.count += 1;
+      current.spend += Number(data.totalAmount ?? 0);
+      orderStats.set(userId, current);
+    });
+
+    const users = usersSnap.docs.map((d) => {
       const data = d.data() as Record<string, unknown>;
+      const stats = orderStats.get(d.id) ?? { count: 0, spend: 0 };
       return {
         id: d.id,
         name: (data.fullName as string) || (data.name as string) || (data.email as string) || "User",
         email: (data.email as string) || "",
         phone: (data.phone as string) || "",
+        walletBalance: Number(data.walletBalance ?? 0),
+        totalOrders: stats.count,
+        totalSpend: stats.spend,
+        lastLogin: data.lastLogin ?? null,
+        createdAt: data.createdAt ?? null,
       };
     });
     return NextResponse.json({ users });

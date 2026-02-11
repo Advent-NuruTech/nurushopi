@@ -3,10 +3,12 @@ export type OrderStatusFilter = "all" | "pending" | "shipped" | "received" | "ca
 
 export interface OrderItem {
   id: string;
+  productId?: string;
   name: string;
   price: number;
   quantity: number;
   image?: string;
+  mode?: "wholesale" | "retail";
 }
 
 export interface ApiOrder {
@@ -29,6 +31,10 @@ export type UserProfile = {
   phone?: string;
   address?: string;
   inviteCount?: number;
+  walletBalance?: number;
+  referredBy?: string | null;
+  lastLogin?: unknown;
+  createdAt?: unknown;
   [key: string]: unknown;
 };
 

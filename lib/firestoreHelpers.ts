@@ -30,8 +30,15 @@ export interface Product {
   shortDescription?: string;
   category: string;
   images: string[];
+  imagePublicIds?: string[];
   imageUrl: string;
   createdAt?: Timestamp;
+  mode?: "wholesale" | "retail";
+  wholesalePrice?: number;
+  wholesaleMinQty?: number;
+  wholesaleUnit?: string;
+  coverImage?: string | null;
+  createdBy?: string | null;
 }
 
 export interface Category {
@@ -72,6 +79,10 @@ export interface UserProfile {
   phone?: string;
   address?: string;
   inviteCount?: number;
+  walletBalance?: number;
+  referredBy?: string | null;
+  createdAt?: Timestamp;
+  lastLogin?: Timestamp;
   updatedAt?: Timestamp;
 }
 
@@ -140,6 +151,12 @@ export const getAllProducts = async (): Promise<Product[]> => {
       description: data.description,
       images,
       imageUrl: data.imageUrl || images[0] || "",
+      mode: data.mode ?? "retail",
+      wholesalePrice: data.wholesalePrice ?? undefined,
+      wholesaleMinQty: data.wholesaleMinQty ?? undefined,
+      wholesaleUnit: data.wholesaleUnit ?? undefined,
+      coverImage: data.coverImage ?? null,
+      createdBy: data.createdBy ?? null,
       createdAt: data.createdAt,
     } as Product;
   });
@@ -176,6 +193,12 @@ export const getProductsByCategory = async (
       description: data.description,
       images,
       imageUrl: data.imageUrl || images[0] || "",
+      mode: data.mode ?? "retail",
+      wholesalePrice: data.wholesalePrice ?? undefined,
+      wholesaleMinQty: data.wholesaleMinQty ?? undefined,
+      wholesaleUnit: data.wholesaleUnit ?? undefined,
+      coverImage: data.coverImage ?? null,
+      createdBy: data.createdBy ?? null,
       createdAt: data.createdAt,
     } as Product;
   });
@@ -206,6 +229,12 @@ export const getProductById = async (id: string): Promise<Product | null> => {
     description: data.description,
     images,
     imageUrl: data.imageUrl || images[0] || "",
+    mode: data.mode ?? "retail",
+    wholesalePrice: data.wholesalePrice ?? undefined,
+    wholesaleMinQty: data.wholesaleMinQty ?? undefined,
+    wholesaleUnit: data.wholesaleUnit ?? undefined,
+    coverImage: data.coverImage ?? null,
+    createdBy: data.createdBy ?? null,
     createdAt: data.createdAt,
   } as Product;
 };

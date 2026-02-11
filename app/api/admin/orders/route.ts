@@ -10,8 +10,11 @@ import {
   where,
   orderBy,
   serverTimestamp,
+  runTransaction,
 } from "firebase/firestore";
 import { getAdminFromRequest } from "@/lib/adminAuth";
+import { logAdminAction } from "@/lib/adminLogs";
+import { notifySeniorAdmins } from "@/lib/notifications";
 
 function toDateStr(t: unknown): string {
   if (!t) return new Date().toISOString();
@@ -61,6 +64,8 @@ export async function GET(request: Request) {
           name?: string;
           price?: number;
           quantity?: number;
+          image?: string;
+          mode?: "wholesale" | "retail";
         }[];
 
       return {
@@ -165,6 +170,13 @@ export async function PUT(request: Request) {
         shippedBy: admin.adminId,
         updatedAt: serverTimestamp(),
       });
+      await logAdminAction({
+        adminId: admin.adminId,
+        action: "order_status_update",
+        targetType: "order",
+        targetId: orderId,
+        metadata: { status: "shipped" },
+      });
       return NextResponse.json({ success: true });
     }
 
@@ -175,11 +187,99 @@ export async function PUT(request: Request) {
     if (status === "approved" || status === "received") {
       updates.status = "received";
       updates.approvedBy = admin.adminId;
+      updates.receivedAt = serverTimestamp();
     } else if (status === "cancelled") {
       updates.status = "cancelled";
     }
 
+    const currentStatus = snap.data()?.status as string | undefined;
+    const shouldApplyAffiliate =
+      (status === "approved" || status === "received") &&
+      currentStatus !== "received" &&
+      !(snap.data()?.affiliateApplied as boolean | undefined);
+
+    if (shouldApplyAffiliate) {
+      const orderData = snap.data() as Record<string, unknown>;
+      const orderUserId = String(orderData.userId ?? "");
+      const orderReferrerId = String(orderData.referrerId ?? "");
+      let referrerId = orderReferrerId;
+
+      if (!referrerId && orderUserId) {
+        const userSnap = await getDoc(doc(db, "users", orderUserId));
+        referrerId = String(userSnap.data()?.referredBy ?? "");
+      }
+
+      if (referrerId && referrerId !== orderUserId) {
+        const total = Number(orderData.totalAmount ?? 0);
+        const commission = Math.round(total * 0.01 * 100) / 100;
+        if (commission > 0) {
+          let walletBefore = 0;
+          let walletAfter = 0;
+          const walletTxRef = doc(collection(db, "wallet_transactions"));
+          const userRef = doc(db, "users", referrerId);
+
+          await runTransaction(db, async (tx) => {
+            const userSnap = await tx.get(userRef);
+            const userData = userSnap.exists() ? userSnap.data() : {};
+            walletBefore = Number(userData?.walletBalance ?? 0);
+            walletAfter = Math.max(0, walletBefore + commission);
+
+            tx.set(
+              userRef,
+              {
+                walletBalance: walletAfter,
+                walletUpdatedAt: serverTimestamp(),
+              },
+              { merge: true }
+            );
+
+            tx.set(walletTxRef, {
+              userId: referrerId,
+              type: "credit",
+              source: "affiliate",
+              amount: commission,
+              balanceAfter: walletAfter,
+              orderId,
+              createdAt: serverTimestamp(),
+              status: "approved",
+            });
+
+            tx.update(ref, {
+              affiliateApplied: true,
+              affiliateAmount: commission,
+              referrerId,
+            });
+          });
+
+          if (walletBefore < 150 && walletAfter >= 150) {
+            await notifySeniorAdmins({
+              title: "Wallet ready for redemption",
+              body: `User ${referrerId} wallet is ready for redemption.`,
+              type: "wallet",
+              relatedId: referrerId,
+            });
+          }
+
+          await logAdminAction({
+            adminId: admin.adminId,
+            action: "affiliate_reward",
+            targetType: "order",
+            targetId: orderId,
+            metadata: { referrerId, commission },
+          });
+        }
+      }
+    }
+
     await updateDoc(ref, updates);
+
+    await logAdminAction({
+      adminId: admin.adminId,
+      action: "order_status_update",
+      targetType: "order",
+      targetId: orderId,
+      metadata: { status: updates.status ?? status },
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

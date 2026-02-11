@@ -46,6 +46,7 @@ function CheckoutContent() {
   const [errorMessage, setErrorMessage] = useState("");
   const [phoneValid, setPhoneValid] = useState(true);
   const [showCountrySuggestions, setShowCountrySuggestions] = useState(false);
+  const [referrerId, setReferrerId] = useState<string | null>(null);
 
   const [user, setUser] = useState<User | null>(null);
   const [authReady, setAuthReady] = useState(false);
@@ -66,6 +67,15 @@ function CheckoutContent() {
       setAuthReady(true);
     });
     return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    try {
+      const ref = localStorage.getItem("nurushop_referrer");
+      if (ref) setReferrerId(ref);
+    } catch {
+      setReferrerId(null);
+    }
   }, []);
 
   useEffect(() => {
@@ -196,6 +206,8 @@ function CheckoutContent() {
         items: cart,
         totalAmount: total,
         createdAt: new Date().toISOString(),
+        referrerId:
+          referrerId && referrerId !== user?.uid ? referrerId : null,
       };
 
       const res = await fetch("/api/orders", {
@@ -252,6 +264,17 @@ function CheckoutContent() {
         <p className="text-gray-600 mt-3">
           You&apos;ll receive a confirmation via WhatsApp or Email soon.
         </p>
+        {user && (
+          <p className="text-gray-600 mt-3">
+            Your order is successful. Invite more people to keep earning wallet rewards.
+          </p>
+        )}
+        <Link
+          href="/profile"
+          className="mt-4 inline-flex items-center justify-center text-sky-600 font-medium hover:underline"
+        >
+          Go to your profile to invite more people →
+        </Link>
         <button
           className="mt-6 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
           onClick={() => router.push("/shop")}
@@ -282,7 +305,7 @@ function CheckoutContent() {
                   <div className="flex items-center gap-4">
                     <div className="relative w-20 h-20">
                       <Image
-                        src={item.image || "/images/placeholder.png"}
+                        src={item.image || "/assets/logo.jpg"}
                         alt={item.name}
                         fill
                         className="object-cover rounded-md"
@@ -363,7 +386,7 @@ function CheckoutContent() {
               >
                 <div className="relative w-full h-40">
                   <Image
-                    src={product.images?.[0] || "/images/placeholder.png"}
+                    src={product.images?.[0] || "/assets/logo.jpg"}
                     alt={product.name}
                     fill
                     className="object-cover"

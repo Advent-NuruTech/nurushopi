@@ -131,6 +131,15 @@ export default function Navbar() {
            <Link href="/shop" className="hover:text-blue-600">
             Shop
           </Link>
+          <Link
+            href="/wholeseller"
+            className="flex items-center gap-2 hover:text-blue-600"
+          >
+            Wholesale
+            <span className="text-[10px] font-bold uppercase bg-blue-600 text-white px-2 py-0.5 rounded-full">
+              Bulk
+            </span>
+          </Link>
 
           {/* Categories */}
           <div
@@ -183,9 +192,9 @@ export default function Navbar() {
           <Link href="/checkout" className="relative p-2 hover:text-blue-600">
             <ShoppingCart size={22} />
             {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs min-w-[20px] h-5 rounded-full flex items-center justify-center">
-                {cartCount > 99 ? "99+" : cartCount}
-              </span>
+             <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs h-5 rounded-full flex items-center justify-center px-2 min-w-[20px]">
+  {cartCount}
+</span>
             )}
           </Link>
 

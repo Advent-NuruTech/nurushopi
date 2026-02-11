@@ -17,6 +17,7 @@ import {
 } from "firebase/firestore";
 import { formatPrice } from "@/lib/formatPrice";
 import { getDiscountPercent, getOriginalPrice, getSellingPrice } from "@/lib/pricing";
+import SectionHeader from "@/components/ui/SectionHeader";
 
 interface Product {
   id: string;
@@ -35,6 +36,7 @@ interface ProductDoc {
   images?: string[];
   image?: string;
   imageURL?: string;
+  mode?: string;
 }
 
 const PAGE_SIZE = 5;
@@ -69,8 +71,10 @@ export default function NewArrivals() {
     const snapshot = await getDocs(q);
 
     if (!snapshot.empty) {
-      const fetched: Product[] = snapshot.docs.map((doc) => {
+      const fetched: Product[] = snapshot.docs
+        .map((doc) => {
         const d = doc.data() as ProductDoc;
+        if ((d.mode ?? "") === "wholesale") return null;
 
         const image =
           Array.isArray(d.images) && d.images.length > 0
@@ -95,7 +99,8 @@ export default function NewArrivals() {
           originalPrice,
           image,
         };
-      });
+      })
+      .filter(Boolean) as Product[];
 
       setProducts((prev) => {
         const map = new Map(prev.map((p) => [p.id, p]));
@@ -151,6 +156,9 @@ export default function NewArrivals() {
   return (
     <section className="w-full py-1 bg-gradient-to-b from-white to-gray-50 dark:from-black dark:to-gray-950">
       <div className="max-w-7xl mx-auto px-0 sm:px-6">
+        <div className="px-2 sm:px-3 mb-3">
+          <SectionHeader title="New Arrivals" href="/shop" />
+        </div>
         {/* Premium E-commerce Title */}
         <div className="relative">
           {/* Left Scroll Button */}
@@ -221,7 +229,7 @@ export default function NewArrivals() {
 
             {loading && (
               <div className="min-w-[240px] flex items-center justify-center text-gray-400">
-                Loading…
+                Products Loading… 
               </div>
             )}
           </div>

@@ -1,12 +1,13 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { auth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import {
   onAuthStateChanged,
   User as FirebaseUser,
   signOut,
 } from "firebase/auth";
+import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 
 interface AppUser {
   id: string;
@@ -42,6 +43,41 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(formatUser(firebaseUser));
       setIsLoading(false);
+
+      if (firebaseUser) {
+        const userRef = doc(db, "users", firebaseUser.uid);
+        getDoc(userRef)
+          .then((snap) => {
+            const basePayload = {
+              email: firebaseUser.email ?? null,
+              fullName: firebaseUser.displayName ?? null,
+              lastLogin: serverTimestamp(),
+            };
+            if (!snap.exists()) {
+              return setDoc(
+                userRef,
+                {
+                  ...basePayload,
+                  createdAt: serverTimestamp(),
+                },
+                { merge: true }
+              );
+            }
+            return setDoc(userRef, basePayload, { merge: true });
+          })
+          .catch(() => {
+            // ignore profile write errors
+          });
+
+        try {
+          const ref = localStorage.getItem("nurushop_referrer");
+          if (ref && ref === firebaseUser.uid) {
+            localStorage.removeItem("nurushop_referrer");
+          }
+        } catch {
+          // ignore storage errors
+        }
+      }
     });
 
     return () => unsubscribe();

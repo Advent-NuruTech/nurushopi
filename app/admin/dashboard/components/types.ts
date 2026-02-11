@@ -1,5 +1,17 @@
 export type AdminRole = "senior" | "sub";
-export type TabId = "invite" | "admins" | "products" | "orders" | "banners" | "contacts" | "categories" | "messages";
+export type TabId =
+  | "invite"
+  | "admins"
+  | "products"
+  | "orders"
+  | "banners"
+  | "contacts"
+  | "categories"
+  | "messages"
+  | "users"
+  | "reviews"
+  | "redemptions"
+  | "wholesale";
 
 export interface Admin {
   adminId: string;
@@ -15,6 +27,10 @@ export const TABS_SENIOR: { id: TabId; label: string; icon: string }[] = [
   { id: "categories", label: "Categories", icon: "Tags" },
   { id: "products", label: "Products", icon: "Package" },
   { id: "orders", label: "Orders", icon: "ShoppingCart" },
+  { id: "wholesale", label: "Wholesale", icon: "Warehouse" },
+  { id: "reviews", label: "Reviews", icon: "MessageSquare" },
+  { id: "redemptions", label: "Redemptions", icon: "Wallet" },
+  { id: "users", label: "Users", icon: "Users" },
   { id: "banners", label: "Banners", icon: "ImageIcon" },
   { id: "contacts", label: "Contacts", icon: "MessageSquare" },
   { id: "messages", label: "Messages", icon: "MessageSquare" },

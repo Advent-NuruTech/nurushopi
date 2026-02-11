@@ -1,0 +1,70 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Requires custom claims set on admin users.
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.admin == true;
+    }
+
+    match /products/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /categories/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /orders/{id} {
+      allow read: if isOwner(resource.data.userId) || isAdmin();
+      allow create: if isOwner(request.resource.data.userId);
+      allow update, delete: if isOwner(resource.data.userId) || isAdmin();
+    }
+
+    match /users/{id} {
+      allow read, write: if isOwner(id) || isAdmin();
+    }
+
+    match /reviews/{id} {
+      allow read: if resource.data.status == "approved";
+      allow create: if isOwner(request.resource.data.userId);
+      allow update: if isAdmin();
+    }
+
+    match /wallet_transactions/{id} {
+      allow read: if isOwner(resource.data.userId) || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /wallet_redemptions/{id} {
+      allow read: if isOwner(resource.data.userId) || isAdmin();
+      allow create: if isOwner(request.resource.data.userId);
+      allow update: if isAdmin();
+    }
+
+    match /admin_logs/{id} {
+      allow read, write: if isAdmin();
+    }
+
+    match /notifications/{id} {
+      allow read, write: if isSignedIn() || isAdmin();
+    }
+
+    match /admins/{id} {
+      allow read, write: if isAdmin();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

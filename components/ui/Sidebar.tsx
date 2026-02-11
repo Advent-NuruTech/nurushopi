@@ -126,6 +126,18 @@ export default function Sidebar({ isOpen, setIsOpen, categories }: SidebarProps)
               </Link>
 
               <Link
+                href="/wholeseller"
+                onClick={handleLinkClick}
+                className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium transition-colors"
+              >
+                <span className="text-lg">📦</span>
+                Wholesale
+                <span className="ml-auto text-[10px] font-bold uppercase bg-blue-600 text-white px-2 py-0.5 rounded-full">
+                  Bulk
+                </span>
+              </Link>
+
+              <Link
                 href="/myoders"
                 onClick={handleLinkClick}
                 className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium transition-colors"

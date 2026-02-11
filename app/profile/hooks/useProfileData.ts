@@ -28,6 +28,10 @@ const convertToLocalProfile = (profile: FirestoreUserProfile | null): LocalUserP
     phone: profile.phone,
     address: profile.address,
     inviteCount: profile.inviteCount,
+    walletBalance: profile.walletBalance,
+    referredBy: profile.referredBy ?? null,
+    lastLogin: profile.lastLogin,
+    createdAt: profile.createdAt,
   };
 };
 

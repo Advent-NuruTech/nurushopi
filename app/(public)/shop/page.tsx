@@ -5,6 +5,7 @@ import Link from "next/link";
 import { formatPrice } from "@/lib/formatPrice";
 import { formatCategoryLabel } from "@/lib/categoryUtils";
 import { getDiscountPercent, getOriginalPrice, getSellingPrice } from "@/lib/pricing";
+import SectionHeader from "@/components/ui/SectionHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -16,10 +17,16 @@ interface RawProduct {
   originalPrice?: number;
   sellingPrice?: number;
   image?: string;
+  imageUrl?: string;
   images?: string[];
   category?: string;
   slug?: string;
   createdAt?: Timestamp | string | null;
+  mode?: string;
+  wholesalePrice?: number;
+  wholesaleMinQty?: number;
+  wholesaleUnit?: string;
+  coverImage?: string | null;
 }
 
 // Canonical Product type without description
@@ -36,15 +43,29 @@ interface Product {
   createdAt?: number | string | null;
 }
 
+interface WholesaleProduct {
+  id: string;
+  name: string;
+  wholesalePrice: number;
+  wholesaleMinQty?: number;
+  wholesaleUnit?: string;
+  imageUrl: string;
+  price?: number;
+  category: string;
+  slug?: string;
+}
+
 export default async function ShopPage({
   searchParams,
 }: {
-  searchParams?: { category?: string };
+  searchParams?: Promise<{ category?: string }>;
 }) {
   let products: Product[] = [];
   let allProducts: Product[] = [];
-  const selectedCategory = searchParams?.category
-    ? decodeURIComponent(String(searchParams.category)).toLowerCase().trim()
+  let wholesaleProducts: WholesaleProduct[] = [];
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const selectedCategory = resolvedSearchParams?.category
+    ? decodeURIComponent(String(resolvedSearchParams.category)).toLowerCase().trim()
     : "";
   
   try {
@@ -63,8 +84,11 @@ export default async function ShopPage({
       );
     }
 
-    // Map Firestore data to Product type
-    allProducts = rawProducts
+    const wholesaleRaw = rawProducts.filter((p) => (p.mode ?? "") === "wholesale");
+    const retailRaw = rawProducts.filter((p) => (p.mode ?? "") !== "wholesale");
+
+    // Map Firestore data to Product type (Retail)
+    allProducts = retailRaw
       .map((p: RawProduct) => {
         let createdAt: number | string | null = null;
 
@@ -93,7 +117,7 @@ export default async function ShopPage({
             typeof p.originalPrice === "number" && Number.isFinite(p.originalPrice)
               ? p.originalPrice
               : undefined,
-          imageUrl: p.image || "/images/placeholder.png",
+          imageUrl: p.image || "/assets/logo.jpg",
           images: p.images || (p.image ? [p.image] : []),
           category: p.category || "Uncategorized",
           slug: p.slug,
@@ -106,6 +130,28 @@ export default async function ShopPage({
         const timeB = typeof b.createdAt === 'number' ? b.createdAt : 0;
         return timeB - timeA; // Descending order (newest first)
       });
+
+    const filteredWholesale = selectedCategory
+      ? wholesaleRaw.filter(
+          (p) => (p.category || "").toLowerCase() === selectedCategory
+        )
+      : wholesaleRaw;
+
+    wholesaleProducts = filteredWholesale.map((p) => ({
+      id: p.id,
+      name: p.name,
+      wholesalePrice: Number(p.wholesalePrice ?? p.price ?? 0),
+      wholesaleMinQty: p.wholesaleMinQty,
+      wholesaleUnit: p.wholesaleUnit,
+      imageUrl:
+        p.coverImage ||
+        p.imageUrl ||
+        p.images?.[0] ||
+        "/assets/logo.jpg",
+      price: typeof p.price === "number" ? p.price : undefined,
+      category: p.category || "Uncategorized",
+      slug: p.slug,
+    }));
 
     products = selectedCategory
       ? allProducts.filter(
@@ -156,10 +202,81 @@ export default async function ShopPage({
           </div>
         )}
 
+        {/* Wholesale Section */}
+        {wholesaleProducts.length > 0 && (
+          <section className="mb-10 mx-2 sm:mx-0">
+            <div className="mb-3">
+              <SectionHeader title="Wholesale Deals" href="/wholeseller" />
+            </div>
+
+            <div className="grid grid-flow-col auto-cols-[minmax(160px,1fr)] sm:auto-cols-[minmax(200px,1fr)] gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-hide">
+              {wholesaleProducts.map((product) => (
+                <Link
+                  key={product.id}
+                  href={`/wholeseller/${product.slug || product.id}`}
+                  className="group bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-sm dark:shadow-gray-900 hover:shadow-lg dark:hover:shadow-gray-700 transition-all duration-300 overflow-hidden border border-blue-200 dark:border-blue-700 hover:border-blue-400 dark:hover:border-blue-500 flex flex-col h-full snap-start"
+                >
+                  <div className="relative w-full pt-[100%] overflow-hidden bg-blue-50 dark:bg-blue-950/30">
+                    <div className="absolute inset-0">
+                      <Image
+                        src={product.imageUrl}
+                        alt={product.name}
+                        fill
+                        className="object-contain p-3 group-hover:scale-105 transition-transform duration-300"
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
+                      />
+                    </div>
+                    <div className="absolute top-2 left-2">
+                      <span className="px-2 py-1 bg-blue-600 text-white text-[10px] font-bold uppercase rounded-full">
+                        Wholesale
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="p-3 flex flex-col flex-1">
+                    <h3 className="font-semibold text-gray-800 dark:text-gray-200 text-sm sm:text-base line-clamp-2">
+                      {product.name}
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                      Min: {product.wholesaleMinQty ?? 1} {product.wholesaleUnit || "unit"}
+                    </p>
+                    <div className="mt-auto pt-2">
+                      {typeof product.price === "number" && product.price > 0 && (
+                        <span className="text-xs text-gray-400 line-through">
+                          {formatPrice(product.price)}
+                        </span>
+                      )}
+                      <div className="text-blue-600 dark:text-blue-400 font-bold text-base">
+                        {formatPrice(product.wholesalePrice)}
+                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                          {" "}
+                          / {product.wholesaleUnit || "unit"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        <div className="mb-3 mx-2 sm:mx-0">
+          <SectionHeader
+            title={
+              selectedCategory
+                ? `${formatCategoryLabel(selectedCategory)} Retail`
+                : "Retail Products"
+            }
+            href="/shop"
+            viewText="View All"
+          />
+        </div>
+
         {/* Products Grid - 2 columns on mobile, 3 on tablet, 4 on desktop */}
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
           {products.map((product) => {
-            const mainImage = product.images?.[0] || product.imageUrl || "/images/placeholder.png";
+            const mainImage = product.images?.[0] || product.imageUrl || "/assets/logo.jpg";
             const discountPercent = getDiscountPercent(product);
             const originalPrice = getOriginalPrice(product);
             const sellingPrice = getSellingPrice(product);
@@ -247,7 +364,7 @@ export default async function ShopPage({
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
               {suggestions.map((product) => {
-                const mainImage = product.images?.[0] || product.imageUrl || "/images/placeholder.png";
+                const mainImage = product.images?.[0] || product.imageUrl || "/assets/logo.jpg";
                 const discountPercent = getDiscountPercent(product);
                 const originalPrice = getOriginalPrice(product);
                 const sellingPrice = getSellingPrice(product);

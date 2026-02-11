@@ -21,7 +21,7 @@ export default async function SharePage() {
     return {
       ...p,
       // Use optional chaining for safer access to potentially undefined properties.
-      image: p.images?.[0] || "/images/placeholder.png",
+      image: p.images?.[0] || "/assets/logo.jpg",
       shortDescription:
         p.shortDescription ||
         p.description ||

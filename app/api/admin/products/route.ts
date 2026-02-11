@@ -14,6 +14,8 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { getAdminFromRequest } from "@/lib/adminAuth";
+import { deleteCloudinaryImages } from "@/lib/cloudinaryAdmin";
+import { logAdminAction } from "@/lib/adminLogs";
 
 /** GET: list products. Senior = all, Sub = only createdBy self */
 export async function GET(request: Request) {
@@ -21,11 +23,26 @@ export async function GET(request: Request) {
   if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
+    const url = new URL(request.url);
+    const mode = url.searchParams.get("mode")?.toLowerCase().trim();
+
     const coll = collection(db, "products");
-    const q =
+    const baseQuery =
       admin.role === "senior"
         ? query(coll, orderBy("createdAt", "desc"))
         : query(coll, where("createdBy", "==", admin.adminId));
+
+    const q =
+      mode === "wholesale"
+        ? admin.role === "senior"
+          ? query(coll, where("mode", "==", "wholesale"), orderBy("createdAt", "desc"))
+          : query(
+              coll,
+              where("mode", "==", "wholesale"),
+              where("createdBy", "==", admin.adminId),
+              orderBy("createdAt", "desc")
+            )
+        : baseQuery;
     const snap = await getDocs(q);
     let products = snap.docs.map((d) => {
       const data = d.data();
@@ -43,6 +60,8 @@ export async function GET(request: Request) {
         shortDescription: data.shortDescription ?? "",
         images: data.images ?? [],
         imageUrl: data.imageUrl ?? (data.images?.[0] ?? ""),
+        imagePublicIds: data.imagePublicIds ?? [],
+        mode: data.mode ?? "retail",
         createdBy: data.createdBy ?? null,
         createdAt: data.createdAt,
         _ts: data.createdAt?.toMillis?.() ?? (data.createdAt ? new Date(data.createdAt as Date).getTime() : 0),
@@ -67,7 +86,17 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { name, price, sellingPrice, originalPrice, category, description, shortDescription, images } = body as {
+    const {
+      name,
+      price,
+      sellingPrice,
+      originalPrice,
+      category,
+      description,
+      shortDescription,
+      images,
+      imagePublicIds,
+    } = body as {
       name?: string;
       price?: number;
       sellingPrice?: number;
@@ -76,6 +105,7 @@ export async function POST(request: Request) {
       description?: string;
       shortDescription?: string;
       images?: string[];
+      imagePublicIds?: string[];
     };
     const finalPrice = sellingPrice ?? price;
     if (!name || finalPrice == null) {
@@ -83,6 +113,7 @@ export async function POST(request: Request) {
     }
 
     const imgList = Array.isArray(images) ? images.slice(0, 5) : [];
+    const publicIdList = Array.isArray(imagePublicIds) ? imagePublicIds.slice(0, 5) : [];
     const payload: Record<string, unknown> = {
       name: String(name),
       price: Number(finalPrice),
@@ -92,6 +123,7 @@ export async function POST(request: Request) {
       shortDescription: String(shortDescription ?? ""),
       images: imgList,
       imageUrl: imgList[0] ?? "",
+      imagePublicIds: publicIdList,
       createdBy: admin.adminId,
       createdAt: serverTimestamp(),
     };
@@ -113,7 +145,18 @@ export async function PUT(request: Request) {
 
   try {
     const body = await request.json();
-    const { id, name, price, sellingPrice, originalPrice, category, description, shortDescription, images } = body as {
+    const {
+      id,
+      name,
+      price,
+      sellingPrice,
+      originalPrice,
+      category,
+      description,
+      shortDescription,
+      images,
+      imagePublicIds,
+    } = body as {
       id?: string;
       name?: string;
       price?: number;
@@ -123,6 +166,7 @@ export async function PUT(request: Request) {
       description?: string;
       shortDescription?: string;
       images?: string[];
+      imagePublicIds?: string[];
     };
     if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
 
@@ -154,12 +198,32 @@ export async function PUT(request: Request) {
     if (category !== undefined) updates.category = String(category).toLowerCase();
     if (description !== undefined) updates.description = String(description);
     if (shortDescription !== undefined) updates.shortDescription = String(shortDescription);
+    const prevPublicIds = Array.isArray(data.imagePublicIds) ? data.imagePublicIds : [];
+    const nextPublicIds = Array.isArray(imagePublicIds)
+      ? imagePublicIds.slice(0, 5)
+      : prevPublicIds;
+
     if (Array.isArray(images)) {
-      updates.images = images.slice(0, 5);
-      updates.imageUrl = images[0] ?? "";
+      const nextImages = images.slice(0, 5);
+      updates.images = nextImages;
+      updates.imageUrl = nextImages[0] ?? "";
+      if (Array.isArray(imagePublicIds)) {
+        updates.imagePublicIds = nextPublicIds;
+        const toDelete = prevPublicIds.filter((id) => !nextPublicIds.includes(id));
+        if (toDelete.length) {
+          await deleteCloudinaryImages(toDelete);
+        }
+      }
     }
     updates.updatedAt = serverTimestamp();
     await updateDoc(ref, updates);
+    await logAdminAction({
+      adminId: admin.adminId,
+      action: "product_update",
+      targetType: "product",
+      targetId: id,
+      metadata: { fields: Object.keys(updates) },
+    });
     return NextResponse.json({ success: true });
   } catch (e) {
     console.error("Admin product update error:", e);
@@ -187,7 +251,18 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "You can only delete your own products" }, { status: 403 });
     }
 
+    const publicIds = Array.isArray(data.imagePublicIds) ? data.imagePublicIds : [];
+    if (publicIds.length) {
+      await deleteCloudinaryImages(publicIds);
+    }
+
     await deleteDoc(ref);
+    await logAdminAction({
+      adminId: admin.adminId,
+      action: "product_delete",
+      targetType: "product",
+      targetId: id,
+    });
     return NextResponse.json({ success: true });
   } catch (e) {
     console.error("Admin product delete error:", e);

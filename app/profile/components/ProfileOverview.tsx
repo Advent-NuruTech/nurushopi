@@ -2,7 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
-import { Package, Clock, CheckCircle2, User as UserIcon } from "lucide-react";
+import { Package, Clock, CheckCircle2, User as UserIcon, Wallet } from "lucide-react";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import type { UserProfile } from "../types";
 
@@ -77,6 +77,15 @@ export default function ProfileOverview({
                 <CheckCircle2 size={18} />
                 <span className="font-medium">{deliveredOrders}</span>
                 <span className="text-sm">Delivered</span>
+              </div>
+              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-50 dark:bg-sky-900/30 text-sky-800 dark:text-sky-200">
+                <Wallet size={18} />
+                <span className="font-medium">
+                  {typeof profile?.walletBalance === "number"
+                    ? profile.walletBalance.toLocaleString()
+                    : "0"}
+                </span>
+                <span className="text-sm">Wallet (KSh)</span>
               </div>
             </div>
           </div>

@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import SectionHeader from "@/components/ui/SectionHeader";
 import { useCart } from "@/context/CartContext";
 import { formatCategoryLabel } from "@/lib/categoryUtils";
 import { formatPrice } from "@/lib/formatPrice";
@@ -92,18 +93,11 @@ export default function FeaturedSection({ products, categories = [] }: FeaturedS
             group.items.length > 0 && (
               <div key={group.category.slug} className="w-full">
                 {/* Category Title + View All */}
-                <div className="flex justify-between items-center mb-5 px-1 sm:px-3">
-                  <h3 className="text-xl sm:text-2xl font-semibold capitalize text-blue-700 dark:text-blue-400">
-                    {group.category.name || formatCategoryLabel(group.category.slug)}
-                  </h3>
-                  <Link href={{ pathname: "/shop", query: { category: group.category.slug } }}>
-                    <Button
-                      variant="outline"
-                      className="text-blue-700 dark:text-blue-300 border-blue-600 dark:border-blue-400 hover:bg-blue-600 hover:text-white dark:hover:text-white"
-                    >
-                      View All →
-                    </Button>
-                  </Link>
+                <div className="mb-5 px-1 sm:px-3">
+                  <SectionHeader
+                    title={group.category.name || formatCategoryLabel(group.category.slug)}
+                    href={`/shop?category=${group.category.slug}`}
+                  />
                 </div>
 
                 {/* Product Grid */}

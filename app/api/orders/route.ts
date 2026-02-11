@@ -6,6 +6,7 @@ import {
   doc,
   getDocs,
   getDoc,
+  setDoc,
   updateDoc,
   deleteDoc,
   query,
@@ -15,6 +16,7 @@ import {
   Timestamp,
   FieldValue,
 } from "firebase/firestore";
+import { getClientKey, rateLimit } from "@/lib/rateLimit";
 
 // Firestore collection reference
 const ordersCollection = collection(db, "orders");
@@ -27,12 +29,14 @@ interface OrderItem {
   price: number;
   quantity: number;
   image?: string;
+  mode?: "wholesale" | "retail";
 }
 
 /** 🔹 Type stored in Firestore */
 interface FirestoreOrder {
   userId?: string | null;
   userEmail?: string | null;
+  referrerId?: string | null;
   name: string;
   phone: string;
   email?: string | null;
@@ -52,6 +56,7 @@ interface Order {
   id: string;
   userId?: string | null;
   userEmail?: string | null;
+  referrerId?: string | null;
   name: string;
   phone: string;
   email?: string | null;
@@ -69,11 +74,17 @@ interface Order {
 /** 🟢 Create a new order */
 export async function POST(request: Request) {
   try {
+    const rl = rateLimit(getClientKey(request), { limit: 10, windowMs: 60_000, keyPrefix: "orders" });
+    if (!rl.ok) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+
     const body: Partial<FirestoreOrder> = await request.json();
 
     const {
       userId,
       userEmail,
+      referrerId,
       items,
       totalAmount,
       status,
@@ -94,9 +105,22 @@ export async function POST(request: Request) {
       );
     }
 
+    let finalReferrerId = referrerId ?? null;
+    if (!finalReferrerId && userId) {
+      try {
+        const userSnap = await getDoc(doc(db, "users", userId));
+        if (userSnap.exists()) {
+          finalReferrerId = (userSnap.data()?.referredBy as string | undefined) ?? null;
+        }
+      } catch {
+        // ignore referral lookup
+      }
+    }
+
     const newOrder: FirestoreOrder = {
       userId: userId ?? null,
       userEmail: userEmail ?? null,
+      referrerId: finalReferrerId,
       name,
       phone,
       email: email ?? null,
@@ -112,6 +136,25 @@ export async function POST(request: Request) {
     };
 
     const docRef = await addDoc(ordersCollection, newOrder);
+
+    try {
+      if (userId && finalReferrerId && finalReferrerId !== userId) {
+        const userRef = doc(db, "users", userId);
+        const userSnap = await getDoc(userRef);
+        const existingReferrer = userSnap.exists()
+          ? (userSnap.data()?.referredBy as string | undefined)
+          : undefined;
+        if (!existingReferrer) {
+          await setDoc(
+            userRef,
+            { referredBy: finalReferrerId, updatedAt: serverTimestamp() },
+            { merge: true }
+          );
+        }
+      }
+    } catch (refErr) {
+      console.error("Order referral save error:", refErr);
+    }
 
     try {
       const notificationsRef = collection(db, "notifications");
@@ -197,6 +240,7 @@ export async function GET(request: Request) {
         id: docSnap.id,
         userId: data.userId ?? null,
         userEmail: data.userEmail ?? null,
+        referrerId: data.referrerId ?? null,
         name: data.name,
         phone: data.phone,
         email: data.email ?? null,

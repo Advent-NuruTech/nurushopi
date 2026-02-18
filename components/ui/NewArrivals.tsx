@@ -1,23 +1,22 @@
 "use client";
 
-import { useEffect, useState, useRef, useMemo, useCallback } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { db } from "@/lib/firebase";
 import {
   collection,
-  query,
-  orderBy,
-  limit,
-  startAfter,
   getDocs,
-  QueryDocumentSnapshot,
-  DocumentData,
+  limit,
+  orderBy,
+  query,
+  Timestamp,
 } from "firebase/firestore";
 import { formatPrice } from "@/lib/formatPrice";
 import { getDiscountPercent, getOriginalPrice, getSellingPrice } from "@/lib/pricing";
 import SectionHeader from "@/components/ui/SectionHeader";
+import ProductCardSkeleton from "@/components/ui/ProductCardSkeleton";
 
 interface Product {
   id: string;
@@ -26,222 +25,184 @@ interface Product {
   originalPrice?: number;
   sellingPrice?: number;
   image: string | null;
+  createdAtMs: number;
 }
 
 interface ProductDoc {
-  name: string;
-  price: number;
+  name?: string;
+  price?: number;
   sellingPrice?: number;
   originalPrice?: number;
   images?: string[];
   image?: string;
   imageURL?: string;
   mode?: string;
+  createdAt?: Timestamp | { seconds?: number } | string | number | null;
 }
 
-const PAGE_SIZE = 5;
-const ROTATION_INTERVAL = 10 * 60 * 1000; // 10 minutes
+const FETCH_LIMIT = 24;
+const NEW_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+
+function toMillis(value: ProductDoc["createdAt"]): number {
+  if (!value) return 0;
+  if (typeof value === "number") return value;
+  if (typeof value === "string") {
+    const parsed = Date.parse(value);
+    return Number.isNaN(parsed) ? 0 : parsed;
+  }
+  if (value instanceof Timestamp) return value.toMillis();
+  if (typeof value === "object" && typeof value.seconds === "number") {
+    return value.seconds * 1000;
+  }
+  return 0;
+}
 
 export default function NewArrivals() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [lastDoc, setLastDoc] =
-    useState<QueryDocumentSnapshot<DocumentData> | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  /* ---------------- FETCH PRODUCTS ---------------- */
-  const fetchProducts = useCallback(async () => {
-    if (loading) return;
-    setLoading(true);
-
-    const q = lastDoc
-      ? query(
-          collection(db, "products"),
-          orderBy("createdAt", "desc"),
-          startAfter(lastDoc),
-          limit(PAGE_SIZE)
-        )
-      : query(
-          collection(db, "products"),
-          orderBy("createdAt", "desc"),
-          limit(PAGE_SIZE)
-        );
-
-    const snapshot = await getDocs(q);
-
-    if (!snapshot.empty) {
-      const fetched: Product[] = snapshot.docs
-        .map((doc) => {
-        const d = doc.data() as ProductDoc;
-        if ((d.mode ?? "") === "wholesale") return null;
-
-        const image =
-          Array.isArray(d.images) && d.images.length > 0
-            ? d.images[0]
-            : typeof d.image === "string" && d.image.trim().length > 5
-            ? d.image.trim()
-            : typeof d.imageURL === "string" && d.imageURL.trim().length > 5
-            ? d.imageURL.trim()
-            : null;
-
-        const sellingPrice = Number(d.sellingPrice ?? d.price ?? 0);
-        const originalPriceValue = d.originalPrice;
-        const originalPrice =
-          typeof originalPriceValue === "number" && Number.isFinite(originalPriceValue)
-            ? originalPriceValue
-            : undefined;
-        return {
-          id: doc.id,
-          name: d.name,
-          price: sellingPrice,
-          sellingPrice,
-          originalPrice,
-          image,
-        };
-      })
-      .filter(Boolean) as Product[];
-
-      setProducts((prev) => {
-        const map = new Map(prev.map((p) => [p.id, p]));
-        fetched.forEach((p) => map.set(p.id, p));
-        return Array.from(map.values());
-      });
-
-      setLastDoc(snapshot.docs[snapshot.docs.length - 1]);
-    }
-
-    setLoading(false);
-  }, [lastDoc, loading]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+    let cancelled = false;
 
-  /* ---------------- ROTATING START INDEX ---------------- */
-  const rotatedProducts = useMemo(() => {
-    if (products.length === 0) return [];
+    const load = async () => {
+      setLoading(true);
+      try {
+        const snapshot = await getDocs(
+          query(collection(db, "products"), orderBy("createdAt", "desc"), limit(FETCH_LIMIT))
+        );
 
-    const rotationIndex =
-      Math.floor(Date.now() / ROTATION_INTERVAL) % products.length;
+        const now = Date.now();
+        const mapped = snapshot.docs
+          .map((docSnap) => {
+            const data = docSnap.data() as ProductDoc;
+            if ((data.mode ?? "") === "wholesale") return null;
 
-    return [
-      ...products.slice(rotationIndex),
-      ...products.slice(0, rotationIndex),
-    ];
-  }, [products]);
+            const createdAtMs = toMillis(data.createdAt);
+            if (!createdAtMs || now - createdAtMs > NEW_WINDOW_MS) return null;
 
-  /* ---------------- SCROLL ---------------- */
-  const scroll = (dir: "left" | "right") => {
-    if (!scrollRef.current) return;
+            const image =
+              Array.isArray(data.images) && data.images.length > 0
+                ? data.images[0]
+                : typeof data.image === "string" && data.image.trim().length > 5
+                ? data.image.trim()
+                : typeof data.imageURL === "string" && data.imageURL.trim().length > 5
+                ? data.imageURL.trim()
+                : null;
 
-    const el = scrollRef.current;
-    const amount = 320;
+            const sellingPrice = Number(data.sellingPrice ?? data.price ?? 0);
+            const originalPrice =
+              typeof data.originalPrice === "number" && Number.isFinite(data.originalPrice)
+                ? data.originalPrice
+                : undefined;
 
-    el.scrollBy({
-      left: dir === "right" ? amount : -amount,
-      behavior: "smooth",
-    });
+            return {
+              id: docSnap.id,
+              name: String(data.name ?? "Product"),
+              price: sellingPrice,
+              sellingPrice,
+              originalPrice,
+              image,
+              createdAtMs,
+            } as Product;
+          })
+          .filter((item): item is Product => Boolean(item))
+          .sort((a, b) => b.createdAtMs - a.createdAtMs);
 
-    // Infinite fetch while scrolling right
-    if (
-      dir === "right" &&
-      el.scrollLeft + el.clientWidth >= el.scrollWidth - 50
-    ) {
-      fetchProducts();
-    }
-  };
+        if (!cancelled) setProducts(mapped);
+      } catch {
+        if (!cancelled) setProducts([]);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
 
-  /* ---------------- UI ---------------- */
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const hasProducts = useMemo(() => products.length > 0, [products]);
+
+  if (!loading && !hasProducts) {
+    return null;
+  }
+
   return (
     <section className="w-full py-1 bg-gradient-to-b from-white to-gray-50 dark:from-black dark:to-gray-950">
-      <div className="max-w-7xl mx-auto px-0 sm:px-6">
-        <div className="px-2 sm:px-3 mb-3">
-          <SectionHeader title="New Arrivals" href="/shop" />
+      <div className="max-w-7xl mx-auto px-0 sm:px-2">
+        <div className="mb-2 px-0">
+          <SectionHeader
+            title="New Arrivals"
+            href="/new-arrivals"
+            showViewAll={!loading && products.length >= 8}
+          />
         </div>
-        {/* Premium E-commerce Title */}
-        <div className="relative">
-          {/* Left Scroll Button */}
-          <button
-            onClick={() => scroll("left")}
-            className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-900 p-3 rounded-full shadow-lg hover:scale-105 transition"
-          >
-            &#10094;
-          </button>
 
-          {/* Product Scroll Container */}
-          <div
-            ref={scrollRef}
-            className="flex gap-6 overflow-x-auto scroll-smooth px-10 pb-4"
-          >
-            {rotatedProducts.map((product) => {
+        {loading ? (
+          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+            {Array.from({ length: 12 }).map((_, idx) => (
+              <ProductCardSkeleton key={idx} className="rounded-lg" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+            {products.slice(0, 12).map((product) => {
               const discountPercent = getDiscountPercent(product);
               const originalPrice = getOriginalPrice(product);
               const sellingPrice = getSellingPrice(product);
+
               return (
-                <motion.div
-                  key={product.id}
-                  whileHover={{ y: -6 }}
-                  transition={{ duration: 0.3 }}
-                  className="relative min-w-[240px] bg-white dark:bg-gray-900 rounded-2xl shadow-md hover:shadow-xl flex-shrink-0 overflow-hidden"
-                >
-                  {discountPercent && (
-                    <div className="absolute top-2 right-2 z-10 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded-full">
-                      {discountPercent}% OFF
+                <motion.div key={product.id} whileHover={{ y: -3 }} transition={{ duration: 0.2 }}>
+                  <Link
+                    href={`/products/${product.id}`}
+                    className="group relative block rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-900 overflow-hidden"
+                  >
+                    {discountPercent && (
+                      <div className="absolute top-1 right-1 z-10 bg-red-600 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full">
+                        {discountPercent}% OFF
+                      </div>
+                    )}
+                    <div className="absolute top-1 left-1 z-10 bg-green-600 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full">
+                      NEW
                     </div>
-                  )}
-                  <Link href={`/products/${product.id}`}>
-                    <div className="relative w-full h-52 bg-white dark:bg-gray-800">
+
+                    <div className="relative aspect-square bg-white dark:bg-gray-800">
                       {product.image ? (
                         <Image
                           src={product.image}
                           alt={product.name}
                           fill
-                          className="object-contain p-4"
-                          sizes="240px"
+                          className="object-contain p-1"
+                          sizes="(max-width: 640px) 33vw, (max-width: 1024px) 25vw, 16vw"
                         />
                       ) : (
-                        <div className="flex items-center justify-center h-full text-xs text-gray-400">
-                          No image
-                        </div>
+                        <div className="h-full flex items-center justify-center text-[10px] text-gray-400">No image</div>
                       )}
                     </div>
 
-                    <div className="p-4 text-center">
-                      <h3 className="font-semibold text-sm line-clamp-1">
+                    <div className="p-1.5">
+                      <h3 className="text-[11px] sm:text-xs font-semibold line-clamp-2 leading-tight text-slate-800 dark:text-slate-100">
                         {product.name}
                       </h3>
-                      <div className="mt-2 flex flex-col items-center">
+                      <div className="mt-1">
                         {discountPercent && originalPrice && (
-                          <span className="text-xs text-gray-400 line-through">
+                          <p className="text-[10px] text-slate-400 line-through leading-none">
                             {formatPrice(originalPrice)}
-                          </span>
+                          </p>
                         )}
-                        <span className="text-blue-600 font-bold text-sm">
+                        <p className="text-[11px] sm:text-xs font-bold text-blue-600 dark:text-blue-400 leading-none">
                           {formatPrice(sellingPrice)}
-                        </span>
+                        </p>
                       </div>
                     </div>
                   </Link>
                 </motion.div>
               );
             })}
-
-            {loading && (
-              <div className="min-w-[240px] flex items-center justify-center text-gray-400">
-                Products Loading… 
-              </div>
-            )}
           </div>
+        )}
 
-          {/* Right Scroll Button */}
-          <button
-            onClick={() => scroll("right")}
-            className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-900 p-3 rounded-full shadow-lg hover:scale-105 transition"
-          >
-            &#10095;
-          </button>
-        </div>
       </div>
     </section>
   );

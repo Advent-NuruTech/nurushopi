@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import React, { Suspense, useEffect, useState, useMemo } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAppUser } from "@/context/UserContext";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
@@ -15,6 +15,7 @@ import {
   Bell,
   Store,
   ShoppingBag,
+  Star,
 } from "lucide-react";
 
 import ProfileOverview from "./components/ProfileOverview";
@@ -27,6 +28,7 @@ import ConfirmSaveModal from "./components/ConfirmSaveModal";
 import AuthRequired from "./components/AuthRequired";
 import MessagesPanel from "./components/MessagesPanel";
 import WalletTab from "./components/WalletTab";
+import ReviewsTab from "./components/ReviewsTab";
 //import QuickReorder from "./components/QuickReorder";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 
@@ -35,8 +37,9 @@ import { useOrders } from "./hooks/useOrders";
 import type { ApiOrder, OrderStatusFilter } from "./types";
 import { adaptAppUser } from "./utils/typeAdapter";
 
-export default function ProfilePage() {
+function ProfilePageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user: contextUser, isLoading: userLoading } = useAppUser();
 
   /* ------------------- Hooks ------------------- */
@@ -46,6 +49,7 @@ export default function ProfilePage() {
   const [orderFilter, setOrderFilter] = useState<OrderStatusFilter>("all");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [unreadMessages, setUnreadMessages] = useState(0);
+  const [unreadReviewPrompts, setUnreadReviewPrompts] = useState(0);
   const [greeting, setGreeting] = useState("");
 
   const appUser = adaptAppUser(contextUser);
@@ -85,11 +89,13 @@ export default function ProfilePage() {
 
   /* ------------------- Orders ------------------- */
   const {
+    orders,
     filteredOrders,
     totalOrders,
     pendingOrders,
     deliveredOrders,
     ordersLoading,
+    updateOrderStatus,
   } = useOrders({ uid, orderFilter });
 
   /* ------------------- Messages ------------------- */
@@ -113,6 +119,38 @@ export default function ProfilePage() {
     if (uid) loadProfile();
   }, [uid, loadProfile]);
 
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (!tab) return;
+    if (
+      ["overview", "orders", "messages", "reviews", "wallet", "profile", "invite", "shop"].includes(tab)
+    ) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (!uid) {
+      setUnreadReviewPrompts(0);
+      return;
+    }
+    let cancelled = false;
+    fetch(`/api/user-notifications?userId=${uid}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (cancelled) return;
+        const list = Array.isArray(d.notifications) ? d.notifications : [];
+        const count = list.filter((n: { type?: string; readAt?: unknown }) => n.type === "review_prompt" && !n.readAt).length;
+        setUnreadReviewPrompts(count);
+      })
+      .catch(() => {
+        if (!cancelled) setUnreadReviewPrompts(0);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [uid, activeTab]);
+
   /* ------------------- Display ------------------- */
   const displayName =
     profile?.fullName || appUser?.name || firebaseUser?.displayName || "User";
@@ -122,7 +160,7 @@ export default function ProfilePage() {
     appUser?.imageUrl || firebaseUser?.photoURL || "/assets/logo.jpg";
 
   /* ------------------- Notifications ------------------- */
-  const notificationCount = unreadMessages + pendingOrders;
+  const notificationCount = unreadMessages + pendingOrders + unreadReviewPrompts;
 
   /* ------------------- Tabs ------------------- */
   const tabs = useMemo(
@@ -130,6 +168,7 @@ export default function ProfilePage() {
       { id: "overview", label: "Home", icon: UserCircle },
       { id: "orders", label: "Orders", icon: Package },
       { id: "messages", label: "Messages", icon: MessageSquare },
+      { id: "reviews", label: "Reviews", icon: Star },
       //{ id: "reorder", label: "Quick Reorder", icon: ShoppingBag },
       { id: "wallet", label: "Wallet", icon: ShoppingBag },
       { id: "profile", label: "Profile", icon: Settings },
@@ -254,11 +293,21 @@ export default function ProfilePage() {
           />
         )}
 
+        {activeTab === "reviews" && uid && (
+          <ReviewsTab
+            orders={orders}
+            userId={uid}
+            userName={displayName}
+            highlightOrderId={searchParams.get("orderId")}
+          />
+        )}
+
         {activeTab === "messages" && uid && (
           <MessagesPanel
             userId={uid}
             displayName={displayName}
             onUnreadChange={setUnreadMessages}
+            onClose={() => setActiveTab("overview")}
           />
         )}
 
@@ -295,7 +344,7 @@ export default function ProfilePage() {
         )}
       </div>
 
-      <BottomNav />
+      {activeTab !== "messages" && <BottomNav />}
 
       <AnimatePresence>
         {showConfirmModal && (
@@ -316,9 +365,29 @@ export default function ProfilePage() {
             onClose={() => setSelectedOrder(null)}
             userId={uid}
             userName={displayName}
+            onOrderUpdated={(orderId, status) => {
+              updateOrderStatus(orderId, status);
+              setSelectedOrder((prev) =>
+                prev && prev.id === orderId ? { ...prev, status } : prev
+              );
+            }}
           />
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <LoadingSpinner size={56} text="Loading profile..." />
+        </div>
+      }
+    >
+      <ProfilePageContent />
+    </Suspense>
   );
 }

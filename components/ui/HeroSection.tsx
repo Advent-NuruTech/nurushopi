@@ -79,6 +79,7 @@ export default function HeroSection() {
         <div className="flex whitespace-nowrap animate-scroll">
           {[...announcements, ...announcements].map((msg, i) => {
             const gradient = gradients[i % gradients.length];
+            const offsetY = Number((Math.sin(i * 2) * 3).toFixed(5));
             return (
               <span
                 key={i}
@@ -95,8 +96,8 @@ export default function HeroSection() {
                   text-transparent
                 `}
                 style={{
-                  // Random slight vertical offset per line for modern dynamic feel
-                  transform: `translateY(${Math.sin(i * 2) * 3}px)`,
+                  // Rounded to avoid server/client float serialization drift.
+                  transform: `translateY(${offsetY}px)`,
                 }}
               >
                 {msg}

@@ -1,5 +1,6 @@
 export type AdminRole = "senior" | "sub";
 export type TabId =
+  | "overview"
   | "invite"
   | "admins"
   | "products"
@@ -22,6 +23,7 @@ export interface Admin {
 
 // Removed JSX elements - they'll be created in the components
 export const TABS_SENIOR: { id: TabId; label: string; icon: string }[] = [
+  { id: "overview", label: "Overview", icon: "LayoutDashboard" },
   { id: "invite", label: "Invite Admin", icon: "UserPlus" },
   { id: "admins", label: "Admin Management", icon: "Users" },
   { id: "categories", label: "Categories", icon: "Tags" },
@@ -37,6 +39,7 @@ export const TABS_SENIOR: { id: TabId; label: string; icon: string }[] = [
 ];
 
 export const TABS_SUB: { id: TabId; label: string; icon: string }[] = [
+  { id: "overview", label: "Overview", icon: "LayoutDashboard" },
   { id: "products", label: "Products", icon: "Package" },
   { id: "orders", label: "Orders", icon: "ShoppingCart" },
   { id: "messages", label: "Messages", icon: "MessageSquare" },

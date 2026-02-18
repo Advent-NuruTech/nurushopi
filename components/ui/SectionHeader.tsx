@@ -1,50 +1,39 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useMemo } from "react";
 import Link from "next/link";
 import type { Route } from "next";
+import { usePathname, useSearchParams } from "next/navigation";
 
 interface SectionHeaderProps {
   title: string;
   href?: string;
   viewText?: string;
   className?: string;
+  showViewAll?: boolean;
 }
 
-export default function SectionHeader({
+function HeaderBar({
   title,
   href,
-  viewText = "View All",
-  className = "",
-}: SectionHeaderProps) {
-  const [isBlue, setIsBlue] = useState(true);
-
-  useEffect(() => {
-    // Change color every 10 seconds
-    const interval = setInterval(() => {
-      setIsBlue((prev) => !prev);
-    }, 10000); // 10,000 ms = 10 seconds
-
-    return () => clearInterval(interval);
-  }, []);
-
+  viewText,
+  className,
+  shouldShowViewAll,
+}: {
+  title: string;
+  href?: string;
+  viewText: string;
+  className: string;
+  shouldShowViewAll: boolean;
+}) {
   return (
     <div className={`w-full ${className}`}>
-      <div
-        className={`w-full flex items-center text-white px-2 sm:px-6 py-3 rounded-x3 shadow-sm text-sm sm:text-base font-bold tracking-wide transition-colors duration-1000 ${
-          isBlue ? "bg-blue-600" : "bg-red-600"
-        }`}
-      >
-        {/* Left — Title */}
+      <div className="w-full flex items-center text-white px-2 sm:px-6 py-3 rounded-xl shadow-sm text-sm sm:text-base font-bold tracking-wide bg-blue-600">
         <div className="flex-1 text-left truncate">{title}</div>
 
-        {/* Center Divider */}
-        {href && (
-          <div className="px-3 opacity-80 select-none">||</div>
-        )}
+        {shouldShowViewAll && <div className="px-3 opacity-80 select-none">||</div>}
 
-        {/* Right — Navigation */}
-        {href && (
+        {shouldShowViewAll && (
           <div className="flex-1 text-right">
             <Link
               href={href as Route}
@@ -56,5 +45,69 @@ export default function SectionHeader({
         )}
       </div>
     </div>
+  );
+}
+
+function SectionHeaderInner({
+  title,
+  href,
+  viewText = "View All",
+  className = "",
+  showViewAll = true,
+}: SectionHeaderProps) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const currentCategory = searchParams.get("category")?.toLowerCase().trim() ?? "";
+  const targetCategory = useMemo(() => {
+    if (!href) return "";
+    try {
+      const url = new URL(href, "http://localhost");
+      return url.searchParams.get("category")?.toLowerCase().trim() ?? "";
+    } catch {
+      return "";
+    }
+  }, [href]);
+
+  const isShopPage = pathname === "/shop";
+  const isCurrentCategoryLink =
+    isShopPage && Boolean(currentCategory) && Boolean(targetCategory) && currentCategory === targetCategory;
+  const shouldShowViewAll = Boolean(href) && showViewAll && !isShopPage && !isCurrentCategoryLink;
+
+  return (
+    <HeaderBar
+      title={title}
+      href={href}
+      viewText={viewText}
+      className={className}
+      shouldShowViewAll={shouldShowViewAll}
+    />
+  );
+}
+
+function SectionHeaderFallback({
+  title,
+  href,
+  viewText = "View All",
+  className = "",
+  showViewAll = true,
+}: SectionHeaderProps) {
+  const shouldShowViewAll = Boolean(href) && showViewAll;
+  return (
+    <HeaderBar
+      title={title}
+      href={href}
+      viewText={viewText}
+      className={className}
+      shouldShowViewAll={shouldShowViewAll}
+    />
+  );
+}
+
+export default function SectionHeader(props: SectionHeaderProps) {
+  return (
+    <Suspense fallback={<SectionHeaderFallback {...props} />}>
+      <SectionHeaderInner {...props} />
+    </Suspense>
   );
 }

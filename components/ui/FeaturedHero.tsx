@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState, useRef, MouseEvent as ReactMouseEvent, TouchEvent as ReactTouchEvent } from "react";
+import { useEffect, useState, useRef, MouseEvent as ReactMouseEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import SectionHeader from "@/components/ui/SectionHeader";
+import ProductCardSkeleton from "@/components/ui/ProductCardSkeleton";
 import { useCart } from "@/context/CartContext";
 import { formatCategoryLabel } from "@/lib/categoryUtils";
 import { formatPrice } from "@/lib/formatPrice";
@@ -21,6 +22,7 @@ interface Product {
   sellingPrice?: number;
   shortDescription?: string;
   description?: string;
+  createdAt?: number | string | null;
 }
 
 interface Category {
@@ -31,6 +33,18 @@ interface Category {
 interface FeaturedSectionProps {
   products: Product[];
   categories?: Category[];
+}
+
+const FEATURED_LIMIT = 8;
+const NEW_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+
+function toMillis(value: Product["createdAt"]): number {
+  if (typeof value === "number") return value;
+  if (typeof value === "string") {
+    const parsed = Date.parse(value);
+    return Number.isNaN(parsed) ? 0 : parsed;
+  }
+  return 0;
 }
 
 export default function FeaturedSection({ products, categories = [] }: FeaturedSectionProps) {
@@ -49,11 +63,24 @@ export default function FeaturedSection({ products, categories = [] }: FeaturedS
   const categoryList = categories.length ? categories : derivedCategories;
 
   const featuredByCategory = categoryList
-    .map((cat) => ({
-      category: cat,
-      items: products.filter((p) => p.category?.toLowerCase() === cat.slug),
-    }))
+    .map((cat) => {
+      const matching = products
+        .filter((p) => p.category?.toLowerCase() === cat.slug)
+        .sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt));
+
+      return {
+        category: cat,
+        totalCount: matching.length,
+        items: matching.slice(0, FEATURED_LIMIT),
+      };
+    })
     .filter((group) => group.items.length > 0);
+
+  useEffect(() => {
+    if (currentCategory >= featuredByCategory.length && featuredByCategory.length > 0) {
+      setCurrentCategory(0);
+    }
+  }, [currentCategory, featuredByCategory.length]);
 
   const handleAddToCart = (product: Product) => {
     const sellingPrice = getSellingPrice(product);
@@ -66,9 +93,6 @@ export default function FeaturedSection({ products, categories = [] }: FeaturedS
     });
   };
 
-  // -----------------------------
-  // Automatic & Manual Infinite Scroll
-  // -----------------------------
   useEffect(() => {
     const container = scrollRef.current;
     if (!container) return;
@@ -77,89 +101,96 @@ export default function FeaturedSection({ products, categories = [] }: FeaturedS
     let startX = 0;
     let scrollLeft = 0;
 
-    // Manual drag handlers
-    const start = (e: MouseEvent | TouchEvent) => {
+    const onMouseDown = (e: MouseEvent) => {
       isDown = true;
-      startX =
-        e instanceof TouchEvent
-          ? e.touches[0].pageX - container.offsetLeft
-          : (e as MouseEvent).pageX - container.offsetLeft;
+      startX = e.pageX - container.offsetLeft;
       scrollLeft = container.scrollLeft;
+      container.classList.add("cursor-grabbing");
     };
 
-    const stop = () => (isDown = false);
+    const onMouseUp = () => {
+      isDown = false;
+      container.classList.remove("cursor-grabbing");
+    };
 
-    const move = (e: MouseEvent | TouchEvent) => {
+    const onMouseLeave = () => {
+      isDown = false;
+      container.classList.remove("cursor-grabbing");
+    };
+
+    const onMouseMove = (e: MouseEvent) => {
       if (!isDown) return;
       e.preventDefault();
-      const x =
-        e instanceof TouchEvent
-          ? e.touches[0].pageX - container.offsetLeft
-          : (e as MouseEvent).pageX - container.offsetLeft;
-      const walk = (x - startX) * 1.5;
+      const x = e.pageX - container.offsetLeft;
+      const walk = (x - startX) * 1.1;
       container.scrollLeft = scrollLeft - walk;
-
-      // Optional: wrap around manually
-      if (container.scrollLeft >= container.scrollWidth / 2) {
-        container.scrollLeft = 0;
-      }
-      if (container.scrollLeft <= 0) {
-        container.scrollLeft = container.scrollWidth / 2;
-      }
     };
 
-    container.addEventListener("mousedown", start);
-    container.addEventListener("mouseleave", stop);
-    container.addEventListener("mouseup", stop);
-    container.addEventListener("mousemove", move);
-    container.addEventListener("touchstart", start);
-    container.addEventListener("touchend", stop);
-    container.addEventListener("touchmove", move);
+    const onWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+      e.preventDefault();
+      container.scrollBy({
+        left: e.deltaY,
+        behavior: "smooth",
+      });
+    };
+
+    container.addEventListener("mousedown", onMouseDown);
+    container.addEventListener("mouseleave", onMouseLeave);
+    container.addEventListener("mouseup", onMouseUp);
+    container.addEventListener("mousemove", onMouseMove);
+    container.addEventListener("wheel", onWheel, { passive: false });
 
     return () => {
-      container.removeEventListener("mousedown", start);
-      container.removeEventListener("mouseleave", stop);
-      container.removeEventListener("mouseup", stop);
-      container.removeEventListener("mousemove", move);
-      container.removeEventListener("touchstart", start);
-      container.removeEventListener("touchend", stop);
-      container.removeEventListener("touchmove", move);
+      container.removeEventListener("mousedown", onMouseDown);
+      container.removeEventListener("mouseleave", onMouseLeave);
+      container.removeEventListener("mouseup", onMouseUp);
+      container.removeEventListener("mousemove", onMouseMove);
+      container.removeEventListener("wheel", onWheel);
+      container.classList.remove("cursor-grabbing");
     };
-  }, []);
+  }, [currentCategory]);
 
-  if (!featuredByCategory.length)
+  if (!featuredByCategory.length) {
     return (
-      <div className="text-center py-10 text-gray-500 dark:text-gray-400">
-        Loading featured products...
-      </div>
+      <section className="relative w-full px-0 sm:px-6 py-4 sm:py-12 overflow-hidden bg-white dark:bg-black transition-colors">
+        <div className="relative max-w-7xl mx-auto">
+          <div className="w-full px-2 sm:px-6 mb-3">
+            <SectionHeader title="Featured Products" showViewAll={false} />
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 px-2 sm:px-6">
+            {Array.from({ length: 4 }).map((_, idx) => (
+              <ProductCardSkeleton key={idx} />
+            ))}
+          </div>
+        </div>
+      </section>
     );
+  }
 
-  const categorySlug = featuredByCategory[currentCategory].category.slug;
+  const activeGroup = featuredByCategory[currentCategory];
+  const categorySlug = activeGroup.category.slug;
 
   return (
     <section className="relative w-full px-0 sm:px-6 py-4 sm:py-12 overflow-hidden bg-white dark:bg-black transition-colors">
       <div className="relative max-w-7xl mx-auto">
         <AnimatePresence mode="wait">
           <motion.div
-            key={featuredByCategory[currentCategory].category.slug}
+            key={activeGroup.category.slug}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.6, ease: "easeInOut" }}
             className="w-full"
           >
-            {/* Header */}
             <div className="w-full px-2 sm:px-6 mb-3">
               <SectionHeader
-                title={
-                  featuredByCategory[currentCategory].category.name ||
-                  formatCategoryLabel(categorySlug)
-                }
+                title={activeGroup.category.name || formatCategoryLabel(categorySlug)}
                 href={`/shop?category=${encodeURIComponent(categorySlug)}`}
+                showViewAll={activeGroup.totalCount > FEATURED_LIMIT}
               />
             </div>
 
-            {/* Category Tabs */}
             <div className="flex gap-2 overflow-x-auto px-2 sm:px-6 pb-2 scrollbar-hide">
               {featuredByCategory.map((group, idx) => (
                 <button
@@ -176,35 +207,33 @@ export default function FeaturedSection({ products, categories = [] }: FeaturedS
               ))}
             </div>
 
-            {/* Infinite scroll container */}
             <div
               ref={scrollRef}
               className="flex gap-3 sm:gap-4 overflow-x-auto px-1 sm:px-3 scrollbar-hide scroll-smooth cursor-grab active:cursor-grabbing snap-x snap-mandatory"
             >
-              {/* Duplicate items to allow infinite effect */}
-              {[
-                ...featuredByCategory[currentCategory].items,
-                ...featuredByCategory[currentCategory].items,
-              ].map((item, idx) => {
+              {activeGroup.items.map((item) => {
                 const discountPercent = getDiscountPercent(item);
                 const originalPrice = getOriginalPrice(item);
                 const sellingPrice = getSellingPrice(item);
+                const isNew = Date.now() - toMillis(item.createdAt) <= NEW_WINDOW_MS;
+
                 return (
                   <motion.div
-                    key={`${item.id}-${idx}`}
+                    key={item.id}
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
                     whileHover={{ scale: 1.05 }}
-                    className="relative min-w-[180px] sm:min-w-[200px] 
-                      bg-white dark:bg-gray-900 
-                      rounded-xl shadow-md dark:shadow-gray-800 
-                      hover:shadow-lg dark:hover:shadow-gray-700 
-                      flex flex-col overflow-hidden transition-all snap-start"
+                    className="relative min-w-[180px] sm:min-w-[200px] bg-white dark:bg-gray-900 rounded-xl shadow-md dark:shadow-gray-800 hover:shadow-lg dark:hover:shadow-gray-700 flex flex-col overflow-hidden transition-all snap-start"
                   >
                     {discountPercent && (
                       <div className="absolute top-2 right-2 z-10 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded-full">
                         {discountPercent}% OFF
+                      </div>
+                    )}
+                    {isNew && (
+                      <div className="absolute top-2 left-2 z-10 bg-green-600 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                        NEW
                       </div>
                     )}
                     <Link href={`/products/${item.id}`} className="flex-grow block">
@@ -244,7 +273,7 @@ export default function FeaturedSection({ products, categories = [] }: FeaturedS
                       <Button
                         size="sm"
                         className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg"
-                        onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                        onClick={(e: ReactMouseEvent<HTMLButtonElement>) => {
                           e.preventDefault();
                           handleAddToCart(item);
                         }}
@@ -259,7 +288,6 @@ export default function FeaturedSection({ products, categories = [] }: FeaturedS
           </motion.div>
         </AnimatePresence>
 
-        {/* Indicators */}
         <div className="flex justify-center mt-4 space-x-2">
           {featuredByCategory.map((_, index) => (
             <button

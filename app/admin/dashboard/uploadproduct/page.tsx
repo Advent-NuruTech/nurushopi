@@ -44,7 +44,6 @@ export default function UploadProductPage() {
   const [categories, setCategories] = useState<CategoryOption[]>([]);
   const [categoryInput, setCategoryInput] = useState("");
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
-  const [uploadedPublicIds, setUploadedPublicIds] = useState<string[]>([]);
   const [status, setStatus] = useState<"idle" | "uploading" | "success" | "error">("idle");
   const [progress, setProgress] = useState(0);
   const [darkMode, setDarkMode] = useState(false);
@@ -138,7 +137,6 @@ export default function UploadProductPage() {
           uploaded.push(result.url);
           if (result.public_id) publicIds.push(result.public_id);
           setUploadedImages([...uploaded]);
-          setUploadedPublicIds([...publicIds]);
           setProgress(((i + 1) / formData.files.length) * 100);
         }
       }
@@ -181,7 +179,6 @@ export default function UploadProductPage() {
   const handleReset = () => {
     setStatus("idle");
     setUploadedImages([]);
-    setUploadedPublicIds([]);
     setImagePreviews([]);
     setFormData({
       name: "",
@@ -193,6 +190,10 @@ export default function UploadProductPage() {
     });
     setCategoryInput("");
     setProgress(0);
+  };
+
+  const closeStatusModal = () => {
+    setStatus("idle");
   };
 
   const sellingPrice =
@@ -688,6 +689,16 @@ export default function UploadProductPage() {
                   )}
 
                   <button
+                    onClick={closeStatusModal}
+                    className={`w-full py-3 rounded-lg font-semibold border transition-all duration-300 ${
+                      darkMode
+                        ? "border-gray-600 text-gray-300 hover:bg-gray-700"
+                        : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                    }`}
+                  >
+                    Close
+                  </button>
+                  <button
                     onClick={handleReset}
                     className={`w-full py-3 rounded-lg font-semibold transition-all duration-300 ${
                       darkMode 
@@ -721,7 +732,7 @@ export default function UploadProductPage() {
 
                   <div className="flex gap-3">
                     <button
-                      onClick={() => setStatus("idle")}
+                      onClick={closeStatusModal}
                       className={`flex-1 py-3 rounded-lg font-semibold border transition-colors duration-300 ${
                         darkMode 
                           ? "border-gray-600 text-gray-300 hover:bg-gray-700" 
@@ -731,14 +742,14 @@ export default function UploadProductPage() {
                       Go Back
                     </button>
                     <button
-                      onClick={handleSubmit}
+                      onClick={() => setStatus("idle")}
                       className={`flex-1 py-3 rounded-lg font-semibold transition-all duration-300 ${
                         darkMode 
                           ? "bg-blue-600 hover:bg-blue-700 text-white" 
                           : "bg-blue-600 hover:bg-blue-700 text-white"
                       }`}
                     >
-                      Try Again
+                      Back to Form
                     </button>
                   </div>
                 </div>

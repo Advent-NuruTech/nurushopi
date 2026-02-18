@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
@@ -19,9 +18,9 @@ interface Product {
   price: number;
   originalPrice?: number;
   sellingPrice?: number;
-  
   shortDescription?: string;
   description?: string;
+  createdAt?: number | string | null;
 }
 
 interface Category {
@@ -34,9 +33,19 @@ interface FeaturedSectionProps {
   categories?: Category[];
 }
 
+const FEATURED_LIMIT = 8;
+const NEW_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+
+function toMillis(value: Product["createdAt"]): number {
+  if (typeof value === "number") return value;
+  if (typeof value === "string") {
+    const parsed = Date.parse(value);
+    return Number.isNaN(parsed) ? 0 : parsed;
+  }
+  return 0;
+}
+
 export default function FeaturedSection({ products, categories = [] }: FeaturedSectionProps) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isScrolling, setIsScrolling] = useState(false);
   const { addToCart } = useCart();
 
   const derivedCategories: Category[] = Array.from(
@@ -49,30 +58,19 @@ export default function FeaturedSection({ products, categories = [] }: FeaturedS
 
   const categoryList = categories.length ? categories : derivedCategories;
 
-  const featuredByCategory = categoryList.map((cat) => ({
-    category: cat,
-    items: products.filter((p) => p.category?.toLowerCase() === cat.slug).slice(0, 8),
-  }));
+  const featuredByCategory = categoryList
+    .map((cat) => {
+      const matching = products
+        .filter((p) => p.category?.toLowerCase() === cat.slug)
+        .sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt));
 
-  // Auto-slide effect
-  useEffect(() => {
-    if (isScrolling) return;
-    const timer = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % 8);
-    }, 4000);
-    return () => clearInterval(timer);
-  }, [isScrolling]);
-
-  useEffect(() => {
-    let scrollTimeout: NodeJS.Timeout;
-    const handleScroll = () => {
-      setIsScrolling(true);
-      clearTimeout(scrollTimeout);
-      scrollTimeout = setTimeout(() => setIsScrolling(false), 1500);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+      return {
+        category: cat,
+        totalCount: matching.length,
+        items: matching.slice(0, FEATURED_LIMIT),
+      };
+    })
+    .filter((group) => group.items.length > 0);
 
   const handleAddToCart = (product: Product) => {
     const sellingPrice = getSellingPrice(product);
@@ -88,91 +86,92 @@ export default function FeaturedSection({ products, categories = [] }: FeaturedS
   return (
     <section className="relative w-full px-0 sm:px-1 py-4 bg-white dark:bg-black transition-colors">
       <div className="flex flex-col gap-14 w-full max-w-7xl mx-auto">
-        {featuredByCategory.map(
-          (group) =>
-            group.items.length > 0 && (
-              <div key={group.category.slug} className="w-full">
-                {/* Category Title + View All */}
-                <div className="mb-5 px-1 sm:px-3">
-                  <SectionHeader
-                    title={group.category.name || formatCategoryLabel(group.category.slug)}
-                    href={`/shop?category=${group.category.slug}`}
-                  />
-                </div>
+        {featuredByCategory.map((group) => (
+          <div key={group.category.slug} className="w-full">
+            <div className="mb-5 px-1 sm:px-3">
+              <SectionHeader
+                title={group.category.name || formatCategoryLabel(group.category.slug)}
+                href={`/shop?category=${group.category.slug}`}
+                showViewAll={group.totalCount > FEATURED_LIMIT}
+              />
+            </div>
 
-                {/* Product Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
-                  {group.items.map((item) => {
-                    const discountPercent = getDiscountPercent(item);
-                    const originalPrice = getOriginalPrice(item);
-                    const sellingPrice = getSellingPrice(item);
-                    return (
-                      <motion.div
-                        key={item.id}
-                        whileHover={{ scale: 1.03 }}
-                        transition={{ duration: 0.3 }}
-                        className="relative bg-white dark:bg-gray-900 rounded-xl shadow-md dark:shadow-gray-700 hover:shadow-lg dark:hover:shadow-gray-600 flex flex-col overflow-hidden transition-all duration-300"
-                      >
-                        {discountPercent && (
-                          <div className="absolute top-2 right-2 z-10 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded-full">
-                            {discountPercent}% OFF
-                          </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
+              {group.items.map((item) => {
+                const discountPercent = getDiscountPercent(item);
+                const originalPrice = getOriginalPrice(item);
+                const sellingPrice = getSellingPrice(item);
+                const isNew = Date.now() - toMillis(item.createdAt) <= NEW_WINDOW_MS;
+
+                return (
+                  <motion.div
+                    key={item.id}
+                    whileHover={{ scale: 1.03 }}
+                    transition={{ duration: 0.3 }}
+                    className="relative bg-white dark:bg-gray-900 rounded-xl shadow-md dark:shadow-gray-700 hover:shadow-lg dark:hover:shadow-gray-600 flex flex-col overflow-hidden transition-all duration-300"
+                  >
+                    {discountPercent && (
+                      <div className="absolute top-2 right-2 z-10 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                        {discountPercent}% OFF
+                      </div>
+                    )}
+                    {isNew && (
+                      <div className="absolute top-2 left-2 z-10 bg-green-600 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                        NEW
+                      </div>
+                    )}
+                    <Link href={`/products/${item.id}`} className="flex-grow block">
+                      <div className="relative w-full h-40 sm:h-56 bg-white dark:bg-gray-800">
+                        <Image
+                          src={item.image}
+                          alt={item.name}
+                          fill
+                          className="object-contain"
+                          sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+                        />
+                      </div>
+
+                      <div className="p-3 text-center">
+                        <h4 className="font-semibold text-black dark:text-white text-sm sm:text-base line-clamp-1">
+                          {item.name}
+                        </h4>
+                        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
+                          {item.shortDescription ||
+                            "A premium item to uplift your faith and wellbeing."}
+                        </p>
+                      </div>
+                    </Link>
+
+                    <div className="flex justify-between items-center px-3 pb-3">
+                      <div className="flex flex-col">
+                        {discountPercent && originalPrice && (
+                          <span className="text-xs text-gray-400 line-through">
+                            {formatPrice(originalPrice)}
+                          </span>
                         )}
-                        <Link href={`/products/${item.id}`} className="flex-grow block">
-                          <div className="relative w-full h-40 sm:h-56 bg-white dark:bg-gray-800">
-                            <Image
-                              src={item.image}
-                              alt={item.name}
-                              fill
-                              className="object-contain"
-                              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
-                            />
-                          </div>
-
-                          <div className="p-3 text-center">
-                            <h4 className="font-semibold text-black dark:text-white text-sm sm:text-base line-clamp-1">
-                              {item.name}
-                            </h4>
-                            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
-                              {item.shortDescription ||
-                                "A premium item to uplift your faith and wellbeing."}
-                            </p>
-                          </div>
-                        </Link>
-
-                        {/* Price + Add Button */}
-                        <div className="flex justify-between items-center px-3 pb-3">
-                          <div className="flex flex-col">
-                            {discountPercent && originalPrice && (
-                              <span className="text-xs text-gray-400 line-through">
-                                {formatPrice(originalPrice)}
-                              </span>
-                            )}
-                            <span className="text-blue-600 dark:text-blue-400 font-bold text-sm">
-                              {formatPrice(sellingPrice)}
-                            </span>
-                          </div>
-                          <Button
-                            size="sm"
-                            className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleAddToCart(item);
-                            }}
-                          >
-                            +
-                          </Button>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </div>
-            )
-        )}
+                        <span className="text-blue-600 dark:text-blue-400 font-bold text-sm">
+                          {formatPrice(sellingPrice)}
+                        </span>
+                      </div>
+                      <Button
+                        size="sm"
+                        className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAddToCart(item);
+                        }}
+                      >
+                        +
+                      </Button>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </div>
 
-      {/* CTA Button */}
       <div className="mt-16 text-center">
         <Link href="/shop">
           <Button

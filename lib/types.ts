@@ -19,6 +19,7 @@ export interface Product {
   
   category: string;
   slug?: string;
+  createdAt?: unknown;
 }
 
 

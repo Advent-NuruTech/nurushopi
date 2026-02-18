@@ -5,6 +5,16 @@ import { formatCategoryLabel, slugifyCategory } from "@/lib/categoryUtils";
 
 export async function GET() {
   try {
+    const productSnap = await getDocs(collection(db, "products"));
+    const activeSlugSet = new Set<string>();
+    productSnap.forEach((docSnap) => {
+      const data = docSnap.data();
+      if ((data.mode ?? "retail") === "wholesale") return;
+      const raw = String(data.category ?? "").trim();
+      const slug = slugifyCategory(raw);
+      if (slug) activeSlugSet.add(slug);
+    });
+
     const snap = await getDocs(query(collection(db, "categories"), orderBy("name_lowercase", "asc")));
     if (!snap.empty) {
       const categories = snap.docs.map((d) => {
@@ -16,20 +26,12 @@ export async function GET() {
           icon: data.icon ?? "",
           description: data.description ?? "",
         };
-      });
+      }).filter((c) => activeSlugSet.has(c.slug));
       return NextResponse.json({ categories });
     }
 
     // Fallback: derive categories from products if no category docs exist
-    const productSnap = await getDocs(collection(db, "products"));
-    const slugSet = new Set<string>();
-    productSnap.forEach((doc) => {
-      const data = doc.data();
-      const raw = String(data.category ?? "").trim();
-      if (raw) slugSet.add(slugifyCategory(raw));
-    });
-
-    const categories = Array.from(slugSet)
+    const categories = Array.from(activeSlugSet)
       .filter(Boolean)
       .sort()
       .map((slug) => ({

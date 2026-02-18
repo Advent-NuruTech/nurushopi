@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { Share2, Copy, MessageCircle } from "lucide-react";
-import { incrementInviteCount } from "@/lib/firestoreHelpers";
 import { useInvite } from "../hooks/useInvite";
 import type { MessageType } from "../types";
 
@@ -20,9 +19,6 @@ export default function InviteSection({ uid, inviteCount, onError }: InviteSecti
     try {
       await copyInviteLink();
       setInviteCopied(true);
-      if (uid) {
-        await incrementInviteCount(uid);
-      }
       setTimeout(() => setInviteCopied(false), 2000);
     } catch {
       onError({ type: "error", text: "Could not copy link." });
@@ -31,16 +27,10 @@ export default function InviteSection({ uid, inviteCount, onError }: InviteSecti
 
   const handleShareWhatsApp = () => {
     shareWhatsApp();
-    if (uid) {
-      incrementInviteCount(uid);
-    }
   };
 
   const handleShareSms = () => {
     shareSms();
-    if (uid) {
-      incrementInviteCount(uid);
-    }
   };
 
   return (
@@ -89,7 +79,7 @@ export default function InviteSection({ uid, inviteCount, onError }: InviteSecti
         </div>
         {inviteCount > 0 && (
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-4">
-            Invites shared:{" "}
+            Successful invites:{" "}
             <span className="font-medium text-slate-700 dark:text-slate-300">{inviteCount}</span>
           </p>
         )}

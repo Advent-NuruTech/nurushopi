@@ -206,7 +206,7 @@ export default async function ShopPage({
         {wholesaleProducts.length > 0 && (
           <section className="mb-10 mx-2 sm:mx-0">
             <div className="mb-3">
-              <SectionHeader title="Wholesale Deals" href="/wholeseller" />
+              <SectionHeader title="Wholesale Deals" href="/wholeseller" showViewAll={false} />
             </div>
 
             <div className="grid grid-flow-col auto-cols-[minmax(160px,1fr)] sm:auto-cols-[minmax(200px,1fr)] gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-hide">
@@ -270,6 +270,7 @@ export default async function ShopPage({
             }
             href="/shop"
             viewText="View All"
+            showViewAll={false}
           />
         </div>
 
@@ -368,6 +369,10 @@ export default async function ShopPage({
                 const discountPercent = getDiscountPercent(product);
                 const originalPrice = getOriginalPrice(product);
                 const sellingPrice = getSellingPrice(product);
+                const isNew =
+                  product.createdAt &&
+                  typeof product.createdAt === "number" &&
+                  Date.now() - product.createdAt < 7 * 24 * 60 * 60 * 1000;
                 return (
                   <Link
                     key={product.id}
@@ -393,6 +398,13 @@ export default async function ShopPage({
                         <div className="absolute top-2 right-2 sm:top-3 sm:right-3">
                           <span className="px-2 py-1 sm:px-3 sm:py-1 bg-red-600 text-white text-xs font-semibold rounded-full">
                             {discountPercent}% OFF
+                          </span>
+                        </div>
+                      )}
+                      {isNew && (
+                        <div className="absolute top-2 left-2 sm:top-3 sm:left-3">
+                          <span className="px-2 py-1 sm:px-3 sm:py-1 bg-green-500 text-white text-xs font-semibold rounded-full">
+                            NEW
                           </span>
                         </div>
                       )}

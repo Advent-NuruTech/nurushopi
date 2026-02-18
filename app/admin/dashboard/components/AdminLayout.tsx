@@ -3,7 +3,19 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, LogOut } from "lucide-react";
+import {
+  LayoutDashboard,
+  LogOut,
+  UserPlus,
+  Users,
+  Tags,
+  Package,
+  ShoppingCart,
+  Warehouse,
+  MessageSquare,
+  Wallet,
+  ImageIcon,
+} from "lucide-react";
 import { Admin, TabId, TABS_SENIOR, TABS_SUB } from "./types";
 import NotificationsBell from "./NotificationsBell";
 
@@ -13,6 +25,19 @@ interface AdminLayoutProps {
   onTabChange: (tab: TabId) => void;
   children: React.ReactNode;
 }
+
+const TAB_ICONS = {
+  LayoutDashboard,
+  UserPlus,
+  Users,
+  Tags,
+  Package,
+  ShoppingCart,
+  Warehouse,
+  MessageSquare,
+  Wallet,
+  ImageIcon,
+} as const;
 
 export default function AdminLayout({ admin, currentTab, onTabChange, children }: AdminLayoutProps) {
   const router = useRouter();
@@ -66,7 +91,10 @@ export default function AdminLayout({ admin, currentTab, onTabChange, children }
                   : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
               }`}
             >
-              {tabItem.icon}
+              {(() => {
+                const Icon = TAB_ICONS[tabItem.icon as keyof typeof TAB_ICONS] ?? LayoutDashboard;
+                return <Icon size={16} />;
+              })()}
               {tabItem.label}
             </button>
           ))}

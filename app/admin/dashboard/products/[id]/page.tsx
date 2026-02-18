@@ -26,6 +26,8 @@ interface CategoryOption {
   slug: string;
 }
 
+type Feedback = { type: "success" | "error"; text: string } | null;
+
 export default function ProductEditPage() {
   const params = useParams();
   const router = useRouter();
@@ -37,6 +39,7 @@ export default function ProductEditPage() {
   const [categories, setCategories] = useState<CategoryOption[]>([]);
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
   const [categoryInput, setCategoryInput] = useState("");
+  const [feedback, setFeedback] = useState<Feedback>(null);
 
   /* ---------------- Load product ---------------- */
   useEffect(() => {
@@ -96,6 +99,7 @@ export default function ProductEditPage() {
     if (!product || !file) return;
 
     setUploadingIndex(index);
+    setFeedback(null);
 
     try {
       const fd = new FormData();
@@ -106,7 +110,11 @@ export default function ProductEditPage() {
         body: fd,
       });
 
-      const result = await res.json();
+      const result = (await res.json()) as { url?: string; public_id?: string; error?: string };
+      if (!res.ok || !result.url) {
+        setFeedback({ type: "error", text: result.error || "Failed to replace image." });
+        return;
+      }
 
       const imgs = [...(product.images ?? [])];
       imgs[index] = result.url;
@@ -121,6 +129,7 @@ export default function ProductEditPage() {
 
   const addImage = async (file: File | null) => {
     if (!product || !file) return;
+    setFeedback(null);
 
     const fd = new FormData();
     fd.append("file", file);
@@ -130,12 +139,18 @@ export default function ProductEditPage() {
       body: fd,
     });
 
-    const result = await res.json();
+    const result = (await res.json()) as { url?: string; public_id?: string; error?: string };
+    if (!res.ok || !result.url) {
+      setFeedback({ type: "error", text: result.error || "Failed to add image." });
+      return;
+    }
 
     setProduct({
       ...product,
       images: [...(product.images ?? []), result.url],
-      imagePublicIds: [...(product.imagePublicIds ?? []), result.public_id].filter(Boolean),
+      imagePublicIds: [...(product.imagePublicIds ?? []), result.public_id].filter(
+        (id): id is string => typeof id === "string" && id.length > 0
+      ),
     });
   };
 
@@ -154,6 +169,7 @@ export default function ProductEditPage() {
   const save = async () => {
     if (!product) return;
     setSaving(true);
+    setFeedback(null);
 
     const res = await fetch("/api/admin/products", {
       method: "PUT",
@@ -165,10 +181,11 @@ export default function ProductEditPage() {
     setSaving(false);
 
     if (res.ok) {
-      alert("Product updated successfully");
+      setFeedback({ type: "success", text: "Product updated successfully." });
       router.refresh();
     } else {
-      alert("Update failed");
+      const payload = (await res.json().catch(() => ({}))) as { error?: string };
+      setFeedback({ type: "error", text: payload.error || "Update failed." });
     }
   };
 
@@ -182,6 +199,7 @@ export default function ProductEditPage() {
     });
 
     if (res.ok) router.push("/admin/dashboard");
+    else setFeedback({ type: "error", text: "Delete failed. Try again." });
   };
 
   if (loading) return <LoadingSpinner text="Loading product…" />;
@@ -203,6 +221,24 @@ export default function ProductEditPage() {
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-6">
       <h1 className="text-2xl font-bold">Edit Product</h1>
+
+      {feedback && (
+        <div
+          className={`flex items-center justify-between rounded-lg border px-4 py-3 text-sm ${
+            feedback.type === "success"
+              ? "border-green-300 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-900/20 dark:text-green-300"
+              : "border-red-300 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300"
+          }`}
+        >
+          <span>{feedback.text}</span>
+          <button
+            onClick={() => setFeedback(null)}
+            className="rounded border border-current px-2 py-0.5 text-xs hover:opacity-80"
+          >
+            Close
+          </button>
+        </div>
+      )}
 
       {/* Product Info */}
       <div className="bg-white p-5 rounded-xl border space-y-4">

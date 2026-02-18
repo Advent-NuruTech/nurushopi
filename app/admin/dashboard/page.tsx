@@ -16,6 +16,7 @@ import UsersTab from "./components/UsersTab";
 import ReviewsTab from "./components/ReviewsTab";
 import RedemptionsTab from "./components/RedemptionsTab";
 import WholesaleTab from "./components/WholesaleTab";
+import DashboardOverviewTab from "./components/DashboardOverviewTab";
 import { Admin, TabId, TABS_SENIOR, TABS_SUB } from "./components/types";
 
 function AdminDashboardContent() {
@@ -24,7 +25,7 @@ function AdminDashboardContent() {
   const tabParam = searchParams.get("tab") as TabId | null;
   const [admin, setAdmin] = useState<Admin | null>(null);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<TabId>("products");
+  const [tab, setTab] = useState<TabId>("overview");
 
   useEffect(() => {
     let cancelled = false;
@@ -40,7 +41,7 @@ function AdminDashboardContent() {
       .then((data) => {
         if (cancelled || !data?.admin) return;
         setAdmin(data.admin);
-        setTab(data.admin.role === "sub" ? "products" : "products");
+        setTab("overview");
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -66,6 +67,7 @@ function AdminDashboardContent() {
 
   return (
     <AdminLayout admin={admin} currentTab={tab} onTabChange={setTab}>
+      {tab === "overview" && <DashboardOverviewTab role={admin.role} />}
       {tab === "invite" && admin.role === "senior" && <InviteTab />}
       {tab === "admins" && admin.role === "senior" && <AdminsTab />}
       {tab === "categories" && admin.role === "senior" && <CategoriesTab />}

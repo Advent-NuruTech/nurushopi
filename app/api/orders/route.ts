@@ -6,7 +6,6 @@ import {
   doc,
   getDocs,
   getDoc,
-  setDoc,
   updateDoc,
   deleteDoc,
   query,
@@ -15,6 +14,8 @@ import {
   serverTimestamp,
   Timestamp,
   FieldValue,
+  increment,
+  runTransaction,
 } from "firebase/firestore";
 import { getClientKey, rateLimit } from "@/lib/rateLimit";
 
@@ -140,17 +141,26 @@ export async function POST(request: Request) {
     try {
       if (userId && finalReferrerId && finalReferrerId !== userId) {
         const userRef = doc(db, "users", userId);
-        const userSnap = await getDoc(userRef);
-        const existingReferrer = userSnap.exists()
-          ? (userSnap.data()?.referredBy as string | undefined)
-          : undefined;
-        if (!existingReferrer) {
-          await setDoc(
+        const referrerRef = doc(db, "users", finalReferrerId);
+        await runTransaction(db, async (tx) => {
+          const userSnap = await tx.get(userRef);
+          const existingReferrer = userSnap.exists()
+            ? (userSnap.data()?.referredBy as string | undefined)
+            : undefined;
+          if (existingReferrer) return;
+
+          tx.set(
             userRef,
             { referredBy: finalReferrerId, updatedAt: serverTimestamp() },
             { merge: true }
           );
-        }
+
+          tx.set(
+            referrerRef,
+            { inviteCount: increment(1), updatedAt: serverTimestamp() },
+            { merge: true }
+          );
+        });
       }
     } catch (refErr) {
       console.error("Order referral save error:", refErr);
@@ -280,6 +290,9 @@ export async function PUT(request: Request) {
     if (!orderId || !updates) {
       return NextResponse.json({ error: "Missing orderId or updates" }, { status: 400 });
     }
+    if (!userId) {
+      return NextResponse.json({ error: "userId is required" }, { status: 400 });
+    }
 
     const orderRef = doc(db, "orders", orderId);
     const orderSnap = await getDoc(orderRef);
@@ -293,7 +306,44 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Not authorized" }, { status: 403 });
     }
 
-    await updateDoc(orderRef, { ...updates, updatedAt: serverTimestamp() });
+    const requestedStatus = String(updates.status ?? "").toLowerCase();
+    if (requestedStatus !== "cancelled") {
+      return NextResponse.json(
+        { error: "Only cancellation is allowed from this endpoint" },
+        { status: 403 }
+      );
+    }
+
+    const currentStatus = String(orderData.status ?? "pending").toLowerCase();
+    if (currentStatus !== "pending" && currentStatus !== "shipped") {
+      return NextResponse.json(
+        { error: "Only pending or shipped orders can be cancelled" },
+        { status: 400 }
+      );
+    }
+
+    const createdAtValue = orderData.createdAt;
+    let createdAtMs = 0;
+    if (createdAtValue && typeof (createdAtValue as { toDate?: () => Date }).toDate === "function") {
+      createdAtMs = (createdAtValue as Timestamp).toDate().getTime();
+    } else if (typeof createdAtValue === "string") {
+      const parsed = Date.parse(createdAtValue);
+      createdAtMs = Number.isNaN(parsed) ? 0 : parsed;
+    }
+
+    if (!createdAtMs || Date.now() - createdAtMs > 24 * 60 * 60 * 1000) {
+      return NextResponse.json(
+        { error: "Cancellation window is 24 hours from order time" },
+        { status: 400 }
+      );
+    }
+
+    await updateDoc(orderRef, {
+      status: "cancelled",
+      cancelledBy: userId ?? null,
+      cancelledAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (err: unknown) {
     console.error("PUT /api/orders error", err);

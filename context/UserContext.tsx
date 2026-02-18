@@ -7,7 +7,7 @@ import {
   User as FirebaseUser,
   signOut,
 } from "firebase/auth";
-import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
+import { doc, getDoc, increment, runTransaction, serverTimestamp, setDoc } from "firebase/firestore";
 
 interface AppUser {
   id: string;
@@ -73,6 +73,38 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
           const ref = localStorage.getItem("nurushop_referrer");
           if (ref && ref === firebaseUser.uid) {
             localStorage.removeItem("nurushop_referrer");
+          } else if (ref) {
+            const referrerRef = doc(db, "users", ref);
+            runTransaction(db, async (tx) => {
+              const userSnap = await tx.get(userRef);
+              const existingReferrer = userSnap.exists()
+                ? String(userSnap.data()?.referredBy ?? "")
+                : "";
+
+              if (existingReferrer) return;
+
+              tx.set(
+                userRef,
+                {
+                  referredBy: ref,
+                  updatedAt: serverTimestamp(),
+                },
+                { merge: true }
+              );
+
+              tx.set(
+                referrerRef,
+                {
+                  inviteCount: increment(1),
+                  updatedAt: serverTimestamp(),
+                },
+                { merge: true }
+              );
+            })
+              .then(() => localStorage.removeItem("nurushop_referrer"))
+              .catch(() => {
+                // ignore referral attribution errors
+              });
           }
         } catch {
           // ignore storage errors

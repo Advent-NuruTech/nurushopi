@@ -193,7 +193,7 @@ export default function MessagesPanel({
   if (loading) return <LoadingSpinner text="Loading messages..." />;
 
   return (
-    <section className="fixed top-0 right-0 h-full w-full md:w-[420px] bg-white dark:bg-gray-800 shadow-xl flex flex-col z-50">
+    <section className="fixed top-0 right-0 h-full w-full md:w-[420px] bg-white dark:bg-gray-800 shadow-xl flex flex-col z-[60] pb-[env(safe-area-inset-bottom)]">
       {/* Header */}
       <div className="border-b p-4 flex items-center justify-between bg-gray-50 dark:bg-gray-900">
         <div className="flex gap-3 items-center">

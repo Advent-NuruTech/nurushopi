@@ -25,6 +25,13 @@ export default function ProductCard({ product }: { product: Product }) {
   const sellingPrice = getSellingPrice(product);
   const originalPrice = getOriginalPrice(product);
   const discountPercent = getDiscountPercent(product);
+  const createdAtMs =
+    typeof product.createdAt === "number"
+      ? product.createdAt
+      : typeof product.createdAt === "string"
+      ? Date.parse(product.createdAt)
+      : 0;
+  const isNew = Number.isFinite(createdAtMs) && createdAtMs > 0 && Date.now() - createdAtMs <= 7 * 24 * 60 * 60 * 1000;
 
   // ✅ Handle add to cart
   const handleAddToCart = () => {
@@ -54,6 +61,11 @@ export default function ProductCard({ product }: { product: Product }) {
       {discountPercent && (
         <div className="absolute top-2 right-2 z-10 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded-full">
           {discountPercent}% OFF
+        </div>
+      )}
+      {isNew && (
+        <div className="absolute top-2 left-2 z-10 bg-green-600 text-white text-xs font-semibold px-2 py-1 rounded-full">
+          NEW
         </div>
       )}
       {/* ✅ Product Link */}

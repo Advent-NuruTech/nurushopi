@@ -15,6 +15,7 @@ import {
   increment,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { formatCategoryLabel, slugifyCategory } from "@/lib/categoryUtils";
 
 // ----------------------------
 // 🔹 Interfaces
@@ -91,8 +92,27 @@ export interface UserProfile {
 // ----------------------------
 
 export const getAllCategories = async (): Promise<Category[]> => {
+  const productSnap = await getDocs(collection(db, "products"));
+  const activeSlugs = new Set<string>();
+  productSnap.forEach((docSnap) => {
+    const data = docSnap.data();
+    if ((data.mode ?? "retail") === "wholesale") return;
+    const slug = slugifyCategory(String(data.category ?? ""));
+    if (slug) activeSlugs.add(slug);
+  });
+
   const q = query(collection(db, "categories"), orderBy("name_lowercase", "asc"));
   const snapshot = await getDocs(q);
+
+  if (snapshot.empty) {
+    return Array.from(activeSlugs)
+      .sort()
+      .map((slug) => ({
+        id: slug,
+        name: formatCategoryLabel(slug),
+        slug,
+      }));
+  }
 
   return snapshot.docs.map((docSnap) => {
     const data = docSnap.data();
@@ -105,7 +125,7 @@ export const getAllCategories = async (): Promise<Category[]> => {
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
     } as Category;
-  });
+  }).filter((category) => activeSlugs.has(category.slug));
 };
 
 // ----------------------------

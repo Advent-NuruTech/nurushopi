@@ -36,7 +36,7 @@ interface Product {
   description?: string;
   category: string;
   images: string[];
-  createdAt?: string;
+  createdAt?: string | number | null;
 }
 
 interface Review {
@@ -159,7 +159,26 @@ export default function ProductDetailPage() {
                   Array.isArray(rd.images) && rd.images.length > 0
                     ? rd.images
                     : [rd.imageUrl || "/assets/logo.jpg"],
+                createdAt:
+                  typeof rd.createdAt === "string" || typeof rd.createdAt === "number"
+                    ? rd.createdAt
+                    : null,
               };
+            })
+            .sort((a, b) => {
+              const aTime =
+                typeof a.createdAt === "number"
+                  ? a.createdAt
+                  : typeof a.createdAt === "string"
+                  ? Date.parse(a.createdAt)
+                  : 0;
+              const bTime =
+                typeof b.createdAt === "number"
+                  ? b.createdAt
+                  : typeof b.createdAt === "string"
+                  ? Date.parse(b.createdAt)
+                  : 0;
+              return (Number.isFinite(bTime) ? bTime : 0) - (Number.isFinite(aTime) ? aTime : 0);
             })
         );
       } catch (e: unknown) {
@@ -305,12 +324,6 @@ export default function ProductDetailPage() {
 
           <div>
             <h1 className="text-3xl font-bold">{product.name}</h1>
-
-            {product.shortDescription && (
-              <p className="text-slate-600 dark:text-slate-400 mt-2">
-                {product.shortDescription}
-              </p>
-            )}
           </div>
 
           {/* ===== Description Preview ===== */}
@@ -349,6 +362,16 @@ export default function ProductDetailPage() {
               const discountPercent = getDiscountPercent(rel);
               const originalPrice = getOriginalPrice(rel);
               const sellingPrice = getSellingPrice(rel);
+              const createdAtMs =
+                typeof rel.createdAt === "number"
+                  ? rel.createdAt
+                  : typeof rel.createdAt === "string"
+                  ? Date.parse(rel.createdAt)
+                  : 0;
+              const isNew =
+                Number.isFinite(createdAtMs) &&
+                createdAtMs > 0 &&
+                Date.now() - createdAtMs <= 7 * 24 * 60 * 60 * 1000;
               return (
                 <Link
                   key={rel.id}
@@ -358,6 +381,11 @@ export default function ProductDetailPage() {
                   {discountPercent && (
                     <div className="absolute top-2 right-2 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded-full">
                       {discountPercent}% OFF
+                    </div>
+                  )}
+                  {isNew && (
+                    <div className="absolute top-2 left-2 bg-green-600 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                      NEW
                     </div>
                   )}
                   <div className="relative w-full h-40 rounded overflow-hidden">

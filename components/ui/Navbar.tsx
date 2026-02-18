@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 
 import SearchBar from "./SearchBar";
 import Sidebar from "./Sidebar";
+import UserNotificationsBell from "./UserNotificationsBell";
 
 import { useAppUser } from "@/context/UserContext";
 import { auth } from "@/lib/firebase";
@@ -187,6 +188,7 @@ export default function Navbar() {
         {/* Right actions */}
         <div className="flex items-center gap-4">
           <SearchBar showSearch={showSearch} setShowSearch={setShowSearch} />
+          <UserNotificationsBell />
 
           {/* Cart */}
           <Link href="/checkout" className="relative p-2 hover:text-blue-600">

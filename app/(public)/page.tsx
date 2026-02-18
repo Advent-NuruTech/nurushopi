@@ -35,6 +35,21 @@ function serializeFirestoreDoc<T extends Record<string, unknown>>(doc: T): T {
   );
 }
 
+function toMillis(value: unknown): number {
+  if (!value) return 0;
+  if (value instanceof Timestamp) return value.toMillis();
+  if (typeof value === "number") return value;
+  if (typeof value === "string") {
+    const parsed = Date.parse(value);
+    return Number.isNaN(parsed) ? 0 : parsed;
+  }
+  if (typeof value === "object" && value !== null && "seconds" in value) {
+    const secs = (value as { seconds?: number }).seconds;
+    return typeof secs === "number" ? secs * 1000 : 0;
+  }
+  return 0;
+}
+
 /* ---------- Extended product shape used in UI ---------- */
 
 type ProductWithExtras = Product & {
@@ -42,6 +57,7 @@ type ProductWithExtras = Product & {
   images?: string[];
   shortDescription?: string;
   description?: string;
+  createdAt?: unknown;
 };
 
 /* ---------- Page ---------- */
@@ -71,7 +87,9 @@ export default async function HomePage() {
   const uiProducts: (Product & {
     image: string;
     shortDescription: string;
-  })[] = retailProducts.map((p) =>
+    createdAt?: number;
+  })[] = retailProducts
+    .map((p) =>
     serializeFirestoreDoc({
       ...p,
       image: p.images?.[0] || "/assets/logo.jpg",
@@ -79,8 +97,10 @@ export default async function HomePage() {
         p.shortDescription ||
         p.description ||
         "A quality product from NuruShop.",
+      createdAt: toMillis(p.createdAt),
     })
-  );
+  )
+    .sort((a, b) => Number(b.createdAt ?? 0) - Number(a.createdAt ?? 0));
 
   const wholesaleProducts = wholesaleSnap.docs.map((docSnap) => {
     const data = docSnap.data() as Record<string, unknown>;

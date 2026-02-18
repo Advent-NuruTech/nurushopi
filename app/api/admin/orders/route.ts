@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/firebase";
 import {
+  addDoc,
   collection,
   getDocs,
   doc,
@@ -183,23 +184,36 @@ export async function PUT(request: Request) {
     const updates: Record<string, unknown> = {
       updatedAt: serverTimestamp(),
     };
+    const orderData = snap.data() as Record<string, unknown>;
 
     if (status === "approved" || status === "received") {
+      if (String(orderData.status ?? "") === "cancelled") {
+        return NextResponse.json(
+          { error: "Cancelled orders cannot be approved" },
+          { status: 400 }
+        );
+      }
       updates.status = "received";
       updates.approvedBy = admin.adminId;
       updates.receivedAt = serverTimestamp();
     } else if (status === "cancelled") {
+      if (String(orderData.status ?? "") === "received") {
+        return NextResponse.json(
+          { error: "Delivered orders cannot be cancelled" },
+          { status: 400 }
+        );
+      }
       updates.status = "cancelled";
     }
 
-    const currentStatus = snap.data()?.status as string | undefined;
+    const currentStatus = orderData.status as string | undefined;
     const shouldApplyAffiliate =
       (status === "approved" || status === "received") &&
       currentStatus !== "received" &&
-      !(snap.data()?.affiliateApplied as boolean | undefined);
+      currentStatus !== "cancelled" &&
+      !(orderData.affiliateApplied as boolean | undefined);
 
     if (shouldApplyAffiliate) {
-      const orderData = snap.data() as Record<string, unknown>;
       const orderUserId = String(orderData.userId ?? "");
       const orderReferrerId = String(orderData.referrerId ?? "");
       let referrerId = orderReferrerId;
@@ -272,6 +286,22 @@ export async function PUT(request: Request) {
     }
 
     await updateDoc(ref, updates);
+
+    if (updates.status === "received" && currentStatus !== "received") {
+      const userId = String(orderData.userId ?? "");
+      if (userId) {
+        await addDoc(collection(db, "notifications"), {
+          recipientType: "user",
+          recipientId: userId,
+          type: "review_prompt",
+          title: "Order delivered",
+          body: "Your order was delivered. Share your review.",
+          relatedId: orderId,
+          readAt: null,
+          createdAt: serverTimestamp(),
+        });
+      }
+    }
 
     await logAdminAction({
       adminId: admin.adminId,

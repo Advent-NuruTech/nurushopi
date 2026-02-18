@@ -318,6 +318,17 @@ function CheckoutContent() {
                       <p className="text-gray-500 text-sm">
                         KSh {item.price.toFixed(2)}
                       </p>
+                      <div className="mt-1 flex items-center gap-2 text-xs">
+                        <span className="text-gray-500 dark:text-gray-400">
+                          Product ID: <code className="font-mono">{item.id}</code>
+                        </span>
+                        <Link
+                          href={`/products/${item.id}`}
+                          className="rounded-full border border-blue-200 px-2 py-0.5 text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-900/30"
+                        >
+                          View details
+                        </Link>
+                      </div>
                       <div className="flex items-center gap-2 mt-2">
                         <button
                           onClick={() => decreaseQuantity(item.id, item.quantity)}

@@ -49,6 +49,9 @@ export function useOrders({ uid, orderFilter }: UseOrdersProps) {
   const totalOrders = orders.length;
   const pendingOrders = orders.filter((o) => o.status === "pending" || o.status === "shipped").length;
   const deliveredOrders = orders.filter((o) => o.status === "received").length;
+  const updateOrderStatus = (orderId: string, status: string) => {
+    setOrders((prev) => prev.map((order) => (order.id === orderId ? { ...order, status } : order)));
+  };
 
   return {
     orders,
@@ -57,5 +60,6 @@ export function useOrders({ uid, orderFilter }: UseOrdersProps) {
     totalOrders,
     pendingOrders,
     deliveredOrders,
+    updateOrderStatus,
   };
 }

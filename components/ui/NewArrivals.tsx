@@ -140,20 +140,27 @@ export default function NewArrivals() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
-            {Array.from({ length: 12 }).map((_, idx) => (
-              <ProductCardSkeleton key={idx} className="rounded-lg" />
+          <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-2">
+            {Array.from({ length: 8 }).map((_, idx) => (
+              <div key={idx} className="min-w-[140px] sm:min-w-[170px] lg:min-w-[190px] shrink-0">
+                <ProductCardSkeleton className="rounded-lg" />
+              </div>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+          <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-2 snap-x snap-mandatory">
             {products.slice(0, 12).map((product) => {
               const discountPercent = getDiscountPercent(product);
               const originalPrice = getOriginalPrice(product);
               const sellingPrice = getSellingPrice(product);
 
               return (
-                <motion.div key={product.id} whileHover={{ y: -3 }} transition={{ duration: 0.2 }}>
+                <motion.div
+                  key={product.id}
+                  whileHover={{ y: -3 }}
+                  transition={{ duration: 0.2 }}
+                  className="min-w-[140px] sm:min-w-[170px] lg:min-w-[190px] shrink-0 snap-start"
+                >
                   <Link
                     href={`/products/${product.id}`}
                     className="group relative block rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-900 overflow-hidden"
@@ -174,7 +181,7 @@ export default function NewArrivals() {
                           alt={product.name}
                           fill
                           className="object-contain p-1"
-                          sizes="(max-width: 640px) 33vw, (max-width: 1024px) 25vw, 16vw"
+                          sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 200px"
                         />
                       ) : (
                         <div className="h-full flex items-center justify-center text-[10px] text-gray-400">No image</div>

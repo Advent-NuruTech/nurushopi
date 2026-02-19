@@ -254,9 +254,18 @@ export default function ProductEditPage() {
           type="number"
           placeholder="Selling Price"
           value={product.price}
-          onChange={(e) =>
-            updateField("price", Number(e.target.value))
-          }
+          onChange={(e) => {
+            const nextPrice = Number(e.target.value);
+            setProduct((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    price: nextPrice,
+                    sellingPrice: nextPrice,
+                  }
+                : prev
+            );
+          }}
         />
 
         <input

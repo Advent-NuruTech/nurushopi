@@ -70,7 +70,7 @@ export default function AdminLayout({ admin, currentTab, onTabChange, children }
             >
               View site
             </Link>
-            <NotificationsBell />
+     
             <button
               onClick={handleLogout}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 text-sm"

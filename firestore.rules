@@ -5,62 +5,162 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
+    function uid() {
+      return request.auth.uid;
     }
 
-    // Requires custom claims set on admin users.
-    function isAdmin() {
+    function isOwner(userId) {
+      return isSignedIn() && uid() == userId;
+    }
+
+    function hasRole(role) {
+      return isSignedIn() &&
+        ("role" in request.auth.token) &&
+        request.auth.token.role == role;
+    }
+
+    function hasAdminMarker() {
       return isSignedIn() && request.auth.token.admin == true;
     }
 
-    match /products/{id} {
-      allow read: if true;
-      allow write: if isAdmin();
+    function isSeniorAdmin() {
+      return hasRole("senior") || (hasAdminMarker() && !("role" in request.auth.token));
+    }
+
+    function isSubAdmin() {
+      return hasRole("sub");
+    }
+
+    function isAnyAdmin() {
+      return isSeniorAdmin() || isSubAdmin() || hasAdminMarker();
+    }
+
+    function adminId() {
+      return isSignedIn() && ("adminId" in request.auth.token)
+        ? request.auth.token.adminId
+        : uid();
+    }
+
+    function isNotificationRecipient() {
+      return isSignedIn() &&
+        (
+          (
+            resource.data.recipientType == "user" &&
+            resource.data.recipientId == uid()
+          ) ||
+          (
+            resource.data.recipientType == "admin" &&
+            resource.data.recipientId == adminId()
+          )
+        );
+    }
+
+    function isMessageParticipant() {
+      return isSignedIn() &&
+        (
+          (resource.data.participantIds is list && uid() in resource.data.participantIds) ||
+          (resource.data.participantIds is list && adminId() in resource.data.participantIds) ||
+          resource.data.senderId == uid() ||
+          resource.data.recipientId == uid() ||
+          resource.data.senderId == adminId() ||
+          resource.data.recipientId == adminId()
+        );
+    }
+
+    function requestHasSelfAsParticipant() {
+      return isSignedIn() &&
+        request.resource.data.participantIds is list &&
+        (uid() in request.resource.data.participantIds || adminId() in request.resource.data.participantIds);
     }
 
     match /categories/{id} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create, update, delete: if isSeniorAdmin();
+    }
+
+    match /banners/{id} {
+      allow read: if true;
+      allow create, update, delete: if isSeniorAdmin();
+    }
+
+    match /products/{id} {
+      allow read: if true;
+      allow create: if isSeniorAdmin() ||
+        (isSubAdmin() && request.resource.data.createdBy == adminId());
+      allow update, delete: if isSeniorAdmin() ||
+        (
+          isSubAdmin() &&
+          resource.data.createdBy == adminId() &&
+          request.resource.data.createdBy == resource.data.createdBy
+        );
     }
 
     match /orders/{id} {
-      allow read: if isOwner(resource.data.userId) || isAdmin();
-      allow create: if isOwner(request.resource.data.userId);
-      allow update, delete: if isOwner(resource.data.userId) || isAdmin();
+      allow read: if isOwner(resource.data.userId) || isAnyAdmin();
+      allow create: if (isSignedIn() && request.resource.data.userId == uid()) || isAnyAdmin();
+      allow update, delete: if isAnyAdmin() ||
+        (
+          isSignedIn() &&
+          resource.data.userId == uid() &&
+          request.resource.data.userId == resource.data.userId
+        );
     }
 
     match /users/{id} {
-      allow read, write: if isOwner(id) || isAdmin();
+      allow read: if isOwner(id) || isAnyAdmin();
+      allow create, update: if isOwner(id) || isSeniorAdmin();
+      allow delete: if isSeniorAdmin();
     }
 
     match /reviews/{id} {
-      allow read: if resource.data.status == "approved";
-      allow create: if isOwner(request.resource.data.userId);
-      allow update: if isAdmin();
+      allow read: if resource.data.status == "approved" || isOwner(resource.data.userId) || isAnyAdmin();
+      allow create: if isSignedIn() && request.resource.data.userId == uid();
+      allow update, delete: if isSeniorAdmin();
     }
 
     match /wallet_transactions/{id} {
-      allow read: if isOwner(resource.data.userId) || isAdmin();
-      allow write: if isAdmin();
+      allow read: if isOwner(resource.data.userId) || isSeniorAdmin();
+      allow create, update, delete: if isSeniorAdmin();
     }
 
     match /wallet_redemptions/{id} {
-      allow read: if isOwner(resource.data.userId) || isAdmin();
-      allow create: if isOwner(request.resource.data.userId);
-      allow update: if isAdmin();
+      allow read: if isOwner(resource.data.userId) || isSeniorAdmin();
+      allow create: if isSignedIn() && request.resource.data.userId == uid();
+      allow update, delete: if isSeniorAdmin();
     }
 
     match /admin_logs/{id} {
-      allow read, write: if isAdmin();
+      allow read: if isSeniorAdmin();
+      allow create: if isAnyAdmin();
+      allow update, delete: if false;
     }
 
     match /notifications/{id} {
-      allow read, write: if isSignedIn() || isAdmin();
+      allow read: if isNotificationRecipient() || isSeniorAdmin();
+      allow create: if isAnyAdmin();
+      allow update: if isNotificationRecipient() || isSeniorAdmin();
+      allow delete: if isSeniorAdmin();
+    }
+
+    match /messages/{id} {
+      allow read: if isMessageParticipant() || isSeniorAdmin();
+      allow create: if requestHasSelfAsParticipant();
+      allow update: if isMessageParticipant() || isSeniorAdmin();
+      allow delete: if isSeniorAdmin();
+    }
+
+    match /contacts/{id} {
+      allow create: if true;
+      allow read, update, delete: if isSeniorAdmin();
     }
 
     match /admins/{id} {
-      allow read, write: if isAdmin();
+      allow read: if isSeniorAdmin() || (isAnyAdmin() && id == adminId());
+      allow create, update, delete: if isSeniorAdmin();
+    }
+
+    match /admin_invites/{id} {
+      allow read, write: if isSeniorAdmin();
     }
 
     match /{document=**} {

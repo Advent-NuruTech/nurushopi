@@ -182,13 +182,13 @@ export async function PUT(request: Request) {
 
     const updates: Record<string, unknown> = {};
     if (name !== undefined) updates.name = String(name);
-    if (price !== undefined) {
-      updates.price = Number(price);
-      updates.sellingPrice = Number(price);
-    }
-    if (sellingPrice !== undefined) {
-      updates.price = Number(sellingPrice);
-      updates.sellingPrice = Number(sellingPrice);
+    if (price !== undefined || sellingPrice !== undefined) {
+      const nextPriceRaw = price !== undefined ? price : sellingPrice;
+      const nextPrice = Number(nextPriceRaw);
+      if (Number.isFinite(nextPrice)) {
+        updates.price = nextPrice;
+        updates.sellingPrice = nextPrice;
+      }
     }
     if (originalPrice === null) {
       updates.originalPrice = null;

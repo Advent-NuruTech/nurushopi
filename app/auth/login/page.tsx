@@ -117,7 +117,7 @@ function LoginForm() {
             onCloseError={() => setError("")}
             onCloseSuccess={() => setSuccess("")}
           />
-
+{/* 
 <motion.button
   onClick={handleGoogleLogin}
   disabled={loading}
@@ -134,7 +134,7 @@ function LoginForm() {
             <div className="flex-1 h-px bg-gray-300"></div>
             <span className="mx-4 text-gray-500 text-sm font-medium">OR</span>
             <div className="flex-1 h-px bg-gray-300"></div>
-          </div>
+          </div>*/}
 
           <form onSubmit={handleEmailLogin}>
             <div className="mb-4">

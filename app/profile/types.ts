@@ -22,6 +22,7 @@ export interface ApiOrder {
   items: OrderItem[];
   totalAmount: number;
   status: string;
+  cancellationReason?: string | null;
   createdAt: string;
 }
 

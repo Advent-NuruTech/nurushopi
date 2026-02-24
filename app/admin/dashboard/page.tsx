@@ -11,6 +11,7 @@ import OrdersTab from "./components/OrdersTab";
 import BannersTab from "./components/BannersTab";
 import ContactsTab from "./components/ContactsTab";
 import CategoriesTab from "./components/CategoriesTab";
+import HeroTab from "./components/HeroTab";
 import MessagesTab from "./components/MessagesTab";
 import UsersTab from "./components/UsersTab";
 import ReviewsTab from "./components/ReviewsTab";
@@ -71,6 +72,7 @@ function AdminDashboardContent() {
       {tab === "invite" && admin.role === "senior" && <InviteTab />}
       {tab === "admins" && admin.role === "senior" && <AdminsTab />}
       {tab === "categories" && admin.role === "senior" && <CategoriesTab />}
+      {tab === "hero" && admin.role === "senior" && <HeroTab />}
       {tab === "products" && <ProductsTab adminId={admin.adminId} role={admin.role} />}
       {tab === "orders" && <OrdersTab adminId={admin.adminId} role={admin.role} />}
       {tab === "wholesale" && admin.role === "senior" && <WholesaleTab />}

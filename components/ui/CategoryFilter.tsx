@@ -11,6 +11,7 @@ interface CategoryFilterProps {
 export default function CategoryFilter({ categories, onSelect }: CategoryFilterProps) {
   const [selected, setSelected] = useState<string | null>(null);
 
+  
   const handleSelect = (category: string) => {
     const newValue = selected === category ? null : category;
     setSelected(newValue);

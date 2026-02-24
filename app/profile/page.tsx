@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAppUser } from "@/context/UserContext";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   UserCircle,
   Package,
@@ -16,6 +16,8 @@ import {
   Store,
   ShoppingBag,
   Star,
+  Menu,
+  X,
 } from "lucide-react";
 
 import ProfileOverview from "./components/ProfileOverview";
@@ -51,6 +53,7 @@ function ProfilePageContent() {
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [unreadReviewPrompts, setUnreadReviewPrompts] = useState(0);
   const [greeting, setGreeting] = useState("");
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   const appUser = adaptAppUser(contextUser);
   const uid = firebaseUser?.uid ?? appUser?.id ?? null;
@@ -122,12 +125,16 @@ function ProfilePageContent() {
   useEffect(() => {
     const tab = searchParams.get("tab");
     if (!tab) return;
+    if (tab === "shop") {
+      router.push("/");
+      return;
+    }
     if (
-      ["overview", "orders", "messages", "reviews", "wallet", "profile", "invite", "shop"].includes(tab)
+      ["overview", "orders", "messages", "reviews", "wallet", "profile", "invite"].includes(tab)
     ) {
       setActiveTab(tab);
     }
-  }, [searchParams]);
+  }, [router, searchParams]);
 
   useEffect(() => {
     if (!uid) {
@@ -178,6 +185,15 @@ function ProfilePageContent() {
     []
   );
 
+  const handleTabChange = (tabId: string) => {
+    setMobileSidebarOpen(false);
+    if (tabId === "shop") {
+      router.push("/");
+      return;
+    }
+    setActiveTab(tabId);
+  };
+
   /* ------------------- Early Loading ------------------- */
   if (userLoading)
     return (
@@ -199,68 +215,160 @@ function ProfilePageContent() {
           <p className="text-sm opacity-90">Manage your account</p>
         </div>
 
-        <button
-          onClick={() =>
-            setActiveTab(unreadMessages > 0 ? "messages" : "orders")
-          }
-          className="relative"
-        >
-          <Bell className="w-6 h-6" />
-          {notificationCount > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-500 w-5 h-5 text-xs flex items-center justify-center rounded-full">
-              {notificationCount > 9 ? "9+" : notificationCount}
-            </span>
-          )}
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setMobileSidebarOpen(true)}
+            className="md:hidden inline-flex items-center justify-center h-10 w-10 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+            aria-label="Open profile menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() =>
+              setActiveTab(unreadMessages > 0 ? "messages" : "orders")
+            }
+            className="relative"
+            type="button"
+          >
+            <Bell className="w-6 h-6" />
+            {notificationCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 w-5 h-5 text-xs flex items-center justify-center rounded-full">
+                {notificationCount > 9 ? "9+" : notificationCount}
+              </span>
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );
 
-  /* ------------------- Bottom Navigation ------------------- */
-  const BottomNav = () => (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t flex justify-around h-16">
-      {tabs.map((t) => {
-        const Icon = t.icon;
-        return (
-          <button
-            key={t.id}
-            onClick={() => {
-              if (t.id === "shop") router.push("/");
-              else setActiveTab(t.id);
-            }}
-            className={`flex flex-col items-center justify-center flex-1 ${
-              activeTab === t.id ? "text-blue-600" : "text-gray-500"
-            }`}
+  /* ------------------- Desktop Sidebar ------------------- */
+  const DesktopSidebar = () => (
+    <aside className="hidden md:block w-64 shrink-0">
+      <div className="sticky top-24 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm p-3">
+        <nav className="space-y-1 max-h-[70vh] overflow-y-auto">
+          {tabs.map((t) => {
+            const Icon = t.icon;
+            const isActive = activeTab === t.id;
+            const badgeCount =
+              t.id === "messages"
+                ? unreadMessages
+                : t.id === "orders"
+                ? pendingOrders
+                : t.id === "reviews"
+                ? unreadReviewPrompts
+                : 0;
+            return (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => handleTabChange(t.id)}
+                className={`w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl text-sm transition-colors ${
+                  isActive
+                    ? "bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300"
+                    : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  <Icon className="w-4 h-4" />
+                  {t.label}
+                </span>
+                {badgeCount > 0 && (
+                  <span className="min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-[11px] inline-flex items-center justify-center">
+                    {badgeCount > 99 ? "99+" : badgeCount}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+    </aside>
+  );
+
+  /* ------------------- Mobile Sidebar ------------------- */
+  const MobileSidebar = () => (
+    <AnimatePresence>
+      {mobileSidebarOpen && (
+        <>
+          <motion.button
+            type="button"
+            className="fixed inset-0 bg-black/45 z-50 md:hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setMobileSidebarOpen(false)}
+            aria-label="Close profile menu backdrop"
+          />
+          <motion.aside
+            className="fixed inset-y-0 left-0 w-[86vw] max-w-sm bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700 z-50 md:hidden flex flex-col"
+            initial={{ x: "-100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "-100%" }}
+            transition={{ type: "spring", stiffness: 340, damping: 34 }}
+            aria-label="Profile menu"
           >
-            <div className="relative">
-              <Icon className="w-5 h-5" />
-
-              {t.id === "messages" && unreadMessages > 0 && (
-                <span className="absolute -top-2 -right-2 text-[10px] bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center">
-                  {unreadMessages > 9 ? "9+" : unreadMessages}
-                </span>
-              )}
-
-              {t.id === "orders" && pendingOrders > 0 && (
-                <span className="absolute -top-2 -right-2 text-[10px] bg-orange-500 text-white rounded-full w-4 h-4 flex items-center justify-center">
-                  {pendingOrders > 9 ? "9+" : pendingOrders}
-                </span>
-              )}
+            <div className="px-4 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+              <p className="font-semibold text-slate-900 dark:text-white">Profile Menu</p>
+              <button
+                type="button"
+                onClick={() => setMobileSidebarOpen(false)}
+                className="inline-flex items-center justify-center h-9 w-9 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+                aria-label="Close profile menu"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
-
-            <span className="text-xs">{t.label}</span>
-          </button>
-        );
-      })}
-    </div>
+            <nav className="p-3 space-y-1 overflow-y-auto">
+              {tabs.map((t) => {
+                const Icon = t.icon;
+                const isActive = activeTab === t.id;
+                const badgeCount =
+                  t.id === "messages"
+                    ? unreadMessages
+                    : t.id === "orders"
+                    ? pendingOrders
+                    : t.id === "reviews"
+                    ? unreadReviewPrompts
+                    : 0;
+                return (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => handleTabChange(t.id)}
+                    className={`w-full flex items-center justify-between gap-2 px-3 py-3 rounded-xl text-sm transition-colors ${
+                      isActive
+                        ? "bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300"
+                        : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                    }`}
+                  >
+                    <span className="flex items-center gap-2">
+                      <Icon className="w-4 h-4" />
+                      {t.label}
+                    </span>
+                    {badgeCount > 0 && (
+                      <span className="min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-[11px] inline-flex items-center justify-center">
+                        {badgeCount > 99 ? "99+" : badgeCount}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+          </motion.aside>
+        </>
+      )}
+    </AnimatePresence>
   );
 
   /* ------------------- Page Render ------------------- */
   return (
-    <div className="min-h-screen pb-24 bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header />
+      <MobileSidebar />
 
-      <div className="max-w-6xl mx-auto px-4 md:px-8 py-6 space-y-6">
+      <div className="max-w-6xl mx-auto px-4 md:px-8 py-6">
         <AnimatePresence>
           {message && (
             <MessageToast
@@ -270,50 +378,54 @@ function ProfilePageContent() {
           )}
         </AnimatePresence>
 
-        {activeTab === "overview" && (
-          <ProfileOverview
-            profile={profile}
-            profileLoading={profileLoading}
-            displayName={displayName}
-            email={email}
-            avatarUrl={avatarUrl}
-            totalOrders={totalOrders}
-            pendingOrders={pendingOrders}
-            deliveredOrders={deliveredOrders}
-          />
-        )}
+        <div className="flex items-start gap-6">
+          <DesktopSidebar />
 
-        {activeTab === "orders" && (
-          <ManageOrders
-            orders={filteredOrders}
-            ordersLoading={ordersLoading}
-            orderFilter={orderFilter}
-            onFilterChange={setOrderFilter}
-            onViewDetails={setSelectedOrder}
-          />
-        )}
+          <div className="flex-1 space-y-6">
+            {activeTab === "overview" && (
+              <ProfileOverview
+                profile={profile}
+                profileLoading={profileLoading}
+                displayName={displayName}
+                email={email}
+                avatarUrl={avatarUrl}
+                totalOrders={totalOrders}
+                pendingOrders={pendingOrders}
+                deliveredOrders={deliveredOrders}
+              />
+            )}
 
-        {activeTab === "reviews" && uid && (
-          <ReviewsTab
-            orders={orders}
-            userId={uid}
-            userName={displayName}
-            highlightOrderId={searchParams.get("orderId")}
-          />
-        )}
+            {activeTab === "orders" && (
+              <ManageOrders
+                orders={filteredOrders}
+                ordersLoading={ordersLoading}
+                orderFilter={orderFilter}
+                onFilterChange={setOrderFilter}
+                onViewDetails={setSelectedOrder}
+              />
+            )}
 
-        {activeTab === "messages" && uid && (
-          <MessagesPanel
-            userId={uid}
-            displayName={displayName}
-            onUnreadChange={setUnreadMessages}
-            onClose={() => setActiveTab("overview")}
-          />
-        )}
+            {activeTab === "reviews" && uid && (
+              <ReviewsTab
+                orders={orders}
+                userId={uid}
+                userName={displayName}
+                highlightOrderId={searchParams.get("orderId")}
+              />
+            )}
 
-        {activeTab === "wallet" && uid && (
-          <WalletTab userId={uid} />
-        )}
+            {activeTab === "messages" && uid && (
+              <MessagesPanel
+                userId={uid}
+                displayName={displayName}
+                onUnreadChange={setUnreadMessages}
+                onClose={() => setActiveTab("overview")}
+              />
+            )}
+
+            {activeTab === "wallet" && uid && (
+              <WalletTab userId={uid} />
+            )}
 
      {/*
 {activeTab === "reorder" && (
@@ -322,29 +434,29 @@ function ProfilePageContent() {
 */}
 
 
-        {activeTab === "profile" && (
-          <UpdateProfile
-            editFullName={editFullName}
-            editPhone={editPhone}
-            editAddress={editAddress}
-            onFullNameChange={setEditFullName}
-            onPhoneChange={setEditPhone}
-            onAddressChange={setEditAddress}
-            onSave={() => setShowConfirmModal(true)}
-            saving={saving}
-          />
-        )}
+            {activeTab === "profile" && (
+              <UpdateProfile
+                editFullName={editFullName}
+                editPhone={editPhone}
+                editAddress={editAddress}
+                onFullNameChange={setEditFullName}
+                onPhoneChange={setEditPhone}
+                onAddressChange={setEditAddress}
+                onSave={() => setShowConfirmModal(true)}
+                saving={saving}
+              />
+            )}
 
-        {activeTab === "invite" && (
-          <InviteSection
-            uid={uid}
-            inviteCount={inviteCount}
-            onError={setMessage}
-          />
-        )}
+            {activeTab === "invite" && (
+              <InviteSection
+                uid={uid}
+                inviteCount={inviteCount}
+                onError={setMessage}
+              />
+            )}
+          </div>
+        </div>
       </div>
-
-      {activeTab !== "messages" && <BottomNav />}
 
       <AnimatePresence>
         {showConfirmModal && (

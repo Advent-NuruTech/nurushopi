@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { formatPrice } from "@/lib/formatPrice";
@@ -28,6 +28,7 @@ export default function ProductsTab({}: ProductsTabProps) {
   const [darkMode, setDarkMode] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showImageModal, setShowImageModal] = useState(false);
+  const [search, setSearch] = useState("");
 
   /* ---------- Detect system dark mode ---------- */
   useEffect(() => {
@@ -69,7 +70,21 @@ export default function ProductsTab({}: ProductsTabProps) {
     setShowImageModal(true);
   };
 
-  if (loading) return <LoadingSpinner text="Loading products…" />;
+  const filteredProducts = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return products;
+    return products.filter((p) => {
+      const name = String(p.name ?? "").toLowerCase();
+      const category = String(p.category ?? "").toLowerCase();
+      return (
+        name.includes(q) ||
+        category.includes(q) ||
+        p.id.toLowerCase().includes(q)
+      );
+    });
+  }, [products, search]);
+
+  if (loading) return <LoadingSpinner text="Loading products..." />;
 
   return (
     <div className={`min-h-screen transition-colors duration-300 py-8 px-4 ${
@@ -99,19 +114,35 @@ export default function ProductsTab({}: ProductsTabProps) {
               }`}>
                 Manage your store products and inventory
               </p>
+              <p className={`mt-1 text-xs ${darkMode ? "text-gray-500" : "text-gray-500"}`}>
+                Total: {products.length} | Showing: {filteredProducts.length}
+              </p>
             </div>
 
-            <Link
-              href="/admin/dashboard/uploadproduct"
-              className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2 ${
-                darkMode 
-                  ? "bg-blue-600 hover:bg-blue-700 text-white" 
-                  : "bg-blue-600 hover:bg-blue-700 text-white"
-              }`}
-            >
-              <span>+</span>
-              Upload Product
-            </Link>
+            <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-2">
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search by name, category, or ID..."
+                className={`w-full sm:w-72 px-3 py-2 rounded-lg border text-sm ${
+                  darkMode
+                    ? "bg-gray-900 border-gray-700 text-gray-100 placeholder:text-gray-500"
+                    : "bg-white border-gray-300 text-gray-900 placeholder:text-gray-500"
+                }`}
+              />
+              <Link
+                href="/admin/dashboard/uploadproduct"
+                className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
+                  darkMode
+                    ? "bg-blue-600 hover:bg-blue-700 text-white"
+                    : "bg-blue-600 hover:bg-blue-700 text-white"
+                }`}
+              >
+                <span>+</span>
+                Upload Product
+              </Link>
+            </div>
           </div>
 
           <div className="overflow-x-auto">
@@ -131,7 +162,7 @@ export default function ProductsTab({}: ProductsTabProps) {
               </thead>
 
               <tbody>
-                {products.map((p) => (
+                {filteredProducts.map((p) => (
                   <tr 
                     key={p.id} 
                     className={`border-t transition-colors duration-300 hover:${
@@ -272,7 +303,7 @@ export default function ProductsTab({}: ProductsTabProps) {
             </table>
           </div>
 
-          {products.length === 0 && (
+          {filteredProducts.length === 0 && (
             <div className={`p-12 text-center transition-colors duration-300 ${
               darkMode ? "text-gray-400" : "text-gray-500"
             }`}>
@@ -286,22 +317,26 @@ export default function ProductsTab({}: ProductsTabProps) {
               <h3 className={`text-xl font-semibold mb-2 ${
                 darkMode ? "text-gray-300" : "text-gray-700"
               }`}>
-                No Products Yet
+                {products.length === 0 ? "No Products Yet" : "No Matching Products"}
               </h3>
               <p className="mb-6 max-w-md mx-auto">
-                Start adding products to your store to display them here.
+                {products.length === 0
+                  ? "Start adding products to your store to display them here."
+                  : "Try a different search term to find products."}
               </p>
-              <Link
-                href="/admin/dashboard/uploadproduct"
-                className={`inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${
-                  darkMode 
-                    ? "bg-blue-600 hover:bg-blue-700 text-white" 
-                    : "bg-blue-600 hover:bg-blue-700 text-white"
-                }`}
-              >
-                <span>+</span>
-                Upload Your First Product
-              </Link>
+              {products.length === 0 && (
+                <Link
+                  href="/admin/dashboard/uploadproduct"
+                  className={`inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${
+                    darkMode
+                      ? "bg-blue-600 hover:bg-blue-700 text-white"
+                      : "bg-blue-600 hover:bg-blue-700 text-white"
+                  }`}
+                >
+                  <span>+</span>
+                  Upload Your First Product
+                </Link>
+              )}
             </div>
           )}
 
@@ -312,7 +347,8 @@ export default function ProductsTab({}: ProductsTabProps) {
                 : "border-gray-200 text-gray-600"
             }`}>
               <div className="text-sm">
-                Showing <span className="font-semibold">{products.length}</span> product{products.length !== 1 ? 's' : ''}
+                Showing <span className="font-semibold">{filteredProducts.length}</span> of{" "}
+                <span className="font-semibold">{products.length}</span> product{products.length !== 1 ? 's' : ''}
               </div>
               <button
                 onClick={loadProducts}

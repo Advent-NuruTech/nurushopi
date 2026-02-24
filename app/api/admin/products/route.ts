@@ -49,8 +49,11 @@ export async function GET(request: Request) {
       return {
         id: d.id,
         name: data.name,
-        price: Number(data.sellingPrice ?? data.price ?? 0),
-        sellingPrice: Number(data.sellingPrice ?? data.price ?? 0),
+        price: Number(data.sellingPrice ?? data.price ?? data.wholesalePrice ?? 0),
+        sellingPrice: Number(data.sellingPrice ?? data.price ?? data.wholesalePrice ?? 0),
+        wholesalePrice: Number(data.wholesalePrice ?? data.sellingPrice ?? data.price ?? 0),
+        wholesaleMinQty: Number(data.wholesaleMinQty ?? 1),
+        wholesaleUnit: data.wholesaleUnit ?? "pcs",
         originalPrice:
           typeof data.originalPrice === "number" && Number.isFinite(data.originalPrice)
             ? Number(data.originalPrice)

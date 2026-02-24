@@ -19,6 +19,7 @@ interface Order {
   name: string;
   totalAmount: number;
   status: string;
+  cancellationReason?: string | null;
   createdAt: string;
   items?: {
     id?: string;
@@ -175,17 +176,24 @@ export default function OrdersTab({ role }: OrdersTabProps) {
                 <td className="px-4 py-3 text-slate-900 dark:text-white">{o.name}</td>
                 <td className="px-4 py-3">{formatPrice(o.totalAmount)}</td>
                 <td className="px-4 py-3">
-                  <span className={`px-2 py-1 rounded text-xs font-medium ${
-                    o.status === "received" 
-                      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300" 
-                      : o.status === "shipped"
-                        ? "bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300"
-                        : o.status === "cancelled" 
-                          ? "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300" 
-                          : "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300"
-                  }`}>
-                    {o.status === "received" ? "Approved" : o.status === "shipped" ? "Shipped" : o.status}
-                  </span>
+                  <div className="space-y-1">
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${
+                      o.status === "received" 
+                        ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300" 
+                        : o.status === "shipped"
+                          ? "bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300"
+                          : o.status === "cancelled" 
+                            ? "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300" 
+                            : "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300"
+                    }`}>
+                      {o.status === "received" ? "Approved" : o.status === "shipped" ? "Shipped" : o.status}
+                    </span>
+                    {o.status === "cancelled" && o.cancellationReason && (
+                      <p className="text-xs text-slate-600 dark:text-slate-400 max-w-[240px] break-words">
+                        Reason: {o.cancellationReason}
+                      </p>
+                    )}
+                  </div>
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex flex-wrap gap-2">

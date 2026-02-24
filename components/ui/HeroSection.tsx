@@ -1,40 +1,55 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { HERO_DEFAULT_GRADIENT, resolveHeroGradient } from "@/lib/heroGradients";
+
+type HeroAnnouncement = {
+  id: string;
+  text: string;
+  gradient: string;
+  order: number;
+};
 
 export default function HeroSection() {
-  const announcements = [
-    "Welcome to NuruShop!",
-    "Natural Remedies & Herbal Health",
-    "E.G. White Books & Pioneer Writings",
-    "Faith-Based Learning Resources",
-    "Pure Oils, Herbs & Health Foods",
-    "All from trusted and satisfied sources",
-    "Affordable Spiritual & Wellness Products",
-    "Incase you don't find the product of your choice, please contact us directly so that we link you to a trusted seller",
-    "If you want to sell your products with this platform, please reach out to us via phone call only 0759167209",
-    "NuruShop — Health & Truth for Every Home",
-    "Handpicked treasures from each category",
-    "We are soon launching wholeselling services. if you wish to be a whole seller, contact us via phone call 0105178685",
-    "We are here to serve you",
-  ];
+  const [announcements, setAnnouncements] = useState<HeroAnnouncement[]>([]);
 
-  // Array of distinct gradient colors for each announcement
-  const gradients = [
-    "from-rose-500 via-pink-500 to-purple-500",
-    "from-fuchsia-500 via-indigo-500 to-blue-500",
-    "from-teal-400 via-emerald-500 to-lime-400",
-    "from-orange-400 via-yellow-400 to-amber-400",
-    "from-cyan-400 via-sky-500 to-blue-400",
-    "from-green-400 via-emerald-400 to-lime-300",
-    "from-purple-500 via-pink-500 to-rose-400",
-    "from-indigo-500 via-violet-500 to-fuchsia-400",
-    "from-yellow-400 via-orange-400 to-red-400",
-    "from-pink-400 via-rose-500 to-fuchsia-500",
-    "from-sky-400 via-cyan-400 to-teal-400",
-    "from-yellow-400 via-orange-400 to-red-400",
-    "from-lime-400 via-green-400 to-emerald-400",
-  ];
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/hero")
+      .then((r) => r.json())
+      .then((d) => {
+        if (cancelled) return;
+        const list = Array.isArray(d.announcements) ? d.announcements : [];
+        const cleaned = list
+          .map((item: Partial<HeroAnnouncement>, index: number) => ({
+            id: String(item.id ?? `hero-${index}`),
+            text: String(item.text ?? "").trim(),
+            gradient: resolveHeroGradient(
+              String(item.gradient ?? "").trim() || HERO_DEFAULT_GRADIENT
+            ),
+            order:
+              typeof item.order === "number" && Number.isFinite(item.order)
+                ? item.order
+                : index,
+          }))
+          .filter((item: HeroAnnouncement) => item.text.length > 0)
+          .sort((a: HeroAnnouncement, b: HeroAnnouncement) => a.order - b.order);
+        setAnnouncements(cleaned);
+      })
+      .catch(() => {
+        if (!cancelled) setAnnouncements([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const marqueeItems = useMemo(() => {
+    if (announcements.length === 0) return [];
+    return [...announcements, ...announcements];
+  }, [announcements]);
+
+  if (marqueeItems.length === 0) return null;
 
   return (
     <section
@@ -44,8 +59,7 @@ export default function HeroSection() {
         rounded-lg
         py-3
         px-4
-        mt-12
-        sm:mt-14
+        mt-0
         mb-4
         overflow-hidden
         bg-gradient-to-r
@@ -57,11 +71,9 @@ export default function HeroSection() {
         dark:to-gray-900
       "
     >
-      {/* Soft Background Accents */}
       <div className="absolute top-0 left-0 w-48 h-48 bg-emerald-400/20 dark:bg-emerald-600/10 blur-3xl rounded-full" />
       <div className="absolute bottom-0 right-0 w-48 h-48 bg-sky-400/20 dark:bg-sky-600/10 blur-3xl rounded-full" />
 
-      {/* Floating Particles */}
       {[...Array(6)].map((_, i) => (
         <div
           key={i}
@@ -74,15 +86,13 @@ export default function HeroSection() {
         />
       ))}
 
-      {/* Marquee Text */}
       <div className="relative max-w-5xl mx-auto flex items-center overflow-hidden py-1">
         <div className="flex whitespace-nowrap animate-scroll">
-          {[...announcements, ...announcements].map((msg, i) => {
-            const gradient = gradients[i % gradients.length];
+          {marqueeItems.map((item, i) => {
             const offsetY = Number((Math.sin(i * 2) * 3).toFixed(5));
             return (
               <span
-                key={i}
+                key={`${item.id}-${i}`}
                 className={`
                   mx-24
                   text-2xl
@@ -91,16 +101,15 @@ export default function HeroSection() {
                   transition-transform
                   duration-300
                   hover:scale-110
-                  bg-gradient-to-r ${gradient}
+                  bg-gradient-to-r ${item.gradient}
                   bg-clip-text
                   text-transparent
                 `}
                 style={{
-                  // Rounded to avoid server/client float serialization drift.
                   transform: `translateY(${offsetY}px)`,
                 }}
               >
-                {msg}
+                {item.text}
               </span>
             );
           })}

@@ -12,7 +12,10 @@ export type AdminLogAction =
   | "product_update"
   | "product_delete"
   | "wholesale_update"
-  | "wholesale_delete";
+  | "wholesale_delete"
+  | "hero_create"
+  | "hero_update"
+  | "hero_delete";
 
 export async function logAdminAction(params: {
   adminId: string;

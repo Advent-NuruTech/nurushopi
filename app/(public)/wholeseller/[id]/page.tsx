@@ -43,6 +43,12 @@ interface Review {
   createdAt?: string;
 }
 
+function toText(value: unknown): string {
+  if (typeof value === "string") return value.trim();
+  if (typeof value === "number" && Number.isFinite(value)) return String(value);
+  return "";
+}
+
 const getShortDescription = (text: string, words = 60) => {
   const parts = text.split(" ");
   if (parts.length <= words) return text;
@@ -109,6 +115,12 @@ export default function WholesaleProductPage() {
             ? (d.images as string[])
             : [String(d.coverImage ?? d.imageUrl ?? "/assets/logo.jpg")];
 
+        const shortDescription =
+          toText(d.shortDescription) ||
+          toText((d as Record<string, unknown>).short_description) ||
+          toText((d as Record<string, unknown>).shortDesc);
+        const description = toText(d.description) || shortDescription;
+
         const prod: WholesaleProduct = {
           id: snap.id,
           name: String(d.name ?? "Wholesale product"),
@@ -117,8 +129,8 @@ export default function WholesaleProductPage() {
           wholesaleMinQty:
             typeof d.wholesaleMinQty === "number" ? d.wholesaleMinQty : undefined,
           wholesaleUnit: String(d.wholesaleUnit ?? ""),
-          shortDescription: String(d.shortDescription ?? ""),
-          description: String(d.description ?? ""),
+          shortDescription,
+          description,
           category: String(d.category ?? "general"),
           images,
           mode: String(d.mode ?? ""),
@@ -222,6 +234,10 @@ export default function WholesaleProductPage() {
   }
 
   const discountPercent = getDiscountPercent(product.price, product.wholesalePrice);
+  const productDescription =
+    toText(product.description) ||
+    toText(product.shortDescription) ||
+    "No description available for this product yet.";
 
   return (
     <main className="min-h-screen bg-white dark:bg-gray-900 py-20 px-4">
@@ -310,22 +326,20 @@ export default function WholesaleProductPage() {
             </p>
           </div>
 
-          {product.description && (
-            <section className="pt-6 border-t">
-              <h2 className="font-semibold text-lg mb-3">Product Details</h2>
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 leading-relaxed text-slate-700 dark:text-slate-300">
-                <p>{getShortDescription(product.description)}</p>
-                {product.description.split(" ").length > 60 && (
-                  <button
-                    onClick={() => setIsDescriptionOpen(true)}
-                    className="mt-3 text-blue-600 font-medium hover:underline"
-                  >
-                    Read full description
-                  </button>
-                )}
-              </div>
-            </section>
-          )}
+          <section className="pt-6 border-t">
+            <h2 className="font-semibold text-lg mb-3">Product Details</h2>
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 leading-relaxed text-slate-700 dark:text-slate-300">
+              <p>{getShortDescription(productDescription)}</p>
+              {productDescription.split(" ").length > 60 && (
+                <button
+                  onClick={() => setIsDescriptionOpen(true)}
+                  className="mt-3 text-blue-600 font-medium hover:underline"
+                >
+                  Read full description
+                </button>
+              )}
+            </div>
+          </section>
         </aside>
       </div>
 
@@ -388,7 +402,7 @@ export default function WholesaleProductPage() {
           <div className="bg-white dark:bg-gray-900 w-full max-w-3xl rounded-2xl shadow-xl overflow-hidden">
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700">
               <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                {product.name} — Description
+                {product.name} - Description
               </h3>
               <button
                 onClick={() => setIsDescriptionOpen(false)}
@@ -399,7 +413,7 @@ export default function WholesaleProductPage() {
             </div>
             <div className="p-6 max-h-[70vh] overflow-y-auto">
               <div className="text-slate-700 dark:text-slate-300 leading-relaxed">
-                <FormattedDescription text={product.description ?? ""} />
+                <FormattedDescription text={productDescription} />
               </div>
             </div>
           </div>

@@ -83,6 +83,10 @@ export async function GET(request: Request) {
         items,
         totalAmount: data.totalAmount ?? 0,
         status: data.status ?? "pending",
+        cancellationReason:
+          typeof data.cancellationReason === "string"
+            ? data.cancellationReason
+            : null,
         approvedBy: data.approvedBy ?? null,
         createdAt: toDateStr(data.createdAt),
         updatedAt: data.updatedAt ? toDateStr(data.updatedAt) : undefined,

@@ -15,9 +15,9 @@ import {
   MessageSquare,
   Wallet,
   ImageIcon,
+  Palette,
 } from "lucide-react";
 import { Admin, TabId, TABS_SENIOR, TABS_SUB } from "./types";
-import NotificationsBell from "./NotificationsBell";
 
 interface AdminLayoutProps {
   admin: Admin;
@@ -37,6 +37,7 @@ const TAB_ICONS = {
   MessageSquare,
   Wallet,
   ImageIcon,
+  Palette,
 } as const;
 
 export default function AdminLayout({ admin, currentTab, onTabChange, children }: AdminLayoutProps) {

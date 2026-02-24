@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
@@ -27,6 +27,8 @@ export default function WholesaleTab() {
   const [products, setProducts] = useState<WholesaleProduct[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [productSearch, setProductSearch] = useState("");
+  const [orderSearch, setOrderSearch] = useState("");
 
   useEffect(() => {
     Promise.all([
@@ -38,7 +40,17 @@ export default function WholesaleTab() {
         .then((d) => d.orders ?? []),
     ])
       .then(([productsData, ordersData]) => {
-        setProducts(productsData);
+        const normalizedProducts = (productsData as Record<string, unknown>[]).map((p) => ({
+          id: String(p.id ?? ""),
+          name: String(p.name ?? "Wholesale product"),
+          wholesalePrice: Number(
+            p.wholesalePrice ?? p.sellingPrice ?? p.price ?? 0
+          ),
+          wholesaleMinQty: Number(p.wholesaleMinQty ?? 1),
+          wholesaleUnit: String(p.wholesaleUnit ?? "pcs"),
+          images: Array.isArray(p.images) ? (p.images as string[]) : [],
+        }));
+        setProducts(normalizedProducts);
         const wholesaleOrders = (ordersData as Order[]).filter((o) =>
           (o.items ?? []).some((it) => it.mode === "wholesale")
         );
@@ -46,6 +58,28 @@ export default function WholesaleTab() {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  const filteredOrders = useMemo(() => {
+    const q = orderSearch.trim().toLowerCase();
+    if (!q) return orders;
+    return orders.filter((o) => {
+      const id = o.id.toLowerCase();
+      const name = String(o.name ?? "").toLowerCase();
+      const status = String(o.status ?? "").toLowerCase();
+      return id.includes(q) || name.includes(q) || status.includes(q);
+    });
+  }, [orders, orderSearch]);
+
+  const filteredProducts = useMemo(() => {
+    const q = productSearch.trim().toLowerCase();
+    if (!q) return products;
+    return products.filter((p) => {
+      const id = p.id.toLowerCase();
+      const name = String(p.name ?? "").toLowerCase();
+      const unit = String(p.wholesaleUnit ?? "").toLowerCase();
+      return id.includes(q) || name.includes(q) || unit.includes(q);
+    });
+  }, [products, productSearch]);
 
   if (loading) return <LoadingSpinner text="Loading wholesale..." />;
 
@@ -58,15 +92,24 @@ export default function WholesaleTab() {
               Wholesale Orders
             </h2>
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              Orders that include wholesale items.
+              Orders that include wholesale items. Total: {orders.length} | Showing: {filteredOrders.length}
             </p>
           </div>
+          <input
+            type="text"
+            value={orderSearch}
+            onChange={(e) => setOrderSearch(e.target.value)}
+            placeholder="Search orders..."
+            className="w-52 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm"
+          />
         </div>
-        {orders.length === 0 ? (
-          <p className="p-6 text-slate-500 text-center">No wholesale orders.</p>
+        {filteredOrders.length === 0 ? (
+          <p className="p-6 text-slate-500 text-center">
+            {orders.length === 0 ? "No wholesale orders." : "No wholesale orders match your search."}
+          </p>
         ) : (
           <div className="divide-y divide-slate-200 dark:divide-slate-700">
-            {orders.map((o) => (
+            {filteredOrders.map((o) => (
               <div key={o.id} className="p-4 flex justify-between text-sm">
                 <span>#{o.id.slice(0, 8)}</span>
                 <span>{o.name}</span>
@@ -85,22 +128,33 @@ export default function WholesaleTab() {
               Wholesale Products
             </h2>
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              Manage wholesale pricing and quantities.
+              Manage wholesale pricing and quantities. Total: {products.length} | Showing: {filteredProducts.length}
             </p>
           </div>
-          <Link
-            href="/admin/dashboard/wholesale/upload"
-            className="bg-sky-600 text-white px-4 py-2 rounded"
-          >
-            Upload Wholesale Product
-          </Link>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={productSearch}
+              onChange={(e) => setProductSearch(e.target.value)}
+              placeholder="Search wholesale..."
+              className="w-56 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm"
+            />
+            <Link
+              href="/admin/dashboard/wholesale/upload"
+              className="bg-sky-600 text-white px-4 py-2 rounded"
+            >
+              Upload Wholesale Product
+            </Link>
+          </div>
         </div>
 
-        {products.length === 0 ? (
-          <p className="text-slate-500 text-center">No wholesale products yet.</p>
+        {filteredProducts.length === 0 ? (
+          <p className="text-slate-500 text-center">
+            {products.length === 0 ? "No wholesale products yet." : "No wholesale products match your search."}
+          </p>
         ) : (
           <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-            {products.map((p) => (
+            {filteredProducts.map((p) => (
               <Link
                 key={p.id}
                 href={`/admin/dashboard/wholesale/${p.id}/edit`}

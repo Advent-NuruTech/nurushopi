@@ -24,6 +24,8 @@ export default function OrderDetailsModal({
   onOrderUpdated,
 }: OrderDetailsModalProps) {
   const [cancelling, setCancelling] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
   const [actionMessage, setActionMessage] = useState<string | null>(null);
 
   if (!order) return null;
@@ -47,7 +49,10 @@ export default function OrderDetailsModal({
         body: JSON.stringify({
           orderId: order.id,
           userId,
-          updates: { status: "cancelled" },
+          updates: {
+            status: "cancelled",
+            cancellationReason: cancelReason.trim() || null,
+          },
         }),
       });
 
@@ -58,6 +63,8 @@ export default function OrderDetailsModal({
       }
 
       setActionMessage("Order cancelled successfully.");
+      setShowCancelConfirm(false);
+      setCancelReason("");
       onOrderUpdated?.(order.id, "cancelled");
     } catch {
       setActionMessage("Failed to cancel order.");
@@ -116,6 +123,14 @@ export default function OrderDetailsModal({
               {formatPrice(order.totalAmount)}
             </span>
           </div>
+          {order.status === "cancelled" && order.cancellationReason && (
+            <div className="text-sm">
+              <span className="text-slate-500 dark:text-slate-400">Cancellation reason</span>
+              <p className="text-slate-900 dark:text-white mt-1 break-words">
+                {order.cancellationReason}
+              </p>
+            </div>
+          )}
           {(order.locality || order.county || order.country) && (
             <div className="text-sm">
               <span className="text-slate-500 dark:text-slate-400">Address</span>
@@ -161,12 +176,61 @@ export default function OrderDetailsModal({
               </p>
               <button
                 type="button"
-                onClick={cancelOrder}
+                onClick={() => setShowCancelConfirm((prev) => !prev)}
                 disabled={cancelling}
                 className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-semibold disabled:opacity-60"
               >
-                {cancelling ? "Cancelling..." : "Cancel Order"}
+                {cancelling
+                  ? "Cancelling..."
+                  : showCancelConfirm
+                  ? "Hide Cancellation Form"
+                  : "Cancel Order"}
               </button>
+
+              {showCancelConfirm && (
+                <div className="mt-3 rounded-lg border border-red-200 dark:border-red-800/60 bg-red-50/70 dark:bg-red-900/20 p-3 space-y-3">
+                  <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                    Are you sure you want to cancel this order?
+                  </p>
+                  <div>
+                    <label
+                      htmlFor="cancel-reason"
+                      className="text-xs text-slate-600 dark:text-slate-400"
+                    >
+                      Please give a reason for cancellation (optional). Admin will receive it.
+                    </label>
+                    <textarea
+                      id="cancel-reason"
+                      value={cancelReason}
+                      onChange={(e) => setCancelReason(e.target.value)}
+                      rows={3}
+                      maxLength={500}
+                      className="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-2 text-sm"
+                      placeholder="Optional reason..."
+                    />
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={cancelOrder}
+                      disabled={cancelling}
+                      className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-semibold disabled:opacity-60"
+                    >
+                      {cancelling ? "Cancelling..." : "Yes, cancel order"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowCancelConfirm(false);
+                        setCancelReason("");
+                      }}
+                      className="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-sm font-semibold"
+                    >
+                      Keep Order
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

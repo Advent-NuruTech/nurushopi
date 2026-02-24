@@ -46,6 +46,12 @@ interface Review {
   createdAt?: string;
 }
 
+function toText(value: unknown): string {
+  if (typeof value === "string") return value.trim();
+  if (typeof value === "number" && Number.isFinite(value)) return String(value);
+  return "";
+}
+
 /* =========================
    COMPONENT
 ========================= */
@@ -112,6 +118,12 @@ export default function ProductDetailPage() {
             ? d.images
             : [d.imageUrl || "/assets/logo.jpg"];
 
+        const shortDescription =
+          toText(d.shortDescription) ||
+          toText((d as Record<string, unknown>).short_description) ||
+          toText((d as Record<string, unknown>).shortDesc);
+        const description = toText(d.description) || shortDescription;
+
         const prod: Product = {
           id: snap.id,
           name: String(d.name ?? "Unnamed product"),
@@ -121,8 +133,8 @@ export default function ProductDetailPage() {
             typeof d.originalPrice === "number" && Number.isFinite(d.originalPrice)
               ? d.originalPrice
               : undefined,
-          shortDescription: d.shortDescription ?? "",
-          description: d.description ?? "",
+          shortDescription,
+          description,
           category: String(d.category ?? "general"),
           images,
           createdAt: d.createdAt,
@@ -247,6 +259,10 @@ export default function ProductDetailPage() {
   const discountPercent = getDiscountPercent(product);
   const originalPrice = getOriginalPrice(product);
   const sellingPrice = getSellingPrice(product);
+  const productDescription =
+    toText(product.description) ||
+    toText(product.shortDescription) ||
+    "No description available for this product yet.";
 
   /* =========================
      UI
@@ -327,28 +343,210 @@ export default function ProductDetailPage() {
           </div>
 
           {/* ===== Description Preview ===== */}
-          {product.description && (
-            <section className="pt-6 border-t">
-              <h2 className="font-semibold text-lg mb-3">
-                Product Details
-              </h2>
+          <section className="pt-6 border-t">
+            <h2 className="font-semibold text-lg mb-3">
+              Product Details
+            </h2>
 
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 leading-relaxed text-slate-700 dark:text-slate-300">
-                <p>{getShortDescription(product.description)}</p>
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 leading-relaxed text-slate-700 dark:text-slate-300">
+              <p>{getShortDescription(productDescription)}</p>
 
-                {product.description.split(" ").length > 60 && (
-                  <button
-                    onClick={() => setIsDescriptionOpen(true)}
-                    className="mt-3 text-blue-600 font-medium hover:underline"
-                  >
-                    Read full description
-                  </button>
-                )}
-              </div>
-            </section>
-          )}
+              {productDescription.split(" ").length > 60 && (
+                <button
+                  onClick={() => setIsDescriptionOpen(true)}
+                  className="mt-3 text-blue-600 font-medium hover:underline"
+                >
+                  Read full description
+                </button>
+              )}
+            </div>
+          </section>
         </aside>
       </div>
+{reviews.length > 0 && (
+  <section className="max-w-6xl mx-auto mt-16 px-4 sm:px-6">
+    <div className="mb-10 text-center md:text-left">
+      <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-3">
+        What clients say about this product
+      </h2>
+      <div className="flex items-center justify-center md:justify-start gap-2">
+        <div className="h-1 w-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" />
+        <p className="text-slate-600 dark:text-slate-400">
+          Real experiences from {reviews.length} customers
+        </p>
+      </div>
+    </div>
+    
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {reviews.map((r, index) => {
+        // Enhanced color palette with gradients
+        const colorSchemes = [
+          {
+            bg: 'bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-950/30 dark:to-amber-900/20',
+            border: 'border-amber-200 dark:border-amber-800',
+            accent: 'text-amber-600 dark:text-amber-400',
+            badge: 'bg-amber-200/50 dark:bg-amber-800/30',
+            shadow: 'hover:shadow-amber-200/50 dark:hover:shadow-amber-900/30'
+          },
+          {
+            bg: 'bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-950/30 dark:to-emerald-900/20',
+            border: 'border-emerald-200 dark:border-emerald-800',
+            accent: 'text-emerald-600 dark:text-emerald-400',
+            badge: 'bg-emerald-200/50 dark:bg-emerald-800/30',
+            shadow: 'hover:shadow-emerald-200/50 dark:hover:shadow-emerald-900/30'
+          },
+          {
+            bg: 'bg-gradient-to-br from-sky-50 to-sky-100/50 dark:from-sky-950/30 dark:to-sky-900/20',
+            border: 'border-sky-200 dark:border-sky-800',
+            accent: 'text-sky-600 dark:text-sky-400',
+            badge: 'bg-sky-200/50 dark:bg-sky-800/30',
+            shadow: 'hover:shadow-sky-200/50 dark:hover:shadow-sky-900/30'
+          },
+          {
+            bg: 'bg-gradient-to-br from-rose-50 to-rose-100/50 dark:from-rose-950/30 dark:to-rose-900/20',
+            border: 'border-rose-200 dark:border-rose-800',
+            accent: 'text-rose-600 dark:text-rose-400',
+            badge: 'bg-rose-200/50 dark:bg-rose-800/30',
+            shadow: 'hover:shadow-rose-200/50 dark:hover:shadow-rose-900/30'
+          },
+          {
+            bg: 'bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-950/30 dark:to-purple-900/20',
+            border: 'border-purple-200 dark:border-purple-800',
+            accent: 'text-purple-600 dark:text-purple-400',
+            badge: 'bg-purple-200/50 dark:bg-purple-800/30',
+            shadow: 'hover:shadow-purple-200/50 dark:hover:shadow-purple-900/30'
+          },
+          {
+            bg: 'bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-950/30 dark:to-orange-900/20',
+            border: 'border-orange-200 dark:border-orange-800',
+            accent: 'text-orange-600 dark:text-orange-400',
+            badge: 'bg-orange-200/50 dark:bg-orange-800/30',
+            shadow: 'hover:shadow-orange-200/50 dark:hover:shadow-orange-900/30'
+          }
+        ];
+
+        const scheme = colorSchemes[index % colorSchemes.length];
+        
+        return (
+          <div
+            key={r.id}
+            className={`group relative ${scheme.bg} border-2 ${scheme.border} 
+                       rounded-2xl p-6 transition-all duration-300 
+                       hover:shadow-xl ${scheme.shadow} hover:-translate-y-1 
+                       hover:border-opacity-50 backdrop-blur-sm overflow-hidden`}
+          >
+            {/* Decorative corner accent */}
+            <div className={`absolute top-0 right-0 w-16 h-16 
+                           bg-gradient-to-br ${scheme.bg} opacity-30 
+                           rounded-bl-3xl -mr-2 -mt-2 blur-sm`} />
+            
+            {/* Quote watermark */}
+            <div className={`absolute bottom-2 right-4 text-7xl font-serif 
+                           opacity-10 ${scheme.accent} select-none`}>
+              &ldquo;
+            </div>
+            
+            {/* User avatar with color accent */}
+            <div className="flex items-start gap-4 mb-4">
+              <div className={`relative flex-shrink-0 w-12 h-12 rounded-full 
+                             bg-white dark:bg-slate-800 border-2 ${scheme.border}
+                             flex items-center justify-center overflow-hidden
+                             shadow-md group-hover:scale-110 transition-transform duration-300`}>
+                <span className={`text-lg font-bold ${scheme.accent}`}>
+                  {r.userName.charAt(0).toUpperCase()}
+                </span>
+                <div className={`absolute inset-0 opacity-0 group-hover:opacity-20 
+                               bg-gradient-to-br ${scheme.bg} transition-opacity duration-300`} />
+              </div>
+              
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-lg text-slate-900 dark:text-white">
+                    {r.userName}
+                  </h3>
+                  
+                  {/* Verified badge */}
+                  <div className={`flex items-center gap-1 px-2 py-1 rounded-full 
+                                 ${scheme.badge} text-xs ${scheme.accent}`}>
+                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span>Verified</span>
+                  </div>
+                </div>
+                
+               
+              </div>
+            </div>
+            
+            {/* Review message with fancy quote marks */}
+            <div className="relative mb-6">
+              <span className={`absolute -left-2 -top-2 text-4xl opacity-20 
+                              ${scheme.accent} select-none`}>&ldquo;</span>
+              <p className="text-slate-700 dark:text-slate-300 leading-relaxed 
+                          pl-4 relative z-10">
+                {r.message}
+              </p>
+            </div>
+            
+            {/* Footer with interactions */}
+            <div className="flex items-center justify-between mt-4 pt-4 
+                          border-t border-slate-200 dark:border-slate-700 
+                          border-dashed">
+              <div className="flex items-center gap-3">
+               
+                <button className={`flex items-center gap-1 text-sm 
+                                   text-slate-500 hover:${scheme.accent} 
+                                   dark:text-slate-400 transition-colors duration-200`}>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                          d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                </button>
+              </div>
+              
+              {/* Date with icon */}
+              <div className={`flex items-center gap-1 text-xs ${scheme.accent} opacity-75`}>
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                {reviewDate(r.createdAt)}
+              </div>
+            </div>
+            
+            {/* Color-coded floating indicator */}
+            <div className={`absolute -left-2 top-1/2 -translate-y-1/2 w-1 h-12 
+                           rounded-full ${scheme.border} opacity-50 
+                           group-hover:h-16 transition-all duration-300`} />
+          </div>
+        );
+      })}
+    </div>
+    
+    {/* View all reviews button with color matching */}
+    {reviews.length >= 6 && (
+      <div className="flex justify-center mt-10">
+        <button className="group relative px-8 py-3 bg-slate-900 dark:bg-slate-100 
+                         text-white dark:text-slate-900 rounded-xl font-medium 
+                         overflow-hidden transition-all duration-300 
+                         hover:shadow-xl hover:shadow-slate-200/50 
+                         dark:hover:shadow-slate-800/50">
+          <span className="relative z-10 flex items-center gap-2">
+            View all {reviews.length} reviews
+            <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" 
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                    d="M9 5l7 7-7 7" />
+            </svg>
+          </span>
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 
+                        opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        </button>
+      </div>
+    )}
+  </section>
+)}
 
       {/* ================= RELATED PRODUCTS ================= */}
       {relatedProducts.length > 0 && (
@@ -418,35 +616,13 @@ export default function ProductDetailPage() {
         </section>
       )}
 
-      {reviews.length > 0 && (
-        <section className="max-w-6xl mx-auto mt-16">
-          <h2 className="text-xl font-semibold mb-4">
-            What people say about this product
-          </h2>
-          <div className="grid gap-4 md:grid-cols-2">
-            {reviews.map((r) => (
-              <div
-                key={r.id}
-                className="border rounded-xl p-4 bg-white dark:bg-slate-900"
-              >
-                <p className="text-sm text-slate-500">
-                  {reviewDate(r.createdAt)}
-                </p>
-                <p className="font-semibold text-slate-900 dark:text-white">{r.userName}</p>
-                <p className="text-slate-700 dark:text-slate-300 mt-2">{r.message}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
       {/* Description Modal */}
       {isDescriptionOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
           <div className="bg-white dark:bg-gray-900 w-full max-w-3xl rounded-2xl shadow-xl overflow-hidden">
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700">
               <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                {product.name} — Description
+                {product.name} - Description
               </h3>
               <button
                 onClick={() => setIsDescriptionOpen(false)}
@@ -457,7 +633,7 @@ export default function ProductDetailPage() {
             </div>
             <div className="p-6 max-h-[70vh] overflow-y-auto">
               <div className="text-slate-700 dark:text-slate-300 leading-relaxed">
-                <FormattedDescription text={product.description ?? ""} />
+                <FormattedDescription text={productDescription} />
               </div>
             </div>
           </div>

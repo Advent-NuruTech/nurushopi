@@ -8,6 +8,7 @@ export type TabId =
   | "banners"
   | "contacts"
   | "categories"
+  | "hero"
   | "messages"
   | "users"
   | "reviews"
@@ -27,6 +28,7 @@ export const TABS_SENIOR: { id: TabId; label: string; icon: string }[] = [
   { id: "invite", label: "Invite Admin", icon: "UserPlus" },
   { id: "admins", label: "Admin Management", icon: "Users" },
   { id: "categories", label: "Categories", icon: "Tags" },
+  { id: "hero", label: "Hero Colors", icon: "Palette" },
   { id: "products", label: "Products", icon: "Package" },
   { id: "orders", label: "Orders", icon: "ShoppingCart" },
   { id: "wholesale", label: "Wholesale", icon: "Warehouse" },

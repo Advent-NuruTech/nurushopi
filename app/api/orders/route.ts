@@ -48,6 +48,9 @@ interface FirestoreOrder {
   items: OrderItem[];
   totalAmount: number;
   status: string;
+  cancellationReason?: string | null;
+  cancelledBy?: string | null;
+  cancelledAt?: Timestamp | FieldValue;
   createdAt?: Timestamp | FieldValue;
   updatedAt?: Timestamp | FieldValue;
 }
@@ -68,6 +71,7 @@ interface Order {
   items: OrderItem[];
   totalAmount: number;
   status: string;
+  cancellationReason?: string | null;
   createdAt: string; // always ISO string
   updatedAt?: string;
 }
@@ -261,6 +265,10 @@ export async function GET(request: Request) {
         items: data.items,
         totalAmount: data.totalAmount,
         status: data.status,
+        cancellationReason:
+          typeof data.cancellationReason === "string"
+            ? data.cancellationReason
+            : null,
         createdAt:
           createdAtTs && "toDate" in createdAtTs
             ? (createdAtTs as Timestamp).toDate().toISOString()
@@ -338,12 +346,44 @@ export async function PUT(request: Request) {
       );
     }
 
+    const cancellationReason =
+      typeof updates.cancellationReason === "string"
+        ? updates.cancellationReason.trim().slice(0, 500)
+        : "";
+
     await updateDoc(orderRef, {
       status: "cancelled",
       cancelledBy: userId ?? null,
+      cancellationReason: cancellationReason || null,
       cancelledAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
+
+    try {
+      const adminsSnap = await getDocs(
+        query(collection(db, "admins"), where("role", "==", "senior"))
+      );
+      const notificationsRef = collection(db, "notifications");
+      const reasonSuffix = cancellationReason ? ` Reason: ${cancellationReason}` : "";
+
+      await Promise.all(
+        adminsSnap.docs.map((adminSnap) =>
+          addDoc(notificationsRef, {
+            recipientType: "admin",
+            recipientId: adminSnap.id,
+            type: "order",
+            title: "Order cancelled by customer",
+            body: `Order #${orderId.slice(0, 8)} was cancelled.${reasonSuffix}`,
+            relatedId: orderId,
+            readAt: null,
+            createdAt: serverTimestamp(),
+          })
+        )
+      );
+    } catch (notifyErr) {
+      console.error("Order cancellation notification error:", notifyErr);
+    }
+
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (err: unknown) {
     console.error("PUT /api/orders error", err);

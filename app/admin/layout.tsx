@@ -18,6 +18,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <NotificationsBell />
           </div>
         </header>
+        
 
         {/* Main content */}
         <main className="flex-1 p-6">{children}</main>

@@ -51,19 +51,27 @@ const toDisplayDate = (value: unknown): string => {
 };
 
 const getNotificationRoute = (n: NotificationItem): Route | null => {
-  if (!n.relatedId) return null;
-  const encoded = encodeURIComponent(n.relatedId);
+  const encoded = n.relatedId ? encodeURIComponent(n.relatedId) : "";
   if (n.type === "order") {
+    if (!n.relatedId) return null;
     return `/admin/dashboard?tab=orders&orderId=${encoded}` as Route;
   }
   if (n.type === "message") {
+    if (!n.relatedId) return null;
     return `/admin/dashboard/messages/${encoded}` as Route;
   }
   if (n.type === "review") {
+    if (!n.relatedId) return null;
     return `/admin/dashboard?tab=reviews&reviewId=${encoded}` as Route;
   }
   if (n.type === "wallet") {
+    if (!n.relatedId) return null;
     return `/admin/dashboard?tab=redemptions&redemptionId=${encoded}` as Route;
+  }
+  if (n.type === "vendor_application") {
+    return (n.relatedId
+      ? `/admin/dashboard/vendors?applicationId=${encoded}`
+      : "/admin/dashboard/vendors") as Route;
   }
   return `/admin/dashboard/notifications` as Route;
 };

@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { Suspense, useCallback, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import {
   collection,
@@ -143,7 +143,7 @@ const normalizeApplication = (id: string, raw: Record<string, unknown>): VendorA
   applicationStep: toSafeString(raw.applicationStep) || undefined
 })
 
-export default function AdminVendorsPage() {
+function AdminVendorsPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const applicationId = searchParams.get("applicationId")
@@ -1069,6 +1069,22 @@ export default function AdminVendorsPage() {
 
       {/* Detail Modal */}
       {selectedApp && <DetailCard application={selectedApp} />}
+    </div>
+  )
+}
+
+export default function AdminVendorsPage() {
+  return (
+    <Suspense fallback={<VendorsPageFallback />}>
+      <AdminVendorsPageContent />
+    </Suspense>
+  )
+}
+
+function VendorsPageFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
     </div>
   )
 }

@@ -9,15 +9,12 @@ import Link from "next/link";
 import { auth } from "@/lib/firebase";
 import {
   signInWithEmailAndPassword,
-  GoogleAuthProvider,
-  signInWithPopup,
   onAuthStateChanged,
   setPersistence,
   browserLocalPersistence,
   browserSessionPersistence,
 } from "firebase/auth";
 
-import { FcGoogle } from "react-icons/fc";
 import { AiOutlineEye, AiOutlineEyeInvisible, AiOutlineMail, AiOutlineLock } from "react-icons/ai";
 
 import AuthHeader from "@/components/ui/auth/AuthHeader";
@@ -25,7 +22,7 @@ import AuthCard from "@/components/ui/auth/AuthCard";
 import StatusMessage from "@/components/ui/auth/StatusMessage";
 import { getFriendlyErrorMessage } from "@/lib/auth/utils";
 
-// Create a separate component that uses useSearchParams
+// Login form component
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -58,26 +55,6 @@ function LoginForm() {
     );
   };
 
-  const handleGoogleLogin = async () => {
-    setLoading(true);
-    setError("");
-    setSuccess("");
-
-    try {
-      await setAuthPersistence();
-      const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({
-        prompt: "select_account"
-      });
-      await signInWithPopup(auth, provider);
-      router.push(redirectTo as Route);
-    } catch (err) {
-      setError(getFriendlyErrorMessage(err));
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleEmailLogin = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -102,14 +79,16 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-blue-50">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 transition-colors">
+      {/* Header remains */}
       <AuthHeader />
 
-      <main className="flex-1 flex items-center justify-center p-4">
+      {/* Centered login card */}
+      <main className="flex-1 flex items-center justify-center p-2">
         <AuthCard
           title="Welcome Back"
           subtitle="Sign in to your account to continue shopping"
-          icon={<AiOutlineMail className="w-6 h-6" />}
+          icon={<AiOutlineMail className="w-6 h-6 text-gray-500 dark:text-gray-300" />}
         >
           <StatusMessage
             error={error}
@@ -117,36 +96,18 @@ function LoginForm() {
             onCloseError={() => setError("")}
             onCloseSuccess={() => setSuccess("")}
           />
-{/* 
-<motion.button
-  onClick={handleGoogleLogin}
-  disabled={loading}
-  whileHover={{ scale: 1.02 }}
-  whileTap={{ scale: 0.98 }}
-  className="w-full border border-gray-300 py-3 rounded-lg font-medium flex items-center justify-center gap-3 hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
->
-  <FcGoogle className="w-5 h-5" />
-  Continue with Google
-</motion.button>
-
-
-       <div className="my-6 flex items-center">
-            <div className="flex-1 h-px bg-gray-300"></div>
-            <span className="mx-4 text-gray-500 text-sm font-medium">OR</span>
-            <div className="flex-1 h-px bg-gray-300"></div>
-          </div>*/}
 
           <form onSubmit={handleEmailLogin}>
             <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-medium mb-2">
+              <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
                 Email Address
               </label>
               <div className="relative">
-                <AiOutlineMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <AiOutlineMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                 <input
                   type="email"
                   placeholder="you@example.com"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -155,15 +116,15 @@ function LoginForm() {
             </div>
 
             <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-medium mb-2">
+              <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
                 Password
               </label>
               <div className="relative">
-                <AiOutlineLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <AiOutlineLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  className="w-full pl-10 pr-10 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -171,7 +132,7 @@ function LoginForm() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
                 >
                   {showPassword ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
                 </button>
@@ -186,11 +147,11 @@ function LoginForm() {
                   onChange={() => setRememberMe(!rememberMe)}
                   className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
                 />
-                <span className="text-gray-700">Remember me</span>
+                <span className="text-gray-700 dark:text-gray-300">Remember me</span>
               </label>
               <Link
                 href="/auth/reset-password"
-                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
               >
                 Forgot password?
               </Link>
@@ -214,13 +175,12 @@ function LoginForm() {
             </motion.button>
           </form>
 
-      
           <div className="mt-6 text-center">
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-400">
               Don&apos;t have an account?{" "}
               <Link
                 href={signupHref}
-                className="text-blue-600 hover:text-blue-800 font-semibold"
+                className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-semibold"
               >
                 Sign up
               </Link>
@@ -236,12 +196,10 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-blue-50">
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <p className="mt-2 text-gray-600">Loading...</p>
-          </div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 transition-colors p-4">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">Loading...</p>
         </div>
       </div>
     }>

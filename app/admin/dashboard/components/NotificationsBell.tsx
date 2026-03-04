@@ -70,10 +70,10 @@ const getNotificationRoute = (n: NotificationItem): Route | null => {
   }
   if (n.type === "vendor_application") {
     return (n.relatedId
-      ? `/admin/dashboard/vendors?applicationId=${encoded}`
-      : "/admin/dashboard/vendors") as Route;
+      ? `/admin/dashboard?tab=vendorApplications&applicationId=${encoded}`
+      : "/admin/dashboard?tab=vendorApplications") as Route;
   }
-  return `/admin/dashboard/notifications` as Route;
+  return `/admin/dashboard?tab=overview` as Route;
 };
 
 export default function NotificationsBell() {
@@ -213,3 +213,4 @@ export default function NotificationsBell() {
     </div>
   );
 }
+

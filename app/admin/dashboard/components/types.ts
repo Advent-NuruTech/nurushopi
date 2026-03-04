@@ -5,6 +5,7 @@ export type TabId =
   | "admins"
   | "products"
   | "orders"
+  | "vendorApplications"
   | "banners"
   | "contacts"
   | "categories"
@@ -22,7 +23,17 @@ export interface Admin {
   role: AdminRole;
 }
 
-// Removed JSX elements - they'll be created in the components
+export interface LinkedAccounts {
+  adminRoles: AdminRole[];
+  hasSeniorRole: boolean;
+  hasSubRole: boolean;
+  hasVendorAccount: boolean;
+  hasVendorApplication: boolean;
+  hasUserAccount: boolean;
+  canSwitchToSenior: boolean;
+  canMoveToUserProfile: boolean;
+}
+
 export const TABS_SENIOR: { id: TabId; label: string; icon: string }[] = [
   { id: "overview", label: "Overview", icon: "LayoutDashboard" },
   { id: "invite", label: "Invite Admin", icon: "UserPlus" },
@@ -31,6 +42,7 @@ export const TABS_SENIOR: { id: TabId; label: string; icon: string }[] = [
   { id: "hero", label: "Hero Colors", icon: "Palette" },
   { id: "products", label: "Products", icon: "Package" },
   { id: "orders", label: "Orders", icon: "ShoppingCart" },
+  { id: "vendorApplications", label: "Vendor Applications", icon: "ClipboardList" },
   { id: "wholesale", label: "Wholesale", icon: "Warehouse" },
   { id: "reviews", label: "Reviews", icon: "MessageSquare" },
   { id: "redemptions", label: "Redemptions", icon: "Wallet" },

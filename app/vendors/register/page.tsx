@@ -654,7 +654,7 @@ export default function VendorForm() {
                   required
                   className={inputClasses}
                 />
-              </div>
+              </div >
 
               <div>
                 <label className={labelClasses}>

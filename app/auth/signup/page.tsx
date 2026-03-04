@@ -26,7 +26,6 @@ import AuthCard from "@/components/ui/auth/AuthCard";
 import StatusMessage from "@/components/ui/auth/StatusMessage";
 import { getFriendlyErrorMessage } from "@/lib/auth/utils";
 
-// Create a separate component that uses useSearchParams
 function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -47,38 +46,13 @@ function SignupForm() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        router.push(redirectTo as Route);
-      }
+      if (user) router.push(redirectTo as Route);
     });
     return () => unsubscribe();
   }, [redirectTo, router]);
 
   const setAuthPersistence = async () => {
-    await setPersistence(
-      auth,
-      rememberMe ? browserLocalPersistence : browserSessionPersistence
-    );
-  };
-
-  const handleGoogleLogin = async () => {
-    setLoading(true);
-    setError("");
-    setSuccess("");
-
-    try {
-      await setAuthPersistence();
-      const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({
-        prompt: "select_account"
-      });
-      await signInWithPopup(auth, provider);
-      router.push(redirectTo as Route);
-    } catch (err) {
-      setError(getFriendlyErrorMessage(err));
-    } finally {
-      setLoading(false);
-    }
+    await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
   };
 
   const handleSignup = async (e: FormEvent) => {
@@ -92,13 +66,11 @@ function SignupForm() {
       setLoading(false);
       return;
     }
-
     if (password.length < 6) {
       setError("Password must be at least 6 characters.");
       setLoading(false);
       return;
     }
-
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
       setLoading(false);
@@ -109,9 +81,7 @@ function SignupForm() {
       await setAuthPersistence();
       await createUserWithEmailAndPassword(auth, email, password);
       setSuccess("Account created successfully! Redirecting...");
-      setTimeout(() => {
-        router.push(redirectTo as Route);
-      }, 1500);
+      setTimeout(() => router.push(redirectTo as Route), 1500);
     } catch (err) {
       setError(getFriendlyErrorMessage(err));
     } finally {
@@ -120,14 +90,14 @@ function SignupForm() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-blue-50">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 transition-colors">
       <AuthHeader />
 
       <main className="flex-1 flex items-center justify-center p-4">
         <AuthCard
           title="Join Nurushop"
           subtitle="Create an account for the best shopping experience"
-          icon={<BiUserPlus className="w-6 h-6" />}
+          icon={<BiUserPlus className="w-6 h-6 text-gray-500 dark:text-gray-300" />}
         >
           <StatusMessage
             error={error}
@@ -138,13 +108,13 @@ function SignupForm() {
 
           <form onSubmit={handleSignup}>
             <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-medium mb-2">
+              <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
                 Email Address
               </label>
               <input
                 type="email"
                 placeholder="you@example.com"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -152,15 +122,15 @@ function SignupForm() {
             </div>
 
             <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-medium mb-2">
+              <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
                 Password
               </label>
               <div className="relative">
-                <AiOutlineLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <AiOutlineLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  className="w-full pl-10 pr-10 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -168,7 +138,7 @@ function SignupForm() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
                 >
                   {showPassword ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
                 </button>
@@ -176,15 +146,15 @@ function SignupForm() {
             </div>
 
             <div className="mb-6">
-              <label className="block text-gray-700 text-sm font-medium mb-2">
+              <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
                 Confirm Password
               </label>
               <div className="relative">
-                <AiOutlineLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <AiOutlineLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                 <input
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  className="w-full pl-10 pr-10 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
@@ -192,7 +162,7 @@ function SignupForm() {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
                 >
                   {showConfirmPassword ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
                 </button>
@@ -207,7 +177,7 @@ function SignupForm() {
                   onChange={() => setRememberMe(!rememberMe)}
                   className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
                 />
-                <span className="text-gray-700">Remember me</span>
+                <span className="text-gray-700 dark:text-gray-300">Remember me</span>
               </label>
             </div>
 
@@ -228,30 +198,13 @@ function SignupForm() {
               )}
             </motion.button>
           </form>
-{/* 
-          <div className="my-6 flex items-center">
-            <div className="flex-1 h-px bg-gray-300"></div>
-            <span className="mx-4 text-gray-500 text-sm font-medium">OR</span>
-            <div className="flex-1 h-px bg-gray-300"></div>
-          </div>
-
-          <motion.button
-            onClick={handleGoogleLogin}
-            disabled={loading}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="w-full border border-gray-300 py-3 rounded-lg font-medium flex items-center justify-center gap-3 hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <FcGoogle className="w-5 h-5" />
-            Continue with Google
-          </motion.button>   */}
 
           <div className="mt-6 text-center">
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-400">
               Already have an account?{" "}
               <Link
                 href={loginHref}
-                className="text-blue-600 hover:text-blue-800 font-semibold"
+                className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-semibold"
               >
                 Sign in
               </Link>
@@ -263,19 +216,20 @@ function SignupForm() {
   );
 }
 
-// Main component with Suspense boundary
 export default function SignupPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-blue-50">
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <p className="mt-2 text-gray-600">Loading...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 transition-colors">
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+              <p className="mt-2 text-gray-600 dark:text-gray-400">Loading...</p>
+            </div>
           </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <SignupForm />
     </Suspense>
   );

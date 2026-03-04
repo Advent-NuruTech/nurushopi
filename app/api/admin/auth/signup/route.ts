@@ -14,7 +14,13 @@ import {
 interface TimestampLike {
   toMillis?: () => number;
 }
-import { hashPassword, createToken, getAdminTokenCookieName, getAdminTokenMaxAge } from "@/lib/adminAuth";
+import {
+  hashPassword,
+  verifyPassword,
+  createToken,
+  getAdminTokenCookieName,
+  getAdminTokenMaxAge,
+} from "@/lib/adminAuth";
 
 export async function POST(request: Request) {
   try {
@@ -49,18 +55,21 @@ export async function POST(request: Request) {
     const adminsRef = collection(db, "admins");
     const existing = query(adminsRef, where("email", "==", trimmedEmail));
     const existingSnap = await getDocs(existing);
-    if (!existingSnap.empty) {
-      return NextResponse.json(
-        { error: "An admin with this email already exists" },
-        { status: 400 }
-      );
-    }
 
     let role: "senior" | "sub" = "sub";
     const allAdmins = await getDocs(adminsRef);
 
+    let passwordHash: string;
+
     if (allAdmins.empty) {
       role = "senior";
+      if (!existingSnap.empty) {
+        return NextResponse.json(
+          { error: "An admin with this email already exists" },
+          { status: 400 }
+        );
+      }
+      passwordHash = await hashPassword(password);
     } else {
       if (!inviteToken) {
         return NextResponse.json(
@@ -88,9 +97,29 @@ export async function POST(request: Request) {
         );
       }
       role = "sub";
+
+      if (!existingSnap.empty) {
+        const sameRoleDoc = existingSnap.docs.find((docSnap) => docSnap.data().role === role);
+        if (sameRoleDoc) {
+          return NextResponse.json(
+            { error: "A sub admin with this email already exists" },
+            { status: 400 }
+          );
+        }
+
+        const linkedPasswordHash = existingSnap.docs[0].data().passwordHash as string | undefined;
+        if (!linkedPasswordHash || !(await verifyPassword(password, linkedPasswordHash))) {
+          return NextResponse.json(
+            { error: "Use the same password as your existing linked account." },
+            { status: 400 }
+          );
+        }
+        passwordHash = linkedPasswordHash;
+      } else {
+        passwordHash = await hashPassword(password);
+      }
     }
 
-    const passwordHash = await hashPassword(password);
     const newAdmin = await addDoc(adminsRef, {
       name: String(name).trim(),
       email: trimmedEmail,

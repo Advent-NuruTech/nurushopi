@@ -69,7 +69,7 @@ export async function GET(request: Request) {
           mode?: "wholesale" | "retail";
         }[];
 
-      return {
+      const baseOrder = {
         id: d.id,
         userId: data.userId ?? null,
         userEmail: data.userEmail ?? null,
@@ -91,6 +91,25 @@ export async function GET(request: Request) {
         createdAt: toDateStr(data.createdAt),
         updatedAt: data.updatedAt ? toDateStr(data.updatedAt) : undefined,
       };
+
+      if (admin.role === "sub") {
+        return {
+          id: baseOrder.id,
+          name: baseOrder.name,
+          country: baseOrder.country,
+          county: baseOrder.county,
+          locality: baseOrder.locality,
+          message: baseOrder.message,
+          items: baseOrder.items,
+          totalAmount: baseOrder.totalAmount,
+          status: baseOrder.status,
+          cancellationReason: baseOrder.cancellationReason,
+          createdAt: baseOrder.createdAt,
+          updatedAt: baseOrder.updatedAt,
+        };
+      }
+
+      return baseOrder;
     });
 
     if (admin.role === "sub") {

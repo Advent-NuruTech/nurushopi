@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/firebase";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { getAdminFromRequest } from "@/lib/adminAuth";
+import { ADMIN_SIGNUP_PATH } from "@/lib/adminPaths";
 
 function randomToken(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
       typeof process.env.NEXT_PUBLIC_APP_URL === "string"
         ? process.env.NEXT_PUBLIC_APP_URL
         : request.url.replace(/\/api\/admin\/auth\/invite.*$/, "");
-    const link = `${base}/admin/signup?invite=${token}`;
+    const link = `${base}${ADMIN_SIGNUP_PATH}?invite=${token}`;
 
     return NextResponse.json({ success: true, link, token });
   } catch (e) {

@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { Upload } from "lucide-react";
+import { ADMIN_DASHBOARD_PATH, adminRoute } from "@/lib/adminPaths";
 
 interface WholesaleItem {
   id: string;
@@ -152,7 +153,7 @@ export default function WholesaleEditPage() {
       credentials: "include",
     });
 
-    if (res.ok) router.push("/admin/dashboard/wholesale");
+    if (res.ok) router.push(adminRoute(`${ADMIN_DASHBOARD_PATH}/wholesale`));
     else setFeedback({ type: "error", text: "Delete failed. Try again." });
   };
 

@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const ADMIN_PUBLIC = ["/admin/login", "/admin/signup"];
+const ADMIN_BASE_PATH = "/np-manage-8f3k";
+const ADMIN_LEGACY_PATH = "/admin";
+const ADMIN_PUBLIC = [`${ADMIN_BASE_PATH}/login`, `${ADMIN_BASE_PATH}/signup`];
 const ADMIN_COOKIE = "admin_token";
 
 const SENIOR_ONLY_TABS = new Set([
@@ -16,6 +18,7 @@ const SENIOR_ONLY_TABS = new Set([
   "users",
   "banners",
   "contacts",
+  "sabbathMessages",
 ]);
 
 const SENIOR_ONLY_PATH_PREFIXES = ["/admin/dashboard/vendors", "/admin/dashboard/users"];
@@ -49,32 +52,48 @@ function getRoleFromToken(token: string): "senior" | "sub" | null {
 
 export async function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
-  if (!pathname.startsWith("/admin")) return NextResponse.next();
+  const isLegacyAdmin = pathname === ADMIN_LEGACY_PATH || pathname.startsWith(`${ADMIN_LEGACY_PATH}/`);
+  if (isLegacyAdmin) {
+    const notFoundUrl = new URL("/not-found", request.url);
+    return NextResponse.rewrite(notFoundUrl);
+  }
+
+  const isAdminPath = pathname === ADMIN_BASE_PATH || pathname.startsWith(`${ADMIN_BASE_PATH}/`);
+  if (!isAdminPath) return NextResponse.next();
+
+  const adminPathname = pathname.replace(ADMIN_BASE_PATH, ADMIN_LEGACY_PATH);
+  const rewriteUrl = request.nextUrl.clone();
+  rewriteUrl.pathname = adminPathname;
 
   if (ADMIN_PUBLIC.some((path) => pathname === path || pathname.startsWith(path + "?"))) {
-    return NextResponse.next();
+    return NextResponse.rewrite(rewriteUrl);
   }
 
   const token = request.cookies.get(ADMIN_COOKIE)?.value;
-  if (!token && (pathname === "/admin" || pathname === "/admin/" || pathname.startsWith("/admin/dashboard"))) {
-    const loginUrl = new URL("/admin/login", request.url);
+  if (
+    !token &&
+    (adminPathname === "/admin" ||
+      adminPathname === "/admin/" ||
+      adminPathname.startsWith("/admin/dashboard"))
+  ) {
+    const loginUrl = new URL(`${ADMIN_BASE_PATH}/login`, request.url);
     loginUrl.searchParams.set("from", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
   if (!token) {
-    return NextResponse.next();
+    return NextResponse.rewrite(rewriteUrl);
   }
 
   const role = getRoleFromToken(token);
   if (!role) {
-    const loginUrl = new URL("/admin/login", request.url);
+    const loginUrl = new URL(`${ADMIN_BASE_PATH}/login`, request.url);
     loginUrl.searchParams.set("from", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
   if (role !== "senior") {
-    if (pathname === "/admin/dashboard") {
+    if (adminPathname === "/admin/dashboard") {
       const tab = searchParams.get("tab");
       if (tab && SENIOR_ONLY_TABS.has(tab)) {
         const redirectUrl = request.nextUrl.clone();
@@ -83,13 +102,13 @@ export async function middleware(request: NextRequest) {
       }
     }
 
-    if (SENIOR_ONLY_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix))) {
-      const redirectUrl = new URL("/admin/dashboard?tab=overview", request.url);
+    if (SENIOR_ONLY_PATH_PREFIXES.some((prefix) => adminPathname.startsWith(prefix))) {
+      const redirectUrl = new URL(`${ADMIN_BASE_PATH}/dashboard?tab=overview`, request.url);
       return NextResponse.redirect(redirectUrl);
     }
   }
 
-  return NextResponse.next();
+  return NextResponse.rewrite(rewriteUrl);
 }
 
 export const config = {

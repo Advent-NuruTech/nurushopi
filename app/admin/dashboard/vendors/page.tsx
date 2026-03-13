@@ -2,6 +2,7 @@
 
 import { Suspense, useCallback, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { ADMIN_DASHBOARD_PATH, ADMIN_LOGIN_PATH, adminRoute } from "@/lib/adminPaths"
 import {
   collection,
   getDocs,
@@ -179,7 +180,7 @@ function AdminVendorsPageContent() {
         const response = await fetch("/api/admin/me", { credentials: "include" })
 
         if (response.status === 401) {
-          router.replace("/admin/login")
+          router.replace(ADMIN_LOGIN_PATH)
           return
         }
 
@@ -187,7 +188,7 @@ function AdminVendorsPageContent() {
         const role = data?.admin?.role
 
         if (role !== "senior") {
-          router.replace("/admin/dashboard")
+          router.replace(adminRoute(ADMIN_DASHBOARD_PATH))
           return
         }
 
@@ -196,7 +197,7 @@ function AdminVendorsPageContent() {
         }
       } catch (error) {
         console.error("Error verifying admin access:", error)
-        router.replace("/admin/login")
+        router.replace(ADMIN_LOGIN_PATH)
       } finally {
         if (!cancelled) {
           setCheckingAccess(false)

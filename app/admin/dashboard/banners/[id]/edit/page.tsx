@@ -3,6 +3,7 @@
 import { useEffect, useState, FormEvent } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
+import { ADMIN_DASHBOARD_PATH, adminRoute } from "@/lib/adminPaths";
 
 export default function EditBannerPage() {
   const params = useParams();
@@ -102,7 +103,7 @@ export default function EditBannerPage() {
       if (!data.success) throw new Error("Update failed");
 
       alert("Banner updated");
-      router.push("/admin/dashboard");
+      router.push(adminRoute(ADMIN_DASHBOARD_PATH));
     } catch (e) {
       console.error(e);
       alert("Update failed");

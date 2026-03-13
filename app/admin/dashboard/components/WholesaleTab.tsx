@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { formatPrice } from "@/lib/formatPrice";
+import { ADMIN_DASHBOARD_PATH, adminRoute } from "@/lib/adminPaths";
 
 type WholesaleProduct = {
   id: string;
@@ -140,7 +141,7 @@ export default function WholesaleTab() {
               className="w-56 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm"
             />
             <Link
-              href="/admin/dashboard/wholesale/upload"
+              href={adminRoute(`${ADMIN_DASHBOARD_PATH}/wholesale/upload`)}
               className="bg-sky-600 text-white px-4 py-2 rounded"
             >
               Upload Wholesale Product
@@ -157,7 +158,7 @@ export default function WholesaleTab() {
             {filteredProducts.map((p) => (
               <Link
                 key={p.id}
-                href={`/admin/dashboard/wholesale/${p.id}/edit`}
+                href={adminRoute(`${ADMIN_DASHBOARD_PATH}/wholesale/${p.id}/edit`)}
                 className="border rounded-xl overflow-hidden bg-white hover:shadow transition"
               >
                 <div className="relative w-full h-40 bg-gray-100">

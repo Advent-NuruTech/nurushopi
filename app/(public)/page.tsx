@@ -4,6 +4,7 @@ import FeaturedSection from "@/components/ui/FeaturedSection";
 import FeaturedHero from "@/components/ui/FeaturedHero";
 import NewArrivals from "@/components/ui/NewArrivals";
 import Bannerss from "@/components/ui/Bannerss";
+import SabbathExperience from "@/components/ui/SabbathExperience";
 import { getAllProducts, getAllCategories } from "@/lib/firestoreHelpers";
 import { Product } from "@/lib/types";
 import { Timestamp } from "firebase/firestore";
@@ -122,6 +123,7 @@ export default async function HomePage() {
   return (
     <main>
       <HeroSection />
+      <SabbathExperience />
       <NewArrivals />
 
       <FeaturedHero

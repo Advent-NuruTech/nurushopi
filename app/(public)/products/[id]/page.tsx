@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
 import { getDiscountPercent, getOriginalPrice, getSellingPrice } from "@/lib/pricing";
 import FormattedDescription from "@/components/ui/FormattedDescription";
+import { useSabbathStatus } from "@/lib/useSabbathStatus";
 
 /* =========================
    TYPES
@@ -60,6 +61,7 @@ export default function ProductDetailPage() {
   const id = typeof params?.id === "string" ? params.id : "";
   const router = useRouter();
   const { addToCart } = useCart();
+  const { isClosed: sabbathClosed } = useSabbathStatus();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
@@ -223,6 +225,7 @@ export default function ProductDetailPage() {
   ========================= */
   const handleAddToCart = () => {
     if (!product) return;
+    if (sabbathClosed) return;
 
     const sellingPrice = getSellingPrice(product);
     addToCart({
@@ -326,12 +329,22 @@ export default function ProductDetailPage() {
           </div>
 
           <div className="flex gap-3">
-            <Button size="lg" variant="outline" onClick={handleAddToCart}>
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={handleAddToCart}
+              disabled={sabbathClosed}
+              className="disabled:cursor-not-allowed"
+              title={sabbathClosed ? "Shopping is paused for Sabbath" : "Add to cart"}
+            >
               Add to Cart
             </Button>
 
             <Button
               size="lg"
+              disabled={sabbathClosed}
+              className="disabled:cursor-not-allowed"
+              title={sabbathClosed ? "Shopping is paused for Sabbath" : "Buy now"}
               onClick={() => router.push("/checkout" as Route)}
             >
               Buy Now

@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Route } from "next";
+import { ADMIN_DASHBOARD_PATH } from "@/lib/adminPaths";
 
 interface NotificationItem {
   id: string;
@@ -31,18 +32,18 @@ const getNotificationRoute = (n: NotificationItem): Route | null => {
   const encoded = n.relatedId ? encodeURIComponent(n.relatedId) : "";
   if (n.type === "order") {
     if (!n.relatedId) return null;
-    return `/admin/dashboard?tab=orders&orderId=${encoded}` as Route;
+    return `${ADMIN_DASHBOARD_PATH}?tab=orders&orderId=${encoded}` as Route;
   }
   if (n.type === "message") {
     if (!n.relatedId) return null;
-    return `/admin/dashboard/messages/${encoded}` as Route;
+    return `${ADMIN_DASHBOARD_PATH}/messages/${encoded}` as Route;
   }
   if (n.type === "vendor_application") {
     return (n.relatedId
-      ? `/admin/dashboard?tab=vendorApplications&applicationId=${encoded}`
-      : "/admin/dashboard?tab=vendorApplications") as Route;
+      ? `${ADMIN_DASHBOARD_PATH}?tab=vendorApplications&applicationId=${encoded}`
+      : `${ADMIN_DASHBOARD_PATH}?tab=vendorApplications`) as Route;
   }
-  return `/admin/dashboard?tab=overview` as Route;
+  return `${ADMIN_DASHBOARD_PATH}?tab=overview` as Route;
 };
 
 export default function NotificationsPage() {

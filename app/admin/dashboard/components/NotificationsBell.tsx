@@ -5,6 +5,7 @@ import { Bell } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { Route } from "next";
 import { useNotifications } from "../context/NotificationsContext";
+import { ADMIN_DASHBOARD_PATH, adminRoute } from "@/lib/adminPaths";
 
 /* ---------- Notification Type ---------- */
 interface NotificationItem {
@@ -54,26 +55,26 @@ const getNotificationRoute = (n: NotificationItem): Route | null => {
   const encoded = n.relatedId ? encodeURIComponent(n.relatedId) : "";
   if (n.type === "order") {
     if (!n.relatedId) return null;
-    return `/admin/dashboard?tab=orders&orderId=${encoded}` as Route;
+    return `${ADMIN_DASHBOARD_PATH}?tab=orders&orderId=${encoded}` as Route;
   }
   if (n.type === "message") {
     if (!n.relatedId) return null;
-    return `/admin/dashboard/messages/${encoded}` as Route;
+    return `${ADMIN_DASHBOARD_PATH}/messages/${encoded}` as Route;
   }
   if (n.type === "review") {
     if (!n.relatedId) return null;
-    return `/admin/dashboard?tab=reviews&reviewId=${encoded}` as Route;
+    return `${ADMIN_DASHBOARD_PATH}?tab=reviews&reviewId=${encoded}` as Route;
   }
   if (n.type === "wallet") {
     if (!n.relatedId) return null;
-    return `/admin/dashboard?tab=redemptions&redemptionId=${encoded}` as Route;
+    return `${ADMIN_DASHBOARD_PATH}?tab=redemptions&redemptionId=${encoded}` as Route;
   }
   if (n.type === "vendor_application") {
     return (n.relatedId
-      ? `/admin/dashboard?tab=vendorApplications&applicationId=${encoded}`
-      : "/admin/dashboard?tab=vendorApplications") as Route;
+      ? `${ADMIN_DASHBOARD_PATH}?tab=vendorApplications&applicationId=${encoded}`
+      : `${ADMIN_DASHBOARD_PATH}?tab=vendorApplications`) as Route;
   }
-  return `/admin/dashboard?tab=overview` as Route;
+  return `${ADMIN_DASHBOARD_PATH}?tab=overview` as Route;
 };
 
 export default function NotificationsBell() {
@@ -200,7 +201,7 @@ export default function NotificationsBell() {
           <div className="px-4 py-2 border-t border-slate-200 dark:border-slate-700 text-center">
             <button
               onClick={() => {
-                router.push("/admin/dashboard/notifications");
+                router.push(adminRoute(`${ADMIN_DASHBOARD_PATH}/notifications`));
                 setOpen(false);
               }}
               className="text-sm text-sky-600 dark:text-sky-400 hover:underline"

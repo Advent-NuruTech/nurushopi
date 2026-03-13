@@ -5,6 +5,7 @@ import Link from "next/link";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { AdminRole } from "./types";
 import { useNotifications } from "../context/NotificationsContext"; // <-- import context
+import { ADMIN_DASHBOARD_PATH, adminRoute } from "@/lib/adminPaths";
 
 interface MessagesTabProps {
   adminId: string;
@@ -230,7 +231,7 @@ export default function MessagesTab({ adminId, role }: MessagesTabProps) {
             return (
               <Link
                 key={m.id}
-                href={`/admin/dashboard/messages/${m.threadId ?? m.id}`}
+                href={adminRoute(`${ADMIN_DASHBOARD_PATH}/messages/${m.threadId ?? m.id}`)}
                 className={`block p-4 flex flex-col gap-2 rounded-lg border-b last:border-b-0 ${
                   !m.readAt && isIncoming ? "bg-slate-50 dark:bg-slate-800/70" : "bg-white dark:bg-slate-900"
                 } hover:bg-slate-100 dark:hover:bg-slate-800/80`}

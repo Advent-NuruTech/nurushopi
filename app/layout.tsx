@@ -2,6 +2,7 @@ import "./globals.css";
 import React, { ReactNode, Suspense } from "react";
 
 import { CartProvider } from "@/context/CartContext";
+import InstallPrompt from "@/components/install-prompt";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { UserProvider } from "@/context/UserContext";
 import ReferralTracker from "@/components/ReferralTracker";
@@ -52,7 +53,7 @@ export const metadata = {
   },
 
   openGraph: {
-    title: "NuruShop – Health & Truth Marketplace",
+    title: "NuruShop â€“ Health & Truth Marketplace",
     description:
       "Shop trusted natural remedies, organic foods, herbal wellness products, and inspiring spiritual literature. Bringing health, healing, and truth to every home.",
     url: "https://nurushop.co.ke",
@@ -71,10 +72,18 @@ export const metadata = {
 
   twitter: {
     card: "summary_large_image",
-    title: "NuruShop – Health & Truth Marketplace",
+    title: "NuruShop â€“ Health & Truth Marketplace",
     description:
       "Discover natural healing products, organic foods, and inspiring spiritual books at NuruShop.",
     images: ["/assets/logo.jpg"],
+  },
+
+  manifest: "/manifest.json",
+
+  appleWebApp: {
+    capable: true,
+    title: "NuruShop",
+    statusBarStyle: "default",
   },
 
   robots: {
@@ -92,6 +101,10 @@ export const metadata = {
   category: "health and wellness",
 };
 
+export const viewport = {
+  themeColor: "#16a34a",
+};
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -102,6 +115,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           </Suspense>
           <ThemeProvider>
             <CartProvider>{children}</CartProvider>
+            <InstallPrompt />
           </ThemeProvider>
         </UserProvider>
       </body>

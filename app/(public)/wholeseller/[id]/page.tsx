@@ -21,6 +21,7 @@ import { formatPrice } from "@/lib/formatPrice";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
 import FormattedDescription from "@/components/ui/FormattedDescription";
+import { useSabbathStatus } from "@/lib/useSabbathStatus";
 
 interface WholesaleProduct {
   id: string;
@@ -66,6 +67,7 @@ export default function WholesaleProductPage() {
   const id = typeof params?.id === "string" ? params.id : "";
   const router = useRouter();
   const { addToCart } = useCart();
+  const { isClosed: sabbathClosed } = useSabbathStatus();
 
   const [product, setProduct] = useState<WholesaleProduct | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<WholesaleProduct[]>([]);
@@ -197,6 +199,7 @@ export default function WholesaleProductPage() {
 
   const handleAddToCart = () => {
     if (!product) return;
+    if (sabbathClosed) return;
 
     const minQty =
       typeof product.wholesaleMinQty === "number" && product.wholesaleMinQty > 0
@@ -294,10 +297,23 @@ export default function WholesaleProductPage() {
           </div>
 
           <div className="flex gap-3">
-            <Button size="lg" variant="outline" onClick={handleAddToCart}>
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={handleAddToCart}
+              disabled={sabbathClosed}
+              className="disabled:cursor-not-allowed"
+              title={sabbathClosed ? "Shopping is paused for Sabbath" : "Add to cart"}
+            >
               Add to Cart
             </Button>
-            <Button size="lg" onClick={() => router.push("/checkout" as Route)}>
+            <Button
+              size="lg"
+              onClick={() => router.push("/checkout" as Route)}
+              disabled={sabbathClosed}
+              className="disabled:cursor-not-allowed"
+              title={sabbathClosed ? "Shopping is paused for Sabbath" : "Buy now"}
+            >
               Buy Now
             </Button>
           </div>

@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { formatPrice } from "@/lib/formatPrice";
+import { ADMIN_DASHBOARD_PATH, adminRoute } from "@/lib/adminPaths";
 
 type AdminUser = {
   id: string;
@@ -96,7 +97,7 @@ export default function UsersTab({ role }: { role: "senior" | "sub" }) {
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
                     <Link
-                      href={`/admin/dashboard/users/${u.id}`}
+                      href={adminRoute(`${ADMIN_DASHBOARD_PATH}/users/${u.id}`)}
                       className="text-sky-600 dark:text-sky-400 hover:underline"
                     >
                       View

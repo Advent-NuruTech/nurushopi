@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ClipboardList,
+  CalendarDays,
   ImageIcon,
   LayoutDashboard,
   LogOut,
@@ -25,6 +26,7 @@ import {
 } from "lucide-react";
 import NotificationsBell from "./NotificationsBell";
 import { Admin, LinkedAccounts, TabId, TABS_SENIOR, TABS_SUB } from "./types";
+import { ADMIN_DASHBOARD_PATH, ADMIN_LOGIN_PATH, adminRoute } from "@/lib/adminPaths";
 
 interface AdminLayoutProps {
   admin: Admin;
@@ -49,6 +51,7 @@ const TAB_ICONS = {
   Wallet,
   ImageIcon,
   Palette,
+  CalendarDays,
 } as const;
 
 function getInitials(name: string): string {
@@ -83,7 +86,7 @@ export default function AdminLayout({
 
   const handleLogout = async () => {
     await fetch("/api/admin/auth/logout", { method: "POST", credentials: "include" });
-    router.replace("/admin/login");
+    router.replace(ADMIN_LOGIN_PATH);
     router.refresh();
   };
 
@@ -130,7 +133,7 @@ export default function AdminLayout({
             </button>
 
             <Link
-              href="/admin/dashboard?tab=overview"
+              href={adminRoute(`${ADMIN_DASHBOARD_PATH}?tab=overview`)}
               className="inline-flex items-center gap-2 text-sky-600 dark:text-sky-400 font-bold shrink-0"
             >
               <LayoutDashboard size={20} />

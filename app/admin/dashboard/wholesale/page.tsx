@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import Image from "next/image";
+import { ADMIN_DASHBOARD_PATH, adminRoute } from "@/lib/adminPaths";
 
 interface WholesaleProduct {
   id: string;
@@ -44,7 +45,7 @@ export default function WholesaleAdminPage() {
         </h1>
 
         <Link
-          href="/admin/dashboard/wholesale/upload"
+          href={adminRoute(`${ADMIN_DASHBOARD_PATH}/wholesale/upload`)}
           className="bg-sky-600 text-white px-4 py-2 rounded"
         >
           Upload Wholesale Product
@@ -63,7 +64,7 @@ export default function WholesaleAdminPage() {
         {products.map((p) => (
           <Link
             key={p.id}
-            href={`/admin/dashboard/wholesale/${p.id}/edit`}
+            href={adminRoute(`${ADMIN_DASHBOARD_PATH}/wholesale/${p.id}/edit`)}
             className="border rounded-xl overflow-hidden bg-white hover:shadow transition"
           >
             <div className="relative w-full h-40 bg-gray-100">

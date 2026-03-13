@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { LogIn, Mail, Lock, ArrowRight } from "lucide-react";
+import { ADMIN_DASHBOARD_PATH, ADMIN_SIGNUP_PATH, adminRoute } from "@/lib/adminPaths";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -28,7 +29,7 @@ export default function AdminLoginPage() {
         setError(data.error || "Login failed");
         return;
       }
-      router.push("/admin/dashboard");
+      router.push(adminRoute(ADMIN_DASHBOARD_PATH));
       router.refresh();
     } catch {
       setError("Network error. Please try again.");
@@ -104,7 +105,7 @@ export default function AdminLoginPage() {
 
           <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
             New admin?{" "}
-            <Link href="/admin/signup" className="text-sky-600 dark:text-sky-400 hover:underline font-medium">
+            <Link href={ADMIN_SIGNUP_PATH} className="text-sky-600 dark:text-sky-400 hover:underline font-medium">
               Sign up
             </Link>{" "}
             or use an invite link from a Senior Admin.

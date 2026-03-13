@@ -7,6 +7,7 @@ import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import AdminLayout from "./components/AdminLayout";
 import TabErrorBoundary from "./components/TabErrorBoundary";
 import { Admin, AdminRole, LinkedAccounts, TabId, TABS_SENIOR, TABS_SUB } from "./components/types";
+import { ADMIN_DASHBOARD_PATH, ADMIN_LOGIN_PATH, adminRoute } from "@/lib/adminPaths";
 
 const DashboardOverviewTab = dynamic<{ role: AdminRole }>(
   () => import("./components/DashboardOverviewTab"),
@@ -57,6 +58,9 @@ const MessagesTab = dynamic<{ adminId: string; role: AdminRole }>(
   () => import("./components/MessagesTab"),
   { loading: () => <TabSkeleton /> }
 );
+const SabbathMessagesTab = dynamic(() => import("./components/SabbathMessagesTab"), {
+  loading: () => <TabSkeleton />,
+});
 
 const TAB_LABELS = new Map<TabId, string>([...TABS_SENIOR, ...TABS_SUB].map((tab) => [tab.id, tab.label]));
 
@@ -95,7 +99,7 @@ function AdminDashboardPageContent() {
       .then((r) => {
         if (cancelled) return null;
         if (r.status === 401) {
-          router.replace("/admin/login");
+          router.replace(ADMIN_LOGIN_PATH);
           return null;
         }
         return r.json();
@@ -124,7 +128,7 @@ function AdminDashboardPageContent() {
     if (requestedTab && isValidTab(requestedTab, admin.role)) return;
     const params = new URLSearchParams(searchParams.toString());
     params.set("tab", getDefaultTab());
-    router.replace(`/admin/dashboard?${params.toString()}`, { scroll: false });
+    router.replace(adminRoute(`${ADMIN_DASHBOARD_PATH}?${params.toString()}`), { scroll: false });
   }, [admin, requestedTab, router, searchParams]);
 
   useEffect(() => {
@@ -151,7 +155,7 @@ function AdminDashboardPageContent() {
     (tab: TabId) => {
       const params = new URLSearchParams(searchParams.toString());
       params.set("tab", tab);
-      router.push(`/admin/dashboard?${params.toString()}`, { scroll: false });
+      router.push(adminRoute(`${ADMIN_DASHBOARD_PATH}?${params.toString()}`), { scroll: false });
     },
     [router, searchParams]
   );
@@ -169,7 +173,7 @@ function AdminDashboardPageContent() {
       throw new Error(data?.error ?? "Unable to switch account role.");
     }
 
-    window.location.assign("/admin/dashboard?tab=overview");
+    window.location.assign(`${ADMIN_DASHBOARD_PATH}?tab=overview`);
   }, []);
 
   const pageTitle = TAB_LABELS.get(currentTab) ?? "Dashboard";
@@ -208,6 +212,8 @@ function AdminDashboardPageContent() {
         return admin.role === "senior" ? <ContactsTab /> : null;
       case "messages":
         return <MessagesTab adminId={admin.adminId} role={admin.role} />;
+      case "sabbathMessages":
+        return admin.role === "senior" ? <SabbathMessagesTab /> : null;
       default:
         return <DashboardOverviewTab role={admin.role} />;
     }

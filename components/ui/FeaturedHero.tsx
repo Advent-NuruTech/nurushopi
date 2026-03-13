@@ -11,6 +11,7 @@ import { useCart } from "@/context/CartContext";
 import { formatCategoryLabel } from "@/lib/categoryUtils";
 import { formatPrice } from "@/lib/formatPrice";
 import { getDiscountPercent, getOriginalPrice, getSellingPrice } from "@/lib/pricing";
+import { useSabbathStatus } from "@/lib/useSabbathStatus";
 
 interface Product {
   id: string;
@@ -49,6 +50,7 @@ function toMillis(value: Product["createdAt"]): number {
 
 export default function FeaturedSection({ products, categories = [] }: FeaturedSectionProps) {
   const { addToCart } = useCart();
+  const { isClosed: sabbathClosed } = useSabbathStatus();
   const [currentCategory, setCurrentCategory] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -83,6 +85,7 @@ export default function FeaturedSection({ products, categories = [] }: FeaturedS
   }, [currentCategory, featuredByCategory.length]);
 
   const handleAddToCart = (product: Product) => {
+    if (sabbathClosed) return;
     const sellingPrice = getSellingPrice(product);
     addToCart({
       id: product.id,
@@ -272,7 +275,9 @@ export default function FeaturedSection({ products, categories = [] }: FeaturedS
                       </div>
                       <Button
                         size="sm"
-                        className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg"
+                        disabled={sabbathClosed}
+                        title={sabbathClosed ? "Shopping is paused for Sabbath" : "Add to cart"}
+                        className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 disabled:bg-slate-300 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg disabled:cursor-not-allowed"
                         onClick={(e: ReactMouseEvent<HTMLButtonElement>) => {
                           e.preventDefault();
                           handleAddToCart(item);

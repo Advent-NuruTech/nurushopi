@@ -4,6 +4,7 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { Send, MessageSquare } from "lucide-react";
+import { ADMIN_DASHBOARD_PATH, ADMIN_LOGIN_PATH, adminRoute } from "@/lib/adminPaths";
 
 /* ---------- Message Type ---------- */
 interface MessageItem {
@@ -99,7 +100,7 @@ export default function MessageDetailPage() {
       .then((r) => {
         if (cancelled) return null;
         if (r.status === 401) {
-          router.replace("/admin/login");
+          router.replace(ADMIN_LOGIN_PATH);
           return null;
         }
         return r.json();
@@ -165,7 +166,7 @@ export default function MessageDetailPage() {
         </div>
 
         <button
-          onClick={() => router.push("/admin/dashboard/messages")}
+          onClick={() => router.push(adminRoute(`${ADMIN_DASHBOARD_PATH}/messages`))}
           className="text-sm text-sky-600 dark:text-sky-400 hover:underline"
         >
           Back

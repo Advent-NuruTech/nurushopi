@@ -4,6 +4,7 @@ import React, { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { UserPlus, Mail, Lock, User, ArrowRight } from "lucide-react";
+import { ADMIN_DASHBOARD_PATH, ADMIN_LOGIN_PATH, adminRoute } from "@/lib/adminPaths";
 
 function AdminSignupForm() {
   const router = useRouter();
@@ -41,7 +42,7 @@ function AdminSignupForm() {
         setError(data.error || "Signup failed");
         return;
       }
-      router.push("/admin/dashboard");
+      router.push(adminRoute(ADMIN_DASHBOARD_PATH));
       router.refresh();
     } catch {
       setError("Network error. Please try again.");
@@ -138,7 +139,7 @@ function AdminSignupForm() {
           <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
             Already have an account?{" "}
             <Link
-              href="/admin/login"
+              href={ADMIN_LOGIN_PATH}
               className="text-sky-600 dark:text-sky-400 hover:underline font-medium"
             >
               Sign in

@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/formatPrice";
+import { useSabbathStatus } from "@/lib/useSabbathStatus";
 
 interface WholesaleProduct {
   id: string;
@@ -18,6 +19,7 @@ interface WholesaleProduct {
 
 export default function WholesaleCard({ product }: { product: WholesaleProduct }) {
   const { addToCart } = useCart();
+  const { isClosed: sabbathClosed } = useSabbathStatus();
 
   const imageSrc =
     product?.coverImage ||
@@ -35,6 +37,7 @@ export default function WholesaleCard({ product }: { product: WholesaleProduct }
   const addWholesale = (e: React.MouseEvent) => {
     e.preventDefault(); // stop navigation
     e.stopPropagation();
+    if (sabbathClosed) return;
 
     addToCart({
       id: product.id,
@@ -76,7 +79,9 @@ export default function WholesaleCard({ product }: { product: WholesaleProduct }
 
       <button
         onClick={addWholesale}
-        className="mt-3 w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700"
+        disabled={sabbathClosed}
+        title={sabbathClosed ? "Shopping is paused for Sabbath" : "Add to Cart"}
+        className="mt-3 w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed"
       >
         Add to Cart
       </button>

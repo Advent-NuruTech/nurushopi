@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { useNotifications } from "../context/NotificationsContext";
 import { Search, MessageSquare } from "lucide-react";
+import { ADMIN_DASHBOARD_PATH, ADMIN_LOGIN_PATH, adminRoute } from "@/lib/adminPaths";
 
 interface FirestoreTimestamp {
   toDate?: () => Date;
@@ -112,7 +113,7 @@ export default function MessagesPage() {
         if (cancelled) return null;
 
         if (r.status === 401) {
-          router.replace("/admin/login");
+          router.replace(ADMIN_LOGIN_PATH);
           return null;
         }
 
@@ -259,7 +260,7 @@ export default function MessagesPage() {
           return (
             <Link
               key={m.id}
-              href={`/admin/dashboard/messages/${m.threadId ?? m.id}`}
+              href={adminRoute(`${ADMIN_DASHBOARD_PATH}/messages/${m.threadId ?? m.id}`)}
               onClick={() => unread && markRead(m.id)}
               className={`flex gap-3 items-start p-3 rounded-xl border transition shadow-sm ${
                 unread

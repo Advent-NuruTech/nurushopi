@@ -11,6 +11,7 @@ export type TabId =
   | "categories"
   | "hero"
   | "messages"
+  | "sabbathMessages"
   | "users"
   | "reviews"
   | "redemptions"
@@ -50,6 +51,7 @@ export const TABS_SENIOR: { id: TabId; label: string; icon: string }[] = [
   { id: "banners", label: "Banners", icon: "ImageIcon" },
   { id: "contacts", label: "Contacts", icon: "MessageSquare" },
   { id: "messages", label: "Messages", icon: "MessageSquare" },
+  { id: "sabbathMessages", label: "Sabbath Messages", icon: "CalendarDays" },
 ];
 
 export const TABS_SUB: { id: TabId; label: string; icon: string }[] = [

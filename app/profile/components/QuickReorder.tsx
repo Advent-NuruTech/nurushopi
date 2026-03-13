@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 import type { ApiOrder, OrderItem } from "../types";
+import { useSabbathStatus } from "@/lib/useSabbathStatus";
 
 interface Props {
   orders: ApiOrder[];
@@ -11,6 +12,7 @@ interface Props {
 
 export default function QuickReorder({ orders }: Props) {
   const { addToCart } = useCart();
+  const { isClosed: sabbathClosed } = useSabbathStatus();
   const [selectedOrder, setSelectedOrder] = useState<ApiOrder | null>(null);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
 
@@ -19,6 +21,7 @@ export default function QuickReorder({ orders }: Props) {
   }
 
   const openOrder = (order: ApiOrder) => {
+    if (sabbathClosed) return;
     setSelectedOrder(order);
     // Initialize quantities
     const q: Record<string, number> = {};
@@ -33,6 +36,7 @@ export default function QuickReorder({ orders }: Props) {
   };
 
   const addSelectedToCart = () => {
+    if (sabbathClosed) return;
     if (!selectedOrder?.items) return;
 
     selectedOrder.items.forEach((item) => {
@@ -79,7 +83,9 @@ export default function QuickReorder({ orders }: Props) {
 
           <button
             onClick={() => openOrder(order)}
-            className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition"
+            disabled={sabbathClosed}
+            title={sabbathClosed ? "Shopping is paused for Sabbath" : "Reorder"}
+            className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition disabled:bg-slate-300 disabled:cursor-not-allowed"
           >
             Reorder
           </button>
@@ -138,7 +144,9 @@ export default function QuickReorder({ orders }: Props) {
               </button>
               <button
                 onClick={addSelectedToCart}
-                className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition"
+                disabled={sabbathClosed}
+                title={sabbathClosed ? "Shopping is paused for Sabbath" : "Add to Cart & Checkout"}
+                className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition disabled:bg-slate-300 disabled:cursor-not-allowed"
               >
                 Add to Cart & Checkout
               </button>

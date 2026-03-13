@@ -2,11 +2,12 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { ADMIN_DASHBOARD_PATH, adminRoute } from "@/lib/adminPaths";
 
 export default function AdminRootPage() {
   const router = useRouter();
   useEffect(() => {
-    router.replace("/admin/dashboard");
+    router.replace(adminRoute(ADMIN_DASHBOARD_PATH));
   }, [router]);
   return (
     <div className="min-h-screen flex items-center justify-center">

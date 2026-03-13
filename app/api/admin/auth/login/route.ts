@@ -8,22 +8,41 @@ import {
   getAdminTokenMaxAge,
   type AdminRole,
 } from "@/lib/adminAuth";
+import { clearAdminLockState, getAdminLockState, recordAdminFailedAttempt, ADMIN_LOCKOUT_POLICY } from "@/lib/adminLoginSecurity";
+import { sendAdminPasswordResetEmail } from "@/lib/adminPasswordReset";
+import { notifySeniorAdmins } from "@/lib/notifications";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { email, password } = body as { email?: string; password?: string };
-    if (!email || !password) {
+    const trimmedEmail = String(email ?? "").trim().toLowerCase();
+    if (!trimmedEmail || !password) {
       return NextResponse.json(
         { error: "Email and password required" },
         { status: 400 }
       );
     }
 
+    const lockState = await getAdminLockState(trimmedEmail);
+    if (lockState.lockedUntilMs && lockState.lockedUntilMs > Date.now()) {
+      return NextResponse.json(
+        { error: "Account locked due to failed attempts. Check your email to reset your password." },
+        { status: 423 }
+      );
+    }
+
     const adminsRef = collection(db, "admins");
-    const q = query(adminsRef, where("email", "==", String(email).trim().toLowerCase()));
+    const q = query(adminsRef, where("email", "==", trimmedEmail));
     const snap = await getDocs(q);
     if (snap.empty) {
+      const lockUpdate = await recordAdminFailedAttempt(trimmedEmail);
+      if (lockUpdate.locked) {
+        await sendAdminPasswordResetEmail({
+          email: trimmedEmail,
+          continueUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/auth/reset-password/confirm`,
+        });
+      }
       return NextResponse.json(
         { error: "Invalid email or password" },
         { status: 401 }
@@ -59,6 +78,29 @@ export async function POST(request: Request) {
     );
 
     if (!validMatches.length) {
+      const lockUpdate = await recordAdminFailedAttempt(trimmedEmail);
+      if (lockUpdate.locked) {
+        await sendAdminPasswordResetEmail({
+          email: trimmedEmail,
+          continueUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/auth/reset-password/confirm`,
+        });
+        try {
+          await notifySeniorAdmins({
+            title: "Admin account locked",
+            body: `Too many failed admin login attempts for ${trimmedEmail}. A password reset email was sent.`,
+            type: "security",
+            relatedId: trimmedEmail,
+          });
+        } catch (notifyError) {
+          console.warn("Failed to notify senior admins:", notifyError);
+        }
+        return NextResponse.json(
+          {
+            error: `Account locked after ${ADMIN_LOCKOUT_POLICY.maxFailedAttempts} failed attempts. A reset email has been sent.`,
+          },
+          { status: 423 }
+        );
+      }
       return NextResponse.json(
         { error: "Invalid email or password" },
         { status: 401 }
@@ -74,6 +116,8 @@ export async function POST(request: Request) {
     const adminId = selected.adminDoc.id;
     const name = (selected.data.name as string) ?? "";
     const role = selected.role;
+
+    await clearAdminLockState(trimmedEmail);
 
     if (snap.docs.length > 1) {
       await Promise.all(

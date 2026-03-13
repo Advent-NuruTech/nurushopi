@@ -18,6 +18,7 @@ import {
   runTransaction,
 } from "firebase/firestore";
 import { getClientKey, rateLimit } from "@/lib/rateLimit";
+import { isSabbathClosed } from "@/lib/isSabbathClosed";
 
 // Firestore collection reference
 const ordersCollection = collection(db, "orders");
@@ -48,6 +49,8 @@ interface FirestoreOrder {
   items: OrderItem[];
   totalAmount: number;
   status: string;
+  clientTime?: string | null;
+  clientTzOffset?: number | null;
   cancellationReason?: string | null;
   cancelledBy?: string | null;
   cancelledAt?: Timestamp | FieldValue;
@@ -100,7 +103,27 @@ export async function POST(request: Request) {
       county,
       locality,
       message,
+      clientTime,
+      clientTzOffset,
     } = body;
+
+    const clientOffset =
+      typeof clientTzOffset === "number"
+        ? clientTzOffset
+        : Number.isFinite(Number(clientTzOffset))
+        ? Number(clientTzOffset)
+        : undefined;
+    const clientNow = clientTime ? new Date(clientTime) : new Date();
+    const safeNow = Number.isNaN(clientNow.getTime()) ? new Date() : clientNow;
+    if (isSabbathClosed({ now: safeNow, tzOffsetMinutes: clientOffset })) {
+      return NextResponse.json(
+        {
+          error:
+            "Shopping is paused in honor of the Sabbath. Please return after sunset on Saturday in your local time.",
+        },
+        { status: 403 }
+      );
+    }
 
     // Validate required fields
     if (!name || !phone || !country || !county || !locality || !items || !totalAmount) {
@@ -136,6 +159,8 @@ export async function POST(request: Request) {
       items,
       totalAmount,
       status: status ?? "pending",
+      clientTime: clientTime ?? null,
+      clientTzOffset: clientOffset ?? null,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };

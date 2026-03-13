@@ -10,10 +10,12 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { formatPrice } from "@/lib/formatPrice";
 import { getDiscountPercent, getOriginalPrice, getSellingPrice } from "@/lib/pricing";
+import { useSabbathStatus } from "@/lib/useSabbathStatus";
 
 export default function ProductCard({ product }: { product: Product }) {
   const [mainImage, setMainImage] = useState<string>("");
   const { addToCart } = useCart();
+  const { isClosed: sabbathClosed } = useSabbathStatus();
 
   // ✅ Set main image safely
   useEffect(() => {
@@ -35,6 +37,7 @@ export default function ProductCard({ product }: { product: Product }) {
 
   // ✅ Handle add to cart
   const handleAddToCart = () => {
+    if (sabbathClosed) return;
     addToCart({
       id: product.id,
       name: product.name,
@@ -108,7 +111,9 @@ export default function ProductCard({ product }: { product: Product }) {
 
         <Button
           size="sm"
-          className="bg-blue-600 hover:bg-blue-700 text-white rounded-full w-8 h-8 flex items-center justify-center"
+          disabled={sabbathClosed}
+          title={sabbathClosed ? "Shopping is paused for Sabbath" : "Add to cart"}
+          className="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white rounded-full w-8 h-8 flex items-center justify-center disabled:cursor-not-allowed"
           onClick={(e) => {
             e.stopPropagation();
             handleAddToCart();

@@ -6,6 +6,7 @@ import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { slugifyCategory } from "@/lib/categoryUtils";
 import { Upload } from "lucide-react";
 import Image from "next/image";
+import { ADMIN_DASHBOARD_PATH, adminRoute } from "@/lib/adminPaths";
 
 interface Product {
   id: string;
@@ -198,7 +199,7 @@ export default function ProductEditPage() {
       credentials: "include",
     });
 
-    if (res.ok) router.push("/admin/dashboard");
+    if (res.ok) router.push(adminRoute(ADMIN_DASHBOARD_PATH));
     else setFeedback({ type: "error", text: "Delete failed. Try again." });
   };
 

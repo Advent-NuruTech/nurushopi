@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { ADMIN_DASHBOARD_PATH, adminRoute } from "@/lib/adminPaths";
 
 interface Banner {
   id: string;
@@ -85,7 +86,7 @@ export default function BannersTab() {
           />
 
           <Link
-            href="/admin/dashboard/upload-banner"
+            href={adminRoute(`${ADMIN_DASHBOARD_PATH}/upload-banner`)}
             className="px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-sm"
           >
             Add banner
@@ -125,7 +126,7 @@ export default function BannersTab() {
 
               <div className="flex justify-between text-sm mt-2">
                 <Link
-                  href={`/admin/dashboard/banners/${b.id}/edit`}
+                  href={adminRoute(`${ADMIN_DASHBOARD_PATH}/banners/${b.id}/edit`)}
                   className="text-emerald-600 hover:underline"
                 >
                   Edit

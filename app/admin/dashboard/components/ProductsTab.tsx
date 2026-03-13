@@ -5,6 +5,7 @@ import Link from "next/link";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { formatPrice } from "@/lib/formatPrice";
 import { AdminRole } from "./types";
+import { ADMIN_DASHBOARD_PATH, adminRoute } from "@/lib/adminPaths";
 import { Edit, Trash2, Eye, Image as ImageIcon } from "lucide-react";
 
 interface ProductsTabProps {
@@ -132,7 +133,7 @@ export default function ProductsTab({}: ProductsTabProps) {
                 }`}
               />
               <Link
-                href="/admin/dashboard/uploadproduct"
+                href={adminRoute(`${ADMIN_DASHBOARD_PATH}/uploadproduct`)}
                 className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
                   darkMode
                     ? "bg-blue-600 hover:bg-blue-700 text-white"
@@ -260,7 +261,7 @@ export default function ProductsTab({}: ProductsTabProps) {
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-center gap-3">
                         <Link
-                          href={`/admin/dashboard/products/${p.id}`}
+                          href={adminRoute(`${ADMIN_DASHBOARD_PATH}/products/${p.id}`)}
                           className={`p-2 rounded-lg transition-colors duration-300 ${
                             darkMode 
                               ? "text-blue-400 hover:bg-gray-700" 
@@ -326,7 +327,7 @@ export default function ProductsTab({}: ProductsTabProps) {
               </p>
               {products.length === 0 && (
                 <Link
-                  href="/admin/dashboard/uploadproduct"
+                  href={adminRoute(`${ADMIN_DASHBOARD_PATH}/uploadproduct`)}
                   className={`inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${
                     darkMode
                       ? "bg-blue-600 hover:bg-blue-700 text-white"

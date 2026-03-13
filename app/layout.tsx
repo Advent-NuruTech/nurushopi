@@ -6,6 +6,7 @@ import InstallPrompt from "@/components/install-prompt";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { UserProvider } from "@/context/UserContext";
 import ReferralTracker from "@/components/ReferralTracker";
+import PwaSplash from "@/components/ui/PwaSplash";
 
 export const metadata = {
   metadataBase: new URL("https://nurushop.co.ke"),
@@ -48,8 +49,11 @@ export const metadata = {
   publisher: "NuruShop",
 
   icons: {
-    icon: "/assets/logo.jpg",
-    apple: "/assets/logo.jpg",
+    icon: [
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: "/icons/icon-192.png",
   },
 
   openGraph: {
@@ -83,7 +87,7 @@ export const metadata = {
   appleWebApp: {
     capable: true,
     title: "NuruShop",
-    statusBarStyle: "default",
+    statusBarStyle: "black-translucent",
   },
 
   robots: {
@@ -102,7 +106,7 @@ export const metadata = {
 };
 
 export const viewport = {
-  themeColor: "#16a34a",
+  themeColor: "#2563eb",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -110,6 +114,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <body className="bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased">
         <UserProvider>
+          <PwaSplash />
           <Suspense fallback={null}>
             <ReferralTracker />
           </Suspense>

@@ -61,6 +61,9 @@ const MessagesTab = dynamic<{ adminId: string; role: AdminRole }>(
 const SabbathMessagesTab = dynamic(() => import("./components/SabbathMessagesTab"), {
   loading: () => <TabSkeleton />,
 });
+const PwaInstallsTab = dynamic(() => import("./components/PwaInstallsTab"), {
+  loading: () => <TabSkeleton />,
+});
 
 const TAB_LABELS = new Map<TabId, string>([...TABS_SENIOR, ...TABS_SUB].map((tab) => [tab.id, tab.label]));
 
@@ -214,6 +217,8 @@ function AdminDashboardPageContent() {
         return <MessagesTab adminId={admin.adminId} role={admin.role} />;
       case "sabbathMessages":
         return admin.role === "senior" ? <SabbathMessagesTab /> : null;
+      case "pwaInstalls":
+        return admin.role === "senior" ? <PwaInstallsTab /> : null;
       default:
         return <DashboardOverviewTab role={admin.role} />;
     }

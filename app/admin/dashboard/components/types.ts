@@ -12,6 +12,7 @@ export type TabId =
   | "hero"
   | "messages"
   | "sabbathMessages"
+  | "pwaInstalls"
   | "users"
   | "reviews"
   | "redemptions"
@@ -52,6 +53,7 @@ export const TABS_SENIOR: { id: TabId; label: string; icon: string }[] = [
   { id: "contacts", label: "Contacts", icon: "MessageSquare" },
   { id: "messages", label: "Messages", icon: "MessageSquare" },
   { id: "sabbathMessages", label: "Sabbath Messages", icon: "CalendarDays" },
+  { id: "pwaInstalls", label: "PWA Installs", icon: "Smartphone" },
 ];
 
 export const TABS_SUB: { id: TabId; label: string; icon: string }[] = [

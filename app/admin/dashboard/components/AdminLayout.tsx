@@ -15,6 +15,7 @@ import {
   Palette,
   ShoppingCart,
   Tags,
+  Smartphone,
   UserPlus,
   UserCircle2,
   Users,
@@ -52,6 +53,7 @@ const TAB_ICONS = {
   ImageIcon,
   Palette,
   CalendarDays,
+  Smartphone,
 } as const;
 
 function getInitials(name: string): string {

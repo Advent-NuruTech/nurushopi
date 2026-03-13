@@ -35,7 +35,7 @@ export default function PwaSplash() {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#0b1f4b] text-white transition-opacity"
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#010216] text-white transition-opacity"
       aria-hidden="true"
     >
       <img

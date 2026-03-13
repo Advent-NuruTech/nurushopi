@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useAppUser } from "@/context/UserContext";
+import { db } from "@/lib/firebase";
+import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => void;
@@ -9,6 +11,7 @@ type BeforeInstallPromptEvent = Event & {
 };
 
 const DISMISS_KEY = "nurushop-pwa-dismissed";
+const REPORT_KEY = "nurushop-pwa-install-reported";
 
 const canUseDOM = typeof window !== "undefined";
 
@@ -106,6 +109,23 @@ export default function InstallPrompt() {
       setPromptEvent(null);
     });
   };
+
+  useEffect(() => {
+    if (!isAuthenticated || !user?.id || !isStandalone) return;
+    if (sessionStorage.getItem(REPORT_KEY) === "true") return;
+    sessionStorage.setItem(REPORT_KEY, "true");
+
+    setDoc(
+      doc(db, "users", user.id),
+      {
+        pwaInstalled: true,
+        pwaInstalledAt: serverTimestamp(),
+      },
+      { merge: true }
+    ).catch(() => {
+      // ignore install report errors
+    });
+  }, [isAuthenticated, isStandalone, user?.id]);
 
   const handleDismiss = () => {
     sessionStorage.setItem(DISMISS_KEY, String(Date.now()));

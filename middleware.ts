@@ -19,6 +19,7 @@ const SENIOR_ONLY_TABS = new Set([
   "banners",
   "contacts",
   "sabbathMessages",
+  "pwaInstalls",
 ]);
 
 const SENIOR_ONLY_PATH_PREFIXES = ["/admin/dashboard/vendors", "/admin/dashboard/users"];

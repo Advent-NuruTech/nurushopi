@@ -1,0 +1,64 @@
+export type AdminRole = "senior" | "sub";
+export type TabId =
+  | "overview"
+  | "invite"
+  | "admins"
+  | "products"
+  | "orders"
+  | "vendorApplications"
+  | "banners"
+  | "contacts"
+  | "categories"
+  | "hero"
+  | "messages"
+  | "sabbathMessages"
+  | "pwaInstalls"
+  | "users"
+  | "reviews"
+  | "redemptions"
+  | "wholesale";
+
+export interface Admin {
+  adminId: string;
+  email: string;
+  name: string;
+  role: AdminRole;
+}
+
+export interface LinkedAccounts {
+  adminRoles: AdminRole[];
+  hasSeniorRole: boolean;
+  hasSubRole: boolean;
+  hasVendorAccount: boolean;
+  hasVendorApplication: boolean;
+  hasUserAccount: boolean;
+  canSwitchToSenior: boolean;
+  canMoveToUserProfile: boolean;
+}
+
+export const TABS_SENIOR: { id: TabId; label: string; icon: string }[] = [
+  { id: "overview", label: "Overview", icon: "LayoutDashboard" },
+  { id: "invite", label: "Invite Admin", icon: "UserPlus" },
+  { id: "admins", label: "Admin Management", icon: "Users" },
+  { id: "categories", label: "Categories", icon: "Tags" },
+  { id: "hero", label: "Hero Colors", icon: "Palette" },
+  { id: "products", label: "Products", icon: "Package" },
+  { id: "orders", label: "Orders", icon: "ShoppingCart" },
+  { id: "vendorApplications", label: "Vendor Applications", icon: "ClipboardList" },
+  { id: "wholesale", label: "Wholesale", icon: "Warehouse" },
+  { id: "reviews", label: "Reviews", icon: "MessageSquare" },
+  { id: "redemptions", label: "Redemptions", icon: "Wallet" },
+  { id: "users", label: "Users", icon: "Users" },
+  { id: "banners", label: "Banners", icon: "ImageIcon" },
+  { id: "contacts", label: "Contacts", icon: "MessageSquare" },
+  { id: "messages", label: "Messages", icon: "MessageSquare" },
+  { id: "sabbathMessages", label: "Sabbath Messages", icon: "CalendarDays" },
+  { id: "pwaInstalls", label: "PWA Installs", icon: "Smartphone" },
+];
+
+export const TABS_SUB: { id: TabId; label: string; icon: string }[] = [
+  { id: "overview", label: "Overview", icon: "LayoutDashboard" },
+  { id: "products", label: "Products", icon: "Package" },
+  { id: "orders", label: "Orders", icon: "ShoppingCart" },
+  { id: "messages", label: "Messages", icon: "MessageSquare" },
+];

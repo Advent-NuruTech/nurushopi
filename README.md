@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NuruShop — Enterprise Monorepo
 
-## Getting Started
+A scalable, host-agnostic e-commerce platform.
 
-First, run the development server:
+- **`apps/web`** — Next.js 15 (App Router) frontend / SSR client
+- **`apps/api`** — Express + TypeScript API (owns all business logic)
+- **`packages/db`** — Prisma schema + client (`@nuru/db`)
+- **`packages/types`** — shared Zod DTOs + types (`@nuru/types`)
+- **`packages/auth`** — JWT / password / crypto helpers (`@nuru/auth`)
+- **`packages/config`** — shared tsconfig / eslint / prettier (`@nuru/config`)
+
+Tooling: **pnpm workspaces** + **Turborepo**. Database: **PostgreSQL** (Supabase now,
+portable to AWS RDS / any Postgres later). Auth is built from scratch (email/password +
+Google OAuth, JWT access + rotating refresh tokens in httpOnly cookies). Images: Cloudinary.
+
+> **Migration status:** Phase 1 (foundation + auth) is complete. Legacy features still run on
+> Firebase and are being migrated module-by-module to the Express API; Firebase is removed once
+> every feature has moved.
+
+## Prerequisites
+
+- Node.js >= 20
+- pnpm 9 (`corepack enable && corepack prepare pnpm@9.15.4 --activate`)
+- A PostgreSQL database (Supabase recommended)
+
+## Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+cp .env.example apps/api/.env        # fill in DATABASE_URL, JWT secrets, Google creds
+cp .env.example packages/db/.env     # DATABASE_URL + DIRECT_URL (for Prisma CLI)
+# apps/web/.env.local                # NEXT_PUBLIC_API_URL=http://localhost:4000/api/v1
+
+pnpm db:generate                     # generate Prisma client
+pnpm db:push                         # create tables (or: pnpm db:migrate)
+pnpm db:seed                         # creates a senior admin + sample categories
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Development
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm dev          # runs web (:3000) + api (:4000) via turbo
+pnpm dev:api      # API only
+pnpm dev:web      # web only
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Quality gates
 
-## Learn More
+```bash
+pnpm typecheck    # tsc across all packages
+pnpm lint
+pnpm build
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Auth API (v1)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+`POST /api/v1/auth/signup · login · logout · refresh · verify-email · forgot-password · reset-password`,
+`GET /api/v1/auth/me`, and `GET /api/v1/auth/google` + `/google/callback`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## ⚠️ Supabase connection note
 
-## Deploy on Vercel
+Supabase **direct** connections (`db.<ref>.supabase.co:5432`) are now **IPv6-only**. If your
+network is IPv4-only (most are), Prisma will fail with `P1001: Can't reach database server`.
+Use the **Session/Transaction pooler** connection string (IPv4) from the Supabase dashboard
+(*Project Settings → Database → Connection string → "Connection pooling"*):
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+DATABASE_URL="postgresql://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:6543/postgres?pgbouncer=true"
+DIRECT_URL="postgresql://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres"
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Also ensure the project is **not paused** (free-tier projects pause after inactivity — resume it
+in the dashboard). URL-encode special characters in the password (`/` → `%2F`, etc.).

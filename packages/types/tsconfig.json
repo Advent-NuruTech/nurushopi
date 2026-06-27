@@ -1,0 +1,12 @@
+{
+  "extends": "@nuru/config/tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "noEmit": true,
+    "moduleResolution": "Bundler",
+    "module": "ESNext"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

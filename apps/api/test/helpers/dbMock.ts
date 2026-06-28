@@ -7,6 +7,8 @@ function model() {
     findFirst: vi.fn(),
     findMany: vi.fn(),
     count: vi.fn(),
+    aggregate: vi.fn(),
+    groupBy: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
     updateMany: vi.fn(),
@@ -29,16 +31,48 @@ export class PrismaClientKnownRequestError extends Error {
  * operations our services use (add/mul/toString) and renders money to 2 dp. The
  * real client uses decimal.js; this keeps the db mock self-contained.
  */
+type DecimalLike = number | string | Decimal | { toString(): string };
+
 export class Decimal {
   private readonly n: number;
-  constructor(value: number | string | { toString(): string }) {
+  constructor(value: DecimalLike) {
     this.n = typeof value === "number" ? value : Number(value.toString());
   }
-  add(other: number | string | Decimal): Decimal {
-    return new Decimal(this.n + new Decimal(other).n);
+  private static num(other: DecimalLike): number {
+    return new Decimal(other).n;
   }
-  mul(other: number | string | Decimal): Decimal {
-    return new Decimal(this.n * new Decimal(other).n);
+  add(other: DecimalLike): Decimal {
+    return new Decimal(this.n + Decimal.num(other));
+  }
+  sub(other: DecimalLike): Decimal {
+    return new Decimal(this.n - Decimal.num(other));
+  }
+  mul(other: DecimalLike): Decimal {
+    return new Decimal(this.n * Decimal.num(other));
+  }
+  lessThan(other: DecimalLike): boolean {
+    return this.n < Decimal.num(other);
+  }
+  lt(other: DecimalLike): boolean {
+    return this.n < Decimal.num(other);
+  }
+  lte(other: DecimalLike): boolean {
+    return this.n <= Decimal.num(other);
+  }
+  greaterThan(other: DecimalLike): boolean {
+    return this.n > Decimal.num(other);
+  }
+  gt(other: DecimalLike): boolean {
+    return this.n > Decimal.num(other);
+  }
+  gte(other: DecimalLike): boolean {
+    return this.n >= Decimal.num(other);
+  }
+  equals(other: DecimalLike): boolean {
+    return this.n === Decimal.num(other);
+  }
+  isZero(): boolean {
+    return this.n === 0;
   }
   toNumber(): number {
     return this.n;
@@ -64,6 +98,14 @@ export function makeDbMock() {
     order: model(),
     orderItem: model(),
     user: model(),
+    walletTransaction: model(),
+    walletRedemption: model(),
+    referral: model(),
+    review: model(),
+    notification: model(),
+    message: model(),
+    contact: model(),
+    vendorApplication: model(),
     // Supports both the array form (Promise.all) and the interactive callback
     // form (`$transaction(async (tx) => …)`), passing the mock itself as `tx`.
     $transaction: vi.fn((arg: unknown) =>

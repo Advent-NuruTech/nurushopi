@@ -3,3 +3,8 @@ export * from "./api.js";
 export * from "./catalog.js";
 export * from "./wholesale.js";
 export * from "./orders.js";
+export * from "./wallet.js";
+export * from "./dashboard.js";
+export * from "./reviews.js";
+export * from "./notifications.js";
+export * from "./vendors.js";

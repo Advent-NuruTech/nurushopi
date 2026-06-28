@@ -154,6 +154,79 @@ describe("orders.checkout", () => {
     await expect(orders.checkout(validCheckout)).rejects.toMatchObject({ status: 409 });
     expect(p.order.create).not.toHaveBeenCalled();
   });
+
+  it("applies wallet credit server-side and debits the ledger when opted in", async () => {
+    p.product.findMany.mockResolvedValue([product()]); // 19.99 * 3 = 59.97
+    p.product.updateMany.mockResolvedValue({ count: 1 });
+    // Live balance (20.00) is less than the subtotal, so the whole balance applies.
+    p.user.findUnique.mockResolvedValue({ walletBalance: decimal("20.00") });
+    p.user.updateMany.mockResolvedValue({ count: 1 });
+    p.walletTransaction.create.mockResolvedValue({});
+    p.referral.findUnique.mockResolvedValue(null);
+    p.order.create.mockResolvedValue(orderRow());
+
+    await orders.checkout({ ...validCheckout, useWallet: true } as never, "user1");
+
+    const created = p.order.create.mock.calls[0][0].data;
+    expect(created.walletApplied.toString()).toBe("20.00");
+    expect(created.total.toString()).toBe("39.97"); // 59.97 - 20.00
+    // A DEBIT/REDEEM ledger row was written, linked to the new order.
+    const ledger = p.walletTransaction.create.mock.calls[0][0].data;
+    expect(ledger.type).toBe("DEBIT");
+    expect(ledger.source).toBe("REDEEM");
+    expect(p.user.updateMany).toHaveBeenCalledTimes(1);
+  });
+
+  it("ignores wallet credit for a guest checkout (no user)", async () => {
+    p.product.findMany.mockResolvedValue([product()]);
+    p.product.updateMany.mockResolvedValue({ count: 1 });
+    p.order.create.mockResolvedValue(orderRow());
+
+    await orders.checkout({ ...validCheckout, useWallet: true } as never);
+
+    const created = p.order.create.mock.calls[0][0].data;
+    expect(created.walletApplied.toString()).toBe("0.00");
+    expect(p.walletTransaction.create).not.toHaveBeenCalled();
+  });
+
+  it("rewards the referrer when a referred user places their first order", async () => {
+    p.product.findMany.mockResolvedValue([product()]);
+    p.product.updateMany.mockResolvedValue({ count: 1 });
+    p.order.create.mockResolvedValue(orderRow());
+    p.referral.findUnique.mockResolvedValue({
+      id: "ref1",
+      referrerId: "refUser",
+      referredId: "user1",
+      rewarded: false,
+    });
+    p.order.count.mockResolvedValue(1); // the order just created is their first
+    p.referral.update.mockResolvedValue({});
+    p.user.findUnique.mockResolvedValue({ walletBalance: decimal("0.00") });
+    p.user.update.mockResolvedValue({});
+    p.walletTransaction.create.mockResolvedValue({});
+
+    await orders.checkout(validCheckout, "user1");
+
+    expect(p.referral.update).toHaveBeenCalledTimes(1);
+    expect(p.referral.update.mock.calls[0][0].data.rewarded).toBe(true);
+    // An AFFILIATE credit was paid to the referrer, not the buyer.
+    const ledger = p.walletTransaction.create.mock.calls[0][0].data;
+    expect(ledger.userId).toBe("refUser");
+    expect(ledger.type).toBe("CREDIT");
+    expect(ledger.source).toBe("AFFILIATE");
+  });
+
+  it("does not reward an already-rewarded referral", async () => {
+    p.product.findMany.mockResolvedValue([product()]);
+    p.product.updateMany.mockResolvedValue({ count: 1 });
+    p.order.create.mockResolvedValue(orderRow());
+    p.referral.findUnique.mockResolvedValue({ id: "ref1", rewarded: true });
+
+    await orders.checkout(validCheckout, "user1");
+
+    expect(p.referral.update).not.toHaveBeenCalled();
+    expect(p.walletTransaction.create).not.toHaveBeenCalled();
+  });
 });
 
 describe("orders.getByOrderNumber", () => {
@@ -218,6 +291,24 @@ describe("orders.updateStatus", () => {
     await orders.updateStatus("o1", "CANCELLED");
 
     expect(p.product.updateMany).not.toHaveBeenCalled();
+  });
+
+  it("refunds wallet credit when a wallet-paid order is cancelled", async () => {
+    p.order.findUnique.mockResolvedValue(
+      orderRow({ status: "PROCESSING", userId: "user1", walletApplied: decimal("20.00") }),
+    );
+    p.product.updateMany.mockResolvedValue({ count: 1 });
+    p.user.findUnique.mockResolvedValue({ walletBalance: decimal("0.00") });
+    p.user.update.mockResolvedValue({});
+    p.walletTransaction.create.mockResolvedValue({});
+    p.order.update.mockResolvedValue(orderRow({ status: "CANCELLED" }));
+
+    await orders.updateStatus("o1", "CANCELLED");
+
+    const ledger = p.walletTransaction.create.mock.calls[0][0].data;
+    expect(ledger.userId).toBe("user1");
+    expect(ledger.type).toBe("CREDIT");
+    expect(ledger.source).toBe("REFUND");
   });
 
   it("does not touch stock for a non-cancel transition", async () => {

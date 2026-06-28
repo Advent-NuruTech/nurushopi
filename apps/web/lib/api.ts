@@ -18,6 +18,16 @@ import type {
   ProductCreateInput,
   ProductDTO,
   ProductUpdateInput,
+  DashboardStatsDTO,
+  RedemptionRequestInput,
+  RedemptionStatus,
+  ReferralSummaryDTO,
+  WalletAdjustmentInput,
+  WalletRedemptionDTO,
+  WalletSummaryDTO,
+  WalletTransactionDTO,
+  WalletTxSource,
+  WalletTxType,
   WholesaleItemCreateInput,
   WholesaleItemDTO,
   WholesaleItemUpdateInput,
@@ -43,6 +53,25 @@ type OrderQuery = Partial<{
   paymentStatus: PaymentStatus;
   userId: string;
   sort: "newest" | "oldest" | "total_asc" | "total_desc";
+}>;
+
+/** Wallet ledger filters accepted by the API (all optional on the client). */
+type WalletTransactionQuery = Partial<{
+  page: number;
+  pageSize: number;
+  type: WalletTxType;
+  source: WalletTxSource;
+  userId: string;
+  sort: "newest" | "oldest";
+}>;
+
+/** Redemption list filters accepted by the API (all optional on the client). */
+type RedemptionQuery = Partial<{
+  page: number;
+  pageSize: number;
+  status: RedemptionStatus;
+  userId: string;
+  sort: "newest" | "oldest";
 }>;
 
 /** Public product list filters accepted by the API (all optional on the client). */
@@ -251,4 +280,38 @@ export const orderApi = {
     updatePayment: (id: string, paymentStatus: PaymentStatus) =>
       api.patch<{ order: OrderDTO }>(`/admin/orders/${id}/payment`, { paymentStatus }),
   },
+};
+
+// ---- Wallet & referral endpoints ----
+
+export const walletApi = {
+  // Customer (require a user session cookie)
+  summary: () => api.get<{ wallet: WalletSummaryDTO }>("/wallet"),
+  transactions: (query: WalletTransactionQuery = {}) =>
+    api.get<Paginated<WalletTransactionDTO>>(`/wallet/transactions${qs(query)}`),
+  redemptions: (query: RedemptionQuery = {}) =>
+    api.get<Paginated<WalletRedemptionDTO>>(`/wallet/redemptions${qs(query)}`),
+  requestRedemption: (input: RedemptionRequestInput) =>
+    api.post<{ redemption: WalletRedemptionDTO }>("/wallet/redemptions", input),
+  referrals: () => api.get<{ referral: ReferralSummaryDTO }>("/wallet/referrals"),
+  applyReferral: (code: string) =>
+    api.post<{ success: boolean }>("/wallet/referrals/apply", { code }),
+
+  // Admin wallet management (require an admin session cookie)
+  admin: {
+    transactions: (query: WalletTransactionQuery = {}) =>
+      api.get<Paginated<WalletTransactionDTO>>(`/admin/wallet/transactions${qs(query)}`),
+    redemptions: (query: RedemptionQuery = {}) =>
+      api.get<Paginated<WalletRedemptionDTO>>(`/admin/wallet/redemptions${qs(query)}`),
+    updateRedemption: (id: string, status: RedemptionStatus) =>
+      api.patch<{ redemption: WalletRedemptionDTO }>(`/admin/wallet/redemptions/${id}`, { status }),
+    adjustBalance: (input: WalletAdjustmentInput) =>
+      api.post<{ transaction: WalletTransactionDTO }>("/admin/wallet/adjustments", input),
+  },
+};
+
+// ---- Admin dashboard endpoints ----
+
+export const dashboardApi = {
+  stats: () => api.get<{ stats: DashboardStatsDTO }>("/admin/dashboard"),
 };

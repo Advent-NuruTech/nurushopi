@@ -11,9 +11,9 @@ import { paginationQuerySchema } from "./catalog.js";
 // order history survives later product edits or deletions.
 //
 // Money is carried as a string in DTOs to avoid float precision loss, mirroring
-// the catalog/wholesale contracts. Wallet redemption is deliberately NOT part of
-// this slice: `walletApplied` is always 0 here and will be owned by the wallet
-// module (which holds the ledger + atomic balance deduction).
+// the catalog/wholesale contracts. Wallet credit can be applied at checkout via
+// `useWallet`: the wallet module owns the ledger + atomic balance deduction, and
+// checkout decides the applied amount server-side (never trusted from the client).
 // ---------------------------------------------------------------------------
 
 /** Order lifecycle states. Mirrors the Prisma `OrderStatus` enum. */
@@ -57,6 +57,10 @@ export const checkoutSchema = z
     contactEmail: emailSchema.optional().nullable(),
     address: z.string().trim().min(1, "Delivery address is required.").max(500),
     note: z.string().trim().max(1000).optional().nullable(),
+    // Opt-in to spending wallet credit on this order. The amount applied is
+    // decided server-side (min of live balance and subtotal) — never trusted
+    // from the client — and only takes effect for an authenticated user.
+    useWallet: z.coerce.boolean().optional().default(false),
   })
   .strict();
 export type CheckoutInput = z.infer<typeof checkoutSchema>;

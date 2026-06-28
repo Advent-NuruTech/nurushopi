@@ -8,6 +8,7 @@ import type {
   PaymentStatus,
 } from "@nuru/types";
 import { Errors } from "../../lib/errors.js";
+import { creditWallet, debitWallet, rewardReferralOnFirstOrder } from "../wallet/ledger.js";
 import { toOrderDTO, type OrderWithItems } from "./serializers.js";
 
 const withItems = { include: { items: true } } as const;
@@ -160,13 +161,27 @@ export async function checkout(input: CheckoutInput, userId?: string): Promise<O
       }
     }
 
-    // Wallet redemption is deferred to the wallet module; total === subtotal here.
-    return tx.order.create({
+    // Decide how much wallet credit to apply — server-side only. The amount is
+    // capped at the live balance and the subtotal; the client only opts in.
+    let walletApplied = new Prisma.Decimal(0);
+    if (userId && input.useWallet) {
+      const wallet = await tx.user.findUnique({
+        where: { id: userId },
+        select: { walletBalance: true },
+      });
+      const balance = new Prisma.Decimal((wallet?.walletBalance ?? 0).toString());
+      if (balance.greaterThan(0)) {
+        walletApplied = balance.greaterThan(subtotal) ? subtotal : balance;
+      }
+    }
+    const total = subtotal.sub(walletApplied);
+
+    const created = await tx.order.create({
       data: {
         userId: userId ?? null,
         subtotal,
-        walletApplied: new Prisma.Decimal(0),
-        total: subtotal,
+        walletApplied,
+        total,
         contactName: input.contactName,
         contactPhone: input.contactPhone,
         contactEmail: input.contactEmail ?? null,
@@ -176,6 +191,15 @@ export async function checkout(input: CheckoutInput, userId?: string): Promise<O
       },
       include: { items: true },
     });
+
+    // Deduct the applied credit from the wallet ledger, atomically with the order.
+    if (userId && walletApplied.greaterThan(0)) {
+      await debitWallet(tx, userId, walletApplied, "REDEEM", { orderId: created.id });
+    }
+    // Pay a referrer once their referred user makes their first purchase.
+    if (userId) await rewardReferralOnFirstOrder(tx, userId);
+
+    return created;
   });
 
   return toOrderDTO(order as OrderWithItems);
@@ -198,6 +222,16 @@ export async function updateStatus(id: string, status: OrderStatus): Promise<Ord
           where: { id: item.productId },
           data: { stock: { increment: item.quantity } },
         });
+      }
+    }
+
+    // Return any wallet credit spent on the order when it is voided (cancelled or
+    // refunded), guarded so it happens exactly once.
+    const enteringReleased = status === "CANCELLED" || status === "REFUNDED";
+    if (enteringReleased && !alreadyReleased && current.userId) {
+      const applied = new Prisma.Decimal((current.walletApplied ?? 0).toString());
+      if (applied.greaterThan(0)) {
+        await creditWallet(tx, current.userId, applied, "REFUND", { orderId: current.id });
       }
     }
 

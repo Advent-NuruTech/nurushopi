@@ -1,58 +1,89 @@
-import { Timestamp } from "firebase/firestore";
-import { getAllProducts } from "@/lib/firestoreHelpers";
 import Image from "next/image";
 import Link from "next/link";
 import { formatPrice } from "@/lib/formatPrice";
 import { formatCategoryLabel } from "@/lib/categoryUtils";
 import { getDiscountPercent, getOriginalPrice, getSellingPrice } from "@/lib/pricing";
 import SectionHeader from "@/components/ui/SectionHeader";
+import { listProducts } from "@/lib/data/catalog";
+import { listWholesaleItems } from "@/lib/data/wholesale";
+import type { ProductCardVM } from "@/lib/view/catalog";
 
-export const dynamic = "force-dynamic";
+export const metadata = {
+  title: "Shop – NuruShop",
+  description: "Browse retail and wholesale products at NuruShop.",
+};
 
-// Type for raw Firestore product
-interface RawProduct {
-  id: string;
-  name: string;
-  price: number;
-  originalPrice?: number;
-  sellingPrice?: number;
-  image?: string;
-  imageUrl?: string;
-  images?: string[];
-  category?: string;
-  slug?: string;
-  createdAt?: Timestamp | string | null;
-  mode?: string;
-  wholesalePrice?: number;
-  wholesaleMinQty?: number;
-  wholesaleUnit?: string;
-  coverImage?: string | null;
-}
+function ProductCard({
+  product,
+  showCategory,
+}: {
+  product: ProductCardVM;
+  showCategory: boolean;
+}) {
+  const discountPercent = getDiscountPercent(product);
+  const originalPrice = getOriginalPrice(product);
+  const sellingPrice = getSellingPrice(product);
 
-// Canonical Product type without description
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  originalPrice?: number;
-  sellingPrice?: number;
-  imageUrl: string;
-  images?: string[];
-  category: string;
-  slug?: string;
-  createdAt?: number | string | null;
-}
+  return (
+    <Link
+      href={product.href}
+      className="group bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-sm dark:shadow-gray-900 hover:shadow-lg dark:hover:shadow-gray-700 transition-all duration-300 overflow-hidden border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-500 flex flex-col h-full"
+    >
+      <div className="relative w-full pt-[100%] overflow-hidden bg-gray-100 dark:bg-gray-700">
+        <div className="absolute inset-0">
+          <Image
+            src={product.image}
+            alt={product.name}
+            fill
+            className="object-contain p-3 group-hover:scale-105 transition-transform duration-300"
+            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+          />
+        </div>
+        {showCategory && product.categoryName && (
+          <div className="absolute top-2 left-2 sm:top-3 sm:left-3">
+            <span className="px-2 py-1 sm:px-3 sm:py-1 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm text-xs font-semibold text-gray-800 dark:text-gray-200 rounded-full truncate max-w-[100px]">
+              {product.categoryName}
+            </span>
+          </div>
+        )}
+        <div className="absolute top-2 right-2 sm:top-3 sm:right-3 flex flex-col items-end gap-2">
+          {discountPercent && (
+            <span className="px-2 py-1 sm:px-3 sm:py-1 bg-red-600 text-white text-xs font-semibold rounded-full">
+              {discountPercent}% OFF
+            </span>
+          )}
+          {product.isNew && (
+            <span className="px-2 py-1 sm:px-3 sm:py-1 bg-green-500 text-white text-xs font-semibold rounded-full">
+              NEW
+            </span>
+          )}
+        </div>
+      </div>
 
-interface WholesaleProduct {
-  id: string;
-  name: string;
-  wholesalePrice: number;
-  wholesaleMinQty?: number;
-  wholesaleUnit?: string;
-  imageUrl: string;
-  price?: number;
-  category: string;
-  slug?: string;
+      <div className="p-3 sm:p-4 flex flex-col flex-1">
+        <h3 className="font-semibold text-gray-800 dark:text-gray-200 text-sm sm:text-base md:text-lg mb-2 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors min-h-[2.5em]">
+          {product.name}
+        </h3>
+        <div className="mt-auto">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="flex flex-col">
+              {discountPercent && originalPrice && (
+                <span className="text-xs text-gray-400 line-through">
+                  {formatPrice(originalPrice)}
+                </span>
+              )}
+              <span className="text-lg sm:text-xl md:text-2xl font-bold text-blue-600 dark:text-blue-400">
+                {formatPrice(sellingPrice)}
+              </span>
+            </div>
+            <span className="sm:hidden text-xs text-gray-500 dark:text-gray-400 text-right">
+              Tap to view →
+            </span>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
 }
 
 export default async function ShopPage({
@@ -60,137 +91,46 @@ export default async function ShopPage({
 }: {
   searchParams?: Promise<{ category?: string }>;
 }) {
-  let products: Product[] = [];
-  let allProducts: Product[] = [];
-  let wholesaleProducts: WholesaleProduct[] = [];
-  const resolvedSearchParams = searchParams ? await searchParams : undefined;
-  const selectedCategory = resolvedSearchParams?.category
-    ? decodeURIComponent(String(resolvedSearchParams.category)).toLowerCase().trim()
+  const resolved = searchParams ? await searchParams : undefined;
+  const selectedCategory = resolved?.category
+    ? decodeURIComponent(String(resolved.category)).toLowerCase().trim()
     : "";
-  
+
+  let allProducts: ProductCardVM[] = [];
+  let wholesaleProducts = [] as Awaited<ReturnType<typeof listWholesaleItems>>["items"];
+
   try {
-    const rawProducts = await getAllProducts();
-
-    if (!rawProducts || rawProducts.length === 0) {
-      return (
-        <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-          <div className="container mx-auto px-4 py-20">
-            <div className="text-center">
-              <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-4">No Products Found</h1>
-              <p className="text-gray-600 dark:text-gray-400">Check back soon for new arrivals!</p>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    const wholesaleRaw = rawProducts.filter((p) => (p.mode ?? "") === "wholesale");
-    const retailRaw = rawProducts.filter((p) => (p.mode ?? "") !== "wholesale");
-
-    // Map Firestore data to Product type (Retail)
-    allProducts = retailRaw
-      .map((p: RawProduct) => {
-        let createdAt: number | string | null = null;
-
-        if (p.createdAt) {
-          if (p.createdAt instanceof Timestamp) {
-            createdAt = p.createdAt.toMillis();
-          } else if (
-            typeof p.createdAt === "object" &&
-            "seconds" in p.createdAt &&
-            "nanoseconds" in p.createdAt
-          ) {
-            createdAt =
-              (p.createdAt as Timestamp).seconds * 1000 +
-              (p.createdAt as Timestamp).nanoseconds / 1_000_000;
-          } else if (typeof p.createdAt === "string") {
-            createdAt = p.createdAt;
-          }
-        }
-
-        return {
-          id: p.id,
-          name: p.name,
-          price: Number(p.sellingPrice ?? p.price ?? 0),
-          sellingPrice: Number(p.sellingPrice ?? p.price ?? 0),
-          originalPrice:
-            typeof p.originalPrice === "number" && Number.isFinite(p.originalPrice)
-              ? p.originalPrice
-              : undefined,
-          imageUrl: p.image || "/assets/logo.jpg",
-          images: p.images || (p.image ? [p.image] : []),
-          category: p.category || "Uncategorized",
-          slug: p.slug,
-          createdAt,
-        };
-      })
-      // Sort products by createdAt (newest first)
-      .sort((a, b) => {
-        const timeA = typeof a.createdAt === 'number' ? a.createdAt : 0;
-        const timeB = typeof b.createdAt === 'number' ? b.createdAt : 0;
-        return timeB - timeA; // Descending order (newest first)
-      });
-
-    const filteredWholesale = selectedCategory
-      ? wholesaleRaw.filter(
-          (p) => (p.category || "").toLowerCase() === selectedCategory
-        )
-      : wholesaleRaw;
-
-    wholesaleProducts = filteredWholesale.map((p) => ({
-      id: p.id,
-      name: p.name,
-      wholesalePrice: Number(p.wholesalePrice ?? p.price ?? 0),
-      wholesaleMinQty: p.wholesaleMinQty,
-      wholesaleUnit: p.wholesaleUnit,
-      imageUrl:
-        p.coverImage ||
-        p.imageUrl ||
-        p.images?.[0] ||
-        "/assets/logo.jpg",
-      price: typeof p.price === "number" ? p.price : undefined,
-      category: p.category || "Uncategorized",
-      slug: p.slug,
-    }));
-
-    products = selectedCategory
-      ? allProducts.filter(
-          (p) => (p.category || "").toLowerCase() === selectedCategory
-        )
-      : allProducts;
-
+    const [productsResult, wholesaleResult] = await Promise.all([
+      listProducts({ pageSize: 100, sort: "newest" }),
+      listWholesaleItems({ pageSize: 24, sort: "newest" }),
+    ]);
+    allProducts = productsResult.items;
+    wholesaleProducts = wholesaleResult.items;
   } catch (error) {
     console.error("Error loading products:", error);
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-        <div className="container mx-auto px-4 py-20">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-red-600 dark:text-red-400 mb-4">Error Loading Products</h1>
-            <p className="text-gray-600 dark:text-gray-400">Please try again later.</p>
-          </div>
+        <div className="container mx-auto px-4 py-20 text-center">
+          <h1 className="text-2xl font-bold text-red-600 dark:text-red-400 mb-4">
+            Error Loading Products
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">Please try again later.</p>
         </div>
       </div>
     );
   }
 
+  const products = selectedCategory
+    ? allProducts.filter((p) => p.categorySlug === selectedCategory)
+    : allProducts;
+
   const suggestions = selectedCategory
-    ? allProducts
-        .filter((p) => (p.category || "").toLowerCase() !== selectedCategory)
-        .slice(0, 8)
+    ? allProducts.filter((p) => p.categorySlug !== selectedCategory).slice(0, 8)
     : [];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-      {/* Hero Section */}
-      
-
-      {/* Products Grid */}
       <div className="container mx-auto px-2 sm:px-4 py-8 md:py-12">
-        {/* Stats Bar */}
-        <div className="mb-8 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm dark:shadow-gray-900 border border-gray-200 dark:border-gray-700 mx-2 sm:mx-0">
-        
-        </div>
-
         {selectedCategory && (
           <div className="mb-6 mx-2 sm:mx-0 flex items-center justify-between rounded-lg border border-blue-200 bg-blue-50 text-blue-700 px-4 py-3">
             <span className="text-sm font-medium">
@@ -202,7 +142,6 @@ export default async function ShopPage({
           </div>
         )}
 
-        {/* Wholesale Section */}
         {wholesaleProducts.length > 0 && (
           <section className="mb-10 mx-2 sm:mx-0">
             <div className="mb-3">
@@ -213,13 +152,13 @@ export default async function ShopPage({
               {wholesaleProducts.map((product) => (
                 <Link
                   key={product.id}
-                  href={`/wholeseller/${product.slug || product.id}`}
+                  href={product.href}
                   className="group bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-sm dark:shadow-gray-900 hover:shadow-lg dark:hover:shadow-gray-700 transition-all duration-300 overflow-hidden border border-blue-200 dark:border-blue-700 hover:border-blue-400 dark:hover:border-blue-500 flex flex-col h-full snap-start"
                 >
                   <div className="relative w-full pt-[100%] overflow-hidden bg-blue-50 dark:bg-blue-950/30">
                     <div className="absolute inset-0">
                       <Image
-                        src={product.imageUrl}
+                        src={product.image}
                         alt={product.name}
                         fill
                         className="object-contain p-3 group-hover:scale-105 transition-transform duration-300"
@@ -238,19 +177,14 @@ export default async function ShopPage({
                       {product.name}
                     </h3>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                      Min: {product.wholesaleMinQty ?? 1} {product.wholesaleUnit || "unit"}
+                      Min: {product.minQuantity} unit
                     </p>
                     <div className="mt-auto pt-2">
-                      {typeof product.price === "number" && product.price > 0 && (
-                        <span className="text-xs text-gray-400 line-through">
-                          {formatPrice(product.price)}
-                        </span>
-                      )}
                       <div className="text-blue-600 dark:text-blue-400 font-bold text-base">
-                        {formatPrice(product.wholesalePrice)}
+                        {formatPrice(product.unitPrice)}
                         <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
                           {" "}
-                          / {product.wholesaleUnit || "unit"}
+                          / unit
                         </span>
                       </div>
                     </div>
@@ -269,93 +203,14 @@ export default async function ShopPage({
                 : "Retail Products"
             }
             href="/shop"
-            viewText="View All"
             showViewAll={false}
           />
         </div>
 
-        {/* Products Grid - 2 columns on mobile, 3 on tablet, 4 on desktop */}
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-          {products.map((product) => {
-            const mainImage = product.images?.[0] || product.imageUrl || "/assets/logo.jpg";
-            const discountPercent = getDiscountPercent(product);
-            const originalPrice = getOriginalPrice(product);
-            const sellingPrice = getSellingPrice(product);
-            
-            return (
-              <Link
-                key={product.id}
-                href={`/products/${product.slug || product.id}`}
-                className="group bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-sm dark:shadow-gray-900 hover:shadow-lg dark:hover:shadow-gray-700 transition-all duration-300 overflow-hidden border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-500 flex flex-col h-full"
-              >
-                {/* Image Container - Maintain aspect ratio, no cropping */}
-                <div className="relative w-full pt-[100%] overflow-hidden bg-gray-100 dark:bg-gray-700">
-                  <div className="absolute inset-0">
-                    <Image
-                      src={mainImage}
-                      alt={product.name}
-                      fill
-                      className="object-contain p-3 group-hover:scale-105 transition-transform duration-300"
-                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
-                      priority={false}
-                    />
-                  </div>
-                  {/* Category Badge */}
-                  {!selectedCategory && (
-                    <div className="absolute top-2 left-2 sm:top-3 sm:left-3">
-                      <span className="px-2 py-1 sm:px-3 sm:py-1 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm text-xs font-semibold text-gray-800 dark:text-gray-200 rounded-full truncate max-w-[100px]">
-                        {product.category}
-                      </span>
-                    </div>
-                  )}
-                  <div className="absolute top-2 right-2 sm:top-3 sm:right-3 flex flex-col items-end gap-2">
-                    {discountPercent && (
-                      <span className="px-2 py-1 sm:px-3 sm:py-1 bg-red-600 text-white text-xs font-semibold rounded-full">
-                        {discountPercent}% OFF
-                      </span>
-                    )}
-                    {/* New Badge for recent products */}
-                    {product.createdAt && 
-                      typeof product.createdAt === 'number' && 
-                      Date.now() - product.createdAt < 7 * 24 * 60 * 60 * 1000 && (
-                        <span className="px-2 py-1 sm:px-3 sm:py-1 bg-green-500 text-white text-xs font-semibold rounded-full">
-                          NEW
-                        </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Product Info */}
-                <div className="p-3 sm:p-4 flex flex-col flex-1">
-                  <h3 className="font-semibold text-gray-800 dark:text-gray-200 text-sm sm:text-base md:text-lg mb-2 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors min-h-[2.5em]">
-                    {product.name}
-                  </h3>
-                  
-                  {/* Price Section */}
-                  <div className="mt-auto">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                      <div className="flex flex-col">
-                        {discountPercent && originalPrice && (
-                          <span className="text-xs text-gray-400 line-through">
-                            {formatPrice(originalPrice)}
-                          </span>
-                        )}
-                        <span className="text-lg sm:text-xl md:text-2xl font-bold text-blue-600 dark:text-blue-400">
-                          {formatPrice(sellingPrice)}
-                        </span>
-                      </div>
-                      {/* View Button - Hidden on mobile, shown on hover for larger screens */}
-                      <button className="hidden sm:block opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-600 dark:bg-blue-500 text-white text-xs sm:text-sm font-semibold rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 whitespace-nowrap">
-                        View Details
-                      </button>
-                      {/* Mobile view indicator */}
-                      <span className="sm:hidden text-xs text-gray-500 dark:text-gray-400 text-right">Tap to view →</span>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
+          {products.map((product) => (
+            <ProductCard key={product.id} product={product} showCategory={!selectedCategory} />
+          ))}
         </div>
 
         {selectedCategory && suggestions.length > 0 && (
@@ -364,118 +219,26 @@ export default async function ShopPage({
               You may also like
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-              {suggestions.map((product) => {
-                const mainImage = product.images?.[0] || product.imageUrl || "/assets/logo.jpg";
-                const discountPercent = getDiscountPercent(product);
-                const originalPrice = getOriginalPrice(product);
-                const sellingPrice = getSellingPrice(product);
-                const isNew =
-                  product.createdAt &&
-                  typeof product.createdAt === "number" &&
-                  Date.now() - product.createdAt < 7 * 24 * 60 * 60 * 1000;
-                return (
-                  <Link
-                    key={product.id}
-                    href={`/products/${product.slug || product.id}`}
-                    className="group bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-sm dark:shadow-gray-900 hover:shadow-lg dark:hover:shadow-gray-700 transition-all duration-300 overflow-hidden border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-500 flex flex-col h-full"
-                  >
-                    <div className="relative w-full pt-[100%] overflow-hidden bg-gray-100 dark:bg-gray-700">
-                      <div className="absolute inset-0">
-                        <Image
-                          src={mainImage}
-                          alt={product.name}
-                          fill
-                          className="object-contain p-3 group-hover:scale-105 transition-transform duration-300"
-                          sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
-                        />
-                      </div>
-                      <div className="absolute top-2 left-2 sm:top-3 sm:left-3">
-                        <span className="px-2 py-1 sm:px-3 sm:py-1 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm text-xs font-semibold text-gray-800 dark:text-gray-200 rounded-full truncate max-w-[100px]">
-                          {product.category}
-                        </span>
-                      </div>
-                      {discountPercent && (
-                        <div className="absolute top-2 right-2 sm:top-3 sm:right-3">
-                          <span className="px-2 py-1 sm:px-3 sm:py-1 bg-red-600 text-white text-xs font-semibold rounded-full">
-                            {discountPercent}% OFF
-                          </span>
-                        </div>
-                      )}
-                      {isNew && (
-                        <div className="absolute top-2 left-2 sm:top-3 sm:left-3">
-                          <span className="px-2 py-1 sm:px-3 sm:py-1 bg-green-500 text-white text-xs font-semibold rounded-full">
-                            NEW
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="p-3 sm:p-4 flex flex-col flex-1">
-                      <h3 className="font-semibold text-gray-800 dark:text-gray-200 text-sm sm:text-base md:text-lg mb-2 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors min-h-[2.5em]">
-                        {product.name}
-                      </h3>
-                      <div className="mt-auto">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                          <div className="flex flex-col">
-                            {discountPercent && originalPrice && (
-                              <span className="text-xs text-gray-400 line-through">
-                                {formatPrice(originalPrice)}
-                              </span>
-                            )}
-                            <span className="text-lg sm:text-xl md:text-2xl font-bold text-blue-600 dark:text-blue-400">
-                              {formatPrice(sellingPrice)}
-                            </span>
-                          </div>
-                          <span className="sm:hidden text-xs text-gray-500 dark:text-gray-400 text-right">Tap to view →</span>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
+              {suggestions.map((product) => (
+                <ProductCard key={product.id} product={product} showCategory />
+              ))}
             </div>
           </div>
         )}
 
-        {/* Empty State */}
         {products.length === 0 && (
           <div className="text-center py-20">
             <div className="w-24 h-24 mx-auto mb-6 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center">
               <span className="text-4xl">📦</span>
             </div>
-            <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">No Products Available</h3>
+            <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              No Products Available
+            </h3>
             <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
               Our store is currently being stocked. Check back soon for amazing products!
             </p>
           </div>
         )}
-
-        {/* Footer Info */}
-        <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-            <div className="text-center md:text-left">
-              <div className="w-10 h-10 md:w-12 md:h-12 mx-auto md:mx-0 mb-3 md:mb-4 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
-                <span className="text-xl md:text-2xl">🚚</span>
-              </div>
-              <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-1 md:mb-2 text-sm md:text-base">Fast Shipping</h4>
-              <p className="text-gray-600 dark:text-gray-400 text-xs md:text-sm">Free shipping on orders over $50</p>
-            </div>
-            <div className="text-center md:text-left">
-              <div className="w-10 h-10 md:w-12 md:h-12 mx-auto md:mx-0 mb-3 md:mb-4 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
-                <span className="text-xl md:text-2xl">🛡️</span>
-              </div>
-              <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-1 md:mb-2 text-sm md:text-base">Secure Payment</h4>
-              <p className="text-gray-600 dark:text-gray-400 text-xs md:text-sm">100% secure & encrypted payments</p>
-            </div>
-            <div className="text-center md:text-left">
-              <div className="w-10 h-10 md:w-12 md:h-12 mx-auto md:mx-0 mb-3 md:mb-4 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
-                <span className="text-xl md:text-2xl">💚</span>
-              </div>
-              <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-1 md:mb-2 text-sm md:text-base">Quality Guaranteed</h4>
-              <p className="text-gray-600 dark:text-gray-400 text-xs md:text-sm">Premium products with satisfaction guarantee</p>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

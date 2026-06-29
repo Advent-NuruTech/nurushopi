@@ -13,6 +13,11 @@ export const ordersCustomerRouter: Router = Router();
 ordersCustomerRouter.post("/checkout", optionalAuth, asyncHandler(ctrl.checkout));
 // `/mine` must precede `/:orderNumber` so it isn't captured as an order number.
 ordersCustomerRouter.get("/mine", requireAuth, asyncHandler(ctrl.getMyOrders));
+ordersCustomerRouter.patch(
+  "/:orderNumber/cancel",
+  requireAuth,
+  asyncHandler(ctrl.cancelMyOrder),
+);
 ordersCustomerRouter.get("/:orderNumber", asyncHandler(ctrl.trackOrder));
 
 /** Admin order management mounted at /api/v1/admin/orders (all guarded). */

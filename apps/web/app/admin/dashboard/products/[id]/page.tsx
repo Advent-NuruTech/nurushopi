@@ -3,28 +3,21 @@
 import React, { useEffect, useState, ChangeEvent } from "react";
 import { useParams, useRouter } from "next/navigation";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import { slugifyCategory } from "@/lib/categoryUtils";
 import { Upload } from "lucide-react";
 import Image from "next/image";
 import { ADMIN_DASHBOARD_PATH, adminRoute } from "@/lib/adminPaths";
+import { catalogApi, ApiClientError } from "@/lib/api";
+import type { CategoryDTO } from "@nuru/types";
 
-interface Product {
+interface ProductForm {
   id: string;
   name: string;
   price: number;
-  originalPrice?: number | null;
-  sellingPrice?: number;
-  category?: string;
-  description?: string;
-  shortDescription?: string;
-  images?: string[];
-  imagePublicIds?: string[];
-}
-
-interface CategoryOption {
-  id: string;
-  name: string;
-  slug: string;
+  originalPrice: number | null;
+  categoryId: string | null;
+  description: string;
+  shortDescription: string;
+  images: string[];
 }
 
 type Feedback = { type: "success" | "error"; text: string } | null;
@@ -34,95 +27,72 @@ export default function ProductEditPage() {
   const router = useRouter();
   const id = params?.id as string;
 
-  const [product, setProduct] = useState<Product | null>(null);
+  const [product, setProduct] = useState<ProductForm | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [categories, setCategories] = useState<CategoryOption[]>([]);
+  const [categories, setCategories] = useState<CategoryDTO[]>([]);
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
-  const [categoryInput, setCategoryInput] = useState("");
   const [feedback, setFeedback] = useState<Feedback>(null);
 
   /* ---------------- Load product ---------------- */
   useEffect(() => {
     if (!id) return;
-
-    const load = async () => {
-      try {
-        const res = await fetch("/api/admin/products", {
-          credentials: "include",
+    catalogApi
+      .getProduct(id)
+      .then(({ product: p }) => {
+        setProduct({
+          id: p.id,
+          name: p.name,
+          price: Number(p.sellingPrice ?? p.price),
+          originalPrice: p.originalPrice != null ? Number(p.originalPrice) : null,
+          categoryId: p.categoryId,
+          description: p.description ?? "",
+          shortDescription: p.shortDescription ?? "",
+          images: p.images,
         });
-        const data = await res.json();
-
-        const found = data.products?.find((p: Product) => p.id === id);
-        if (found) {
-          setProduct({
-            ...found,
-            images: found.images ?? [],
-            imagePublicIds: found.imagePublicIds ?? [],
-          });
-
-          setCategoryInput(found.category ?? "");
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    load();
+      })
+      .catch(() => setProduct(null))
+      .finally(() => setLoading(false));
   }, [id]);
 
   /* ---------------- Load categories ---------------- */
   useEffect(() => {
-    fetch("/api/admin/categories", { credentials: "include" })
-      .then((r) => r.json())
-      .then((d) => setCategories(d.categories ?? []))
+    catalogApi
+      .listCategories()
+      .then((d) => setCategories(d.categories))
       .catch(() => setCategories([]));
   }, []);
 
-  const updateField = (key: keyof Product, value: string | number | string[] | null | undefined) => {
-    if (!product) return;
-    setProduct({ ...product, [key]: value });
-  };
-
-  /* ---------------- Category handling ---------------- */
-  const handleCategorySelect = (value: string) => {
-    setCategoryInput(value);
-    updateField("category", slugifyCategory(value));
-  };
-
-  const handleCategoryTyping = (value: string) => {
-    setCategoryInput(value);
-    updateField("category", slugifyCategory(value));
+  const updateField = (
+    key: keyof ProductForm,
+    value: string | number | string[] | null,
+  ) => {
+    setProduct((prev) => (prev ? { ...prev, [key]: value } : prev));
   };
 
   /* ---------------- Image logic ---------------- */
+  const uploadFile = async (file: File): Promise<string | null> => {
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = await fetch("/api/upload", { method: "POST", body: fd });
+    const result = (await res.json()) as { url?: string; error?: string };
+    if (!res.ok || !result.url) {
+      setFeedback({ type: "error", text: result.error || "Image upload failed." });
+      return null;
+    }
+    return result.url;
+  };
+
   const replaceImage = async (index: number, file: File | null) => {
     if (!product || !file) return;
-
     setUploadingIndex(index);
     setFeedback(null);
-
     try {
-      const fd = new FormData();
-      fd.append("file", file);
-
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: fd,
-      });
-
-      const result = (await res.json()) as { url?: string; public_id?: string; error?: string };
-      if (!res.ok || !result.url) {
-        setFeedback({ type: "error", text: result.error || "Failed to replace image." });
-        return;
-      }
-
-      const imgs = [...(product.images ?? [])];
-      imgs[index] = result.url;
-      const publicIds = [...(product.imagePublicIds ?? [])];
-      publicIds[index] = result.public_id ?? publicIds[index];
-
-      setProduct({ ...product, images: imgs, imagePublicIds: publicIds });
+      const url = await uploadFile(file);
+      if (!url) return;
+      const imgs = [...product.images];
+      imgs[index] = url;
+      setProduct({ ...product, images: imgs });
     } finally {
       setUploadingIndex(null);
     }
@@ -131,39 +101,16 @@ export default function ProductEditPage() {
   const addImage = async (file: File | null) => {
     if (!product || !file) return;
     setFeedback(null);
-
-    const fd = new FormData();
-    fd.append("file", file);
-
-    const res = await fetch("/api/upload", {
-      method: "POST",
-      body: fd,
-    });
-
-    const result = (await res.json()) as { url?: string; public_id?: string; error?: string };
-    if (!res.ok || !result.url) {
-      setFeedback({ type: "error", text: result.error || "Failed to add image." });
-      return;
-    }
-
-    setProduct({
-      ...product,
-      images: [...(product.images ?? []), result.url],
-      imagePublicIds: [...(product.imagePublicIds ?? []), result.public_id].filter(
-        (id): id is string => typeof id === "string" && id.length > 0
-      ),
-    });
+    const url = await uploadFile(file);
+    if (!url) return;
+    setProduct({ ...product, images: [...product.images, url].slice(0, 3) });
   };
 
   const removeImage = (index: number) => {
     if (!product) return;
-
-    const imgs = [...(product.images ?? [])];
+    const imgs = [...product.images];
     imgs.splice(index, 1);
-    const publicIds = [...(product.imagePublicIds ?? [])];
-    publicIds.splice(index, 1);
-
-    setProduct({ ...product, images: imgs, imagePublicIds: publicIds });
+    setProduct({ ...product, images: imgs });
   };
 
   /* ---------------- Save ---------------- */
@@ -171,47 +118,46 @@ export default function ProductEditPage() {
     if (!product) return;
     setSaving(true);
     setFeedback(null);
-
-    const res = await fetch("/api/admin/products", {
-      method: "PUT",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(product),
-    });
-
-    setSaving(false);
-
-    if (res.ok) {
+    try {
+      await catalogApi.admin.updateProduct(product.id, {
+        name: product.name,
+        price: product.price,
+        sellingPrice: product.price,
+        originalPrice: product.originalPrice,
+        categoryId: product.categoryId,
+        description: product.description || null,
+        shortDescription: product.shortDescription || null,
+        images: product.images.slice(0, 3),
+      });
       setFeedback({ type: "success", text: "Product updated successfully." });
       router.refresh();
-    } else {
-      const payload = (await res.json().catch(() => ({}))) as { error?: string };
-      setFeedback({ type: "error", text: payload.error || "Update failed." });
+    } catch (err) {
+      setFeedback({
+        type: "error",
+        text: err instanceof ApiClientError ? err.message : "Update failed.",
+      });
+    } finally {
+      setSaving(false);
     }
   };
 
   /* ---------------- Delete ---------------- */
   const remove = async () => {
     if (!confirm("Delete this product?")) return;
-
-    const res = await fetch(`/api/admin/products?id=${id}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
-
-    if (res.ok) router.push(adminRoute(ADMIN_DASHBOARD_PATH));
-    else setFeedback({ type: "error", text: "Delete failed. Try again." });
+    try {
+      await catalogApi.admin.deleteProduct(id);
+      router.push(adminRoute(ADMIN_DASHBOARD_PATH));
+    } catch {
+      setFeedback({ type: "error", text: "Delete failed. Try again." });
+    }
   };
 
   if (loading) return <LoadingSpinner text="Loading product…" />;
   if (!product) return <p className="p-6">Product not found.</p>;
 
-  const sellingPrice =
-    typeof product.price === "number" && Number.isFinite(product.price)
-      ? product.price
-      : 0;
+  const sellingPrice = Number.isFinite(product.price) ? product.price : 0;
   const originalPrice =
-    typeof product.originalPrice === "number" && Number.isFinite(product.originalPrice)
+    product.originalPrice != null && Number.isFinite(product.originalPrice)
       ? product.originalPrice
       : 0;
   const discountPercent =
@@ -255,18 +201,7 @@ export default function ProductEditPage() {
           type="number"
           placeholder="Selling Price"
           value={product.price}
-          onChange={(e) => {
-            const nextPrice = Number(e.target.value);
-            setProduct((prev) =>
-              prev
-                ? {
-                    ...prev,
-                    price: nextPrice,
-                    sellingPrice: nextPrice,
-                  }
-                : prev
-            );
-          }}
+          onChange={(e) => updateField("price", Number(e.target.value))}
         />
 
         <input
@@ -275,10 +210,7 @@ export default function ProductEditPage() {
           placeholder="Original Price (optional)"
           value={product.originalPrice ?? ""}
           onChange={(e) =>
-            updateField(
-              "originalPrice",
-              e.target.value === "" ? null : Number(e.target.value)
-            )
+            updateField("originalPrice", e.target.value === "" ? null : Number(e.target.value))
           }
         />
 
@@ -296,61 +228,53 @@ export default function ProductEditPage() {
         </div>
         {discountPercent && (
           <div className="flex items-center gap-2 text-sm">
-            <span className="line-through text-gray-400">
-              KSh {originalPrice.toLocaleString()}
-            </span>
-            <span className="font-semibold text-sky-600">
-              KSh {sellingPrice.toLocaleString()}
-            </span>
+            <span className="line-through text-gray-400">KSh {originalPrice.toLocaleString()}</span>
+            <span className="font-semibold text-sky-600">KSh {sellingPrice.toLocaleString()}</span>
           </div>
         )}
 
         {/* Category picker */}
         <div className="space-y-2">
           <label className="font-medium">Category</label>
-
           <select
             className="w-full border p-3 rounded"
-            value={categoryInput}
+            value={product.categoryId ?? ""}
             onChange={(e: ChangeEvent<HTMLSelectElement>) =>
-              handleCategorySelect(e.target.value)
+              updateField("categoryId", e.target.value || null)
             }
           >
-            <option value="">Select existing category</option>
+            <option value="">Uncategorized</option>
             {categories.map((c) => (
-              <option key={c.id} value={c.slug}>
+              <option key={c.id} value={c.id}>
                 {c.name}
               </option>
             ))}
           </select>
-
-          <input
-            className="w-full border p-3 rounded"
-            placeholder="Or type new category"
-            value={categoryInput}
-            onChange={(e) =>
-              handleCategoryTyping(e.target.value)
-            }
-          />
         </div>
 
         <textarea
           className="w-full border p-3 rounded"
           rows={4}
           placeholder="Short description"
-          value={product.shortDescription ?? ""}
-          onChange={(e) =>
-            updateField("shortDescription", e.target.value)
-          }
+          value={product.shortDescription}
+          onChange={(e) => updateField("shortDescription", e.target.value)}
+        />
+
+        <textarea
+          className="w-full border p-3 rounded"
+          rows={6}
+          placeholder="Full description"
+          value={product.description}
+          onChange={(e) => updateField("description", e.target.value)}
         />
       </div>
 
       {/* Images */}
       <div className="bg-white p-5 rounded-xl border">
-        <h2 className="font-semibold mb-3">Product Images</h2>
+        <h2 className="font-semibold mb-3">Product Images (max 3)</h2>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {(product.images ?? []).map((img, index) => (
+          {product.images.map((img, index) => (
             <div key={index} className="border rounded p-2 space-y-2">
               <div className="relative w-full h-32 rounded overflow-hidden">
                 <Image
@@ -368,61 +292,44 @@ export default function ProductEditPage() {
                   hidden
                   type="file"
                   accept="image/*"
-                  onChange={(e) =>
-                    replaceImage(index, e.target.files?.[0] ?? null)
-                  }
+                  onChange={(e) => replaceImage(index, e.target.files?.[0] ?? null)}
                 />
               </label>
 
-              <button
-                onClick={() => removeImage(index)}
-                className="text-red-600 text-sm"
-              >
+              <button onClick={() => removeImage(index)} className="text-red-600 text-sm">
                 Remove
               </button>
 
-              {uploadingIndex === index && (
-                <p className="text-xs">Uploading…</p>
-              )}
+              {uploadingIndex === index && <p className="text-xs">Uploading…</p>}
             </div>
           ))}
 
-          <label className="border-dashed border rounded p-4 flex flex-col items-center justify-center cursor-pointer">
-            <Upload className="w-6 h-6 mb-1" />
-            Add Image
-            <input
-              hidden
-              type="file"
-              accept="image/*"
-              onChange={(e) =>
-                addImage(e.target.files?.[0] ?? null)
-              }
-            />
-          </label>
+          {product.images.length < 3 && (
+            <label className="border-dashed border rounded p-4 flex flex-col items-center justify-center cursor-pointer">
+              <Upload className="w-6 h-6 mb-1" />
+              Add Image
+              <input
+                hidden
+                type="file"
+                accept="image/*"
+                onChange={(e) => addImage(e.target.files?.[0] ?? null)}
+              />
+            </label>
+          )}
         </div>
       </div>
 
       {/* Actions */}
       <div className="flex gap-3">
-        <button
-          onClick={save}
-          disabled={saving}
-          className="px-5 py-2 bg-sky-600 text-white rounded"
-        >
+        <button onClick={save} disabled={saving} className="px-5 py-2 bg-sky-600 text-white rounded">
           {saving ? "Saving…" : "Save Changes"}
         </button>
 
-        <button
-          onClick={remove}
-          className="px-5 py-2 bg-red-600 text-white rounded"
-        >
+        <button onClick={remove} className="px-5 py-2 bg-red-600 text-white rounded">
           Delete
         </button>
 
-        <button
-          onClick={() => router.back()}
-          className="px-5 py-2 border rounded"
-        >
+        <button onClick={() => router.back()} className="px-5 py-2 border rounded">
           Back
         </button>
       </div>

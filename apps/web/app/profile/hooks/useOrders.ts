@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { orderApi, ApiClientError } from "@/lib/api";
+import { adaptOrder } from "../utils/typeAdapter";
 import type { ApiOrder, OrderStatusFilter } from "../types";
 
 interface UseOrdersProps {
@@ -14,30 +16,32 @@ export function useOrders({ uid, orderFilter }: UseOrdersProps) {
 
   useEffect(() => {
     if (!uid) {
+      setOrders([]);
       setOrdersLoading(false);
       return;
     }
     let cancelled = false;
     setOrdersLoading(true);
-    fetch(`/api/orders?userId=${uid}`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch orders");
-        return res.json();
-      })
-      .then((data) => {
-        if (!cancelled) setOrders(data.orders ?? []);
+    // The order history endpoint is scoped to the signed-in user by the session
+    // cookie, so no userId needs to be passed. Pull a generous page so the
+    // profile view shows the full history without client-side pagination.
+    orderApi
+      .myOrders({ pageSize: 100, sort: "newest" })
+      .then((page) => {
+        if (!cancelled) setOrders(page.items.map(adaptOrder));
       })
       .catch((error) => {
-        if (!cancelled) {
+        if (cancelled) return;
+        if (!(error instanceof ApiClientError) || error.status !== 401) {
           console.error("Failed to load orders:", error);
-          setOrders([]);
         }
+        setOrders([]);
       })
       .finally(() => {
         if (!cancelled) setOrdersLoading(false);
       });
-    return () => { 
-      cancelled = true; 
+    return () => {
+      cancelled = true;
     };
   }, [uid]);
 

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { sendOk } from "./lib/response.js";
 import { authRouter } from "./modules/auth/auth.routes.js";
+import { adminAuthRouter } from "./modules/admin/admin.routes.js";
 import {
   catalogAdminRouter,
   catalogPublicRouter,
@@ -34,6 +35,12 @@ import {
   vendorsAdminRouter,
   vendorsPublicRouter,
 } from "./modules/vendors/vendors.routes.js";
+import { pwaAdminRouter, pwaPublicRouter } from "./modules/pwa/pwa.routes.js";
+import { usersAdminRouter } from "./modules/users/users.routes.js";
+import {
+  sabbathAdminRouter,
+  sabbathPublicRouter,
+} from "./modules/sabbath/sabbath.routes.js";
 
 export const apiRouter: Router = Router();
 
@@ -42,6 +49,7 @@ apiRouter.get("/", (_req, res) => {
 });
 
 apiRouter.use("/auth", authRouter);
+apiRouter.use("/admin/auth", adminAuthRouter);
 apiRouter.use("/catalog", catalogPublicRouter);
 apiRouter.use("/admin/catalog", catalogAdminRouter);
 apiRouter.use("/wholesale", wholesalePublicRouter);
@@ -61,3 +69,8 @@ apiRouter.use("/admin/messages", messagesAdminRouter);
 apiRouter.use("/admin/contacts", contactsAdminRouter);
 apiRouter.use("/vendors", vendorsPublicRouter);
 apiRouter.use("/admin/vendors", vendorsAdminRouter);
+apiRouter.use("/pwa-installs", pwaPublicRouter);
+apiRouter.use("/admin/pwa-installs", pwaAdminRouter);
+apiRouter.use("/sabbath-messages", sabbathPublicRouter);
+apiRouter.use("/admin/sabbath-messages", sabbathAdminRouter);
+apiRouter.use("/admin/users", usersAdminRouter);

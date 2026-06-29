@@ -4,29 +4,21 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { formatPrice } from "@/lib/formatPrice";
-
-type Redemption = {
-  id: string;
-  userId?: string;
-  type?: string;
-  amount?: number;
-  phone?: string;
-  bankDetails?: string;
-  productName?: string;
-  status?: string;
-};
+import { walletApi, ApiClientError } from "@/lib/api";
+import type { WalletRedemptionDTO } from "@nuru/types";
 
 export default function RedemptionsTab() {
-  const [items, setItems] = useState<Redemption[]>([]);
+  const [items, setItems] = useState<WalletRedemptionDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
   const highlightId = searchParams.get("redemptionId");
 
   const load = () => {
     setLoading(true);
-    fetch("/api/admin/wallet/redemptions?status=pending", { credentials: "include" })
-      .then((r) => r.json())
-      .then((d) => setItems(d.redemptions ?? []))
+    walletApi.admin
+      .redemptions({ status: "PENDING", pageSize: 100 })
+      .then((page) => setItems(page.items))
+      .catch(() => setItems([]))
       .finally(() => setLoading(false));
   };
 
@@ -40,14 +32,13 @@ export default function RedemptionsTab() {
     row?.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [highlightId, items]);
 
-  const update = async (id: string, status: "approved" | "rejected") => {
-    const res = await fetch("/api/admin/wallet/redemptions", {
-      method: "PUT",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, status }),
-    });
-    if (res.ok) load();
+  const update = async (id: string, status: "APPROVED" | "REJECTED") => {
+    try {
+      await walletApi.admin.updateRedemption(id, status);
+      load();
+    } catch (err) {
+      if (err instanceof ApiClientError) alert(err.message);
+    }
   };
 
   if (loading) return <LoadingSpinner text="Loading redemptions..." />;
@@ -76,22 +67,20 @@ export default function RedemptionsTab() {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-semibold text-slate-900 dark:text-white">
-                    {r.userId}
-                  </p>
+                  <p className="font-semibold text-slate-900 dark:text-white">{r.userId}</p>
                   <p className="text-xs text-slate-500">
-                    {r.type} {r.productName ? `- ${r.productName}` : ""}
+                    {r.method ?? "Cash-out"} · {new Date(r.createdAt).toLocaleDateString()}
                   </p>
                 </div>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => update(r.id, "approved")}
+                    onClick={() => update(r.id, "APPROVED")}
                     className="px-3 py-1 rounded bg-emerald-600 text-white text-xs"
                   >
                     Approve
                   </button>
                   <button
-                    onClick={() => update(r.id, "rejected")}
+                    onClick={() => update(r.id, "REJECTED")}
                     className="px-3 py-1 rounded bg-red-600 text-white text-xs"
                   >
                     Reject
@@ -99,14 +88,14 @@ export default function RedemptionsTab() {
                 </div>
               </div>
               <p className="text-sm text-slate-700 dark:text-slate-300">
-                Amount: {formatPrice(Number(r.amount ?? 0))}
+                Amount: {formatPrice(Number(r.amount))}
               </p>
-              {r.phone && (
-                <p className="text-xs text-slate-500">Phone: {r.phone}</p>
-              )}
-              {r.bankDetails && (
-                <p className="text-xs text-slate-500">Bank: {r.bankDetails}</p>
-              )}
+              {r.details &&
+                Object.entries(r.details).map(([k, v]) => (
+                  <p key={k} className="text-xs text-slate-500">
+                    {k}: {v}
+                  </p>
+                ))}
             </div>
           ))}
         </div>

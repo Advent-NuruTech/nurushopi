@@ -17,7 +17,6 @@ import {
   Tags,
   Smartphone,
   UserPlus,
-  UserCircle2,
   Users,
   Wallet,
   Warehouse,
@@ -26,16 +25,15 @@ import {
   ChevronRight,
 } from "lucide-react";
 import NotificationsBell from "./NotificationsBell";
-import { Admin, LinkedAccounts, TabId, TABS_SENIOR, TABS_SUB } from "./types";
+import { Admin, TabId, TABS_SENIOR, TABS_SUB } from "./types";
 import { ADMIN_DASHBOARD_PATH, ADMIN_LOGIN_PATH, adminRoute } from "@/lib/adminPaths";
+import { adminAuthApi } from "@/lib/api";
 
 interface AdminLayoutProps {
   admin: Admin;
-  linkedAccounts: LinkedAccounts | null;
   currentTab: TabId;
   pageTitle: string;
   onTabChange: (tab: TabId) => void;
-  onSwitchToSenior: () => Promise<void>;
   children: React.ReactNode;
 }
 
@@ -68,18 +66,15 @@ function getInitials(name: string): string {
 
 export default function AdminLayout({
   admin,
-  linkedAccounts,
   currentTab,
   pageTitle,
   onTabChange,
-  onSwitchToSenior,
   children,
 }: AdminLayoutProps) {
   const router = useRouter();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [desktopSidebarCollapsed, setDesktopSidebarCollapsed] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [switchingRole, setSwitchingRole] = useState(false);
 
   const tabs = useMemo(
     () => (admin.role === "senior" ? TABS_SENIOR : TABS_SUB),
@@ -87,21 +82,9 @@ export default function AdminLayout({
   );
 
   const handleLogout = async () => {
-    await fetch("/api/admin/auth/logout", { method: "POST", credentials: "include" });
+    await adminAuthApi.logout().catch(() => {});
     router.replace(ADMIN_LOGIN_PATH);
     router.refresh();
-  };
-
-  const handleSwitchToSenior = async () => {
-    setSwitchingRole(true);
-    try {
-      await onSwitchToSenior();
-      setProfileOpen(false);
-    } catch (error) {
-      console.error("Role switch error:", error);
-    } finally {
-      setSwitchingRole(false);
-    }
   };
 
   useEffect(() => {
@@ -174,17 +157,6 @@ export default function AdminLayout({
                   </div>
 
                   <div className="p-2 space-y-1">
-                    {admin.role === "sub" && linkedAccounts?.canSwitchToSenior && (
-                      <button
-                        type="button"
-                        onClick={handleSwitchToSenior}
-                        disabled={switchingRole}
-                        className="w-full text-left px-3 py-2 rounded-lg text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-60"
-                      >
-                        {switchingRole ? "Switching..." : "Move to Admin Dashboard"}
-                      </button>
-                    )}
-
                     <Link
                       href="/"
                       className="block px-3 py-2 rounded-lg text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
@@ -239,9 +211,6 @@ export default function AdminLayout({
                   setMobileSidebarOpen(false);
                 }}
                 collapsed={false}
-                showMoveToUserProfile={Boolean(
-                  admin.role === "senior" && linkedAccounts?.canMoveToUserProfile
-                )}
               />
             </aside>
           </div>
@@ -257,9 +226,6 @@ export default function AdminLayout({
             currentTab={currentTab}
             onTabChange={onTabChange}
             collapsed={desktopSidebarCollapsed}
-            showMoveToUserProfile={Boolean(
-              admin.role === "senior" && linkedAccounts?.canMoveToUserProfile
-            )}
           />
         </aside>
 
@@ -274,16 +240,12 @@ function SidebarNav({
   currentTab,
   onTabChange,
   collapsed,
-  showMoveToUserProfile,
 }: {
   tabs: { id: TabId; label: string; icon: string }[];
   currentTab: TabId;
   onTabChange: (tab: TabId) => void;
   collapsed: boolean;
-  showMoveToUserProfile: boolean;
 }) {
-  const router = useRouter();
-
   return (
     <nav className="flex-1 overflow-y-auto p-3 space-y-1">
       {tabs.map((tabItem) => {
@@ -306,18 +268,6 @@ function SidebarNav({
           </button>
         );
       })}
-
-      {showMoveToUserProfile && (
-        <button
-          type="button"
-          onClick={() => router.push("/profile")}
-          className="w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
-          title={collapsed ? "Move to User Profile" : undefined}
-        >
-          <UserCircle2 size={18} className="shrink-0" />
-          {!collapsed && <span className="text-sm font-medium">Move to User Profile</span>}
-        </button>
-      )}
     </nav>
   );
 }

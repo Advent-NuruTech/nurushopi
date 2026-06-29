@@ -4,7 +4,9 @@ import type { NextRequest } from "next/server";
 const ADMIN_BASE_PATH = "/np-manage-8f3k";
 const ADMIN_LEGACY_PATH = "/admin";
 const ADMIN_PUBLIC = [`${ADMIN_BASE_PATH}/login`, `${ADMIN_BASE_PATH}/signup`];
-const ADMIN_COOKIE = "admin_token";
+// Admin session cookie issued by the Express API (presence-gated here; the API
+// performs full signature verification on every request).
+const ADMIN_COOKIE = "nuru_admin_access";
 
 // User session cookie issued by the Express API (presence-gated here; the API
 // performs full signature verification on every request).
@@ -51,7 +53,9 @@ function decodeJwtPayload(token: string): Record<string, unknown> | null {
 
 function getRoleFromToken(token: string): "senior" | "sub" | null {
   const payload = decodeJwtPayload(token);
-  const role = payload?.role;
+  // The Express admin token carries an uppercase Prisma enum role
+  // (`SENIOR` | `SUB`); the web app uses the lowercase variants throughout.
+  const role = String(payload?.role ?? "").toLowerCase();
   if (role === "senior" || role === "sub") return role;
   return null;
 }

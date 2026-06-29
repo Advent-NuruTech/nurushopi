@@ -1,7 +1,7 @@
 import { prisma, type User } from "@nuru/db";
 import { hashPassword, verifyPassword } from "@nuru/auth/password";
 import { generateOpaqueToken, hashToken, generateCode } from "@nuru/auth/crypto";
-import type { AuthUser, SignupInput } from "@nuru/types";
+import type { AuthUser, ProfileUpdateInput, SignupInput } from "@nuru/types";
 import { Errors } from "../../lib/errors.js";
 import { sendPasswordResetEmail, sendVerificationEmail } from "./email.js";
 
@@ -15,11 +15,32 @@ export function toAuthUser(user: User): AuthUser {
     email: user.email,
     name: user.name,
     phone: user.phone,
+    address: user.address,
     avatarUrl: user.avatarUrl,
     emailVerified: Boolean(user.emailVerified),
     walletBalance: user.walletBalance.toString(),
     referralCode: user.referralCode,
   };
+}
+
+/**
+ * Self-service profile edit. Only the provided fields are written; a field set
+ * to an empty string clears it (stored as null). `email`/`password` are
+ * deliberately out of scope here (they have their own verified flows).
+ */
+export async function updateProfile(userId: string, input: ProfileUpdateInput): Promise<User> {
+  const data: Record<string, string | null> = {};
+  if (input.name !== undefined) data.name = input.name?.trim() || null;
+  if (input.phone !== undefined) data.phone = input.phone?.trim() || null;
+  if (input.address !== undefined) data.address = input.address?.trim() || null;
+  if (input.avatarUrl !== undefined) data.avatarUrl = input.avatarUrl?.trim() || null;
+
+  try {
+    return await prisma.user.update({ where: { id: userId }, data });
+  } catch {
+    // The only realistic failure here is the user row vanishing mid-session.
+    throw Errors.unauthorized();
+  }
 }
 
 async function uniqueReferralCode(): Promise<string> {

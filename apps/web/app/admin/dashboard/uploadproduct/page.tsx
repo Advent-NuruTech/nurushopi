@@ -13,22 +13,17 @@ import {
   X,
   Upload
 } from "lucide-react";
-import { slugifyCategory } from "@/lib/categoryUtils";
 import Image from "next/image";
+import { catalogApi, ApiClientError } from "@/lib/api";
+import type { CategoryDTO } from "@nuru/types";
 
 interface ProductFormData {
   name: string;
   price: number | "";
   originalPrice: number | "";
   description: string;
-  category: string;
+  categoryId: string;
   files: FileList | null;
-}
-
-interface CategoryOption {
-  id: string;
-  name: string;
-  slug: string;
 }
 
 export default function UploadProductPage() {
@@ -37,11 +32,11 @@ export default function UploadProductPage() {
     price: "",
     originalPrice: "",
     description: "",
-    category: "",
+    categoryId: "",
     files: null
   });
 
-  const [categories, setCategories] = useState<CategoryOption[]>([]);
+  const [categories, setCategories] = useState<CategoryDTO[]>([]);
   const [categoryInput, setCategoryInput] = useState("");
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [status, setStatus] = useState<"idle" | "uploading" | "success" | "error">("idle");
@@ -61,27 +56,16 @@ export default function UploadProductPage() {
 
   /* ---------- Load categories ---------- */
   useEffect(() => {
-    fetch("/api/admin/categories", { credentials: "include" })
-      .then(r => r.json())
-      .then(d => setCategories(d.categories ?? []))
+    catalogApi
+      .listCategories()
+      .then((d) => setCategories(d.categories))
       .catch(() => setCategories([]));
   }, []);
 
   /* ---------- Category logic ---------- */
   const handleCategorySelect = (value: string) => {
     setCategoryInput(value);
-    setFormData(prev => ({
-      ...prev,
-      category: slugifyCategory(value)
-    }));
-  };
-
-  const handleCategoryTyping = (value: string) => {
-    setCategoryInput(value);
-    setFormData(prev => ({
-      ...prev,
-      category: slugifyCategory(value)
-    }));
+    setFormData((prev) => ({ ...prev, categoryId: value }));
   };
 
   /* ---------- File selection with preview ---------- */
@@ -142,35 +126,28 @@ export default function UploadProductPage() {
       }
 
       const originalPriceValue =
-        formData.originalPrice === "" ? undefined : Number(formData.originalPrice);
-      const payload = {
+        formData.originalPrice === "" ? null : Number(formData.originalPrice);
+
+      await catalogApi.admin.createProduct({
         name: formData.name,
         price: Number(formData.price),
         originalPrice:
           typeof originalPriceValue === "number" && Number.isFinite(originalPriceValue)
             ? originalPriceValue
-            : undefined,
-        description: formData.description,
-        shortDescription: formData.description.slice(0, 160),
-        category: formData.category,
-        images: uploaded,
-        imagePublicIds: publicIds,
-        coverImage: uploaded[0] || null // first image becomes homepage image
-      };
-
-      const response = await fetch("/api/admin/products", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+            : null,
+        description: formData.description || null,
+        shortDescription: formData.description.slice(0, 160) || null,
+        categoryId: formData.categoryId || null,
+        images: uploaded.slice(0, 3), // API accepts up to 3; first is the cover
+        stock: 0,
+        isActive: true,
+        isFeatured: false,
       });
-
-      if (!response.ok) throw new Error();
 
       setStatus("success");
       setProgress(100);
-
-    } catch {
+    } catch (err) {
+      if (err instanceof ApiClientError) console.error(err.message);
       setStatus("error");
     }
   }
@@ -185,7 +162,7 @@ export default function UploadProductPage() {
       price: "",
       originalPrice: "",
       description: "",
-      category: "",
+      categoryId: "",
       files: null
     });
     setCategoryInput("");
@@ -360,9 +337,9 @@ export default function UploadProductPage() {
             <select
               value={categoryInput}
               onChange={e => handleCategorySelect(e.target.value)}
-              className={`w-full p-3 rounded mb-2 transition-colors duration-300 ${
-                darkMode 
-                  ? "bg-gray-700 border-gray-600 text-gray-100 focus:border-blue-500 focus:ring-blue-500" 
+              className={`w-full p-3 rounded transition-colors duration-300 ${
+                darkMode
+                  ? "bg-gray-700 border-gray-600 text-gray-100 focus:border-blue-500 focus:ring-blue-500"
                   : "border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
               } border focus:outline-none focus:ring-2`}
             >
@@ -370,26 +347,15 @@ export default function UploadProductPage() {
                 Select category
               </option>
               {categories.map(c => (
-                <option 
-                  key={c.id} 
-                  value={c.slug}
+                <option
+                  key={c.id}
+                  value={c.id}
                   className={darkMode ? "bg-gray-700" : "bg-white"}
                 >
                   {c.name}
                 </option>
               ))}
             </select>
-
-            <input
-              placeholder="Or type new category"
-              value={categoryInput}
-              onChange={e => handleCategoryTyping(e.target.value)}
-              className={`w-full p-3 rounded transition-colors duration-300 ${
-                darkMode 
-                  ? "bg-gray-700 border-gray-600 text-gray-100 focus:border-blue-500 focus:ring-blue-500" 
-                  : "border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
-              } border focus:outline-none focus:ring-2`}
-            />
           </div>
 
           {/* Description */}

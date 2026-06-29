@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   forgotPasswordSchema,
   loginSchema,
+  profileUpdateSchema,
   resetPasswordSchema,
   signupSchema,
   verifyEmailSchema,
@@ -19,6 +20,12 @@ authRouter.post("/login", authLimiter, validateBody(loginSchema), asyncHandler(c
 authRouter.post("/logout", asyncHandler(ctrl.logout));
 authRouter.post("/refresh", asyncHandler(ctrl.refresh));
 authRouter.get("/me", requireAuth, asyncHandler(ctrl.me));
+authRouter.patch(
+  "/me",
+  requireAuth,
+  validateBody(profileUpdateSchema),
+  asyncHandler(ctrl.updateMe),
+);
 
 authRouter.post(
   "/verify-email",

@@ -45,12 +45,28 @@ export const verifyEmailSchema = z.object({
 });
 export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>;
 
+/**
+ * Self-service profile edit for the signed-in user. Every field is optional so
+ * the client may send only what changed; an empty string clears the value.
+ */
+export const profileUpdateSchema = z
+  .object({
+    name: z.string().trim().max(120).optional().nullable(),
+    phone: z.string().trim().max(32).optional().nullable(),
+    address: z.string().trim().max(300).optional().nullable(),
+    avatarUrl: z.string().trim().url("Avatar must be a valid URL.").max(2000).optional().nullable(),
+  })
+  .strict()
+  .refine((v) => Object.keys(v).length > 0, { message: "Nothing to update." });
+export type ProfileUpdateInput = z.infer<typeof profileUpdateSchema>;
+
 /** Public shape of an authenticated user returned by the API. */
 export interface AuthUser {
   id: string;
   email: string;
   name: string | null;
   phone: string | null;
+  address: string | null;
   avatarUrl: string | null;
   emailVerified: boolean;
   walletBalance: string; // Decimal serialized as string

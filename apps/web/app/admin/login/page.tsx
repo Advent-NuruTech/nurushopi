@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { LogIn, Mail, Lock, ArrowRight } from "lucide-react";
 import { ADMIN_DASHBOARD_PATH, ADMIN_SIGNUP_PATH, adminRoute } from "@/lib/adminPaths";
+import { adminAuthApi, ApiClientError } from "@/lib/api";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -18,21 +19,15 @@ export default function AdminLoginPage() {
     setError("");
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), password }),
-        credentials: "include",
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || "Login failed");
-        return;
-      }
+      await adminAuthApi.login({ email: email.trim().toLowerCase(), password });
       router.push(adminRoute(ADMIN_DASHBOARD_PATH));
       router.refresh();
-    } catch {
-      setError("Network error. Please try again.");
+    } catch (err) {
+      if (err instanceof ApiClientError) {
+        setError(err.message || "Login failed");
+      } else {
+        setError("Network error. Please try again.");
+      }
     } finally {
       setLoading(false);
     }

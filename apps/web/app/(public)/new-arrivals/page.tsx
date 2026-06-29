@@ -1,78 +1,22 @@
 import Image from "next/image";
 import Link from "next/link";
 import SectionHeader from "@/components/ui/SectionHeader";
-import { getAllProducts } from "@/lib/firestoreHelpers";
 import { formatPrice } from "@/lib/formatPrice";
 import { getDiscountPercent, getOriginalPrice, getSellingPrice } from "@/lib/pricing";
+import { listProducts } from "@/lib/data/catalog";
 
-export const dynamic = "force-dynamic";
-
-type Product = {
-  id: string;
-  name: string;
-  images?: string[];
-  imageUrl?: string;
-  price?: number;
-  sellingPrice?: number;
-  originalPrice?: number;
-  createdAt?: unknown;
-  mode?: string;
+export const metadata = {
+  title: "New Arrivals – NuruShop",
+  description: "The latest products added to NuruShop.",
 };
 
-const NEW_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
-
-function toMillis(value: unknown): number {
-  if (!value) return 0;
-  if (typeof value === "number") return Number.isFinite(value) ? value : 0;
-  if (typeof value === "string") {
-    const parsed = Date.parse(value);
-    return Number.isNaN(parsed) ? 0 : parsed;
-  }
-  if (typeof value === "object" && value !== null) {
-    const timestamp = value as {
-      toMillis?: () => number;
-      toDate?: () => Date;
-      seconds?: number;
-      nanoseconds?: number;
-    };
-
-    if (typeof timestamp.toMillis === "function") {
-      const ms = timestamp.toMillis();
-      return Number.isFinite(ms) ? ms : 0;
-    }
-
-    if (typeof timestamp.toDate === "function") {
-      const date = timestamp.toDate();
-      const ms = date instanceof Date ? date.getTime() : NaN;
-      return Number.isNaN(ms) ? 0 : ms;
-    }
-
-    if (typeof timestamp.seconds === "number") {
-      const nanos = typeof timestamp.nanoseconds === "number" ? timestamp.nanoseconds : 0;
-      return timestamp.seconds * 1000 + Math.floor(nanos / 1_000_000);
-    }
-  }
-  return 0;
-}
-
 export default async function NewArrivalsPage() {
-  const now = Date.now();
-  const products = (await getAllProducts()) as Product[];
+  // One cached call; split client-side into fresh arrivals vs. suggestions.
+  const { items } = await listProducts({ pageSize: 60, sort: "newest" });
 
-  const arrivals = products
-    .filter((p) => (p.mode ?? "retail") !== "wholesale")
-    .map((p) => ({
-      ...p,
-      createdAtMs: toMillis(p.createdAt),
-    }))
-    .filter((p) => p.createdAtMs > 0 && now - p.createdAtMs <= NEW_WINDOW_MS)
-    .sort((a, b) => b.createdAtMs - a.createdAtMs);
-
+  const arrivals = items.filter((p) => p.isNew);
   const arrivalIds = new Set(arrivals.map((p) => p.id));
-  const suggestedProducts = products
-    .filter((p) => (p.mode ?? "retail") !== "wholesale")
-    .filter((p) => !arrivalIds.has(p.id))
-    .slice(0, 18);
+  const suggestedProducts = items.filter((p) => !arrivalIds.has(p.id)).slice(0, 18);
 
   const showingArrivals = arrivals.length > 0;
   const visibleProducts = showingArrivals ? arrivals : suggestedProducts;
@@ -103,12 +47,11 @@ export default async function NewArrivalsPage() {
               const discountPercent = getDiscountPercent(product);
               const originalPrice = getOriginalPrice(product);
               const sellingPrice = getSellingPrice(product);
-              const mainImage = product.images?.[0] || product.imageUrl || "/assets/logo.jpg";
 
               return (
                 <Link
                   key={product.id}
-                  href={`/products/${product.id}`}
+                  href={product.href}
                   className="group relative block rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-900 overflow-hidden"
                 >
                   {discountPercent && (
@@ -124,7 +67,7 @@ export default async function NewArrivalsPage() {
 
                   <div className="relative aspect-square bg-white dark:bg-gray-800">
                     <Image
-                      src={mainImage}
+                      src={product.image}
                       alt={product.name}
                       fill
                       className="object-contain p-1"

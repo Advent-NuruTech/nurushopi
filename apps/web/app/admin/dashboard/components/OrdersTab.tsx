@@ -7,6 +7,8 @@ import type { Route } from "next";
 import { useSearchParams } from "next/navigation";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { formatPrice } from "@/lib/formatPrice";
+import { orderApi, ApiClientError } from "@/lib/api";
+import type { OrderDTO, OrderStatus } from "@nuru/types";
 import { AdminRole } from "./types";
 
 interface OrdersTabProps {
@@ -14,64 +16,37 @@ interface OrdersTabProps {
   role: AdminRole;
 }
 
-interface OrderItem {
-  id?: string;
-  productId?: string;
-  name?: string;
-  quantity?: number;
-  price?: number;
-  image?: string;
-  mode?: "wholesale" | "retail";
-}
+const STATUS_STYLES: Record<OrderStatus, string> = {
+  PENDING: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
+  CONFIRMED: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
+  PROCESSING: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300",
+  SHIPPED: "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300",
+  DELIVERED: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
+  CANCELLED: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300",
+  REFUNDED: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
+};
 
-interface Order {
-  id: string;
-  name?: string;
-  email?: string | null;
-  phone?: string | null;
-  country?: string;
-  county?: string;
-  locality?: string;
-  message?: string;
-  totalAmount: number;
-  status: string;
-  cancellationReason?: string | null;
-  createdAt: string;
-  items: OrderItem[];
-}
-
-function formatLocation(order: Order): string {
-  return [order.locality, order.county, order.country].filter(Boolean).join(", ");
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const normalized = status.toLowerCase();
-  const classes =
-    normalized === "received"
-      ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
-      : normalized === "shipped"
-        ? "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300"
-        : normalized === "cancelled"
-          ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300"
-          : "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300";
-
+function StatusBadge({ status }: { status: OrderStatus }) {
   return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${classes}`}>
-      {normalized === "received" ? "Approved" : status}
+    <span
+      className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${STATUS_STYLES[status]}`}
+    >
+      {status.charAt(0) + status.slice(1).toLowerCase()}
     </span>
   );
 }
 
 export default function OrdersTab({ role }: OrdersTabProps) {
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<OrderDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
   const highlightId = searchParams.get("orderId");
 
   useEffect(() => {
-    fetch("/api/admin/orders", { credentials: "include" })
-      .then((response) => response.json())
-      .then((data) => setOrders(data.orders ?? []))
+    orderApi.admin
+      .list({ pageSize: 100 })
+      .then((page) => setOrders(page.items))
+      .catch(() => setOrders([]))
       .finally(() => setLoading(false));
   }, []);
 
@@ -81,31 +56,12 @@ export default function OrdersTab({ role }: OrdersTabProps) {
     row?.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [highlightId, orders]);
 
-  const approve = async (orderId: string) => {
-    const res = await fetch("/api/admin/orders", {
-      method: "PUT",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ orderId, status: "approved" }),
-    });
-    if (res.ok) {
-      setOrders((current) =>
-        current.map((order) => (order.id === orderId ? { ...order, status: "received" } : order))
-      );
-    }
-  };
-
-  const markShipped = async (orderId: string) => {
-    const res = await fetch("/api/admin/orders", {
-      method: "PUT",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ orderId, status: "shipped" }),
-    });
-    if (res.ok) {
-      setOrders((current) =>
-        current.map((order) => (order.id === orderId ? { ...order, status: "shipped" } : order))
-      );
+  const setStatus = async (id: string, status: OrderStatus) => {
+    try {
+      const { order } = await orderApi.admin.updateStatus(id, status);
+      setOrders((current) => current.map((o) => (o.id === id ? order : o)));
+    } catch (err) {
+      if (err instanceof ApiClientError) alert(err.message);
     }
   };
 
@@ -140,7 +96,7 @@ export default function OrdersTab({ role }: OrdersTabProps) {
         >
           <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
             <div>
-              <p className="font-semibold text-slate-900 dark:text-white">Order #{order.id.slice(0, 8)}</p>
+              <p className="font-semibold text-slate-900 dark:text-white">Order #{order.orderNumber}</p>
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 {new Date(order.createdAt).toLocaleString()}
               </p>
@@ -152,11 +108,13 @@ export default function OrdersTab({ role }: OrdersTabProps) {
             <div className="space-y-3 text-sm">
               <div>
                 <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Customer</p>
-                <p className="font-medium text-slate-900 dark:text-white">{order.name || "Unknown customer"}</p>
+                <p className="font-medium text-slate-900 dark:text-white">
+                  {order.contactName || "Unknown customer"}
+                </p>
                 {role === "senior" && (
                   <div className="text-slate-600 dark:text-slate-300">
-                    {order.email && <p>Email: {order.email}</p>}
-                    {order.phone && <p>Phone: {order.phone}</p>}
+                    {order.contactEmail && <p>Email: {order.contactEmail}</p>}
+                    {order.contactPhone && <p>Phone: {order.contactPhone}</p>}
                   </div>
                 )}
               </div>
@@ -164,20 +122,20 @@ export default function OrdersTab({ role }: OrdersTabProps) {
               <div>
                 <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Delivery location</p>
                 <p className="font-medium text-slate-900 dark:text-white">
-                  {formatLocation(order) || "Location not provided"}
+                  {order.address || "Location not provided"}
                 </p>
               </div>
 
               <div>
                 <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Special message</p>
                 <p className="text-slate-700 dark:text-slate-300">
-                  {order.message?.trim() ? order.message : "No special message"}
+                  {order.note?.trim() ? order.note : "No special message"}
                 </p>
               </div>
 
               <div>
                 <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Total amount</p>
-                <p className="font-semibold text-slate-900 dark:text-white">{formatPrice(order.totalAmount)}</p>
+                <p className="font-semibold text-slate-900 dark:text-white">{formatPrice(Number(order.total))}</p>
               </div>
             </div>
 
@@ -185,20 +143,17 @@ export default function OrdersTab({ role }: OrdersTabProps) {
               <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">Order items</p>
               <div className="space-y-2">
                 {order.items?.length ? (
-                  order.items.map((item, index) => {
-                    const productId = item.productId || item.id;
-                    const href = productId
-                      ? item.mode === "wholesale"
-                        ? `/wholeseller/${encodeURIComponent(productId)}`
-                        : `/products/${encodeURIComponent(productId)}`
+                  order.items.map((item) => {
+                    const href = item.productId
+                      ? (`/products/${encodeURIComponent(item.productId)}` as Route)
                       : null;
 
                     return (
-                      <div key={`${productId ?? "item"}-${index}`} className="flex gap-3 rounded-lg border border-slate-200 dark:border-slate-700 p-2">
+                      <div key={item.id} className="flex gap-3 rounded-lg border border-slate-200 dark:border-slate-700 p-2">
                         <div className="relative h-12 w-12 rounded-md overflow-hidden bg-slate-100 dark:bg-slate-800 shrink-0">
                           <Image
-                            src={item.image || "/assets/logo.jpg"}
-                            alt={item.name || "Product"}
+                            src={item.imageUrl || "/assets/logo.jpg"}
+                            alt={item.productName || "Product"}
                             fill
                             sizes="48px"
                             className="object-cover"
@@ -206,18 +161,18 @@ export default function OrdersTab({ role }: OrdersTabProps) {
                         </div>
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
-                            {item.name || "Product"}
+                            {item.productName || "Product"}
                           </p>
                           <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                             {href ? (
-                              <Link href={href as Route} className="text-sky-600 dark:text-sky-400 hover:underline break-all">
-                                {productId}
+                              <Link href={href} className="text-sky-600 dark:text-sky-400 hover:underline break-all">
+                                {item.productId}
                               </Link>
                             ) : (
                               <span>No product id</span>
                             )}
-                            {typeof item.quantity === "number" && <span>x{item.quantity}</span>}
-                            {typeof item.price === "number" && <span>{formatPrice(item.price)}</span>}
+                            <span>x{item.quantity}</span>
+                            <span>{formatPrice(Number(item.unitPrice))}</span>
                           </div>
                         </div>
                       </div>
@@ -230,29 +185,32 @@ export default function OrdersTab({ role }: OrdersTabProps) {
             </div>
           </div>
 
-          {order.status === "cancelled" && order.cancellationReason && (
-            <p className="mt-3 text-xs text-red-600 dark:text-red-400">
-              Cancellation reason: {order.cancellationReason}
-            </p>
-          )}
-
           <div className="mt-4 flex flex-wrap gap-2">
             {role === "sub" && (
               <button
-                onClick={() => markShipped(order.id)}
-                disabled={order.status === "received" || order.status === "cancelled" || order.status === "shipped"}
+                onClick={() => setStatus(order.id, "SHIPPED")}
+                disabled={order.status !== "CONFIRMED" && order.status !== "PROCESSING"}
                 className="px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 disabled:opacity-60 text-white text-sm"
               >
                 Mark Shipped
               </button>
             )}
             <button
-              onClick={() => approve(order.id)}
-              disabled={role !== "senior" || order.status === "received" || order.status === "cancelled"}
+              onClick={() => setStatus(order.id, "CONFIRMED")}
+              disabled={role !== "senior" || order.status !== "PENDING"}
               className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white text-sm"
             >
-              Approve
+              Confirm
             </button>
+            {role === "senior" && (
+              <button
+                onClick={() => setStatus(order.id, "CANCELLED")}
+                disabled={order.status === "CANCELLED" || order.status === "DELIVERED" || order.status === "REFUNDED"}
+                className="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white text-sm"
+              >
+                Cancel
+              </button>
+            )}
           </div>
         </article>
       ))}

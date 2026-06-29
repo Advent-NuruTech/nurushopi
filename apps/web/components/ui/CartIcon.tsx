@@ -4,8 +4,7 @@ import { ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { auth } from "@/lib/firebase";
-import { onAuthStateChanged } from "firebase/auth";
+import { useAppUser } from "@/context/UserContext";
 
 interface CartIconProps {
   count?: number;
@@ -13,7 +12,8 @@ interface CartIconProps {
 
 export default function CartIcon({ count = 0 }: CartIconProps) {
   const [animate, setAnimate] = useState(false);
-  const [isSignedIn, setIsSignedIn] = useState(false);
+  const { user } = useAppUser();
+  const isSignedIn = Boolean(user);
 
   // Trigger subtle animation when count changes
   useEffect(() => {
@@ -23,14 +23,6 @@ export default function CartIcon({ count = 0 }: CartIconProps) {
       return () => clearTimeout(timer);
     }
   }, [count]);
-
-  // 🔥 Firebase auth check
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setIsSignedIn(!!user);
-    });
-    return () => unsubscribe();
-  }, []);
 
   return (
     <Link href="/checkout" className="relative group">

@@ -1,52 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Bell } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { Route } from "next";
-import {
-  collection,
-  limit,
-  onSnapshot,
-  query,
-  serverTimestamp,
-  updateDoc,
-  where,
-  doc,
-} from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import type { NotificationDTO } from "@nuru/types";
+import { notificationsApi } from "@/lib/api";
 import { useAppUser } from "@/context/UserContext";
 
-type NotificationItem = {
-  id: string;
-  type?: string;
-  title?: string;
-  body?: string;
-  relatedId?: string;
-  recipientType?: string;
-  readAt?: unknown;
-  createdAt?: unknown;
-};
+const POLL_INTERVAL_MS = 30_000;
 
-function toMillis(value: unknown): number {
-  if (!value) return 0;
-  if (typeof value === "number") return value;
-  if (typeof value === "string") {
-    const parsed = Date.parse(value);
-    return Number.isNaN(parsed) ? 0 : parsed;
-  }
-  if (typeof value === "object" && value !== null && "toDate" in value) {
-    const dt = (value as { toDate?: () => Date }).toDate;
-    return typeof dt === "function" ? dt().getTime() : 0;
-  }
-  if (typeof value === "object" && value !== null && "seconds" in value) {
-    const seconds = (value as { seconds?: number }).seconds;
-    return typeof seconds === "number" ? seconds * 1000 : 0;
-  }
-  return 0;
-}
-
-function getNotificationRoute(item: NotificationItem): string {
+function getNotificationRoute(item: NotificationDTO): string {
   if (item.type === "review_prompt") {
     const orderParam = item.relatedId ? `&orderId=${encodeURIComponent(item.relatedId)}` : "";
     return `/profile?tab=reviews${orderParam}`;
@@ -60,33 +24,28 @@ export default function UserNotificationsBell() {
   const { user } = useAppUser();
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [notifications, setNotifications] = useState<NotificationDTO[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const load = useCallback(async () => {
+    try {
+      const { items } = await notificationsApi.list({ pageSize: 30 });
+      setNotifications(items);
+    } catch {
+      setNotifications([]);
+    }
+  }, []);
+
+  // Poll the user's notifications while signed in.
   useEffect(() => {
     if (!user?.id) {
       setNotifications([]);
       return;
     }
-
-    const q = query(
-      collection(db, "notifications"),
-      where("recipientId", "==", user.id),
-      limit(30)
-    );
-
-    return onSnapshot(
-      q,
-      (snap) => {
-        const list = snap.docs
-          .map((d) => ({ id: d.id, ...(d.data() as Omit<NotificationItem, "id">) }))
-          .filter((n) => (n.recipientType ?? "user") === "user")
-          .sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt));
-        setNotifications(list);
-      },
-      () => setNotifications([])
-    );
-  }, [user?.id]);
+    void load();
+    const timer = setInterval(() => void load(), POLL_INTERVAL_MS);
+    return () => clearInterval(timer);
+  }, [user?.id, load]);
 
   useEffect(() => {
     const onClickOutside = (event: MouseEvent) => {
@@ -99,16 +58,30 @@ export default function UserNotificationsBell() {
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, [open]);
 
-  const unread = useMemo(() => notifications.filter((n) => !n.readAt), [notifications]);
+  const unread = useMemo(() => notifications.filter((n) => !n.read), [notifications]);
 
-  const markRead = async (id: string) => {
-    await updateDoc(doc(db, "notifications", id), { readAt: serverTimestamp() });
-  };
-
-  const handleItemClick = async (item: NotificationItem) => {
-    if (!item.readAt) {
-      await markRead(item.id);
+  const markRead = useCallback(async (id: string) => {
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+    );
+    try {
+      await notificationsApi.markRead(id);
+    } catch {
+      // Best-effort; a later poll will reconcile.
     }
+  }, []);
+
+  const markAllRead = useCallback(async () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    try {
+      await notificationsApi.markAllRead();
+    } catch {
+      void load();
+    }
+  }, [load]);
+
+  const handleItemClick = async (item: NotificationDTO) => {
+    if (!item.read) await markRead(item.id);
     setOpen(false);
     router.push(getNotificationRoute(item) as Route);
   };
@@ -139,9 +112,7 @@ export default function UserNotificationsBell() {
               <button
                 type="button"
                 className="text-xs text-sky-600 dark:text-sky-400 hover:underline"
-                onClick={async () => {
-                  await Promise.all(unread.map((n) => markRead(n.id)));
-                }}
+                onClick={markAllRead}
               >
                 Mark all read
               </button>
@@ -157,7 +128,7 @@ export default function UserNotificationsBell() {
                   type="button"
                   onClick={() => handleItemClick(item)}
                   className={`w-full text-left px-4 py-3 border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 ${
-                    item.readAt ? "bg-transparent" : "bg-sky-50/40 dark:bg-sky-900/10"
+                    item.read ? "bg-transparent" : "bg-sky-50/40 dark:bg-sky-900/10"
                   }`}
                 >
                   <p className="text-sm font-medium text-slate-900 dark:text-white">

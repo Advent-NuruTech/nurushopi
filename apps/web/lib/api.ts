@@ -1,4 +1,12 @@
 import type {
+  AdminInviteDTO,
+  AdminInviteInput,
+  AdminLoginInput,
+  AdminRole,
+  AdminSignupInput,
+  AdminUserDTO,
+  AdminUserBundleDTO,
+  AdminUserSummaryDTO,
   ApiResponse,
   AuthUser,
   BannerCreateInput,
@@ -8,9 +16,36 @@ import type {
   CategoryDTO,
   CategoryUpdateInput,
   CheckoutInput,
+  ContactCreateInput,
+  ContactDTO,
+  ContactQuery,
   HeroAnnouncementDTO,
+  MessageCreateInput,
+  MessageDTO,
+  MessageThreadDTO,
+  NotificationCreateInput,
+  ProfileUpdateInput,
+  PwaInstallRecordInput,
+  PwaInstallStatsDTO,
+  SabbathMessageCreateInput,
+  SabbathMessageDTO,
+  SabbathMessageListDTO,
+  SabbathMessageUpdateInput,
+  ProductReviewQuery,
+  ReviewCreateInput,
+  ReviewDTO,
+  ReviewModerateInput,
+  ReviewQuery,
+  ReviewSummaryDTO,
+  ReviewUpdateInput,
+  VendorApplicationCreateInput,
+  VendorApplicationDTO,
+  VendorApplicationModerateInput,
+  VendorApplicationQuery,
   HeroCreateInput,
   HeroUpdateInput,
+  NotificationDTO,
+  NotificationQuery,
   OrderDTO,
   OrderStatus,
   Paginated,
@@ -166,6 +201,8 @@ type AuthUserResponse = { user: AuthUser };
 
 export const authApi = {
   me: () => api.get<AuthUserResponse>("/auth/me"),
+  updateProfile: (input: ProfileUpdateInput) =>
+    api.patch<AuthUserResponse>("/auth/me", input),
   login: (email: string, password: string) =>
     api.post<AuthUserResponse>("/auth/login", { email, password }),
   signup: (input: { email: string; password: string; name?: string; referralCode?: string }) =>
@@ -179,6 +216,25 @@ export const authApi = {
   verifyEmail: (token: string) =>
     api.post<{ success: boolean }>("/auth/verify-email", { token }),
   googleUrl: () => apiUrl("/auth/google"),
+};
+
+// ---- Admin authentication ----
+type AdminUserResponse = { admin: AdminUserDTO };
+
+export const adminAuthApi = {
+  me: () => api.get<AdminUserResponse>("/admin/auth/me"),
+  login: (input: AdminLoginInput) =>
+    api.post<AdminUserResponse>("/admin/auth/login", input),
+  signup: (input: AdminSignupInput) =>
+    api.post<AdminUserResponse>("/admin/auth/signup", input),
+  logout: () => api.post<{ success: boolean }>("/admin/auth/logout"),
+  invite: (input: AdminInviteInput) =>
+    api.post<{ invite: AdminInviteDTO }>("/admin/auth/invite", input),
+  listAdmins: () => api.get<{ admins: AdminUserDTO[] }>("/admin/auth/admins"),
+  updateRole: (id: string, role: AdminRole) =>
+    api.patch<AdminUserResponse>(`/admin/auth/admins/${encodeURIComponent(id)}/role`, { role }),
+  removeAdmin: (id: string) =>
+    api.del<{ success: boolean }>(`/admin/auth/admins/${encodeURIComponent(id)}`),
 };
 
 // ---- Catalog endpoints ----
@@ -269,6 +325,9 @@ export const orderApi = {
   // The signed-in user's own order history.
   myOrders: (query: OrderQuery = {}) =>
     api.get<Paginated<OrderDTO>>(`/orders/mine${qs(query)}`),
+  // Customer self-cancel (own order, pre-shipment, within 24h — enforced server-side).
+  cancel: (orderNumber: string) =>
+    api.patch<{ order: OrderDTO }>(`/orders/${encodeURIComponent(orderNumber)}/cancel`),
 
   // Admin order management (require an admin session cookie)
   admin: {
@@ -307,6 +366,200 @@ export const walletApi = {
       api.patch<{ redemption: WalletRedemptionDTO }>(`/admin/wallet/redemptions/${id}`, { status }),
     adjustBalance: (input: WalletAdjustmentInput) =>
       api.post<{ transaction: WalletTransactionDTO }>("/admin/wallet/adjustments", input),
+  },
+};
+
+// ---- Contact form (public) ----
+
+export const contactApi = {
+  // Unauthenticated "get in touch" form → POST /contact.
+  submit: (input: ContactCreateInput) =>
+    api.post<{ contact: ContactDTO }>("/contact", input),
+
+  // Admin contact inbox (require an admin session cookie)
+  admin: {
+    list: (query: Partial<ContactQuery> = {}) =>
+      api.get<Paginated<ContactDTO>>(`/admin/contacts${qs(query)}`),
+    setHandled: (id: string, handled: boolean) =>
+      api.patch<{ contact: ContactDTO }>(`/admin/contacts/${id}`, { handled }),
+  },
+};
+
+// ---- Product reviews ----
+
+/** Public/customer per-product review listing filters (all optional). */
+type ProductReviewFilter = Partial<Pick<ProductReviewQuery, "page" | "pageSize" | "rating" | "sort">>;
+/** Admin review listing filters (all optional). */
+type ReviewFilter = Partial<
+  Pick<ReviewQuery, "page" | "pageSize" | "status" | "productId" | "userId" | "rating" | "sort">
+>;
+
+export const reviewsApi = {
+  // Public reads (APPROVED reviews only, server-enforced)
+  listForProduct: (productId: string, query: ProductReviewFilter = {}) =>
+    api.get<Paginated<ReviewDTO>>(
+      `/reviews/product/${encodeURIComponent(productId)}${qs(query)}`,
+    ),
+  summaryForProduct: (productId: string) =>
+    api.get<{ summary: ReviewSummaryDTO }>(
+      `/reviews/product/${encodeURIComponent(productId)}/summary`,
+    ),
+
+  // Customer (require a user session cookie)
+  mine: (query: ProductReviewFilter = {}) =>
+    api.get<Paginated<ReviewDTO>>(`/reviews/mine${qs(query)}`),
+  create: (input: ReviewCreateInput) =>
+    api.post<{ review: ReviewDTO }>("/reviews", input),
+  update: (id: string, input: ReviewUpdateInput) =>
+    api.put<{ review: ReviewDTO }>(`/reviews/${encodeURIComponent(id)}`, input),
+  remove: (id: string) =>
+    api.del<{ success: boolean }>(`/reviews/${encodeURIComponent(id)}`),
+
+  // Admin moderation (require an admin session cookie)
+  admin: {
+    list: (query: ReviewFilter = {}) =>
+      api.get<Paginated<ReviewDTO>>(`/admin/reviews${qs(query)}`),
+    moderate: (id: string, input: ReviewModerateInput) =>
+      api.patch<{ review: ReviewDTO }>(`/admin/reviews/${id}`, input),
+    remove: (id: string) =>
+      api.del<{ success: boolean }>(`/admin/reviews/${id}`),
+  },
+};
+
+// ---- Support messages ----
+
+export const messagesApi = {
+  // Customer support thread (require a user session cookie). The thread is
+  // keyed by the user's id server-side, so no id is needed here.
+  list: () => api.get<{ messages: MessageDTO[] }>("/messages"),
+  send: (input: MessageCreateInput) =>
+    api.post<{ message: MessageDTO }>("/messages", input),
+
+  // Admin support inbox (require an admin session cookie)
+  admin: {
+    listThreads: (query: Partial<{ page: number; pageSize: number }> = {}) =>
+      api.get<Paginated<MessageThreadDTO>>(`/admin/messages/threads${qs(query)}`),
+    listThread: (threadId: string) =>
+      api.get<{ messages: MessageDTO[] }>(
+        `/admin/messages/threads/${encodeURIComponent(threadId)}`,
+      ),
+    reply: (threadId: string, input: MessageCreateInput) =>
+      api.post<{ message: MessageDTO }>(
+        `/admin/messages/threads/${encodeURIComponent(threadId)}`,
+        input,
+      ),
+  },
+};
+
+// ---- Vendor applications ----
+
+/** Admin vendor application listing filters (all optional). */
+type VendorFilter = Partial<
+  Pick<VendorApplicationQuery, "page" | "pageSize" | "status" | "search" | "sort">
+>;
+
+export const vendorsApi = {
+  // Apply works for guests and signed-in users alike.
+  apply: (input: VendorApplicationCreateInput) =>
+    api.post<{ application: VendorApplicationDTO }>("/vendors/apply", input),
+  mine: (query: VendorFilter = {}) =>
+    api.get<Paginated<VendorApplicationDTO>>(`/vendors/mine${qs(query)}`),
+
+  // Admin vendor management (require an admin session cookie)
+  admin: {
+    list: (query: VendorFilter = {}) =>
+      api.get<Paginated<VendorApplicationDTO>>(`/admin/vendors${qs(query)}`),
+    get: (id: string) =>
+      api.get<{ application: VendorApplicationDTO }>(`/admin/vendors/${id}`),
+    moderate: (id: string, input: VendorApplicationModerateInput) =>
+      api.patch<{ application: VendorApplicationDTO }>(`/admin/vendors/${id}`, input),
+  },
+};
+
+// ---- Notifications (signed-in user) ----
+
+/** The signed-in user's own notification feed filters (all optional). */
+type NotificationFilter = Partial<Pick<NotificationQuery, "page" | "pageSize" | "read" | "type">>;
+
+export const notificationsApi = {
+  list: (query: NotificationFilter = {}) =>
+    api.get<Paginated<NotificationDTO>>(`/notifications${qs(query)}`),
+  unreadCount: () => api.get<{ unreadCount: number }>("/notifications/unread-count"),
+  markRead: (id: string) =>
+    api.patch<{ notification: NotificationDTO }>(`/notifications/${encodeURIComponent(id)}/read`),
+  markAllRead: () => api.post<{ updated: number }>("/notifications/read-all"),
+
+  // Admin notification feed + dispatch (require an admin session cookie)
+  admin: {
+    list: (query: NotificationFilter = {}) =>
+      api.get<Paginated<NotificationDTO>>(`/admin/notifications${qs(query)}`),
+    unreadCount: () => api.get<{ unreadCount: number }>("/admin/notifications/unread-count"),
+    create: (input: NotificationCreateInput) =>
+      api.post<{ notification: NotificationDTO }>("/admin/notifications", input),
+    markRead: (id: string) =>
+      api.patch<{ notification: NotificationDTO }>(
+        `/admin/notifications/${encodeURIComponent(id)}/read`,
+      ),
+    markAllRead: () => api.post<{ updated: number }>("/admin/notifications/read-all"),
+  },
+};
+
+// ---- Admin customer management ----
+
+/** Admin customer-list filters (all optional). */
+type AdminUserFilter = Partial<{ search: string; limit: number }>;
+
+export const usersApi = {
+  admin: {
+    list: (query: AdminUserFilter = {}) =>
+      api.get<{ users: AdminUserSummaryDTO[] }>(`/admin/users${qs(query)}`),
+    get: (id: string) => api.get<AdminUserBundleDTO>(`/admin/users/${encodeURIComponent(id)}`),
+    remove: (id: string) =>
+      api.del<{ success: boolean }>(`/admin/users/${encodeURIComponent(id)}`),
+  },
+};
+
+// ---- PWA installs ----
+
+export const pwaApi = {
+  // Public: record an install (links to the user when one is signed in).
+  record: (input: PwaInstallRecordInput = {}) =>
+    api.post<{ success: boolean }>("/pwa-installs", input),
+
+  // Admin install stats (require an admin session cookie)
+  admin: {
+    stats: () => api.get<PwaInstallStatsDTO>("/admin/pwa-installs"),
+  },
+};
+
+// ---- Sabbath messages ----
+
+/** Public Sabbath listing filters (all optional). */
+type SabbathQuery = Partial<{
+  date: string;
+  limit: number;
+  cursorDate: string;
+  cursorCreatedAt: string;
+}>;
+
+export const sabbathApi = {
+  // Public: current message for a date + paginated history.
+  list: (query: SabbathQuery = {}) =>
+    api.get<SabbathMessageListDTO>(`/sabbath-messages${qs(query)}`),
+
+  // Admin authoring (read: any admin; write: senior admin — enforced server-side)
+  admin: {
+    list: (limit?: number) =>
+      api.get<{ messages: SabbathMessageDTO[] }>(`/admin/sabbath-messages${qs({ limit })}`),
+    create: (input: SabbathMessageCreateInput) =>
+      api.post<{ message: SabbathMessageDTO }>("/admin/sabbath-messages", input),
+    update: (id: string, input: SabbathMessageUpdateInput) =>
+      api.put<{ message: SabbathMessageDTO }>(
+        `/admin/sabbath-messages/${encodeURIComponent(id)}`,
+        input,
+      ),
+    remove: (id: string) =>
+      api.del<{ success: boolean }>(`/admin/sabbath-messages/${encodeURIComponent(id)}`),
   },
 };
 

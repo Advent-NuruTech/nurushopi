@@ -2,8 +2,8 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { updateProfile, User } from "firebase/auth";
-import { getUserProfile, updateUserProfile, type UserProfile as FirestoreUserProfile } from "@/lib/firestoreHelpers";
+import { authApi, walletApi, ApiClientError } from "@/lib/api";
+import { useAppUser } from "@/context/UserContext";
 import type { UserProfile as LocalUserProfile, MessageType } from "../types";
 
 // Define the exact type from context
@@ -17,30 +17,12 @@ type ContextAppUser = {
 interface UseProfileDataProps {
   uid: string | null;
   appUser: ContextAppUser | null; // Use context type directly
-  firebaseUser: User | null;
 }
 
-// Helper function to convert FirestoreUserProfile to LocalUserProfile
-const convertToLocalProfile = (profile: FirestoreUserProfile | null): LocalUserProfile | null => {
-  if (!profile) return null;
-  return {
-    fullName: profile.fullName,
-    phone: profile.phone,
-    address: profile.address,
-    inviteCount: profile.inviteCount,
-    walletBalance: profile.walletBalance,
-    referredBy: profile.referredBy ?? null,
-    lastLogin: profile.lastLogin,
-    createdAt: profile.createdAt,
-  };
-};
+const getSafeString = (value?: string | null): string => value ?? "";
 
-// Helper to safely get string value
-const getSafeString = (value?: string | null): string => {
-  return value ?? "";
-};
-
-export function useProfileData({ uid, appUser, firebaseUser }: UseProfileDataProps) {
+export function useProfileData({ uid, appUser }: UseProfileDataProps) {
+  const { setUserFromAuth } = useAppUser();
   const [profile, setProfile] = useState<LocalUserProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [editFullName, setEditFullName] = useState("");
@@ -57,13 +39,27 @@ export function useProfileData({ uid, appUser, firebaseUser }: UseProfileDataPro
     }
     setProfileLoading(true);
     try {
-      const p = await getUserProfile(uid);
-      const localProfile = convertToLocalProfile(p);
+      const { user } = await authApi.me();
+      const localProfile: LocalUserProfile = {
+        fullName: user.name ?? "",
+        phone: user.phone ?? "",
+        address: user.address ?? "",
+        walletBalance: Number(user.walletBalance),
+        referredBy: null,
+      };
       setProfile(localProfile);
-      setEditFullName(localProfile?.fullName ?? getSafeString(appUser?.name) ?? "");
-      setEditPhone(localProfile?.phone ?? "");
-      setEditAddress(localProfile?.address ?? "");
-      setInviteCount(localProfile?.inviteCount ?? 0);
+      setEditFullName(localProfile.fullName ?? getSafeString(appUser?.name));
+      setEditPhone(localProfile.phone ?? "");
+      setEditAddress(localProfile.address ?? "");
+
+      // Invite count comes from the referral program summary (best-effort).
+      try {
+        const { referral } = await walletApi.referrals();
+        setInviteCount(referral.referralCount);
+        setProfile((p) => (p ? { ...p, inviteCount: referral.referralCount } : p));
+      } catch {
+        /* non-fatal — leave the count at 0 */
+      }
     } catch {
       setMessage({ type: "error", text: "Failed to load profile." });
     } finally {
@@ -73,40 +69,39 @@ export function useProfileData({ uid, appUser, firebaseUser }: UseProfileDataPro
 
   useEffect(() => {
     if (appUser?.name && !profile?.fullName) setEditFullName(getSafeString(appUser.name));
-    if (profile) {
-      setEditFullName(profile.fullName ?? getSafeString(appUser?.name) ?? "");
-      setEditPhone(profile.phone ?? "");
-      setEditAddress(profile.address ?? "");
-      setInviteCount(profile.inviteCount ?? 0);
-    }
-  }, [appUser?.name, profile]);
+  }, [appUser?.name, profile?.fullName]);
 
   const handleSaveProfile = useCallback(async () => {
     if (!uid) return;
     setSaving(true);
     setMessage(null);
     try {
-      await updateUserProfile(uid, {
-        fullName: editFullName.trim() || undefined,
-        phone: editPhone.trim() || undefined,
-        address: editAddress.trim() || undefined,
+      const { user } = await authApi.updateProfile({
+        name: editFullName.trim() || null,
+        phone: editPhone.trim() || null,
+        address: editAddress.trim() || null,
       });
-      if (firebaseUser && editFullName.trim() && editFullName !== firebaseUser.displayName) {
-        await updateProfile(firebaseUser, { displayName: editFullName.trim() });
-      }
+      // Keep the global session in sync so the navbar/avatar reflect the change.
+      setUserFromAuth(user);
       setProfile((p) => ({
         ...p,
-        fullName: editFullName.trim() || p?.fullName,
-        phone: editPhone.trim() || p?.phone,
-        address: editAddress.trim() || p?.address,
+        fullName: user.name ?? "",
+        phone: user.phone ?? "",
+        address: user.address ?? "",
       }));
       setMessage({ type: "success", text: "Profile updated successfully." });
-    } catch {
-      setMessage({ type: "error", text: "Failed to update profile. Please try again." });
+    } catch (error) {
+      setMessage({
+        type: "error",
+        text:
+          error instanceof ApiClientError
+            ? error.message
+            : "Failed to update profile. Please try again.",
+      });
     } finally {
       setSaving(false);
     }
-  }, [uid, editFullName, editPhone, editAddress, firebaseUser]);
+  }, [uid, editFullName, editPhone, editAddress, setUserFromAuth]);
 
   // Dismiss message after 4s
   useEffect(() => {

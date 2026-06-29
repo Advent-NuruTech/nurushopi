@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { slugifyCategory } from "@/lib/categoryUtils";
+import { catalogApi, wholesaleApi, ApiClientError } from "@/lib/api";
 
 interface WholesaleFormData {
   name: string;
@@ -56,9 +57,9 @@ export default function UploadWholesalePage() {
   const [fileInputKey, setFileInputKey] = useState(0);
 
   useEffect(() => {
-    fetch("/api/admin/categories", { credentials: "include" })
-      .then((r) => r.json())
-      .then((d) => setCategories(d.categories ?? []))
+    catalogApi
+      .listCategories()
+      .then((d) => setCategories(d.categories))
       .catch(() => setCategories([]));
   }, []);
 
@@ -140,11 +141,6 @@ export default function UploadWholesalePage() {
       setStatus("error");
       return;
     }
-    if (!formData.category.trim()) {
-      setErrorText("Category is required.");
-      setStatus("error");
-      return;
-    }
     if (!formData.files || formData.files.length === 0) {
       setErrorText("At least one image is required.");
       setStatus("error");
@@ -160,9 +156,8 @@ export default function UploadWholesalePage() {
       for (let i = 0; i < formData.files.length; i += 1) {
         const fd = new FormData();
         fd.append("file", formData.files[i]);
-        const uploadRes = await fetch("/api/wholesale/upload", {
+        const uploadRes = await fetch("/api/upload", {
           method: "POST",
-          credentials: "include",
           body: fd,
         });
         const uploadJson = (await uploadRes.json()) as { url?: string; error?: string };
@@ -174,32 +169,17 @@ export default function UploadWholesalePage() {
         setProgress(((i + 1) / formData.files.length) * 100);
       }
 
-      const payload = {
+      await wholesaleApi.admin.createItem({
         name: formData.name.trim(),
-        price: Number(formData.retailPrice),
-        wholesalePrice: Number(formData.wholesalePrice),
-        wholesaleMinQty: Number(formData.wholesaleMinQty),
-        wholesaleUnit: formData.wholesaleUnit.trim(),
-        description: formData.description.trim(),
-        category: formData.category,
-        images: uploaded,
-        coverImage: uploaded[0] ?? null,
-      };
-
-      const createRes = await fetch("/api/wholesale/upload", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        description: formData.description.trim() || null,
+        unitPrice: Number(formData.wholesalePrice),
+        minQuantity: Number(formData.wholesaleMinQty) || 1,
+        images: uploaded.slice(0, 3),
+        isActive: true,
       });
-
-      const createJson = (await createRes.json()) as { error?: string };
-      if (!createRes.ok) {
-        throw new Error(createJson.error || "Failed to create wholesale product.");
-      }
       setStatus("success");
     } catch (error) {
-      setErrorText(error instanceof Error ? error.message : "Upload failed.");
+      setErrorText(error instanceof ApiClientError ? error.message : "Upload failed.");
       setStatus("error");
     }
   };

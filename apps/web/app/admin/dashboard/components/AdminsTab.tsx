@@ -1,93 +1,69 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import { Admin } from "./types";
-import { 
-  Search, 
-  Filter, 
-  MoreVertical, 
-  UserX, 
-  UserCheck, 
+import { adminAuthApi, ApiClientError } from "@/lib/api";
+import type { AdminUserDTO } from "@nuru/types";
+import {
+  Search,
+  Filter,
+  UserX,
+  UserCheck,
   Mail,
   Shield,
   ShieldAlert,
-  ChevronRight
+  ChevronRight,
 } from "lucide-react";
 
 interface FilterState {
-  role: "all" | "senior" | "sub";
+  role: "all" | "SENIOR" | "SUB";
   search: string;
 }
 
-type AdminWithStats = Admin & {
-  productCount?: number;
-  productValue?: number;
-  salesTotal?: number;
-};
-
 export default function AdminsTab() {
-  const [admins, setAdmins] = useState<AdminWithStats[]>([]);
-  const [filteredAdmins, setFilteredAdmins] = useState<AdminWithStats[]>([]);
+  const [admins, setAdmins] = useState<AdminUserDTO[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [expandedAdmin, setExpandedAdmin] = useState<string | null>(null);
-  const [totals, setTotals] = useState<{ totalProducts?: number; totalSales?: number }>({});
-  const [filters, setFilters] = useState<FilterState>({
-    role: "all",
-    search: ""
-  });
+  const [filters, setFilters] = useState<FilterState>({ role: "all", search: "" });
 
-  const applyFilters = useCallback((adminList: AdminWithStats[], filterState: FilterState) => {
-    let result = [...adminList];
-    
-    if (filterState.role !== "all") {
-      result = result.filter(admin => admin.role === filterState.role);
-    }
-    
-    if (filterState.search.trim()) {
-      const searchTerm = filterState.search.toLowerCase();
-      result = result.filter(admin => 
-        admin.name.toLowerCase().includes(searchTerm) ||
-        admin.email.toLowerCase().includes(searchTerm)
-      );
-    }
-    
-    setFilteredAdmins(result);
+  const load = useCallback(() => {
+    setLoading(true);
+    adminAuthApi
+      .listAdmins()
+      .then((d) => setAdmins(d.admins))
+      .catch((err) => setError(err instanceof ApiClientError ? err.message : "Failed to load admins."))
+      .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
-    fetch("/api/admin/admins", { credentials: "include" })
-      .then((r) => r.json())
-      .then((d) => {
-        const adminsList = d.admins ?? [];
-        setAdmins(adminsList);
-        setTotals(d.totals ?? {});
-        applyFilters(adminsList, filters);
-      })
-      .finally(() => setLoading(false));
-  }, [applyFilters, filters]);
+    load();
+  }, [load]);
 
-  useEffect(() => {
-    applyFilters(admins, filters);
-  }, [filters, admins, applyFilters]);
+  const filteredAdmins = useMemo(() => {
+    let result = admins;
+    if (filters.role !== "all") result = result.filter((a) => a.role === filters.role);
+    const term = filters.search.trim().toLowerCase();
+    if (term) {
+      result = result.filter(
+        (a) => a.name.toLowerCase().includes(term) || a.email.toLowerCase().includes(term),
+      );
+    }
+    return result;
+  }, [admins, filters]);
 
-  const removeAdmin = async (adminId: string, adminName: string) => {
+  const removeAdmin = async (id: string, adminName: string) => {
     if (!confirm(`Are you sure you want to remove ${adminName}? This action cannot be undone.`)) return;
-    
-    const res = await fetch(`/api/admin/admins?adminId=${adminId}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
-    
-    if (res.ok) {
-      setAdmins((prev) => prev.filter((a) => a.adminId !== adminId));
+    try {
+      await adminAuthApi.removeAdmin(id);
+      setAdmins((prev) => prev.filter((a) => a.id !== id));
       setExpandedAdmin(null);
+    } catch (err) {
+      alert(err instanceof ApiClientError ? err.message : "Failed to remove admin.");
     }
   };
 
-  const toggleExpand = (adminId: string) => {
-    setExpandedAdmin(expandedAdmin === adminId ? null : adminId);
-  };
+  const toggleExpand = (id: string) => setExpandedAdmin((cur) => (cur === id ? null : id));
 
   if (loading) {
     return (
@@ -101,13 +77,20 @@ export default function AdminsTab() {
     );
   }
 
-  const seniorAdminsCount = admins.filter(a => a.role === "senior").length;
-  const subAdminsCount = admins.filter(a => a.role === "sub").length;
+  const seniorAdminsCount = admins.filter((a) => a.role === "SENIOR").length;
+  const subAdminsCount = admins.filter((a) => a.role === "SUB").length;
+  const activeCount = admins.filter((a) => a.isActive).length;
 
   return (
     <div className="space-y-6">
+      {error && (
+        <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm">
+          {error}
+        </div>
+      )}
+
       {/* Header Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-4">
           <div className="flex items-center justify-between">
             <div>
@@ -119,11 +102,11 @@ export default function AdminsTab() {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-gradient-to-r from-amber-50 to-amber-100 border border-amber-200 rounded-xl p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-amber-700">Super Admins</p>
+              <p className="text-sm font-medium text-amber-700">Senior Admins</p>
               <p className="text-2xl font-bold text-amber-900 mt-1">{seniorAdminsCount}</p>
             </div>
             <div className="p-2 bg-white rounded-lg">
@@ -131,7 +114,7 @@ export default function AdminsTab() {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 rounded-xl p-4">
           <div className="flex items-center justify-between">
             <div>
@@ -143,43 +126,15 @@ export default function AdminsTab() {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-gradient-to-r from-emerald-50 to-emerald-100 border border-emerald-200 rounded-xl p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-emerald-700">Active</p>
-              <p className="text-2xl font-bold text-emerald-900 mt-1">{admins.length}</p>
+              <p className="text-2xl font-bold text-emerald-900 mt-1">{activeCount}</p>
             </div>
             <div className="p-2 bg-white rounded-lg">
               <UserCheck className="w-6 h-6 text-emerald-600" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-r from-sky-50 to-sky-100 border border-sky-200 rounded-xl p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-sky-700">Total Products</p>
-              <p className="text-2xl font-bold text-sky-900 mt-1">
-                {Number(totals.totalProducts ?? 0).toLocaleString()}
-              </p>
-            </div>
-            <div className="p-2 bg-white rounded-lg">
-              <UserCheck className="w-6 h-6 text-sky-600" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-purple-700">Total Sales</p>
-              <p className="text-2xl font-bold text-purple-900 mt-1">
-                {Math.round(Number(totals.totalSales ?? 0)).toLocaleString()}
-              </p>
-            </div>
-            <div className="p-2 bg-white rounded-lg">
-              <UserCheck className="w-6 h-6 text-purple-600" />
             </div>
           </div>
         </div>
@@ -192,7 +147,7 @@ export default function AdminsTab() {
             <h2 className="text-lg font-semibold text-gray-900">Admin Management</h2>
             <p className="text-sm text-gray-500 mt-1">Manage team permissions and access</p>
           </div>
-          
+
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -200,46 +155,43 @@ export default function AdminsTab() {
                 type="text"
                 placeholder="Search admins..."
                 value={filters.search}
-                onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+                onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
                 className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
               />
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <Filter className="w-4 h-4 text-gray-400" />
               <select
                 value={filters.role}
-                onChange={(e) => setFilters(prev => ({ ...prev, role: e.target.value as FilterState["role"] }))}
+                onChange={(e) => setFilters((prev) => ({ ...prev, role: e.target.value as FilterState["role"] }))}
                 className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="all">All Roles</option>
-                <option value="senior">Super Admin</option>
-                <option value="sub">Sub Admin</option>
+                <option value="SENIOR">Senior Admin</option>
+                <option value="SUB">Sub Admin</option>
               </select>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Admin Cards/Table - Responsive Design */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-1 gap-4">
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden hidden xl:block">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Admin</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Role</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Products</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Product Value</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Sales</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {filteredAdmins.map((admin) => (
-                  <tr key={admin.adminId} className="hover:bg-gray-50 transition-colors">
+      {/* Admin Table */}
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Admin</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Role</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {filteredAdmins.map((admin) => (
+                <React.Fragment key={admin.id}>
+                  <tr className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
@@ -257,15 +209,15 @@ export default function AdminsTab() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                        admin.role === "senior" 
-                          ? "bg-amber-100 text-amber-800" 
-                          : "bg-gray-100 text-gray-800"
-                      }`}>
-                        {admin.role === "senior" ? (
+                      <span
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                          admin.role === "SENIOR" ? "bg-amber-100 text-amber-800" : "bg-gray-100 text-gray-800"
+                        }`}
+                      >
+                        {admin.role === "SENIOR" ? (
                           <>
                             <ShieldAlert className="w-3 h-3 mr-1" />
-                            Super Admin
+                            Senior Admin
                           </>
                         ) : (
                           <>
@@ -275,26 +227,23 @@ export default function AdminsTab() {
                         )}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-700">
-                      {admin.productCount ?? 0}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-700">
-                      {Math.round(Number(admin.productValue ?? 0)).toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-700">
-                      {Math.round(Number(admin.salesTotal ?? 0)).toLocaleString()}
-                    </td>
                     <td className="px-6 py-4">
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-                        <div className="w-2 h-2 bg-emerald-500 rounded-full mr-2"></div>
-                        Active
+                      <span
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                          admin.isActive ? "bg-emerald-100 text-emerald-800" : "bg-gray-100 text-gray-600"
+                        }`}
+                      >
+                        <div
+                          className={`w-2 h-2 rounded-full mr-2 ${admin.isActive ? "bg-emerald-500" : "bg-gray-400"}`}
+                        ></div>
+                        {admin.isActive ? "Active" : "Inactive"}
                       </span>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-2">
-                        {admin.role === "sub" && (
+                        {admin.role === "SUB" && (
                           <button
-                            onClick={() => removeAdmin(admin.adminId, admin.name)}
+                            onClick={() => removeAdmin(admin.id, admin.name)}
                             className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
                           >
                             <UserX className="w-4 h-4 mr-1" />
@@ -302,124 +251,39 @@ export default function AdminsTab() {
                           </button>
                         )}
                         <button
-                          onClick={() => toggleExpand(admin.adminId)}
+                          onClick={() => toggleExpand(admin.id)}
                           className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors"
                         >
                           Details
-                          <ChevronRight className={`w-4 h-4 ml-1 transition-transform ${
-                            expandedAdmin === admin.adminId ? "rotate-90" : ""
-                          }`} />
+                          <ChevronRight
+                            className={`w-4 h-4 ml-1 transition-transform ${
+                              expandedAdmin === admin.id ? "rotate-90" : ""
+                            }`}
+                          />
                         </button>
                       </div>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          
-          {/* Expanded View */}
-          {expandedAdmin && (
-            <div className="border-t border-gray-200 bg-gray-50">
-              {filteredAdmins
-                .filter(a => a.adminId === expandedAdmin)
-                .map(admin => (
-                  <div key={admin.adminId} className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-700 mb-2">Admin Details</h4>
-                        <div className="space-y-2">
+                  {expandedAdmin === admin.id && (
+                    <tr className="bg-gray-50">
+                      <td colSpan={4} className="px-6 py-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
                             <span className="text-sm text-gray-500">Admin ID:</span>
-                            <p className="text-sm font-mono bg-gray-100 px-2 py-1 rounded mt-1">{admin.adminId}</p>
+                            <p className="text-sm font-mono bg-gray-100 px-2 py-1 rounded mt-1">{admin.id}</p>
                           </div>
                           <div>
                             <span className="text-sm text-gray-500">Created:</span>
-                            <p className="text-sm">{new Date().toLocaleDateString()}</p>
+                            <p className="text-sm mt-1">{new Date(admin.createdAt).toLocaleDateString()}</p>
                           </div>
                         </div>
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-700 mb-2">Permissions</h4>
-                        <div className="space-y-2">
-                          <div className="flex items-center text-sm">
-                            <div className={`w-2 h-2 rounded-full mr-2 ${
-                              admin.role === "senior" ? "bg-amber-500" : "bg-gray-400"
-                            }`}></div>
-                            {admin.role === "senior" ? "Full system access" : "Limited access"}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-            </div>
-          )}
-        </div>
-
-        {/* Mobile/Grid View */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:hidden gap-4">
-          {filteredAdmins.map((admin) => (
-            <div key={admin.adminId} className="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition-shadow">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center">
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-                    <span className="text-white font-semibold text-lg">
-                      {admin.name.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                  <div className="ml-4">
-                    <h3 className="font-semibold text-gray-900">{admin.name}</h3>
-                    <p className="text-sm text-gray-500 flex items-center mt-1">
-                      <Mail className="w-3 h-3 mr-1" />
-                      {admin.email}
-                    </p>
-                  </div>
-                </div>
-                <button className="text-gray-400 hover:text-gray-600">
-                  <MoreVertical className="w-5 h-5" />
-                </button>
-              </div>
-              
-              <div className="mt-4 flex items-center justify-between">
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                  admin.role === "senior" 
-                    ? "bg-amber-100 text-amber-800" 
-                    : "bg-gray-100 text-gray-800"
-                }`}>
-                  {admin.role === "senior" ? (
-                    <>
-                      <ShieldAlert className="w-3 h-3 mr-1" />
-                      Super Admin
-                    </>
-                  ) : (
-                    <>
-                      <Shield className="w-3 h-3 mr-1" />
-                      Sub Admin
-                    </>
+                      </td>
+                    </tr>
                   )}
-                </span>
-                
-                <span className="inline-flex items-center text-sm text-emerald-600">
-                  <div className="w-2 h-2 bg-emerald-500 rounded-full mr-2"></div>
-                  Active
-                </span>
-              </div>
-              
-              <div className="mt-4 pt-4 border-t border-gray-100">
-                <div className="flex justify-end">
-                  {admin.role === "sub" && (
-                    <button
-                      onClick={() => removeAdmin(admin.adminId, admin.name)}
-                      className="px-3 py-1.5 text-sm font-medium text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
-                    >
-                      Remove Admin
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
+                </React.Fragment>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -432,8 +296,8 @@ export default function AdminsTab() {
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">No admins found</h3>
             <p className="text-gray-500 mb-6">
-              {filters.search || filters.role !== "all" 
-                ? "Try adjusting your search or filters" 
+              {filters.search || filters.role !== "all"
+                ? "Try adjusting your search or filters"
                 : "No admins have been added yet"}
             </p>
             {(filters.search || filters.role !== "all") && (
@@ -452,7 +316,7 @@ export default function AdminsTab() {
       <div className="text-sm text-gray-500 text-center">
         Showing {filteredAdmins.length} of {admins.length} admins
         {filters.search && ` • Matching "${filters.search}"`}
-        {filters.role !== "all" && ` • ${filters.role === "senior" ? "Super" : "Sub"} Admins only`}
+        {filters.role !== "all" && ` • ${filters.role === "SENIOR" ? "Senior" : "Sub"} Admins only`}
       </div>
     </div>
   );

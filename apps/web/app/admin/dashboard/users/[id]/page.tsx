@@ -4,26 +4,24 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { formatPrice } from "@/lib/formatPrice";
-
-type UserDetail = {
-  id: string;
-  fullName?: string;
-  name?: string;
-  email?: string;
-  phone?: string;
-  walletBalance?: number;
-};
+import { usersApi, walletApi, ApiClientError } from "@/lib/api";
+import type {
+  AdminUserDetailDTO,
+  OrderDTO,
+  WalletTransactionDTO,
+  WalletRedemptionDTO,
+} from "@nuru/types";
 
 export default function AdminUserDetailPage() {
   const params = useParams<{ id: string }>();
   const id = params?.id ?? "";
 
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<UserDetail | null>(null);
-  const [orders, setOrders] = useState<Record<string, unknown>[]>([]);
-  const [transactions, setTransactions] = useState<Record<string, unknown>[]>([]);
-  const [redemptions, setRedemptions] = useState<Record<string, unknown>[]>([]);
-  const [adjustType, setAdjustType] = useState<"credit" | "debit">("credit");
+  const [user, setUser] = useState<AdminUserDetailDTO | null>(null);
+  const [orders, setOrders] = useState<OrderDTO[]>([]);
+  const [transactions, setTransactions] = useState<WalletTransactionDTO[]>([]);
+  const [redemptions, setRedemptions] = useState<WalletRedemptionDTO[]>([]);
+  const [adjustType, setAdjustType] = useState<"CREDIT" | "DEBIT">("CREDIT");
   const [adjustAmount, setAdjustAmount] = useState<number | "">("");
   const [adjustReason, setAdjustReason] = useState("");
   const [adjusting, setAdjusting] = useState(false);
@@ -31,48 +29,48 @@ export default function AdminUserDetailPage() {
   const load = () => {
     if (!id) return;
     setLoading(true);
-    fetch(`/api/admin/users/${id}`, { credentials: "include" })
-      .then((r) => r.json())
+    usersApi.admin
+      .get(id)
       .then((d) => {
-        setUser(d.user ?? null);
-        setOrders(d.orders ?? []);
-        setTransactions(d.transactions ?? []);
-        setRedemptions(d.redemptions ?? []);
+        setUser(d.user);
+        setOrders(d.orders);
+        setTransactions(d.transactions);
+        setRedemptions(d.redemptions);
       })
+      .catch(() => setUser(null))
       .finally(() => setLoading(false));
   };
 
   useEffect(() => {
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const submitAdjustment = async () => {
     if (!user) return;
     if (adjustAmount === "" || Number(adjustAmount) <= 0) return;
     setAdjusting(true);
-    const res = await fetch("/api/admin/wallet/adjust", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+    try {
+      await walletApi.admin.adjustBalance({
         userId: user.id,
-        amount: Number(adjustAmount),
         type: adjustType,
-        reason: adjustReason,
-      }),
-    });
-    setAdjusting(false);
-    if (res.ok) {
+        amount: Number(adjustAmount),
+        note: adjustReason.trim() || null,
+      });
       setAdjustAmount("");
       setAdjustReason("");
       load();
+    } catch (err) {
+      if (err instanceof ApiClientError) alert(err.message);
+    } finally {
+      setAdjusting(false);
     }
   };
 
   if (loading) return <LoadingSpinner text="Loading user..." />;
   if (!user) return <p>User not found.</p>;
 
-  const displayName = user.fullName || user.name || "User";
+  const displayName = user.name || "User";
 
   return (
     <div className="space-y-6">
@@ -81,30 +79,28 @@ export default function AdminUserDetailPage() {
         <p className="text-sm text-slate-500">{user.email}</p>
         <p className="text-sm text-slate-500">{user.phone}</p>
         <p className="text-sm text-slate-700 mt-3">
-          Wallet Balance: {formatPrice(Number(user.walletBalance ?? 0))}
+          Wallet Balance: {formatPrice(Number(user.walletBalance))}
         </p>
         <div className="mt-4 space-y-2">
           <h3 className="text-sm font-semibold">Wallet Adjustment</h3>
           <div className="flex flex-wrap gap-2">
             <select
               value={adjustType}
-              onChange={(e) => setAdjustType(e.target.value as "credit" | "debit")}
+              onChange={(e) => setAdjustType(e.target.value as "CREDIT" | "DEBIT")}
               className="border rounded px-2 py-1 text-sm"
             >
-              <option value="credit">Credit</option>
-              <option value="debit">Debit</option>
+              <option value="CREDIT">Credit</option>
+              <option value="DEBIT">Debit</option>
             </select>
             <input
               type="number"
               placeholder="Amount"
               value={adjustAmount}
-              onChange={(e) =>
-                setAdjustAmount(e.target.value === "" ? "" : Number(e.target.value))
-              }
+              onChange={(e) => setAdjustAmount(e.target.value === "" ? "" : Number(e.target.value))}
               className="border rounded px-2 py-1 text-sm"
             />
             <input
-              placeholder="Reason (optional)"
+              placeholder="Note (optional)"
               value={adjustReason}
               onChange={(e) => setAdjustReason(e.target.value)}
               className="border rounded px-2 py-1 text-sm flex-1 min-w-[160px]"
@@ -127,10 +123,10 @@ export default function AdminUserDetailPage() {
         ) : (
           <div className="space-y-2">
             {orders.map((o) => (
-              <div key={String(o.id)} className="flex justify-between text-sm border-b py-2">
-                <span>#{String(o.id).slice(0, 8)}</span>
-                <span>{formatPrice(Number(o.totalAmount ?? 0))}</span>
-                <span className="capitalize">{String(o.status ?? "")}</span>
+              <div key={o.id} className="flex justify-between text-sm border-b py-2">
+                <span>#{o.orderNumber}</span>
+                <span>{formatPrice(Number(o.total))}</span>
+                <span className="capitalize">{o.status.toLowerCase()}</span>
               </div>
             ))}
           </div>
@@ -144,10 +140,10 @@ export default function AdminUserDetailPage() {
         ) : (
           <div className="space-y-2">
             {transactions.map((t) => (
-              <div key={String(t.id)} className="flex justify-between text-sm border-b py-2">
-                <span className="capitalize">{String(t.type ?? "")}</span>
-                <span>{String(t.source ?? "")}</span>
-                <span>{formatPrice(Number(t.amount ?? 0))}</span>
+              <div key={t.id} className="flex justify-between text-sm border-b py-2">
+                <span className="capitalize">{t.type.toLowerCase()}</span>
+                <span className="capitalize">{t.source.toLowerCase()}</span>
+                <span>{formatPrice(Number(t.amount))}</span>
               </div>
             ))}
           </div>
@@ -161,11 +157,10 @@ export default function AdminUserDetailPage() {
         ) : (
           <div className="space-y-2">
             {redemptions.map((r) => (
-              <div key={String(r.id)} className="flex justify-between text-sm border-b py-2">
-                <span className="capitalize">{String(r.type ?? "")}</span>
-                <span>{String(r.productName ?? "")}</span>
-                <span>{formatPrice(Number(r.amount ?? 0))}</span>
-                <span className="capitalize">{String(r.status ?? "")}</span>
+              <div key={r.id} className="flex justify-between text-sm border-b py-2">
+                <span>{r.method ?? "Cash-out"}</span>
+                <span>{formatPrice(Number(r.amount))}</span>
+                <span className="capitalize">{r.status.toLowerCase()}</span>
               </div>
             ))}
           </div>

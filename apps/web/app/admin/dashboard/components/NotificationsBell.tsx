@@ -6,49 +6,14 @@ import { useRouter } from "next/navigation";
 import type { Route } from "next";
 import { useNotifications } from "../context/NotificationsContext";
 import { ADMIN_DASHBOARD_PATH, adminRoute } from "@/lib/adminPaths";
+import type { NotificationDTO } from "@nuru/types";
 
-/* ---------- Notification Type ---------- */
-interface NotificationItem {
-  id: string;
-  readAt?: unknown;
-  relatedId?: string;
-  type?: string;
-  senderName?: string;
-  userName?: string;
-  title?: string;
-  body?: string;
-  createdAt?: unknown;
-}
+type NotificationItem = NotificationDTO;
 
 /* ---------- Safe Date Formatter ---------- */
-const toDisplayDate = (value: unknown): string => {
+const toDisplayDate = (value: string): string => {
   if (!value) return "";
-
-  if (typeof value === "string" || typeof value === "number") {
-    return new Date(value).toLocaleString();
-  }
-
-  if (
-    typeof value === "object" &&
-    value !== null &&
-    "toDate" in value &&
-    typeof (value as { toDate?: () => Date }).toDate === "function"
-  ) {
-    return (value as { toDate: () => Date }).toDate().toLocaleString();
-  }
-
-  if (
-    typeof value === "object" &&
-    value !== null &&
-    "seconds" in value &&
-    typeof (value as { seconds?: number }).seconds === "number"
-  ) {
-    return new Date(
-      (value as { seconds: number }).seconds * 1000
-    ).toLocaleString();
-  }
-
-  return "";
+  return new Date(value).toLocaleString();
 };
 
 const getNotificationRoute = (n: NotificationItem): Route | null => {
@@ -91,14 +56,13 @@ export default function NotificationsBell() {
 
   /* ---------- Only unread in dropdown ---------- */
   const visibleNotifications = useMemo(
-    () =>
-      (notifications as NotificationItem[]).filter((n) => !n.readAt),
+    () => notifications.filter((n) => !n.read),
     [notifications]
   );
 
   /* ---------- Click notification ---------- */
   const handleNotificationClick = async (n: NotificationItem) => {
-    if (!n.readAt) await markRead(n.id);
+    if (!n.read) await markRead(n.id);
 
     const route = getNotificationRoute(n);
     if (route) {
@@ -151,11 +115,7 @@ export default function NotificationsBell() {
               </p>
             ) : (
               visibleNotifications.map((n) => {
-                const sender =
-                  n.senderName ||
-                  n.userName ||
-                  n.title ||
-                  "User";
+                const sender = n.title || "Notification";
 
                 return (
                   <div

@@ -3616,6 +3616,7 @@ export namespace Prisma {
     passwordHash: string | null
     name: string | null
     phone: string | null
+    address: string | null
     avatarUrl: string | null
     emailVerified: Date | null
     isActive: boolean | null
@@ -3632,6 +3633,7 @@ export namespace Prisma {
     passwordHash: string | null
     name: string | null
     phone: string | null
+    address: string | null
     avatarUrl: string | null
     emailVerified: Date | null
     isActive: boolean | null
@@ -3648,6 +3650,7 @@ export namespace Prisma {
     passwordHash: number
     name: number
     phone: number
+    address: number
     avatarUrl: number
     emailVerified: number
     isActive: number
@@ -3674,6 +3677,7 @@ export namespace Prisma {
     passwordHash?: true
     name?: true
     phone?: true
+    address?: true
     avatarUrl?: true
     emailVerified?: true
     isActive?: true
@@ -3690,6 +3694,7 @@ export namespace Prisma {
     passwordHash?: true
     name?: true
     phone?: true
+    address?: true
     avatarUrl?: true
     emailVerified?: true
     isActive?: true
@@ -3706,6 +3711,7 @@ export namespace Prisma {
     passwordHash?: true
     name?: true
     phone?: true
+    address?: true
     avatarUrl?: true
     emailVerified?: true
     isActive?: true
@@ -3809,6 +3815,7 @@ export namespace Prisma {
     passwordHash: string | null
     name: string | null
     phone: string | null
+    address: string | null
     avatarUrl: string | null
     emailVerified: Date | null
     isActive: boolean
@@ -3844,6 +3851,7 @@ export namespace Prisma {
     passwordHash?: boolean
     name?: boolean
     phone?: boolean
+    address?: boolean
     avatarUrl?: boolean
     emailVerified?: boolean
     isActive?: boolean
@@ -3875,6 +3883,7 @@ export namespace Prisma {
     passwordHash?: boolean
     name?: boolean
     phone?: boolean
+    address?: boolean
     avatarUrl?: boolean
     emailVerified?: boolean
     isActive?: boolean
@@ -3892,6 +3901,7 @@ export namespace Prisma {
     passwordHash?: boolean
     name?: boolean
     phone?: boolean
+    address?: boolean
     avatarUrl?: boolean
     emailVerified?: boolean
     isActive?: boolean
@@ -3909,6 +3919,7 @@ export namespace Prisma {
     passwordHash?: boolean
     name?: boolean
     phone?: boolean
+    address?: boolean
     avatarUrl?: boolean
     emailVerified?: boolean
     isActive?: boolean
@@ -3919,7 +3930,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "passwordHash" | "name" | "phone" | "avatarUrl" | "emailVerified" | "isActive" | "walletBalance" | "referralCode" | "referredById" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "passwordHash" | "name" | "phone" | "address" | "avatarUrl" | "emailVerified" | "isActive" | "walletBalance" | "referralCode" | "referredById" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     referredBy?: boolean | User$referredByArgs<ExtArgs>
     referrals?: boolean | User$referralsArgs<ExtArgs>
@@ -3968,6 +3979,7 @@ export namespace Prisma {
       passwordHash: string | null
       name: string | null
       phone: string | null
+      address: string | null
       avatarUrl: string | null
       emailVerified: Date | null
       isActive: boolean
@@ -4418,6 +4430,7 @@ export namespace Prisma {
     readonly passwordHash: FieldRef<"User", 'String'>
     readonly name: FieldRef<"User", 'String'>
     readonly phone: FieldRef<"User", 'String'>
+    readonly address: FieldRef<"User", 'String'>
     readonly avatarUrl: FieldRef<"User", 'String'>
     readonly emailVerified: FieldRef<"User", 'DateTime'>
     readonly isActive: FieldRef<"User", 'Boolean'>
@@ -17493,14 +17506,26 @@ export namespace Prisma {
 
   export type AggregateHeroAnnouncement = {
     _count: HeroAnnouncementCountAggregateOutputType | null
+    _avg: HeroAnnouncementAvgAggregateOutputType | null
+    _sum: HeroAnnouncementSumAggregateOutputType | null
     _min: HeroAnnouncementMinAggregateOutputType | null
     _max: HeroAnnouncementMaxAggregateOutputType | null
+  }
+
+  export type HeroAnnouncementAvgAggregateOutputType = {
+    displayOrder: number | null
+  }
+
+  export type HeroAnnouncementSumAggregateOutputType = {
+    displayOrder: number | null
   }
 
   export type HeroAnnouncementMinAggregateOutputType = {
     id: string | null
     message: string | null
     linkUrl: string | null
+    gradient: string | null
+    displayOrder: number | null
     isActive: boolean | null
     startsAt: Date | null
     endsAt: Date | null
@@ -17512,6 +17537,8 @@ export namespace Prisma {
     id: string | null
     message: string | null
     linkUrl: string | null
+    gradient: string | null
+    displayOrder: number | null
     isActive: boolean | null
     startsAt: Date | null
     endsAt: Date | null
@@ -17523,6 +17550,8 @@ export namespace Prisma {
     id: number
     message: number
     linkUrl: number
+    gradient: number
+    displayOrder: number
     isActive: number
     startsAt: number
     endsAt: number
@@ -17532,10 +17561,20 @@ export namespace Prisma {
   }
 
 
+  export type HeroAnnouncementAvgAggregateInputType = {
+    displayOrder?: true
+  }
+
+  export type HeroAnnouncementSumAggregateInputType = {
+    displayOrder?: true
+  }
+
   export type HeroAnnouncementMinAggregateInputType = {
     id?: true
     message?: true
     linkUrl?: true
+    gradient?: true
+    displayOrder?: true
     isActive?: true
     startsAt?: true
     endsAt?: true
@@ -17547,6 +17586,8 @@ export namespace Prisma {
     id?: true
     message?: true
     linkUrl?: true
+    gradient?: true
+    displayOrder?: true
     isActive?: true
     startsAt?: true
     endsAt?: true
@@ -17558,6 +17599,8 @@ export namespace Prisma {
     id?: true
     message?: true
     linkUrl?: true
+    gradient?: true
+    displayOrder?: true
     isActive?: true
     startsAt?: true
     endsAt?: true
@@ -17604,6 +17647,18 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
+     * Select which fields to average
+    **/
+    _avg?: HeroAnnouncementAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: HeroAnnouncementSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
      * Select which fields to find the minimum value
     **/
     _min?: HeroAnnouncementMinAggregateInputType
@@ -17634,6 +17689,8 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: HeroAnnouncementCountAggregateInputType | true
+    _avg?: HeroAnnouncementAvgAggregateInputType
+    _sum?: HeroAnnouncementSumAggregateInputType
     _min?: HeroAnnouncementMinAggregateInputType
     _max?: HeroAnnouncementMaxAggregateInputType
   }
@@ -17642,12 +17699,16 @@ export namespace Prisma {
     id: string
     message: string
     linkUrl: string | null
+    gradient: string | null
+    displayOrder: number
     isActive: boolean
     startsAt: Date | null
     endsAt: Date | null
     createdAt: Date
     updatedAt: Date
     _count: HeroAnnouncementCountAggregateOutputType | null
+    _avg: HeroAnnouncementAvgAggregateOutputType | null
+    _sum: HeroAnnouncementSumAggregateOutputType | null
     _min: HeroAnnouncementMinAggregateOutputType | null
     _max: HeroAnnouncementMaxAggregateOutputType | null
   }
@@ -17670,6 +17731,8 @@ export namespace Prisma {
     id?: boolean
     message?: boolean
     linkUrl?: boolean
+    gradient?: boolean
+    displayOrder?: boolean
     isActive?: boolean
     startsAt?: boolean
     endsAt?: boolean
@@ -17681,6 +17744,8 @@ export namespace Prisma {
     id?: boolean
     message?: boolean
     linkUrl?: boolean
+    gradient?: boolean
+    displayOrder?: boolean
     isActive?: boolean
     startsAt?: boolean
     endsAt?: boolean
@@ -17692,6 +17757,8 @@ export namespace Prisma {
     id?: boolean
     message?: boolean
     linkUrl?: boolean
+    gradient?: boolean
+    displayOrder?: boolean
     isActive?: boolean
     startsAt?: boolean
     endsAt?: boolean
@@ -17703,6 +17770,8 @@ export namespace Prisma {
     id?: boolean
     message?: boolean
     linkUrl?: boolean
+    gradient?: boolean
+    displayOrder?: boolean
     isActive?: boolean
     startsAt?: boolean
     endsAt?: boolean
@@ -17710,7 +17779,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type HeroAnnouncementOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "message" | "linkUrl" | "isActive" | "startsAt" | "endsAt" | "createdAt" | "updatedAt", ExtArgs["result"]["heroAnnouncement"]>
+  export type HeroAnnouncementOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "message" | "linkUrl" | "gradient" | "displayOrder" | "isActive" | "startsAt" | "endsAt" | "createdAt" | "updatedAt", ExtArgs["result"]["heroAnnouncement"]>
 
   export type $HeroAnnouncementPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "HeroAnnouncement"
@@ -17719,6 +17788,14 @@ export namespace Prisma {
       id: string
       message: string
       linkUrl: string | null
+      /**
+       * * Optional CSS gradient token rendered behind the marquee slide.
+       */
+      gradient: string | null
+      /**
+       * * Sort position in the marquee; lower shows first.
+       */
+      displayOrder: number
       isActive: boolean
       startsAt: Date | null
       endsAt: Date | null
@@ -18150,6 +18227,8 @@ export namespace Prisma {
     readonly id: FieldRef<"HeroAnnouncement", 'String'>
     readonly message: FieldRef<"HeroAnnouncement", 'String'>
     readonly linkUrl: FieldRef<"HeroAnnouncement", 'String'>
+    readonly gradient: FieldRef<"HeroAnnouncement", 'String'>
+    readonly displayOrder: FieldRef<"HeroAnnouncement", 'Int'>
     readonly isActive: FieldRef<"HeroAnnouncement", 'Boolean'>
     readonly startsAt: FieldRef<"HeroAnnouncement", 'DateTime'>
     readonly endsAt: FieldRef<"HeroAnnouncement", 'DateTime'>
@@ -31948,7 +32027,8 @@ export namespace Prisma {
   export type SabbathMessageMinAggregateOutputType = {
     id: string | null
     message: string | null
-    isActive: boolean | null
+    sabbathDate: string | null
+    createdById: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -31956,7 +32036,8 @@ export namespace Prisma {
   export type SabbathMessageMaxAggregateOutputType = {
     id: string | null
     message: string | null
-    isActive: boolean | null
+    sabbathDate: string | null
+    createdById: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -31964,7 +32045,8 @@ export namespace Prisma {
   export type SabbathMessageCountAggregateOutputType = {
     id: number
     message: number
-    isActive: number
+    sabbathDate: number
+    createdById: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -31974,7 +32056,8 @@ export namespace Prisma {
   export type SabbathMessageMinAggregateInputType = {
     id?: true
     message?: true
-    isActive?: true
+    sabbathDate?: true
+    createdById?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -31982,7 +32065,8 @@ export namespace Prisma {
   export type SabbathMessageMaxAggregateInputType = {
     id?: true
     message?: true
-    isActive?: true
+    sabbathDate?: true
+    createdById?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -31990,7 +32074,8 @@ export namespace Prisma {
   export type SabbathMessageCountAggregateInputType = {
     id?: true
     message?: true
-    isActive?: true
+    sabbathDate?: true
+    createdById?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -32071,7 +32156,8 @@ export namespace Prisma {
   export type SabbathMessageGroupByOutputType = {
     id: string
     message: string
-    isActive: boolean
+    sabbathDate: string
+    createdById: string | null
     createdAt: Date
     updatedAt: Date
     _count: SabbathMessageCountAggregateOutputType | null
@@ -32096,7 +32182,8 @@ export namespace Prisma {
   export type SabbathMessageSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     message?: boolean
-    isActive?: boolean
+    sabbathDate?: boolean
+    createdById?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["sabbathMessage"]>
@@ -32104,7 +32191,8 @@ export namespace Prisma {
   export type SabbathMessageSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     message?: boolean
-    isActive?: boolean
+    sabbathDate?: boolean
+    createdById?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["sabbathMessage"]>
@@ -32112,7 +32200,8 @@ export namespace Prisma {
   export type SabbathMessageSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     message?: boolean
-    isActive?: boolean
+    sabbathDate?: boolean
+    createdById?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["sabbathMessage"]>
@@ -32120,12 +32209,13 @@ export namespace Prisma {
   export type SabbathMessageSelectScalar = {
     id?: boolean
     message?: boolean
-    isActive?: boolean
+    sabbathDate?: boolean
+    createdById?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type SabbathMessageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "message" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["sabbathMessage"]>
+  export type SabbathMessageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "message" | "sabbathDate" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["sabbathMessage"]>
 
   export type $SabbathMessagePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "SabbathMessage"
@@ -32133,7 +32223,8 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       message: string
-      isActive: boolean
+      sabbathDate: string
+      createdById: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["sabbathMessage"]>
@@ -32561,7 +32652,8 @@ export namespace Prisma {
   interface SabbathMessageFieldRefs {
     readonly id: FieldRef<"SabbathMessage", 'String'>
     readonly message: FieldRef<"SabbathMessage", 'String'>
-    readonly isActive: FieldRef<"SabbathMessage", 'Boolean'>
+    readonly sabbathDate: FieldRef<"SabbathMessage", 'String'>
+    readonly createdById: FieldRef<"SabbathMessage", 'String'>
     readonly createdAt: FieldRef<"SabbathMessage", 'DateTime'>
     readonly updatedAt: FieldRef<"SabbathMessage", 'DateTime'>
   }
@@ -32950,6 +33042,7 @@ export namespace Prisma {
     passwordHash: 'passwordHash',
     name: 'name',
     phone: 'phone',
+    address: 'address',
     avatarUrl: 'avatarUrl',
     emailVerified: 'emailVerified',
     isActive: 'isActive',
@@ -33122,6 +33215,8 @@ export namespace Prisma {
     id: 'id',
     message: 'message',
     linkUrl: 'linkUrl',
+    gradient: 'gradient',
+    displayOrder: 'displayOrder',
     isActive: 'isActive',
     startsAt: 'startsAt',
     endsAt: 'endsAt',
@@ -33313,7 +33408,8 @@ export namespace Prisma {
   export const SabbathMessageScalarFieldEnum: {
     id: 'id',
     message: 'message',
-    isActive: 'isActive',
+    sabbathDate: 'sabbathDate',
+    createdById: 'createdById',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -33638,6 +33734,7 @@ export namespace Prisma {
     passwordHash?: StringNullableFilter<"User"> | string | null
     name?: StringNullableFilter<"User"> | string | null
     phone?: StringNullableFilter<"User"> | string | null
+    address?: StringNullableFilter<"User"> | string | null
     avatarUrl?: StringNullableFilter<"User"> | string | null
     emailVerified?: DateTimeNullableFilter<"User"> | Date | string | null
     isActive?: BoolFilter<"User"> | boolean
@@ -33668,6 +33765,7 @@ export namespace Prisma {
     passwordHash?: SortOrderInput | SortOrder
     name?: SortOrderInput | SortOrder
     phone?: SortOrderInput | SortOrder
+    address?: SortOrderInput | SortOrder
     avatarUrl?: SortOrderInput | SortOrder
     emailVerified?: SortOrderInput | SortOrder
     isActive?: SortOrder
@@ -33702,6 +33800,7 @@ export namespace Prisma {
     passwordHash?: StringNullableFilter<"User"> | string | null
     name?: StringNullableFilter<"User"> | string | null
     phone?: StringNullableFilter<"User"> | string | null
+    address?: StringNullableFilter<"User"> | string | null
     avatarUrl?: StringNullableFilter<"User"> | string | null
     emailVerified?: DateTimeNullableFilter<"User"> | Date | string | null
     isActive?: BoolFilter<"User"> | boolean
@@ -33731,6 +33830,7 @@ export namespace Prisma {
     passwordHash?: SortOrderInput | SortOrder
     name?: SortOrderInput | SortOrder
     phone?: SortOrderInput | SortOrder
+    address?: SortOrderInput | SortOrder
     avatarUrl?: SortOrderInput | SortOrder
     emailVerified?: SortOrderInput | SortOrder
     isActive?: SortOrder
@@ -33755,6 +33855,7 @@ export namespace Prisma {
     passwordHash?: StringNullableWithAggregatesFilter<"User"> | string | null
     name?: StringNullableWithAggregatesFilter<"User"> | string | null
     phone?: StringNullableWithAggregatesFilter<"User"> | string | null
+    address?: StringNullableWithAggregatesFilter<"User"> | string | null
     avatarUrl?: StringNullableWithAggregatesFilter<"User"> | string | null
     emailVerified?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     isActive?: BoolWithAggregatesFilter<"User"> | boolean
@@ -34565,6 +34666,8 @@ export namespace Prisma {
     id?: StringFilter<"HeroAnnouncement"> | string
     message?: StringFilter<"HeroAnnouncement"> | string
     linkUrl?: StringNullableFilter<"HeroAnnouncement"> | string | null
+    gradient?: StringNullableFilter<"HeroAnnouncement"> | string | null
+    displayOrder?: IntFilter<"HeroAnnouncement"> | number
     isActive?: BoolFilter<"HeroAnnouncement"> | boolean
     startsAt?: DateTimeNullableFilter<"HeroAnnouncement"> | Date | string | null
     endsAt?: DateTimeNullableFilter<"HeroAnnouncement"> | Date | string | null
@@ -34576,6 +34679,8 @@ export namespace Prisma {
     id?: SortOrder
     message?: SortOrder
     linkUrl?: SortOrderInput | SortOrder
+    gradient?: SortOrderInput | SortOrder
+    displayOrder?: SortOrder
     isActive?: SortOrder
     startsAt?: SortOrderInput | SortOrder
     endsAt?: SortOrderInput | SortOrder
@@ -34590,6 +34695,8 @@ export namespace Prisma {
     NOT?: HeroAnnouncementWhereInput | HeroAnnouncementWhereInput[]
     message?: StringFilter<"HeroAnnouncement"> | string
     linkUrl?: StringNullableFilter<"HeroAnnouncement"> | string | null
+    gradient?: StringNullableFilter<"HeroAnnouncement"> | string | null
+    displayOrder?: IntFilter<"HeroAnnouncement"> | number
     isActive?: BoolFilter<"HeroAnnouncement"> | boolean
     startsAt?: DateTimeNullableFilter<"HeroAnnouncement"> | Date | string | null
     endsAt?: DateTimeNullableFilter<"HeroAnnouncement"> | Date | string | null
@@ -34601,14 +34708,18 @@ export namespace Prisma {
     id?: SortOrder
     message?: SortOrder
     linkUrl?: SortOrderInput | SortOrder
+    gradient?: SortOrderInput | SortOrder
+    displayOrder?: SortOrder
     isActive?: SortOrder
     startsAt?: SortOrderInput | SortOrder
     endsAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: HeroAnnouncementCountOrderByAggregateInput
+    _avg?: HeroAnnouncementAvgOrderByAggregateInput
     _max?: HeroAnnouncementMaxOrderByAggregateInput
     _min?: HeroAnnouncementMinOrderByAggregateInput
+    _sum?: HeroAnnouncementSumOrderByAggregateInput
   }
 
   export type HeroAnnouncementScalarWhereWithAggregatesInput = {
@@ -34618,6 +34729,8 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"HeroAnnouncement"> | string
     message?: StringWithAggregatesFilter<"HeroAnnouncement"> | string
     linkUrl?: StringNullableWithAggregatesFilter<"HeroAnnouncement"> | string | null
+    gradient?: StringNullableWithAggregatesFilter<"HeroAnnouncement"> | string | null
+    displayOrder?: IntWithAggregatesFilter<"HeroAnnouncement"> | number
     isActive?: BoolWithAggregatesFilter<"HeroAnnouncement"> | boolean
     startsAt?: DateTimeNullableWithAggregatesFilter<"HeroAnnouncement"> | Date | string | null
     endsAt?: DateTimeNullableWithAggregatesFilter<"HeroAnnouncement"> | Date | string | null
@@ -35535,7 +35648,8 @@ export namespace Prisma {
     NOT?: SabbathMessageWhereInput | SabbathMessageWhereInput[]
     id?: StringFilter<"SabbathMessage"> | string
     message?: StringFilter<"SabbathMessage"> | string
-    isActive?: BoolFilter<"SabbathMessage"> | boolean
+    sabbathDate?: StringFilter<"SabbathMessage"> | string
+    createdById?: StringNullableFilter<"SabbathMessage"> | string | null
     createdAt?: DateTimeFilter<"SabbathMessage"> | Date | string
     updatedAt?: DateTimeFilter<"SabbathMessage"> | Date | string
   }
@@ -35543,7 +35657,8 @@ export namespace Prisma {
   export type SabbathMessageOrderByWithRelationInput = {
     id?: SortOrder
     message?: SortOrder
-    isActive?: SortOrder
+    sabbathDate?: SortOrder
+    createdById?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -35554,7 +35669,8 @@ export namespace Prisma {
     OR?: SabbathMessageWhereInput[]
     NOT?: SabbathMessageWhereInput | SabbathMessageWhereInput[]
     message?: StringFilter<"SabbathMessage"> | string
-    isActive?: BoolFilter<"SabbathMessage"> | boolean
+    sabbathDate?: StringFilter<"SabbathMessage"> | string
+    createdById?: StringNullableFilter<"SabbathMessage"> | string | null
     createdAt?: DateTimeFilter<"SabbathMessage"> | Date | string
     updatedAt?: DateTimeFilter<"SabbathMessage"> | Date | string
   }, "id">
@@ -35562,7 +35678,8 @@ export namespace Prisma {
   export type SabbathMessageOrderByWithAggregationInput = {
     id?: SortOrder
     message?: SortOrder
-    isActive?: SortOrder
+    sabbathDate?: SortOrder
+    createdById?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: SabbathMessageCountOrderByAggregateInput
@@ -35576,7 +35693,8 @@ export namespace Prisma {
     NOT?: SabbathMessageScalarWhereWithAggregatesInput | SabbathMessageScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"SabbathMessage"> | string
     message?: StringWithAggregatesFilter<"SabbathMessage"> | string
-    isActive?: BoolWithAggregatesFilter<"SabbathMessage"> | boolean
+    sabbathDate?: StringWithAggregatesFilter<"SabbathMessage"> | string
+    createdById?: StringNullableWithAggregatesFilter<"SabbathMessage"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"SabbathMessage"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"SabbathMessage"> | Date | string
   }
@@ -35587,6 +35705,7 @@ export namespace Prisma {
     passwordHash?: string | null
     name?: string | null
     phone?: string | null
+    address?: string | null
     avatarUrl?: string | null
     emailVerified?: Date | string | null
     isActive?: boolean
@@ -35616,6 +35735,7 @@ export namespace Prisma {
     passwordHash?: string | null
     name?: string | null
     phone?: string | null
+    address?: string | null
     avatarUrl?: string | null
     emailVerified?: Date | string | null
     isActive?: boolean
@@ -35645,6 +35765,7 @@ export namespace Prisma {
     passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -35674,6 +35795,7 @@ export namespace Prisma {
     passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -35703,6 +35825,7 @@ export namespace Prisma {
     passwordHash?: string | null
     name?: string | null
     phone?: string | null
+    address?: string | null
     avatarUrl?: string | null
     emailVerified?: Date | string | null
     isActive?: boolean
@@ -35719,6 +35842,7 @@ export namespace Prisma {
     passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -35734,6 +35858,7 @@ export namespace Prisma {
     passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -36618,6 +36743,8 @@ export namespace Prisma {
     id?: string
     message: string
     linkUrl?: string | null
+    gradient?: string | null
+    displayOrder?: number
     isActive?: boolean
     startsAt?: Date | string | null
     endsAt?: Date | string | null
@@ -36629,6 +36756,8 @@ export namespace Prisma {
     id?: string
     message: string
     linkUrl?: string | null
+    gradient?: string | null
+    displayOrder?: number
     isActive?: boolean
     startsAt?: Date | string | null
     endsAt?: Date | string | null
@@ -36640,6 +36769,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     message?: StringFieldUpdateOperationsInput | string
     linkUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    gradient?: NullableStringFieldUpdateOperationsInput | string | null
+    displayOrder?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     startsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -36651,6 +36782,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     message?: StringFieldUpdateOperationsInput | string
     linkUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    gradient?: NullableStringFieldUpdateOperationsInput | string | null
+    displayOrder?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     startsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -36662,6 +36795,8 @@ export namespace Prisma {
     id?: string
     message: string
     linkUrl?: string | null
+    gradient?: string | null
+    displayOrder?: number
     isActive?: boolean
     startsAt?: Date | string | null
     endsAt?: Date | string | null
@@ -36673,6 +36808,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     message?: StringFieldUpdateOperationsInput | string
     linkUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    gradient?: NullableStringFieldUpdateOperationsInput | string | null
+    displayOrder?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     startsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -36684,6 +36821,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     message?: StringFieldUpdateOperationsInput | string
     linkUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    gradient?: NullableStringFieldUpdateOperationsInput | string | null
+    displayOrder?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     startsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -37681,7 +37820,8 @@ export namespace Prisma {
   export type SabbathMessageCreateInput = {
     id?: string
     message: string
-    isActive?: boolean
+    sabbathDate: string
+    createdById?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -37689,7 +37829,8 @@ export namespace Prisma {
   export type SabbathMessageUncheckedCreateInput = {
     id?: string
     message: string
-    isActive?: boolean
+    sabbathDate: string
+    createdById?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -37697,7 +37838,8 @@ export namespace Prisma {
   export type SabbathMessageUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     message?: StringFieldUpdateOperationsInput | string
-    isActive?: BoolFieldUpdateOperationsInput | boolean
+    sabbathDate?: StringFieldUpdateOperationsInput | string
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -37705,7 +37847,8 @@ export namespace Prisma {
   export type SabbathMessageUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     message?: StringFieldUpdateOperationsInput | string
-    isActive?: BoolFieldUpdateOperationsInput | boolean
+    sabbathDate?: StringFieldUpdateOperationsInput | string
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -37713,7 +37856,8 @@ export namespace Prisma {
   export type SabbathMessageCreateManyInput = {
     id?: string
     message: string
-    isActive?: boolean
+    sabbathDate: string
+    createdById?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -37721,7 +37865,8 @@ export namespace Prisma {
   export type SabbathMessageUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     message?: StringFieldUpdateOperationsInput | string
-    isActive?: BoolFieldUpdateOperationsInput | boolean
+    sabbathDate?: StringFieldUpdateOperationsInput | string
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -37729,7 +37874,8 @@ export namespace Prisma {
   export type SabbathMessageUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     message?: StringFieldUpdateOperationsInput | string
-    isActive?: BoolFieldUpdateOperationsInput | boolean
+    sabbathDate?: StringFieldUpdateOperationsInput | string
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -37938,6 +38084,7 @@ export namespace Prisma {
     passwordHash?: SortOrder
     name?: SortOrder
     phone?: SortOrder
+    address?: SortOrder
     avatarUrl?: SortOrder
     emailVerified?: SortOrder
     isActive?: SortOrder
@@ -37958,6 +38105,7 @@ export namespace Prisma {
     passwordHash?: SortOrder
     name?: SortOrder
     phone?: SortOrder
+    address?: SortOrder
     avatarUrl?: SortOrder
     emailVerified?: SortOrder
     isActive?: SortOrder
@@ -37974,6 +38122,7 @@ export namespace Prisma {
     passwordHash?: SortOrder
     name?: SortOrder
     phone?: SortOrder
+    address?: SortOrder
     avatarUrl?: SortOrder
     emailVerified?: SortOrder
     isActive?: SortOrder
@@ -38685,6 +38834,8 @@ export namespace Prisma {
     id?: SortOrder
     message?: SortOrder
     linkUrl?: SortOrder
+    gradient?: SortOrder
+    displayOrder?: SortOrder
     isActive?: SortOrder
     startsAt?: SortOrder
     endsAt?: SortOrder
@@ -38692,10 +38843,16 @@ export namespace Prisma {
     updatedAt?: SortOrder
   }
 
+  export type HeroAnnouncementAvgOrderByAggregateInput = {
+    displayOrder?: SortOrder
+  }
+
   export type HeroAnnouncementMaxOrderByAggregateInput = {
     id?: SortOrder
     message?: SortOrder
     linkUrl?: SortOrder
+    gradient?: SortOrder
+    displayOrder?: SortOrder
     isActive?: SortOrder
     startsAt?: SortOrder
     endsAt?: SortOrder
@@ -38707,11 +38864,17 @@ export namespace Prisma {
     id?: SortOrder
     message?: SortOrder
     linkUrl?: SortOrder
+    gradient?: SortOrder
+    displayOrder?: SortOrder
     isActive?: SortOrder
     startsAt?: SortOrder
     endsAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+  }
+
+  export type HeroAnnouncementSumOrderByAggregateInput = {
+    displayOrder?: SortOrder
   }
 
   export type WholesaleItemCountOrderByAggregateInput = {
@@ -39386,7 +39549,8 @@ export namespace Prisma {
   export type SabbathMessageCountOrderByAggregateInput = {
     id?: SortOrder
     message?: SortOrder
-    isActive?: SortOrder
+    sabbathDate?: SortOrder
+    createdById?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -39394,7 +39558,8 @@ export namespace Prisma {
   export type SabbathMessageMaxOrderByAggregateInput = {
     id?: SortOrder
     message?: SortOrder
-    isActive?: SortOrder
+    sabbathDate?: SortOrder
+    createdById?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -39402,7 +39567,8 @@ export namespace Prisma {
   export type SabbathMessageMinOrderByAggregateInput = {
     id?: SortOrder
     message?: SortOrder
-    isActive?: SortOrder
+    sabbathDate?: SortOrder
+    createdById?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -41125,6 +41291,7 @@ export namespace Prisma {
     passwordHash?: string | null
     name?: string | null
     phone?: string | null
+    address?: string | null
     avatarUrl?: string | null
     emailVerified?: Date | string | null
     isActive?: boolean
@@ -41153,6 +41320,7 @@ export namespace Prisma {
     passwordHash?: string | null
     name?: string | null
     phone?: string | null
+    address?: string | null
     avatarUrl?: string | null
     emailVerified?: Date | string | null
     isActive?: boolean
@@ -41186,6 +41354,7 @@ export namespace Prisma {
     passwordHash?: string | null
     name?: string | null
     phone?: string | null
+    address?: string | null
     avatarUrl?: string | null
     emailVerified?: Date | string | null
     isActive?: boolean
@@ -41214,6 +41383,7 @@ export namespace Prisma {
     passwordHash?: string | null
     name?: string | null
     phone?: string | null
+    address?: string | null
     avatarUrl?: string | null
     emailVerified?: Date | string | null
     isActive?: boolean
@@ -41631,6 +41801,7 @@ export namespace Prisma {
     passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -41659,6 +41830,7 @@ export namespace Prisma {
     passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -41706,6 +41878,7 @@ export namespace Prisma {
     passwordHash?: StringNullableFilter<"User"> | string | null
     name?: StringNullableFilter<"User"> | string | null
     phone?: StringNullableFilter<"User"> | string | null
+    address?: StringNullableFilter<"User"> | string | null
     avatarUrl?: StringNullableFilter<"User"> | string | null
     emailVerified?: DateTimeNullableFilter<"User"> | Date | string | null
     isActive?: BoolFilter<"User"> | boolean
@@ -42073,6 +42246,7 @@ export namespace Prisma {
     passwordHash?: string | null
     name?: string | null
     phone?: string | null
+    address?: string | null
     avatarUrl?: string | null
     emailVerified?: Date | string | null
     isActive?: boolean
@@ -42101,6 +42275,7 @@ export namespace Prisma {
     passwordHash?: string | null
     name?: string | null
     phone?: string | null
+    address?: string | null
     avatarUrl?: string | null
     emailVerified?: Date | string | null
     isActive?: boolean
@@ -42145,6 +42320,7 @@ export namespace Prisma {
     passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -42173,6 +42349,7 @@ export namespace Prisma {
     passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -42201,6 +42378,7 @@ export namespace Prisma {
     passwordHash?: string | null
     name?: string | null
     phone?: string | null
+    address?: string | null
     avatarUrl?: string | null
     emailVerified?: Date | string | null
     isActive?: boolean
@@ -42229,6 +42407,7 @@ export namespace Prisma {
     passwordHash?: string | null
     name?: string | null
     phone?: string | null
+    address?: string | null
     avatarUrl?: string | null
     emailVerified?: Date | string | null
     isActive?: boolean
@@ -42273,6 +42452,7 @@ export namespace Prisma {
     passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -42301,6 +42481,7 @@ export namespace Prisma {
     passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -42329,6 +42510,7 @@ export namespace Prisma {
     passwordHash?: string | null
     name?: string | null
     phone?: string | null
+    address?: string | null
     avatarUrl?: string | null
     emailVerified?: Date | string | null
     isActive?: boolean
@@ -42357,6 +42539,7 @@ export namespace Prisma {
     passwordHash?: string | null
     name?: string | null
     phone?: string | null
+    address?: string | null
     avatarUrl?: string | null
     emailVerified?: Date | string | null
     isActive?: boolean
@@ -42401,6 +42584,7 @@ export namespace Prisma {
     passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -42429,6 +42613,7 @@ export namespace Prisma {
     passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -42457,6 +42642,7 @@ export namespace Prisma {
     passwordHash?: string | null
     name?: string | null
     phone?: string | null
+    address?: string | null
     avatarUrl?: string | null
     emailVerified?: Date | string | null
     isActive?: boolean
@@ -42485,6 +42671,7 @@ export namespace Prisma {
     passwordHash?: string | null
     name?: string | null
     phone?: string | null
+    address?: string | null
     avatarUrl?: string | null
     emailVerified?: Date | string | null
     isActive?: boolean
@@ -42529,6 +42716,7 @@ export namespace Prisma {
     passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -42557,6 +42745,7 @@ export namespace Prisma {
     passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -43229,6 +43418,7 @@ export namespace Prisma {
     passwordHash?: string | null
     name?: string | null
     phone?: string | null
+    address?: string | null
     avatarUrl?: string | null
     emailVerified?: Date | string | null
     isActive?: boolean
@@ -43257,6 +43447,7 @@ export namespace Prisma {
     passwordHash?: string | null
     name?: string | null
     phone?: string | null
+    address?: string | null
     avatarUrl?: string | null
     emailVerified?: Date | string | null
     isActive?: boolean
@@ -43329,6 +43520,7 @@ export namespace Prisma {
     passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -43357,6 +43549,7 @@ export namespace Prisma {
     passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -43585,6 +43778,7 @@ export namespace Prisma {
     passwordHash?: string | null
     name?: string | null
     phone?: string | null
+    address?: string | null
     avatarUrl?: string | null
     emailVerified?: Date | string | null
     isActive?: boolean
@@ -43613,6 +43807,7 @@ export namespace Prisma {
     passwordHash?: string | null
     name?: string | null
     phone?: string | null
+    address?: string | null
     avatarUrl?: string | null
     emailVerified?: Date | string | null
     isActive?: boolean
@@ -43702,6 +43897,7 @@ export namespace Prisma {
     passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -43730,6 +43926,7 @@ export namespace Prisma {
     passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -43809,6 +44006,7 @@ export namespace Prisma {
     passwordHash?: string | null
     name?: string | null
     phone?: string | null
+    address?: string | null
     avatarUrl?: string | null
     emailVerified?: Date | string | null
     isActive?: boolean
@@ -43837,6 +44035,7 @@ export namespace Prisma {
     passwordHash?: string | null
     name?: string | null
     phone?: string | null
+    address?: string | null
     avatarUrl?: string | null
     emailVerified?: Date | string | null
     isActive?: boolean
@@ -43881,6 +44080,7 @@ export namespace Prisma {
     passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -43909,6 +44109,7 @@ export namespace Prisma {
     passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -43937,6 +44138,7 @@ export namespace Prisma {
     passwordHash?: string | null
     name?: string | null
     phone?: string | null
+    address?: string | null
     avatarUrl?: string | null
     emailVerified?: Date | string | null
     isActive?: boolean
@@ -43965,6 +44167,7 @@ export namespace Prisma {
     passwordHash?: string | null
     name?: string | null
     phone?: string | null
+    address?: string | null
     avatarUrl?: string | null
     emailVerified?: Date | string | null
     isActive?: boolean
@@ -44009,6 +44212,7 @@ export namespace Prisma {
     passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -44037,6 +44241,7 @@ export namespace Prisma {
     passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -44065,6 +44270,7 @@ export namespace Prisma {
     passwordHash?: string | null
     name?: string | null
     phone?: string | null
+    address?: string | null
     avatarUrl?: string | null
     emailVerified?: Date | string | null
     isActive?: boolean
@@ -44093,6 +44299,7 @@ export namespace Prisma {
     passwordHash?: string | null
     name?: string | null
     phone?: string | null
+    address?: string | null
     avatarUrl?: string | null
     emailVerified?: Date | string | null
     isActive?: boolean
@@ -44126,6 +44333,7 @@ export namespace Prisma {
     passwordHash?: string | null
     name?: string | null
     phone?: string | null
+    address?: string | null
     avatarUrl?: string | null
     emailVerified?: Date | string | null
     isActive?: boolean
@@ -44154,6 +44362,7 @@ export namespace Prisma {
     passwordHash?: string | null
     name?: string | null
     phone?: string | null
+    address?: string | null
     avatarUrl?: string | null
     emailVerified?: Date | string | null
     isActive?: boolean
@@ -44198,6 +44407,7 @@ export namespace Prisma {
     passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -44226,6 +44436,7 @@ export namespace Prisma {
     passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -44265,6 +44476,7 @@ export namespace Prisma {
     passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -44293,6 +44505,7 @@ export namespace Prisma {
     passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -44321,6 +44534,7 @@ export namespace Prisma {
     passwordHash?: string | null
     name?: string | null
     phone?: string | null
+    address?: string | null
     avatarUrl?: string | null
     emailVerified?: Date | string | null
     isActive?: boolean
@@ -44349,6 +44563,7 @@ export namespace Prisma {
     passwordHash?: string | null
     name?: string | null
     phone?: string | null
+    address?: string | null
     avatarUrl?: string | null
     emailVerified?: Date | string | null
     isActive?: boolean
@@ -44393,6 +44608,7 @@ export namespace Prisma {
     passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -44421,6 +44637,7 @@ export namespace Prisma {
     passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -44449,6 +44666,7 @@ export namespace Prisma {
     passwordHash?: string | null
     name?: string | null
     phone?: string | null
+    address?: string | null
     avatarUrl?: string | null
     emailVerified?: Date | string | null
     isActive?: boolean
@@ -44477,6 +44695,7 @@ export namespace Prisma {
     passwordHash?: string | null
     name?: string | null
     phone?: string | null
+    address?: string | null
     avatarUrl?: string | null
     emailVerified?: Date | string | null
     isActive?: boolean
@@ -44521,6 +44740,7 @@ export namespace Prisma {
     passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -44549,6 +44769,7 @@ export namespace Prisma {
     passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -44577,6 +44798,7 @@ export namespace Prisma {
     passwordHash?: string | null
     name?: string | null
     phone?: string | null
+    address?: string | null
     avatarUrl?: string | null
     emailVerified?: Date | string | null
     isActive?: boolean
@@ -44715,6 +44937,7 @@ export namespace Prisma {
     passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -44743,6 +44966,7 @@ export namespace Prisma {
     passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -44771,6 +44995,7 @@ export namespace Prisma {
     passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean

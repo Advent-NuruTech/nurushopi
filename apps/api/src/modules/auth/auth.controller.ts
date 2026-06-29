@@ -4,6 +4,7 @@ import { generateOpaqueToken } from "@nuru/auth/crypto";
 import type {
   ForgotPasswordInput,
   LoginInput,
+  ProfileUpdateInput,
   ResetPasswordInput,
   SignupInput,
   VerifyEmailInput,
@@ -44,6 +45,12 @@ export async function me(req: Request, res: Response): Promise<void> {
   if (!req.user) throw Errors.unauthorized();
   const user = await prisma.user.findUnique({ where: { id: req.user.sub } });
   if (!user) throw Errors.unauthorized();
+  sendOk(res, { user: authService.toAuthUser(user) });
+}
+
+export async function updateMe(req: Request, res: Response): Promise<void> {
+  if (!req.user) throw Errors.unauthorized();
+  const user = await authService.updateProfile(req.user.sub, req.body as ProfileUpdateInput);
   sendOk(res, { user: authService.toAuthUser(user) });
 }
 

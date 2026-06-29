@@ -127,6 +127,7 @@ exports.Prisma.UserScalarFieldEnum = {
   passwordHash: 'passwordHash',
   name: 'name',
   phone: 'phone',
+  address: 'address',
   avatarUrl: 'avatarUrl',
   emailVerified: 'emailVerified',
   isActive: 'isActive',
@@ -263,6 +264,8 @@ exports.Prisma.HeroAnnouncementScalarFieldEnum = {
   id: 'id',
   message: 'message',
   linkUrl: 'linkUrl',
+  gradient: 'gradient',
+  displayOrder: 'displayOrder',
   isActive: 'isActive',
   startsAt: 'startsAt',
   endsAt: 'endsAt',
@@ -415,7 +418,8 @@ exports.Prisma.PwaInstallScalarFieldEnum = {
 exports.Prisma.SabbathMessageScalarFieldEnum = {
   id: 'id',
   message: 'message',
-  isActive: 'isActive',
+  sabbathDate: 'sabbathDate',
+  createdById: 'createdById',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

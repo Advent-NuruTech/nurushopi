@@ -7,6 +7,7 @@ import { formatPrice } from "@/lib/formatPrice";
 import { AdminRole } from "./types";
 import { ADMIN_DASHBOARD_PATH, adminRoute } from "@/lib/adminPaths";
 import { Edit, Trash2, Eye, Image as ImageIcon } from "lucide-react";
+import { catalogApi, ApiClientError } from "@/lib/api";
 
 interface ProductsTabProps {
   adminId: string;
@@ -43,9 +44,22 @@ export default function ProductsTab({}: ProductsTabProps) {
 
   const loadProducts = () => {
     setLoading(true);
-    fetch("/api/admin/products", { credentials: "include" })
-      .then((r) => r.json())
-      .then((d) => setProducts(d.products ?? []))
+    catalogApi.admin
+      .listProducts({ pageSize: 100 })
+      .then((page) =>
+        setProducts(
+          page.items.map((p) => ({
+            id: p.id,
+            name: p.name,
+            price: Number(p.sellingPrice ?? p.price),
+            category: p.category?.name ?? "Uncategorized",
+            imageUrl: p.images[0],
+            coverImage: p.images[0],
+            images: p.images,
+          })),
+        ),
+      )
+      .catch(() => setProducts([]))
       .finally(() => setLoading(false));
   };
 
@@ -55,14 +69,11 @@ export default function ProductsTab({}: ProductsTabProps) {
 
   const remove = async (id: string) => {
     if (!confirm("Are you sure you want to delete this product?")) return;
-
-    const res = await fetch(`/api/admin/products?id=${id}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
-
-    if (res.ok) {
+    try {
+      await catalogApi.admin.deleteProduct(id);
       setProducts((p) => p.filter((x) => x.id !== id));
+    } catch (err) {
+      if (err instanceof ApiClientError) alert(err.message);
     }
   };
 

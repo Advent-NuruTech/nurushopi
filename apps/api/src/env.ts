@@ -13,6 +13,15 @@ const envSchema = z.object({
 
   JWT_ACCESS_SECRET: z.string().min(16, "JWT_ACCESS_SECRET must be at least 16 chars"),
   JWT_REFRESH_SECRET: z.string().min(16, "JWT_REFRESH_SECRET must be at least 16 chars"),
+
+  // Shared secret that authorizes self-service SENIOR admin signup. When unset
+  // (or blank), senior signup is disabled entirely (fail closed) and admins can
+  // only join via a single-use invite. Must be strong enough to resist guessing.
+  // A blank value is treated as unset so an empty `.env` placeholder is valid.
+  SENIOR_ADMIN_CODE: z.preprocess(
+    (v) => (v === "" ? undefined : v),
+    z.string().min(16, "SENIOR_ADMIN_CODE must be at least 16 chars").optional(),
+  ),
   ACCESS_TOKEN_TTL: z.coerce.number().default(900),
   REFRESH_TOKEN_TTL: z.coerce.number().default(2_592_000),
   COOKIE_DOMAIN: z.string().optional(),
@@ -42,6 +51,9 @@ export const isProd = env.NODE_ENV === "production";
 
 /** Comma-separated allowlist of browser origins permitted to send credentials. */
 export const allowedOrigins = env.WEB_ORIGIN.split(",").map((o) => o.trim());
+
+/** Whether self-service senior admin signup (via SENIOR_ADMIN_CODE) is enabled. */
+export const seniorSignupEnabled = Boolean(env.SENIOR_ADMIN_CODE);
 
 export const googleOAuthConfigured = Boolean(
   env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET && env.GOOGLE_REDIRECT_URI,

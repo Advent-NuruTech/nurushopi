@@ -7,27 +7,21 @@ import {
   HERO_GRADIENT_PRESETS,
   resolveHeroGradient,
 } from "@/lib/heroGradients";
-
-type HeroItem = {
-  id: string;
-  text: string;
-  gradient: string;
-  order: number;
-  isActive: boolean;
-};
+import { catalogApi, ApiClientError } from "@/lib/api";
+import type { HeroAnnouncementDTO } from "@nuru/types";
 
 type NewHeroItem = {
-  text: string;
+  message: string;
   gradient: string;
 };
 
 const DEFAULT_NEW_ITEM: NewHeroItem = {
-  text: "",
+  message: "",
   gradient: HERO_DEFAULT_GRADIENT,
 };
 
 export default function HeroTab() {
-  const [items, setItems] = useState<HeroItem[]>([]);
+  const [items, setItems] = useState<HeroAnnouncementDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
@@ -42,16 +36,12 @@ export default function HeroTab() {
   const loadItems = () => {
     setLoading(true);
     setError(null);
-    fetch("/api/admin/hero", { credentials: "include" })
-      .then(async (r) => {
-        const payload = (await r.json().catch(() => ({}))) as {
-          items?: HeroItem[];
-          error?: string;
-        };
-        if (!r.ok) throw new Error(payload.error || "Failed to load hero items");
-        setItems(payload.items ?? []);
-      })
-      .catch((e) => setError(e instanceof Error ? e.message : "Failed to load hero items"))
+    catalogApi.admin
+      .listHero()
+      .then((d) => setItems(d.announcements))
+      .catch((e) =>
+        setError(e instanceof ApiClientError ? e.message : "Failed to load hero items")
+      )
       .finally(() => setLoading(false));
   };
 
@@ -59,29 +49,27 @@ export default function HeroTab() {
     loadItems();
   }, []);
 
-  const saveItem = async (item: HeroItem) => {
+  const saveItem = async (item: HeroAnnouncementDTO) => {
     setSavingId(item.id);
     setError(null);
     try {
-      const res = await fetch("/api/admin/hero", {
-        method: "PUT",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(item),
+      const { announcement } = await catalogApi.admin.updateHero(item.id, {
+        message: item.message,
+        gradient: resolveHeroGradient(item.gradient ?? HERO_DEFAULT_GRADIENT),
+        order: item.order,
+        isActive: item.isActive,
       });
-      const payload = (await res.json().catch(() => ({}))) as { error?: string };
-      if (!res.ok) throw new Error(payload.error || "Failed to save item");
-      setItems((prev) => prev.map((x) => (x.id === item.id ? item : x)));
+      setItems((prev) => prev.map((x) => (x.id === item.id ? announcement : x)));
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to save item");
+      setError(e instanceof ApiClientError ? e.message : "Failed to save item");
     } finally {
       setSavingId(null);
     }
   };
 
   const createItem = async () => {
-    const text = newItem.text.trim();
-    if (!text) {
+    const message = newItem.message.trim();
+    if (!message) {
       setError("Announcement text is required.");
       return;
     }
@@ -89,23 +77,16 @@ export default function HeroTab() {
     setCreating(true);
     setError(null);
     try {
-      const res = await fetch("/api/admin/hero", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          text,
-          gradient: resolveHeroGradient(newItem.gradient),
-          order: items.length,
-          isActive: true,
-        }),
+      await catalogApi.admin.createHero({
+        message,
+        gradient: resolveHeroGradient(newItem.gradient),
+        order: items.length,
+        isActive: true,
       });
-      const payload = (await res.json().catch(() => ({}))) as { error?: string };
-      if (!res.ok) throw new Error(payload.error || "Failed to create item");
       setNewItem(DEFAULT_NEW_ITEM);
       loadItems();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to create item");
+      setError(e instanceof ApiClientError ? e.message : "Failed to create item");
     } finally {
       setCreating(false);
     }
@@ -116,15 +97,10 @@ export default function HeroTab() {
     setSavingId(id);
     setError(null);
     try {
-      const res = await fetch(`/api/admin/hero?id=${encodeURIComponent(id)}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-      const payload = (await res.json().catch(() => ({}))) as { error?: string };
-      if (!res.ok) throw new Error(payload.error || "Failed to delete item");
+      await catalogApi.admin.deleteHero(id);
       setItems((prev) => prev.filter((x) => x.id !== id));
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to delete item");
+      setError(e instanceof ApiClientError ? e.message : "Failed to delete item");
     } finally {
       setSavingId(null);
     }
@@ -153,8 +129,8 @@ export default function HeroTab() {
       <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900 space-y-3">
         <h3 className="font-semibold text-slate-900 dark:text-white">Add New Item</h3>
         <textarea
-          value={newItem.text}
-          onChange={(e) => setNewItem((prev) => ({ ...prev, text: e.target.value }))}
+          value={newItem.message}
+          onChange={(e) => setNewItem((prev) => ({ ...prev, message: e.target.value }))}
           rows={3}
           placeholder="Announcement text..."
           className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm"
@@ -187,11 +163,11 @@ export default function HeroTab() {
             className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900 space-y-3"
           >
             <textarea
-              value={item.text}
+              value={item.message}
               onChange={(e) =>
                 setItems((prev) =>
                   prev.map((x) =>
-                    x.id === item.id ? { ...x, text: e.target.value } : x
+                    x.id === item.id ? { ...x, message: e.target.value } : x
                   )
                 )
               }
@@ -200,7 +176,7 @@ export default function HeroTab() {
             />
             <div className="grid gap-3 md:grid-cols-3">
               <select
-                value={item.gradient}
+                value={item.gradient ?? HERO_DEFAULT_GRADIENT}
                 onChange={(e) =>
                   setItems((prev) =>
                     prev.map((x) =>

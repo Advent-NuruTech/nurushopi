@@ -1,51 +1,15 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { collection, getDocs, orderBy, query, Timestamp } from "firebase/firestore";
 import SectionHeader from "@/components/ui/SectionHeader";
-import { db } from "@/lib/firebase";
+import { listBanners } from "@/lib/data/catalog";
 
-type Banner = {
-  id: string;
-  title: string;
-  shortDescription?: string;
-  image?: string;
-  createdAt?: Timestamp;
+export const metadata = {
+  title: "Promotions & Offers – NuruShop",
+  description: "Current promotions and special offers at NuruShop.",
 };
 
-export default function BannersPage() {
-  const [banners, setBanners] = useState<Banner[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const load = async () => {
-      try {
-        const snapshot = await getDocs(
-          query(collection(db, "banners"), orderBy("createdAt", "desc"))
-        );
-        if (cancelled) return;
-        setBanners(
-          snapshot.docs.map((docSnap) => ({
-            id: docSnap.id,
-            ...(docSnap.data() as Omit<Banner, "id">),
-          }))
-        );
-      } catch {
-        if (!cancelled) setBanners([]);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+export default async function BannersPage() {
+  const banners = await listBanners();
 
   return (
     <main className="min-h-screen py-16 sm:py-14">
@@ -54,16 +18,14 @@ export default function BannersPage() {
           <SectionHeader title="Promotions & Offers" showViewAll={false} />
         </div>
 
-        {loading ? (
-          <p className="text-sm text-slate-500">Loading offers...</p>
-        ) : banners.length === 0 ? (
+        {banners.length === 0 ? (
           <p className="text-sm text-slate-500">No active promotions right now.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {banners.map((banner) => (
               <Link
                 key={banner.id}
-                href={`/banners/${banner.id}`}
+                href={banner.href}
                 className="group rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 overflow-hidden hover:shadow-md transition"
               >
                 <div className="relative w-full aspect-[16/10] bg-slate-100 dark:bg-slate-800">
@@ -85,9 +47,9 @@ export default function BannersPage() {
                   <h2 className="font-semibold text-slate-900 dark:text-slate-100 line-clamp-1">
                     {banner.title}
                   </h2>
-                  {banner.shortDescription && (
+                  {banner.subtitle && (
                     <p className="mt-1 text-sm text-slate-600 dark:text-slate-300 line-clamp-2">
-                      {banner.shortDescription}
+                      {banner.subtitle}
                     </p>
                   )}
                 </div>

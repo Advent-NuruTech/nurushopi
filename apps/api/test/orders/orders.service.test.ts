@@ -326,6 +326,39 @@ describe("orders.updateStatus", () => {
   });
 });
 
+describe("orders.cancelOwnOrder", () => {
+  it("cancels a recent pending order owned by the user (restoring stock)", async () => {
+    // findUnique is called twice: once to authorize, once inside updateStatus.
+    p.order.findUnique.mockResolvedValue(orderRow({ userId: "user1", status: "PENDING" }));
+    p.product.updateMany.mockResolvedValue({ count: 1 });
+    p.order.update.mockResolvedValue(orderRow({ status: "CANCELLED" }));
+
+    const dto = await orders.cancelOwnOrder("user1", "ord_abc");
+
+    expect(dto.status).toBe("CANCELLED");
+    expect(p.product.updateMany).toHaveBeenCalled();
+  });
+
+  it("404s when the order belongs to a different user", async () => {
+    p.order.findUnique.mockResolvedValue(orderRow({ userId: "someone-else", status: "PENDING" }));
+    await expect(orders.cancelOwnOrder("user1", "ord_abc")).rejects.toMatchObject({ status: 404 });
+    expect(p.order.update).not.toHaveBeenCalled();
+  });
+
+  it("400s when the order is already shipped", async () => {
+    p.order.findUnique.mockResolvedValue(orderRow({ userId: "user1", status: "SHIPPED" }));
+    await expect(orders.cancelOwnOrder("user1", "ord_abc")).rejects.toMatchObject({ status: 400 });
+    expect(p.order.update).not.toHaveBeenCalled();
+  });
+
+  it("400s once the 24-hour window has passed", async () => {
+    const old = new Date(Date.now() - 25 * 60 * 60 * 1000);
+    p.order.findUnique.mockResolvedValue(orderRow({ userId: "user1", status: "PENDING", createdAt: old }));
+    await expect(orders.cancelOwnOrder("user1", "ord_abc")).rejects.toMatchObject({ status: 400 });
+    expect(p.order.update).not.toHaveBeenCalled();
+  });
+});
+
 describe("orders.updatePayment", () => {
   it("updates payment status when the order exists", async () => {
     p.order.findUnique.mockResolvedValue({ id: "o1" });

@@ -1,90 +1,28 @@
 "use client";
 
-import React, {
-  useEffect,
-  useState,
-  useRef,
-  useCallback,
-} from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { useRouter } from "next/navigation";
 import { Send, Bell, MessageSquare, X } from "lucide-react";
+import { messagesApi } from "@/lib/api";
+import type { MessageDTO } from "@nuru/types";
 
-interface FirestoreTimestamp {
-  toDate?: () => Date;
-  seconds?: number;
-}
-
-interface MessageItem {
-  id: string;
-  senderId?: string;
-  senderName?: string;
-  recipientId?: string;
-  recipientName?: string;
-  content?: string;
-  createdAt?: unknown;
-  readAt?: unknown;
-}
-
-const toDisplayDate = (value: unknown): string => {
-  if (!value) return "";
-
-  if (typeof value === "string" || typeof value === "number") {
-    return new Date(value).toLocaleString();
-  }
-
-  if (typeof value === "object" && value !== null) {
-    const ts = value as FirestoreTimestamp;
-
-    if (typeof ts.toDate === "function") {
-      return ts.toDate().toLocaleString();
-    }
-
-    if (typeof ts.seconds === "number") {
-      return new Date(ts.seconds * 1000).toLocaleString();
-    }
-  }
-
-  return "";
-};
-
-/* ---------- Timestamp to ms ---------- */
-const timestampToMs = (value: unknown): number => {
-  if (!value) return 0;
-
-  if (typeof value === "string" || typeof value === "number") {
-    return new Date(value).getTime();
-  }
-
-  if (typeof value === "object" && value !== null) {
-    const ts = value as FirestoreTimestamp;
-
-    if (typeof ts.toDate === "function") {
-      return ts.toDate().getTime();
-    }
-
-    if (typeof ts.seconds === "number") {
-      return ts.seconds * 1000;
-    }
-  }
-
-  return 0;
-};
+const toDisplayDate = (value: string): string =>
+  value ? new Date(value).toLocaleString() : "";
 
 export default function MessagesPanel({
   userId,
-  displayName,
   onUnreadChange,
   onClose,
 }: {
   userId: string;
-  displayName: string;
+  displayName?: string;
   onUnreadChange?: (count: number) => void;
   onClose?: () => void;
 }) {
   const router = useRouter();
 
-  const [messages, setMessages] = useState<MessageItem[]>([]);
+  const [messages, setMessages] = useState<MessageDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [content, setContent] = useState("");
@@ -92,58 +30,28 @@ export default function MessagesPanel({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  /* ---------- Mark read ---------- */
-  const markRead = useCallback(
-    async (id: string) => {
-      await fetch("/api/messages", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, userId }),
-      });
-    },
-    [userId]
-  );
-
   /* ---------- Load messages ---------- */
   const load = useCallback(
     async (showLoading = true) => {
       if (!userId) return;
       if (showLoading) setLoading(true);
-
       try {
-        const res = await fetch(
-          `/api/messages?userId=${encodeURIComponent(userId)}`
-        );
-
-        if (!res.ok) throw new Error("Fetch failed");
-
-        const data = await res.json();
-        const serverMessages: MessageItem[] = data.messages ?? [];
-
-        const sorted = [...serverMessages].sort(
-          (a, b) =>
-            timestampToMs(a.createdAt) -
-            timestampToMs(b.createdAt)
-        );
-
-        setMessages(sorted);
-
-        const unreadMessages = sorted.filter(
-          (m) => m.recipientId === userId && !m.readAt
-        );
-
-        unreadMessages.forEach((m) => markRead(m.id));
-
+        // The thread is keyed by the signed-in user server-side; listing also
+        // auto-marks inbound (admin) messages as read.
+        const { messages: rows } = await messagesApi.list();
+        setMessages(rows);
         onUnreadChange?.(0);
+      } catch {
+        /* keep whatever we had on a transient failure */
       } finally {
         if (showLoading) setLoading(false);
       }
     },
-    [userId, onUnreadChange, markRead]
+    [userId, onUnreadChange]
   );
 
   useEffect(() => {
-    load();
+    void load();
     const interval = setInterval(() => load(false), 30000);
     return () => clearInterval(interval);
   }, [load]);
@@ -161,19 +69,12 @@ export default function MessagesPanel({
     const text = content.trim();
     setSending(true);
     setContent("");
-
-    await fetch("/api/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId,
-        senderName: displayName,
-        content: text,
-      }),
-    });
-
-    await load(false);
-    setSending(false);
+    try {
+      await messagesApi.send({ body: text, attachments: [] });
+      await load(false);
+    } finally {
+      setSending(false);
+    }
   };
 
   /* ---------- Handle close ---------- */
@@ -182,7 +83,6 @@ export default function MessagesPanel({
       onClose();
       return;
     }
-
     if (window.history.length > 1) {
       router.back();
     } else {
@@ -200,15 +100,12 @@ export default function MessagesPanel({
           <MessageSquare size={24} />
           <div>
             <h2 className="text-lg font-bold">Customer Support</h2>
-            <p className="text-sm text-gray-500">
-              Chat with Senior Admin Team
-            </p>
+            <p className="text-sm text-gray-500">Chat with Senior Admin Team</p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
           <Bell size={18} />
-
           <button
             onClick={handleClose}
             className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
@@ -221,30 +118,24 @@ export default function MessagesPanel({
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50 dark:bg-gray-800 flex flex-col">
         {messages.map((m) => {
-          const incoming = m.recipientId === userId;
+          const incoming = m.senderType === "ADMIN";
 
           return (
             <div
               key={m.id}
-              className={`max-w-[75%] flex flex-col ${
-                incoming ? "self-start" : "self-end"
-              }`}
+              className={`max-w-[75%] flex flex-col ${incoming ? "self-start" : "self-end"}`}
             >
               <div
                 className={`p-3 rounded-xl break-words ${
-                  incoming
-                    ? "bg-gray-200 dark:bg-gray-700"
-                    : "bg-blue-600 text-white"
+                  incoming ? "bg-gray-200 dark:bg-gray-700" : "bg-blue-600 text-white"
                 }`}
               >
-                <p className="whitespace-pre-wrap">{m.content}</p>
+                <p className="whitespace-pre-wrap">{m.body}</p>
               </div>
 
               <span
                 className={`text-xs mt-1 px-1 ${
-                  incoming
-                    ? "text-gray-500 self-start"
-                    : "text-gray-400 self-end"
+                  incoming ? "text-gray-500 self-start" : "text-gray-400 self-end"
                 }`}
               >
                 {toDisplayDate(m.createdAt)}
@@ -258,10 +149,7 @@ export default function MessagesPanel({
 
       {/* Input */}
       <div className="border-t p-3 bg-gray-50 dark:bg-gray-900">
-        <form
-          onSubmit={sendMessage}
-          className="flex gap-2 items-center w-full"
-        >
+        <form onSubmit={sendMessage} className="flex gap-2 items-center w-full">
           <textarea
             ref={textareaRef}
             value={content}

@@ -14,13 +14,15 @@ export async function listActive() {
         { OR: [{ endsAt: null }, { endsAt: { gte: now } }] },
       ],
     },
-    orderBy: { createdAt: "desc" },
+    orderBy: [{ displayOrder: "asc" }, { createdAt: "desc" }],
   });
   return rows.map(toHeroDTO);
 }
 
 export async function listAll() {
-  const rows = await prisma.heroAnnouncement.findMany({ orderBy: { createdAt: "desc" } });
+  const rows = await prisma.heroAnnouncement.findMany({
+    orderBy: [{ displayOrder: "asc" }, { createdAt: "desc" }],
+  });
   return rows.map(toHeroDTO);
 }
 
@@ -29,6 +31,8 @@ export async function create(input: HeroCreateInput) {
     data: {
       message: input.message,
       linkUrl: input.linkUrl ?? null,
+      gradient: input.gradient ?? null,
+      displayOrder: input.order ?? 0,
       isActive: input.isActive ?? true,
       startsAt: input.startsAt ?? null,
       endsAt: input.endsAt ?? null,
@@ -44,6 +48,8 @@ export async function update(id: string, input: HeroUpdateInput) {
       data: {
         ...(input.message !== undefined ? { message: input.message } : {}),
         ...(input.linkUrl !== undefined ? { linkUrl: input.linkUrl } : {}),
+        ...(input.gradient !== undefined ? { gradient: input.gradient } : {}),
+        ...(input.order !== undefined ? { displayOrder: input.order } : {}),
         ...(input.isActive !== undefined ? { isActive: input.isActive } : {}),
         ...(input.startsAt !== undefined ? { startsAt: input.startsAt } : {}),
         ...(input.endsAt !== undefined ? { endsAt: input.endsAt } : {}),

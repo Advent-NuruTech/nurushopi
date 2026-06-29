@@ -2,13 +2,10 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { sabbathApi, ApiClientError } from "@/lib/api";
+import type { SabbathMessageDTO } from "@nuru/types";
 
-type SabbathMessage = {
-  id: string;
-  message: string;
-  sabbathDate: string;
-  createdAt?: string | null;
-};
+type SabbathMessage = SabbathMessageDTO;
 
 const MAX_MESSAGE_LENGTH = 5000;
 
@@ -75,16 +72,12 @@ export default function SabbathMessagesTab() {
   const loadMessages = () => {
     setLoading(true);
     setError(null);
-    fetch("/api/admin/sabbath-messages", { credentials: "include" })
-      .then(async (r) => {
-        const payload = (await r.json().catch(() => ({}))) as {
-          messages?: SabbathMessage[];
-          error?: string;
-        };
-        if (!r.ok) throw new Error(payload.error || "Failed to load Sabbath messages.");
-        setMessages(payload.messages ?? []);
-      })
-      .catch((e) => setError(e instanceof Error ? e.message : "Failed to load Sabbath messages."))
+    sabbathApi.admin
+      .list(100)
+      .then((d) => setMessages(d.messages))
+      .catch((e) =>
+        setError(e instanceof ApiClientError ? e.message : "Failed to load Sabbath messages.")
+      )
       .finally(() => setLoading(false));
   };
 
@@ -119,22 +112,15 @@ export default function SabbathMessagesTab() {
     setCreating(true);
     setError(null);
     try {
-      const res = await fetch("/api/admin/sabbath-messages", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: trimmed.slice(0, MAX_MESSAGE_LENGTH),
-          sabbathDate: dateValue,
-        }),
+      await sabbathApi.admin.create({
+        message: trimmed.slice(0, MAX_MESSAGE_LENGTH),
+        sabbathDate: dateValue,
       });
-      const payload = (await res.json().catch(() => ({}))) as { error?: string };
-      if (!res.ok) throw new Error(payload.error || "Failed to create message.");
       setNewMessage("");
       setNewDate("");
       loadMessages();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to create message.");
+      setError(e instanceof ApiClientError ? e.message : "Failed to create message.");
     } finally {
       setCreating(false);
     }
@@ -154,21 +140,13 @@ export default function SabbathMessagesTab() {
     setSavingId(message.id);
     setError(null);
     try {
-      const res = await fetch("/api/admin/sabbath-messages", {
-        method: "PUT",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: message.id,
-          message: trimmed.slice(0, MAX_MESSAGE_LENGTH),
-          sabbathDate: message.sabbathDate,
-        }),
+      const { message: saved } = await sabbathApi.admin.update(message.id, {
+        message: trimmed.slice(0, MAX_MESSAGE_LENGTH),
+        sabbathDate: message.sabbathDate,
       });
-      const payload = (await res.json().catch(() => ({}))) as { error?: string };
-      if (!res.ok) throw new Error(payload.error || "Failed to save message.");
-      setMessages((prev) => prev.map((item) => (item.id === message.id ? message : item)));
+      setMessages((prev) => prev.map((item) => (item.id === message.id ? saved : item)));
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to save message.");
+      setError(e instanceof ApiClientError ? e.message : "Failed to save message.");
     } finally {
       setSavingId(null);
     }
@@ -179,15 +157,10 @@ export default function SabbathMessagesTab() {
     setSavingId(id);
     setError(null);
     try {
-      const res = await fetch(`/api/admin/sabbath-messages?id=${encodeURIComponent(id)}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-      const payload = (await res.json().catch(() => ({}))) as { error?: string };
-      if (!res.ok) throw new Error(payload.error || "Failed to delete message.");
+      await sabbathApi.admin.remove(id);
       setMessages((prev) => prev.filter((item) => item.id !== id));
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to delete message.");
+      setError(e instanceof ApiClientError ? e.message : "Failed to delete message.");
     } finally {
       setSavingId(null);
     }

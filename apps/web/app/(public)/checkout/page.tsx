@@ -1,29 +1,25 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, Suspense, useCallback } from "react";
 import { useCart } from "@/context/CartContext";
 import { useRouter, useSearchParams } from "next/navigation";
-import { db } from "@/lib/firebase";
-import { collection, getDocs, limit, query, orderBy } from "firebase/firestore";
 import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, AlertCircle, XCircle } from "lucide-react";
 import PhoneInput, { validatePhoneForSubmission } from "@/components/ui/PhoneInput";
 import { useSabbathStatus } from "@/lib/useSabbathStatus";
-
-import { auth } from "@/lib/firebase";
-import { onAuthStateChanged, User } from "firebase/auth";
+import { useAppUser } from "@/context/UserContext";
+import { catalogApi, orderApi, ApiClientError } from "@/lib/api";
+import type { ProductDTO } from "@nuru/types";
 
 export const dynamic = "force-dynamic";
 
 // -------------------- Types --------------------
-type Product = {
+type RelatedProduct = {
   id: string;
   name: string;
   price: number;
-  image?: string;
-  images?: string[];
-  createdAt?: string;
+  image: string;
 };
 
 // -------------------- Common Countries --------------------
@@ -33,6 +29,15 @@ const commonCountries = [
   "Australia", "Germany", "France", "India", "China", "Japan"
 ];
 
+function toRelated(p: ProductDTO): RelatedProduct {
+  return {
+    id: p.id,
+    name: p.name,
+    price: Number(p.sellingPrice ?? p.price) || 0,
+    image: p.images[0] || "/assets/logo.jpg",
+  };
+}
+
 // -------------------- Checkout Page --------------------
 function CheckoutContent() {
   const { cart, total, removeFromCart, clearCart, updateQuantity } = useCart();
@@ -40,17 +45,17 @@ function CheckoutContent() {
   const searchParams = useSearchParams();
   const step = searchParams.get("step");
 
-  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const { user, isLoading: authLoading } = useAppUser();
+
+  const [relatedProducts, setRelatedProducts] = useState<RelatedProduct[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [orderNumber, setOrderNumber] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [phoneValid, setPhoneValid] = useState(true);
   const [showCountrySuggestions, setShowCountrySuggestions] = useState(false);
-  const [referrerId, setReferrerId] = useState<string | null>(null);
-
-  const [user, setUser] = useState<User | null>(null);
-  const [authReady, setAuthReady] = useState(false);
+  const [useWallet, setUseWallet] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -64,76 +69,49 @@ function CheckoutContent() {
 
   const { isClosed: sabbathClosed, end: sabbathEndsAt } = useSabbathStatus();
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      setAuthReady(true);
-    });
-    return () => unsubscribe();
-  }, []);
+  const walletBalance = user ? Number(user.walletBalance) || 0 : 0;
 
-  useEffect(() => {
-    try {
-      const ref = localStorage.getItem("nurushop_referrer");
-      if (ref) setReferrerId(ref);
-    } catch {
-      setReferrerId(null);
-    }
-  }, []);
-
+  // Prefill contact details from the signed-in user.
   useEffect(() => {
     if (!user) return;
     setFormData((prev) => ({
       ...prev,
       email: user.email ?? prev.email,
-      name: prev.name || user.displayName || prev.name,
+      name: prev.name || user.name || prev.name,
     }));
   }, [user]);
 
+  // Auth gating: a logged-out user landing on ?step=details is sent to login.
   useEffect(() => {
-    if (authReady && !user) {
+    if (authLoading) return;
+    if (!user) {
       setShowForm(false);
-    }
-  }, [authReady, user]);
-
-  useEffect(() => {
-    if (!authReady) return;
-    if (!user && step === "details") {
-      router.replace(
-        `/auth/login?redirectTo=${encodeURIComponent("/checkout?step=details")}`
-      );
+      if (step === "details") {
+        router.replace(
+          `/auth/login?redirectTo=${encodeURIComponent("/checkout?step=details")}`
+        );
+      }
       return;
     }
-
-    if (user && step === "details") {
-      setShowForm(true);
-    }
-  }, [user, step, router, authReady]);
+    if (step === "details") setShowForm(true);
+  }, [user, step, router, authLoading]);
 
   useEffect(() => {
-    if (sabbathClosed) {
-      setShowForm(false);
-    }
+    if (sabbathClosed) setShowForm(false);
   }, [sabbathClosed]);
 
   // -------------------- Fetch Related Products --------------------
   useEffect(() => {
-    const fetchRelated = async () => {
-      try {
-        const q = query(
-          collection(db, "products"),
-          orderBy("createdAt", "desc"),
-          limit(4)
-        );
-        const snap = await getDocs(q);
-        setRelatedProducts(
-          snap.docs.map((doc) => ({ id: doc.id, ...(doc.data() as Omit<Product, "id">) }))
-        );
-      } catch (err) {
-        console.error("Error fetching products:", err);
-      }
+    let cancelled = false;
+    catalogApi
+      .listProducts({ sort: "newest", pageSize: 4 })
+      .then((res) => {
+        if (!cancelled) setRelatedProducts(res.items.map(toRelated));
+      })
+      .catch((err) => console.error("Error fetching products:", err));
+    return () => {
+      cancelled = true;
     };
-    fetchRelated();
   }, []);
 
   // -------------------- Handlers --------------------
@@ -165,11 +143,11 @@ function CheckoutContent() {
     country.toLowerCase().includes(formData.country.toLowerCase())
   );
 
-  const redirectToAuth = () => {
+  const redirectToAuth = useCallback(() => {
     router.push(
       `/auth/login?redirectTo=${encodeURIComponent("/checkout?step=details")}`
     );
-  };
+  }, [router]);
 
   // -------------------- Submit Order --------------------
   const handleSubmitOrder = async () => {
@@ -192,7 +170,7 @@ function CheckoutContent() {
       return;
     }
 
-    const { name, phone, country, county, locality } = formData;
+    const { name, phone, email, country, county, locality, message } = formData;
     const errors: string[] = [];
 
     if (!name.trim()) errors.push("Name is required");
@@ -213,32 +191,22 @@ function CheckoutContent() {
 
     try {
       const normalizedPhone = phoneValidation.normalized || phone;
+      const address = [locality, county, country]
+        .map((p) => p.trim())
+        .filter(Boolean)
+        .join(", ");
 
-      const orderData = {
-        userId: user?.uid || null,
-        userEmail: user?.email || null,
-        ...formData,
-        phone: normalizedPhone,
-        items: cart,
-        totalAmount: total,
-        createdAt: new Date().toISOString(),
-        referrerId:
-          referrerId && referrerId !== user?.uid ? referrerId : null,
-        clientTime: new Date().toISOString(),
-        clientTzOffset: new Date().getTimezoneOffset(),
-      };
-
-      const res = await fetch("/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(orderData),
+      const { order } = await orderApi.checkout({
+        items: cart.map((item) => ({ productId: item.id, quantity: item.quantity })),
+        contactName: name.trim(),
+        contactPhone: normalizedPhone,
+        contactEmail: email.trim() || user.email || null,
+        address,
+        note: message.trim() || null,
+        useWallet,
       });
 
-      if (!res.ok) {
-        setErrorMessage("Order submission failed. Try again.");
-        return;
-      }
-
+      // Notify the shop via WhatsApp with the live order number.
       const productList = cart
         .map(
           (item, idx) =>
@@ -246,17 +214,21 @@ function CheckoutContent() {
         )
         .join("%0A");
 
-      const whatsappMessage = `🛍️ *Receive My Order*%0A--------------------------------%0A*Name:* ${name}%0A*Phone:* ${normalizedPhone}%0A*Country:* ${country}%0A*County/State:* ${county}%0A*Locality:* ${locality}%0A--------------------------------%0A${productList}%0A--------------------------------%0A*Total:* KSh ${total.toFixed(2)}%0AThank you!`;
+      const whatsappMessage = `🛍️ *New Order ${order.orderNumber}*%0A--------------------------------%0A*Name:* ${name}%0A*Phone:* ${normalizedPhone}%0A*Address:* ${address}%0A--------------------------------%0A${productList}%0A--------------------------------%0A*Total:* KSh ${Number(order.total).toFixed(2)}%0AThank you!`;
 
       const phoneNumber = "254105178685";
-      const whatsappURL = `https://wa.me/${phoneNumber}?text=${whatsappMessage}`;
-      window.open(whatsappURL, "_blank");
+      window.open(`https://wa.me/${phoneNumber}?text=${whatsappMessage}`, "_blank");
 
+      setOrderNumber(order.orderNumber);
       setSuccess(true);
       clearCart();
     } catch (err) {
       console.error(err);
-      setErrorMessage("Something went wrong. Please try again.");
+      setErrorMessage(
+        err instanceof ApiClientError
+          ? err.message
+          : "Something went wrong. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -279,26 +251,30 @@ function CheckoutContent() {
         <h2 className="text-2xl font-semibold text-green-700">
           ✅ Order placed successfully!
         </h2>
+        {orderNumber && (
+          <p className="text-gray-700 dark:text-gray-300 mt-3">
+            Your order number is{" "}
+            <span className="font-mono font-semibold">{orderNumber}</span>. Keep it
+            to track your order.
+          </p>
+        )}
         <p className="text-gray-600 mt-3">
           You&apos;ll receive a confirmation via WhatsApp or Email soon.
         </p>
-        {user && (
-          <p className="text-gray-600 mt-3">
-            Your order is successful. Invite more people to keep earning wallet rewards.
-          </p>
-        )}
         <Link
-          href="/profile"
+          href="/profile?tab=orders"
           className="mt-4 inline-flex items-center justify-center text-sky-600 font-medium hover:underline"
         >
-          Go to your profile to invite more people →
+          View your orders →
         </Link>
-        <button
-          className="mt-6 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
-          onClick={() => router.push("/shop")}
-        >
-          Continue Shopping
-        </button>
+        <div>
+          <button
+            className="mt-6 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
+            onClick={() => router.push("/shop")}
+          >
+            Continue Shopping
+          </button>
+        </div>
       </div>
     );
   }
@@ -434,7 +410,7 @@ function CheckoutContent() {
               >
                 <div className="relative w-full h-40">
                   <Image
-                    src={product.images?.[0] || "/assets/logo.jpg"}
+                    src={product.image}
                     alt={product.name}
                     fill
                     className="object-cover"
@@ -452,12 +428,12 @@ function CheckoutContent() {
         </section>
       )}
 
-      
+
 
       {/* Order Form Modal */}
       {showForm && user && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md shadow-lg">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md shadow-lg max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-semibold mb-4 text-blue-700">
               Complete Your Order
             </h2>
@@ -487,10 +463,10 @@ function CheckoutContent() {
                 placeholder="Email (optional)"
                 value={formData.email}
                 onChange={handleChange}
-                readOnly={Boolean(user?.email)}
+                readOnly={Boolean(user.email)}
                 className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               />
-              {user?.email && (
+              {user.email && (
                 <p className="text-xs text-gray-500">Signed in as {user.email}</p>
               )}
 
@@ -548,6 +524,18 @@ function CheckoutContent() {
                 onChange={handleChange}
                 className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none h-32 resize-none"
               />
+
+              {walletBalance > 0 && (
+                <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                  <input
+                    type="checkbox"
+                    checked={useWallet}
+                    onChange={(e) => setUseWallet(e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  Apply wallet balance (KSh {walletBalance.toFixed(2)} available)
+                </label>
+              )}
             </div>
 
             {/* Enhanced Error Display */}

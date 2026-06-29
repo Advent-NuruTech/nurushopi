@@ -1,159 +1,81 @@
 // ./app/(public)/page.tsx
+import Image from "next/image";
+import Link from "next/link";
 import HeroSection from "@/components/ui/HeroSection";
 import FeaturedSection from "@/components/ui/FeaturedSection";
 import FeaturedHero from "@/components/ui/FeaturedHero";
 import NewArrivals from "@/components/ui/NewArrivals";
 import Bannerss from "@/components/ui/Bannerss";
 import SabbathExperience from "@/components/ui/SabbathExperience";
-import { getAllProducts, getAllCategories } from "@/lib/firestoreHelpers";
-import { Product } from "@/lib/types";
-import { Timestamp } from "firebase/firestore";
 import SectionHeader from "@/components/ui/SectionHeader";
-import Image from "next/image";
-import Link from "next/link";
-import { db } from "@/lib/firebase";
+import { formatPrice } from "@/lib/formatPrice";
 import {
-  collection,
-  getDocs,
-  query,
-  where,
-  orderBy,
-  limit,
-} from "firebase/firestore";
+  listProducts,
+  listCategories,
+  listNewArrivals,
+  listBanners,
+} from "@/lib/data/catalog";
+import { listWholesaleItems } from "@/lib/data/wholesale";
+import type { ProductCardVM } from "@/lib/view/catalog";
 
-export const dynamic = "force-dynamic";
+// Storefront is served from the Data Cache (ISR). The data-layer functions set
+// per-collection `revalidate` windows and cache tags; admin writes purge them
+// instantly via POST /api/revalidate. No `force-dynamic` needed.
 
-/* ---------- Helpers ---------- */
-
-function serializeFirestoreDoc<T extends Record<string, unknown>>(doc: T): T {
-  return JSON.parse(
-    JSON.stringify(doc, (_key, value) => {
-      if (value instanceof Timestamp) {
-        return value.toDate().toISOString();
-      }
-      return value;
-    })
-  );
+/** Adapt a card VM to the shape the Featured* carousels expect. */
+function toFeaturedProduct(p: ProductCardVM) {
+  return {
+    id: p.id,
+    name: p.name,
+    image: p.image,
+    category: p.categorySlug ?? "",
+    price: p.price,
+    originalPrice: p.originalPrice,
+    sellingPrice: p.sellingPrice,
+    shortDescription: p.shortDescription ?? undefined,
+    createdAt: p.createdAtMs,
+  };
 }
-
-function toMillis(value: unknown): number {
-  if (!value) return 0;
-  if (value instanceof Timestamp) return value.toMillis();
-  if (typeof value === "number") return value;
-  if (typeof value === "string") {
-    const parsed = Date.parse(value);
-    return Number.isNaN(parsed) ? 0 : parsed;
-  }
-  if (typeof value === "object" && value !== null && "seconds" in value) {
-    const secs = (value as { seconds?: number }).seconds;
-    return typeof secs === "number" ? secs * 1000 : 0;
-  }
-  return 0;
-}
-
-/* ---------- Extended product shape used in UI ---------- */
-
-type ProductWithExtras = Product & {
-  mode?: string;
-  images?: string[];
-  shortDescription?: string;
-  description?: string;
-  createdAt?: unknown;
-};
-
-/* ---------- Page ---------- */
 
 export default async function HomePage() {
-  const [productsRaw, categories, wholesaleSnap] = await Promise.all([
-    getAllProducts(),
-    getAllCategories(),
-    getDocs(
-      query(
-        collection(db, "products"),
-        where("mode", "==", "wholesale"),
-        orderBy("createdAt", "desc"),
-        limit(12)
-      )
-    ),
-  ]);
+  const [productsResult, categories, newArrivals, banners, wholesaleResult] =
+    await Promise.all([
+      listProducts({ pageSize: 60, sort: "newest" }),
+      listCategories(),
+      listNewArrivals(12),
+      listBanners(),
+      listWholesaleItems({ pageSize: 12, sort: "newest" }),
+    ]);
 
-  const products = productsRaw as ProductWithExtras[];
-
-  // Exclude wholesale products
-  const retailProducts = products.filter(
-    (p) => (p.mode ?? "") !== "wholesale"
-  );
-
-  // Convert products for UI components
-  const uiProducts: (Product & {
-    image: string;
-    shortDescription: string;
-    createdAt?: number;
-  })[] = retailProducts
-    .map((p) =>
-    serializeFirestoreDoc({
-      ...p,
-      image: p.images?.[0] || "/assets/logo.jpg",
-      shortDescription:
-        p.shortDescription ||
-        p.description ||
-        "A quality product from NuruShop.",
-      createdAt: toMillis(p.createdAt),
-    })
-  )
-    .sort((a, b) => Number(b.createdAt ?? 0) - Number(a.createdAt ?? 0));
-
-  const wholesaleProducts = wholesaleSnap.docs.map((docSnap) => {
-    const data = docSnap.data() as Record<string, unknown>;
-
-    return {
-      id: docSnap.id,
-      name: String(data.name ?? "Wholesale product"),
-      wholesalePrice: Number(data.wholesalePrice ?? data.price ?? 0),
-      wholesaleMinQty: Number(data.wholesaleMinQty ?? 1),
-      wholesaleUnit: String(data.wholesaleUnit ?? "unit"),
-      imageUrl:
-        (Array.isArray(data.images) && String(data.images[0])) ||
-        (typeof data.coverImage === "string"
-          ? data.coverImage
-          : "/assets/logo.jpg"),
-    };
-  });
+  const featuredProducts = productsResult.items.map(toFeaturedProduct);
+  const categoryOptions = categories.map((c) => ({ name: c.name, slug: c.slug }));
+  const wholesaleProducts = wholesaleResult.items;
 
   return (
     <main>
       <HeroSection />
       <SabbathExperience />
-      <NewArrivals />
+      <NewArrivals products={newArrivals} />
 
-      <FeaturedHero
-        products={uiProducts}
-        categories={categories.map((c) => ({
-          name: c.name,
-          slug: c.slug,
-        }))}
-      />
+      <FeaturedHero products={featuredProducts} categories={categoryOptions} />
 
       {wholesaleProducts.length > 0 && (
         <section className="py-6 bg-white dark:bg-black">
           <div className="max-w-7xl mx-auto px-2 sm:px-6">
             <div className="mb-3">
-              <SectionHeader
-                title="Wholesale Picks"
-                href="/wholeseller"
-              />
+              <SectionHeader title="Wholesale Picks" href="/wholeseller" />
             </div>
 
             <div className="grid grid-flow-col auto-cols-[minmax(160px,1fr)] sm:auto-cols-[minmax(200px,1fr)] gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-hide">
               {wholesaleProducts.map((product) => (
                 <Link
                   key={product.id}
-                  href={`/wholeseller/${product.id}`}
+                  href={product.href}
                   className="group bg-white dark:bg-gray-900 rounded-xl border border-blue-200 dark:border-blue-700 hover:border-blue-400 dark:hover:border-blue-500 shadow-sm hover:shadow-md transition snap-start"
                 >
                   <div className="relative w-full pt-[100%] overflow-hidden bg-blue-50 dark:bg-blue-950/30 rounded-t-xl">
                     <Image
-                      src={product.imageUrl}
+                      src={product.image}
                       alt={product.name}
                       fill
                       className="object-contain p-3 group-hover:scale-105 transition-transform duration-300"
@@ -173,13 +95,11 @@ export default async function HomePage() {
                     </h3>
 
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                      Min: {product.wholesaleMinQty}{" "}
-                      {product.wholesaleUnit}
+                      Min: {product.minQuantity} unit
                     </p>
 
                     <p className="text-blue-600 dark:text-blue-400 font-bold text-base mt-2">
-                      KSh {product.wholesalePrice.toLocaleString()} /{" "}
-                      {product.wholesaleUnit}
+                      {formatPrice(product.unitPrice)}
                     </p>
                   </div>
                 </Link>
@@ -189,15 +109,9 @@ export default async function HomePage() {
         </section>
       )}
 
-      <Bannerss />
+      <Bannerss banners={banners} />
 
-      <FeaturedSection
-        products={uiProducts}
-        categories={categories.map((c) => ({
-          name: c.name,
-          slug: c.slug,
-        }))}
-      />
+      <FeaturedSection products={featuredProducts} categories={categoryOptions} />
     </main>
   );
 }

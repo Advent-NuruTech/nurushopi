@@ -1,33 +1,24 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { reviewsApi, ApiClientError } from "@/lib/api";
 import type { ApiOrder } from "../types";
-
-type ExistingReview = {
-  id: string;
-  orderId?: string;
-  productId?: string;
-  message?: string;
-};
 
 interface ReviewsTabProps {
   orders: ApiOrder[];
   userId: string;
-  userName: string;
   highlightOrderId?: string | null;
 }
 
-type ReviewMap = Record<string, Record<string, ExistingReview>>;
+type DraftReview = { rating: number; comment: string };
 
-function inputKey(orderId: string, productId: string) {
-  return `${orderId}:${productId}`;
-}
-
-export default function ReviewsTab({ orders, userId, userName, highlightOrderId }: ReviewsTabProps) {
-  const [reviewsByOrder, setReviewsByOrder] = useState<ReviewMap>({});
-  const [reviewInputs, setReviewInputs] = useState<Record<string, string>>({});
+export default function ReviewsTab({ orders, userId, highlightOrderId }: ReviewsTabProps) {
+  // Product ids the user has already reviewed (reviews are per-product, and a
+  // verified-purchase check is enforced server-side).
+  const [reviewedProductIds, setReviewedProductIds] = useState<Set<string>>(new Set());
+  const [drafts, setDrafts] = useState<Record<string, DraftReview>>({});
   const [loading, setLoading] = useState(false);
-  const [submittingOrderId, setSubmittingOrderId] = useState<string | null>(null);
+  const [submittingProductId, setSubmittingProductId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   const deliveredOrders = useMemo(
@@ -38,101 +29,61 @@ export default function ReviewsTab({ orders, userId, userName, highlightOrderId 
   const pendingByOrder = useMemo(() => {
     return deliveredOrders
       .map((order) => {
-        const items = (order.items ?? []).filter((item) => {
-          const productId = item.productId || item.id;
-          if (!productId) return false;
-          return !reviewsByOrder[order.id]?.[productId];
-        });
+        // Only real product references can be reviewed (an item whose product was
+        // deleted has productId === undefined and is skipped).
+        const items = (order.items ?? []).filter(
+          (item) => item.productId && !reviewedProductIds.has(item.productId)
+        );
         return { order, items };
       })
       .filter((group) => group.items.length > 0);
-  }, [deliveredOrders, reviewsByOrder]);
+  }, [deliveredOrders, reviewedProductIds]);
 
   const loadReviews = async () => {
     if (!deliveredOrders.length) {
-      setReviewsByOrder({});
+      setReviewedProductIds(new Set());
       return;
     }
-
     setLoading(true);
     try {
-      const pairs = await Promise.all(
-        deliveredOrders.map(async (order) => {
-          const res = await fetch(`/api/reviews?orderId=${order.id}&userId=${userId}`);
-          const data = await res.json();
-          const list = Array.isArray(data.reviews) ? (data.reviews as ExistingReview[]) : [];
-
-          const byProduct: Record<string, ExistingReview> = {};
-          list.forEach((review) => {
-            if (review.productId) byProduct[review.productId] = review;
-          });
-
-          return [order.id, byProduct] as const;
-        })
-      );
-
-      setReviewsByOrder(Object.fromEntries(pairs));
+      const page = await reviewsApi.mine({ pageSize: 100 });
+      setReviewedProductIds(new Set(page.items.map((r) => r.productId)));
     } catch {
-      setReviewsByOrder({});
+      setReviewedProductIds(new Set());
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadReviews();
+    void loadReviews();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, deliveredOrders.map((o) => o.id).join("|")]);
 
-  const submitReviews = async (order: ApiOrder) => {
-    const rows = (order.items ?? [])
-      .map((item) => {
-        const productId = item.productId || item.id;
-        if (!productId) return null;
+  const setDraft = (productId: string, patch: Partial<DraftReview>) =>
+    setDrafts((prev) => {
+      const current = prev[productId] ?? { rating: 5, comment: "" };
+      return { ...prev, [productId]: { ...current, ...patch } };
+    });
 
-        const existing = reviewsByOrder[order.id]?.[productId];
-        if (existing) return null;
-
-        const text = (reviewInputs[inputKey(order.id, productId)] ?? "").trim();
-        if (!text) return null;
-
-        return {
-          productId,
-          productName: item.name,
-          message: text,
-        };
-      })
-      .filter(Boolean);
-
-    if (!rows.length) {
-      setMessage("Write at least one review before submitting.");
-      return;
-    }
-
-    setSubmittingOrderId(order.id);
+  const submitReview = async (productId: string) => {
+    const draft = drafts[productId] ?? { rating: 5, comment: "" };
+    setSubmittingProductId(productId);
     setMessage(null);
     try {
-      const res = await fetch("/api/reviews", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId,
-          userName,
-          orderId: order.id,
-          reviews: rows,
-        }),
+      await reviewsApi.create({
+        productId,
+        rating: draft.rating,
+        comment: draft.comment.trim() || null,
       });
-
-      if (!res.ok) {
-        setMessage("Failed to submit reviews. Please try again.");
-        return;
-      }
-
       setMessage("Thank you. Your review was submitted for approval.");
-      setReviewInputs({});
-      await loadReviews();
+      setReviewedProductIds((prev) => new Set(prev).add(productId));
+    } catch (error) {
+      setMessage(
+        error instanceof ApiClientError ? error.message : "Failed to submit review. Please try again."
+      );
     } finally {
-      setSubmittingOrderId(null);
+      setSubmittingProductId(null);
     }
   };
 
@@ -176,9 +127,8 @@ export default function ReviewsTab({ orders, userId, userName, highlightOrderId 
 
                 <div className="space-y-3">
                   {items.map((item, idx) => {
-                    const productId = item.productId || item.id;
-                    if (!productId) return null;
-
+                    const productId = item.productId as string;
+                    const draft = drafts[productId] ?? { rating: 5, comment: "" };
                     return (
                       <div
                         key={`${order.id}-${productId}-${idx}`}
@@ -187,31 +137,42 @@ export default function ReviewsTab({ orders, userId, userName, highlightOrderId 
                         <p className="text-sm font-medium text-slate-900 dark:text-white">
                           {item.name}
                         </p>
+                        <div className="mt-2 flex items-center gap-1" role="radiogroup" aria-label="Rating">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                              key={star}
+                              type="button"
+                              aria-label={`${star} star${star > 1 ? "s" : ""}`}
+                              aria-checked={draft.rating === star}
+                              role="radio"
+                              onClick={() => setDraft(productId, { rating: star })}
+                              className={`text-2xl leading-none ${
+                                star <= draft.rating ? "text-amber-400" : "text-slate-300 dark:text-slate-600"
+                              }`}
+                            >
+                              ★
+                            </button>
+                          ))}
+                        </div>
                         <textarea
                           rows={3}
-                          value={reviewInputs[inputKey(order.id, productId)] ?? ""}
-                          onChange={(e) =>
-                            setReviewInputs((prev) => ({
-                              ...prev,
-                              [inputKey(order.id, productId)]: e.target.value,
-                            }))
-                          }
-                          placeholder="Write your review..."
+                          value={draft.comment}
+                          onChange={(e) => setDraft(productId, { comment: e.target.value })}
+                          placeholder="Write your review (optional)..."
                           className="mt-2 w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2 text-sm"
                         />
+                        <button
+                          type="button"
+                          onClick={() => submitReview(productId)}
+                          disabled={submittingProductId === productId}
+                          className="mt-3 px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold disabled:opacity-60"
+                        >
+                          {submittingProductId === productId ? "Submitting..." : "Submit Review"}
+                        </button>
                       </div>
                     );
                   })}
                 </div>
-
-                <button
-                  type="button"
-                  onClick={() => submitReviews(order)}
-                  disabled={submittingOrderId === order.id}
-                  className="mt-4 w-full sm:w-auto px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold disabled:opacity-60"
-                >
-                  {submittingOrderId === order.id ? "Submitting..." : "Submit Reviews"}
-                </button>
               </div>
             ))}
           </div>

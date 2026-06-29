@@ -25,17 +25,6 @@ export interface Admin {
   role: AdminRole;
 }
 
-export interface LinkedAccounts {
-  adminRoles: AdminRole[];
-  hasSeniorRole: boolean;
-  hasSubRole: boolean;
-  hasVendorAccount: boolean;
-  hasVendorApplication: boolean;
-  hasUserAccount: boolean;
-  canSwitchToSenior: boolean;
-  canMoveToUserProfile: boolean;
-}
-
 export const TABS_SENIOR: { id: TabId; label: string; icon: string }[] = [
   { id: "overview", label: "Overview", icon: "LayoutDashboard" },
   { id: "invite", label: "Invite Admin", icon: "UserPlus" },

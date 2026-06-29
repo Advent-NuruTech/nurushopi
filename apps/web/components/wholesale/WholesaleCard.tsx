@@ -5,34 +5,13 @@ import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/formatPrice";
 import { useSabbathStatus } from "@/lib/useSabbathStatus";
+import type { WholesaleCardVM } from "@/lib/view/catalog";
 
-interface WholesaleProduct {
-  id: string;
-  name?: string;
-  coverImage?: string;
-  image?: string;
-  images?: string[];
-  wholesalePrice?: number;
-  wholesaleMinQty?: number;
-  wholesaleUnit?: string;
-}
-
-export default function WholesaleCard({ product }: { product: WholesaleProduct }) {
+export default function WholesaleCard({ product }: { product: WholesaleCardVM }) {
   const { addToCart } = useCart();
   const { isClosed: sabbathClosed } = useSabbathStatus();
 
-  const imageSrc =
-    product?.coverImage ||
-    product?.image ||
-    product?.images?.[0] ||
-    "/assets/logo.jpg";
-
-  const minQty =
-    typeof product?.wholesaleMinQty === "number" && product.wholesaleMinQty > 0
-      ? product.wholesaleMinQty
-      : 1;
-
-  const unit = product?.wholesaleUnit || "unit";
+  const minQty = product.minQuantity > 0 ? product.minQuantity : 1;
 
   const addWholesale = (e: React.MouseEvent) => {
     e.preventDefault(); // stop navigation
@@ -41,10 +20,10 @@ export default function WholesaleCard({ product }: { product: WholesaleProduct }
 
     addToCart({
       id: product.id,
-      name: product.name ?? "Wholesale product",
-      price: Number(product?.wholesalePrice ?? 0),
+      name: product.name,
+      price: product.unitPrice,
       quantity: minQty,
-      image: imageSrc,
+      image: product.image,
       category: undefined,
       mode: "wholesale",
     });
@@ -52,29 +31,25 @@ export default function WholesaleCard({ product }: { product: WholesaleProduct }
 
   return (
     <Link
-      href={`/wholeseller/${product.id}`}
+      href={product.href}
       className="border rounded-xl p-3 block hover:shadow transition bg-white dark:bg-slate-900"
     >
       <div className="relative h-40 w-full rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800">
         <Image
-          src={imageSrc}
-          alt={product.name ?? "Wholesale product"}
+          src={product.image}
+          alt={product.name}
           fill
           sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
           className="object-cover"
         />
       </div>
 
-      <h3 className="font-semibold mt-2">
-        {product.name}
-      </h3>
+      <h3 className="font-semibold mt-2">{product.name}</h3>
 
-      <p className="text-blue-600 font-bold">
-        {formatPrice(Number(product?.wholesalePrice ?? 0))} / {unit}
-      </p>
+      <p className="text-blue-600 font-bold">{formatPrice(product.unitPrice)} / unit</p>
 
       <p className="text-sm text-gray-500">
-        Minimum: {minQty} {unit}
+        Minimum: {minQty} unit
       </p>
 
       <button

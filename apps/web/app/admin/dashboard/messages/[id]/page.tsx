@@ -4,116 +4,36 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { Send, MessageSquare } from "lucide-react";
-import { ADMIN_DASHBOARD_PATH, ADMIN_LOGIN_PATH, adminRoute } from "@/lib/adminPaths";
-
-/* ---------- Message Type ---------- */
-interface MessageItem {
-  id: string;
-  threadId?: string;
-  senderId?: string;
-  senderName?: string;
-  senderPhotoURL?: string;
-  senderType?: string;
-  recipientId?: string;
-  recipientName?: string;
-  recipientType?: string;
-  content?: string;
-  createdAt?: unknown;
-  readAt?: unknown;
-}
-
-/* ---------- Safe Date Conversion ---------- */
-const toDisplayDate = (value: unknown): string => {
-  if (!value) return "";
-  if (typeof value === "string" || typeof value === "number")
-    return new Date(value).toLocaleString();
-  if (
-    typeof value === "object" &&
-    value !== null &&
-    "toDate" in value &&
-    typeof (value as { toDate?: () => Date }).toDate === "function"
-  )
-    return (value as { toDate: () => Date }).toDate().toLocaleString();
-  if (
-    typeof value === "object" &&
-    value !== null &&
-    "seconds" in value &&
-    typeof (value as { seconds?: number }).seconds === "number"
-  )
-    return new Date((value as { seconds: number }).seconds * 1000).toLocaleString();
-  return "";
-};
+import { ADMIN_DASHBOARD_PATH, adminRoute } from "@/lib/adminPaths";
+import { messagesApi, ApiClientError } from "@/lib/api";
+import type { MessageDTO } from "@nuru/types";
 
 export default function MessageDetailPage() {
   const { id } = useParams();
   const router = useRouter();
+  const threadId = Array.isArray(id) ? id[0] : id;
 
-  const [adminId, setAdminId] = useState<string | null>(null);
-  const [authLoading, setAuthLoading] = useState(true);
-  const [messages, setMessages] = useState<MessageItem[]>([]);
+  const [messages, setMessages] = useState<MessageDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [reply, setReply] = useState("");
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  /* ---------- Load messages ---------- */
+  /* ---------- Load thread ---------- */
   const loadMessages = useCallback(async () => {
-    if (!id || !adminId) return;
-
+    if (!threadId) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/admin/messages/${id}`, {
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Failed to fetch messages");
-
-      const data: { messages: MessageItem[] } = await res.json();
-      setMessages(data.messages ?? []);
-
-      const unreadIncoming = data.messages?.filter(
-        (m) => m.recipientId === adminId && !m.readAt
-      );
-
-      if (unreadIncoming?.length) {
-        const ids = unreadIncoming.map((m) => m.id);
-        await fetch(`/api/admin/messages`, {
-          method: "PUT",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ids }),
-        });
-      }
+      const { messages: msgs } = await messagesApi.admin.listThread(threadId);
+      setMessages(msgs);
     } catch (err) {
       console.error("Failed to load messages:", err);
       setMessages([]);
     } finally {
       setLoading(false);
     }
-  }, [id, adminId]);
-
-  /* ---------- Admin auth ---------- */
-  useEffect(() => {
-    let cancelled = false;
-
-    fetch("/api/admin/me", { credentials: "include" })
-      .then((r) => {
-        if (cancelled) return null;
-        if (r.status === 401) {
-          router.replace(ADMIN_LOGIN_PATH);
-          return null;
-        }
-        return r.json();
-      })
-      .then((data) => {
-        if (!cancelled && data?.admin?.adminId) setAdminId(data.admin.adminId);
-      })
-      .finally(() => !cancelled && setAuthLoading(false));
-
-    return () => {
-      cancelled = true;
-    };
-  }, [router]);
+  }, [threadId]);
 
   useEffect(() => {
     loadMessages();
@@ -126,29 +46,19 @@ export default function MessageDetailPage() {
 
   /* ---------- Send reply ---------- */
   const sendReply = async () => {
-    if (!reply.trim() || !adminId || !id) return;
-
-    const text = reply.trim();
+    if (!reply.trim() || !threadId) return;
+    const body = reply.trim();
     setReply("");
-
     try {
-      await fetch("/api/admin/messages", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          threadId: id,
-          content: text,
-        }),
-      });
+      await messagesApi.admin.reply(threadId, { body, attachments: [] });
       await loadMessages();
       textareaRef.current?.focus();
     } catch (err) {
-      console.error("Failed to send reply:", err);
+      if (err instanceof ApiClientError) alert(err.message);
     }
   };
 
-  if (authLoading || loading) return <LoadingSpinner text="Loading messages..." />;
+  if (loading) return <LoadingSpinner text="Loading messages..." />;
 
   if (!messages.length)
     return <p className="p-6 text-center text-slate-500">No messages found.</p>;
@@ -161,7 +71,7 @@ export default function MessageDetailPage() {
           <MessageSquare size={24} />
           <div>
             <h2 className="text-lg font-bold">Conversation</h2>
-            <p className="text-sm text-gray-500">Admin chat view</p>
+            <p className="text-sm text-gray-500">Customer support thread</p>
           </div>
         </div>
 
@@ -176,7 +86,7 @@ export default function MessageDetailPage() {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50 dark:bg-gray-800 flex flex-col">
         {messages.map((m) => {
-          const incoming = m.recipientId === adminId;
+          const incoming = m.senderType === "USER";
 
           return (
             <div
@@ -188,13 +98,15 @@ export default function MessageDetailPage() {
                   incoming ? "bg-gray-200 dark:bg-gray-700" : "bg-blue-600 text-white"
                 }`}
               >
-                <p className="whitespace-pre-wrap">{m.content}</p>
+                <p className="whitespace-pre-wrap">{m.body}</p>
               </div>
 
               <span
-                className={`text-xs mt-1 px-1 ${incoming ? "text-gray-500 self-start" : "text-gray-300 self-end"}`}
+                className={`text-xs mt-1 px-1 ${
+                  incoming ? "text-gray-500 self-start" : "text-gray-300 self-end"
+                }`}
               >
-                {toDisplayDate(m.createdAt)}
+                {new Date(m.createdAt).toLocaleString()}
               </span>
             </div>
           );

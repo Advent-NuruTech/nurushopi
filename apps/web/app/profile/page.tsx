@@ -3,8 +3,7 @@
 import React, { Suspense, useEffect, useState, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAppUser } from "@/context/UserContext";
-import { onAuthStateChanged, User } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { messagesApi, notificationsApi } from "@/lib/api";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   UserCircle,
@@ -45,7 +44,6 @@ function ProfilePageContent() {
   const { user: contextUser, isLoading: userLoading } = useAppUser();
 
   /* ------------------- Hooks ------------------- */
-  const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedOrder, setSelectedOrder] = useState<ApiOrder | null>(null);
   const [orderFilter, setOrderFilter] = useState<OrderStatusFilter>("all");
@@ -56,7 +54,7 @@ function ProfilePageContent() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   const appUser = adaptAppUser(contextUser);
-  const uid = firebaseUser?.uid ?? appUser?.id ?? null;
+  const uid = appUser?.id ?? null;
 
   /* ------------------- Greeting ------------------- */
   useEffect(() => {
@@ -64,12 +62,6 @@ function ProfilePageContent() {
     if (h < 12) setGreeting("Good morning");
     else if (h < 18) setGreeting("Good afternoon");
     else setGreeting("Good evening");
-  }, []);
-
-  /* ------------------- Auth ------------------- */
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, setFirebaseUser);
-    return unsub;
   }, []);
 
   /* ------------------- Profile ------------------- */
@@ -88,7 +80,7 @@ function ProfilePageContent() {
     saving,
     loadProfile,
     handleSaveProfile,
-  } = useProfileData({ uid, appUser, firebaseUser });
+  } = useProfileData({ uid, appUser });
 
   /* ------------------- Orders ------------------- */
   const {
@@ -104,17 +96,21 @@ function ProfilePageContent() {
   /* ------------------- Messages ------------------- */
   useEffect(() => {
     if (!uid) return;
-    fetch(`/api/messages?userId=${uid}`)
-      .then((r) => r.json())
+    let cancelled = false;
+    // Unread = inbound (admin → user) support messages the user hasn't read.
+    messagesApi
+      .list()
       .then((d) => {
-        const msgs = d.messages ?? [];
-        const unread = msgs.filter(
-          (m: { recipientId?: string; readAt?: unknown }) =>
-            m.recipientId === uid && !m.readAt
-        ).length;
+        if (cancelled) return;
+        const unread = d.messages.filter((m) => m.senderType === "ADMIN" && !m.read).length;
         setUnreadMessages(unread);
       })
-      .catch(() => setUnreadMessages(0));
+      .catch(() => {
+        if (!cancelled) setUnreadMessages(0);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [uid]);
 
   /* ------------------- Load Profile ------------------- */
@@ -142,13 +138,10 @@ function ProfilePageContent() {
       return;
     }
     let cancelled = false;
-    fetch(`/api/user-notifications?userId=${uid}`)
-      .then((r) => r.json())
-      .then((d) => {
-        if (cancelled) return;
-        const list = Array.isArray(d.notifications) ? d.notifications : [];
-        const count = list.filter((n: { type?: string; readAt?: unknown }) => n.type === "review_prompt" && !n.readAt).length;
-        setUnreadReviewPrompts(count);
+    notificationsApi
+      .list({ type: "review_prompt", read: false, pageSize: 50 })
+      .then((page) => {
+        if (!cancelled) setUnreadReviewPrompts(page.items.length);
       })
       .catch(() => {
         if (!cancelled) setUnreadReviewPrompts(0);
@@ -159,12 +152,10 @@ function ProfilePageContent() {
   }, [uid, activeTab]);
 
   /* ------------------- Display ------------------- */
-  const displayName =
-    profile?.fullName || appUser?.name || firebaseUser?.displayName || "User";
+  const displayName = profile?.fullName || appUser?.name || "User";
   const firstName = displayName.split(" ")[0];
-  const email = appUser?.email || firebaseUser?.email || "";
-  const avatarUrl =
-    appUser?.imageUrl || firebaseUser?.photoURL || "/assets/logo.jpg";
+  const email = appUser?.email || "";
+  const avatarUrl = appUser?.imageUrl || "/assets/logo.jpg";
 
   /* ------------------- Notifications ------------------- */
   const notificationCount = unreadMessages + pendingOrders + unreadReviewPrompts;
@@ -202,7 +193,7 @@ function ProfilePageContent() {
       </div>
     );
 
-  if (!contextUser && !firebaseUser) return <AuthRequired />;
+  if (!contextUser) return <AuthRequired />;
 
   /* ------------------- Header ------------------- */
   const Header = () => (
@@ -409,7 +400,6 @@ function ProfilePageContent() {
               <ReviewsTab
                 orders={orders}
                 userId={uid}
-                userName={displayName}
                 highlightOrderId={searchParams.get("orderId")}
               />
             )}
@@ -423,9 +413,7 @@ function ProfilePageContent() {
               />
             )}
 
-            {activeTab === "wallet" && uid && (
-              <WalletTab userId={uid} />
-            )}
+            {activeTab === "wallet" && uid && <WalletTab />}
 
      {/*
 {activeTab === "reorder" && (

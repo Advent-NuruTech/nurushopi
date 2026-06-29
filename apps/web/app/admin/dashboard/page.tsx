@@ -6,8 +6,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import AdminLayout from "./components/AdminLayout";
 import TabErrorBoundary from "./components/TabErrorBoundary";
-import { Admin, AdminRole, LinkedAccounts, TabId, TABS_SENIOR, TABS_SUB } from "./components/types";
+import { Admin, AdminRole, TabId, TABS_SENIOR, TABS_SUB } from "./components/types";
 import { ADMIN_DASHBOARD_PATH, ADMIN_LOGIN_PATH, adminRoute } from "@/lib/adminPaths";
+import { adminAuthApi, ApiClientError } from "@/lib/api";
 
 const DashboardOverviewTab = dynamic<{ role: AdminRole }>(
   () => import("./components/DashboardOverviewTab"),
@@ -93,24 +94,26 @@ function AdminDashboardPageContent() {
   const searchParams = useSearchParams();
 
   const [admin, setAdmin] = useState<Admin | null>(null);
-  const [linkedAccounts, setLinkedAccounts] = useState<LinkedAccounts | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/admin/me", { credentials: "include" })
-      .then((r) => {
-        if (cancelled) return null;
-        if (r.status === 401) {
-          router.replace(ADMIN_LOGIN_PATH);
-          return null;
-        }
-        return r.json();
+    adminAuthApi
+      .me()
+      .then(({ admin: dto }) => {
+        if (cancelled) return;
+        setAdmin({
+          adminId: dto.id,
+          email: dto.email,
+          name: dto.name,
+          role: dto.role === "SENIOR" ? "senior" : "sub",
+        });
       })
-      .then((data) => {
-        if (cancelled || !data?.admin) return;
-        setAdmin(data.admin);
-        setLinkedAccounts(data.linkedAccounts ?? null);
+      .catch((err) => {
+        if (cancelled) return;
+        if (err instanceof ApiClientError && err.status === 401) {
+          router.replace(ADMIN_LOGIN_PATH);
+        }
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -162,22 +165,6 @@ function AdminDashboardPageContent() {
     },
     [router, searchParams]
   );
-
-  const onSwitchToSenior = useCallback(async () => {
-    const response = await fetch("/api/admin/auth/switch-role", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ targetRole: "senior" }),
-    });
-
-    if (!response.ok) {
-      const data = await response.json().catch(() => ({}));
-      throw new Error(data?.error ?? "Unable to switch account role.");
-    }
-
-    window.location.assign(`${ADMIN_DASHBOARD_PATH}?tab=overview`);
-  }, []);
 
   const pageTitle = TAB_LABELS.get(currentTab) ?? "Dashboard";
 
@@ -235,11 +222,9 @@ function AdminDashboardPageContent() {
   return (
     <AdminLayout
       admin={admin}
-      linkedAccounts={linkedAccounts}
       currentTab={currentTab}
       pageTitle={pageTitle}
       onTabChange={onTabChange}
-      onSwitchToSenior={onSwitchToSenior}
     >
       <TabErrorBoundary tabLabel={currentTab}>
         <Suspense fallback={<TabSkeleton />}>{activeTab}</Suspense>

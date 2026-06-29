@@ -5,27 +5,19 @@ import Link from "next/link";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import Image from "next/image";
 import { ADMIN_DASHBOARD_PATH, adminRoute } from "@/lib/adminPaths";
-
-interface WholesaleProduct {
-  id: string;
-  name: string;
-  wholesalePrice: number;
-  wholesaleMinQty: number;
-  wholesaleUnit?: string;
-  images?: string[];
-  stock?: number;
-}
+import { formatPrice } from "@/lib/formatPrice";
+import { wholesaleApi } from "@/lib/api";
+import type { WholesaleItemDTO } from "@nuru/types";
 
 export default function WholesaleAdminPage() {
-  const [products, setProducts] = useState<WholesaleProduct[]>([]);
+  const [products, setProducts] = useState<WholesaleItemDTO[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/admin/products?mode=wholesale", {
-      credentials: "include",
-    })
-      .then((r) => r.json())
-      .then((d) => setProducts(d.products ?? []))
+    wholesaleApi.admin
+      .listItems({ pageSize: 100 })
+      .then((page) => setProducts(page.items))
+      .catch(() => setProducts([]))
       .finally(() => setLoading(false));
   }, []);
 
@@ -40,9 +32,7 @@ export default function WholesaleAdminPage() {
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">
-          Wholesale Products
-        </h1>
+        <h1 className="text-2xl font-bold">Wholesale Products</h1>
 
         <Link
           href={adminRoute(`${ADMIN_DASHBOARD_PATH}/wholesale/upload`)}
@@ -69,34 +59,14 @@ export default function WholesaleAdminPage() {
           >
             <div className="relative w-full h-40 bg-gray-100">
               {p.images?.[0] && (
-                <Image
-                  src={p.images[0]}
-                  alt={p.name}
-                  fill
-                  className="object-cover"
-                />
+                <Image src={p.images[0]} alt={p.name} fill className="object-cover" />
               )}
             </div>
 
             <div className="p-4 space-y-1">
-              <h3 className="font-semibold line-clamp-1">
-                {p.name}
-              </h3>
-
-              <p className="text-sky-600 font-semibold">
-                KSh {p.wholesalePrice?.toLocaleString()}
-              </p>
-
-              <p className="text-sm text-gray-500">
-                Min: {p.wholesaleMinQty}{" "}
-                {p.wholesaleUnit ?? "pcs"}
-              </p>
-
-              {p.stock !== undefined && (
-                <p className="text-xs text-gray-500">
-                  Stock: {p.stock}
-                </p>
-              )}
+              <h3 className="font-semibold line-clamp-1">{p.name}</h3>
+              <p className="text-sky-600 font-semibold">{formatPrice(Number(p.unitPrice))}</p>
+              <p className="text-sm text-gray-500">Min: {p.minQuantity} pcs</p>
             </div>
           </Link>
         ))}

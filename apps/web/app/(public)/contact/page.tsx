@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { db } from '@/lib/firebase';
-import { collection, addDoc, Timestamp } from 'firebase/firestore';
+import { contactApi, ApiClientError } from '@/lib/api';
 
 export default function ContactPage() {
   const [name, setName] = useState('');
@@ -10,19 +9,19 @@ export default function ContactPage() {
   const [phone, setPhone] = useState('');
   const [message, setMessage] = useState('');
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus('sending');
+    setErrorMessage('');
 
     try {
-      // 🔹 Add new message to Firestore
-      await addDoc(collection(db, 'contacts'), {
-        name,
-        email,
-        phone,
-        message,
-        createdAt: Timestamp.now(),
+      await contactApi.submit({
+        name: name.trim(),
+        email: email.trim() || null,
+        phone: phone.trim() || null,
+        message: message.trim(),
       });
 
       // Clear form and show success
@@ -33,6 +32,11 @@ export default function ContactPage() {
       setStatus('success');
     } catch (error) {
       console.error('Error sending contact form:', error);
+      setErrorMessage(
+        error instanceof ApiClientError
+          ? error.message
+          : 'Failed to send. Please try again later.'
+      );
       setStatus('error');
     }
   };
@@ -107,7 +111,7 @@ export default function ContactPage() {
         )}
         {status === 'error' && (
           <div className="text-rose-600 text-sm mt-2">
-            ❌ Failed to send. Please try again later.
+            ❌ {errorMessage || 'Failed to send. Please try again later.'}
           </div>
         )}
       </form>
@@ -130,7 +134,7 @@ export default function ContactPage() {
               nurushoponline@gmail.com
             </a>
           </li>
-          
+
         </ul>
       </div>
     </div>

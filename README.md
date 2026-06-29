@@ -13,9 +13,9 @@ Tooling: **pnpm workspaces** + **Turborepo**. Database: **PostgreSQL** (Supabase
 portable to AWS RDS / any Postgres later). Auth is built from scratch (email/password +
 Google OAuth, JWT access + rotating refresh tokens in httpOnly cookies). Images: Cloudinary.
 
-> **Migration status:** Phase 1 (foundation + auth) is complete. Legacy features still run on
-> Firebase and are being migrated module-by-module to the Express API; Firebase is removed once
-> every feature has moved.
+> **Migration status:** Complete. Every feature now runs on the Express API + PostgreSQL.
+> Firebase/Firestore has been fully removed — the web app, storefront, profile, and admin
+> dashboard all talk only to the API's HTTP contract (`@nuru/types`).
 
 ## Prerequisites
 

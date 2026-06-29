@@ -3,8 +3,9 @@
 import React, { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { UserPlus, Mail, Lock, User, ArrowRight } from "lucide-react";
+import { UserPlus, Mail, Lock, User, ArrowRight, KeyRound } from "lucide-react";
 import { ADMIN_DASHBOARD_PATH, ADMIN_LOGIN_PATH, adminRoute } from "@/lib/adminPaths";
+import { adminAuthApi, ApiClientError } from "@/lib/api";
 
 function AdminSignupForm() {
   const router = useRouter();
@@ -14,6 +15,7 @@ function AdminSignupForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [seniorCode, setSeniorCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -24,28 +26,22 @@ function AdminSignupForm() {
     setError("");
     setLoading(true);
     try {
-      const body: { name: string; email: string; password: string; inviteToken?: string } = {
+      await adminAuthApi.signup({
         name: name.trim(),
         email: email.trim().toLowerCase(),
         password,
-      };
-      if (inviteToken) body.inviteToken = inviteToken;
-
-      const res = await fetch("/api/admin/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-        credentials: "include",
+        ...(inviteToken
+          ? { inviteToken }
+          : { seniorCode: seniorCode.trim() }),
       });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || "Signup failed");
-        return;
-      }
       router.push(adminRoute(ADMIN_DASHBOARD_PATH));
       router.refresh();
-    } catch {
-      setError("Network error. Please try again.");
+    } catch (err) {
+      if (err instanceof ApiClientError) {
+        setError(err.message || "Signup failed");
+      } else {
+        setError("Network error. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -125,6 +121,28 @@ function AdminSignupForm() {
                 />
               </div>
             </div>
+
+            {!isSubSignup && (
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  Senior admin code
+                </label>
+                <div className="relative">
+                  <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <input
+                    type="password"
+                    value={seniorCode}
+                    onChange={(e) => setSeniorCode(e.target.value)}
+                    required
+                    placeholder="Provided by NuruShop"
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                  />
+                </div>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  Required to register as a Senior Admin.
+                </p>
+              </div>
+            )}
 
             <button
               type="submit"

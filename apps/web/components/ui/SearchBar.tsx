@@ -3,8 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search } from "lucide-react";
-import { collection, query, getDocs, limit } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { catalogApi } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import type { Route } from "next";
 import Image from "next/image";
@@ -68,9 +67,9 @@ export default function SearchBar({ showSearch, setShowSearch }: SearchBarProps)
     };
   }, [showSearch, setShowSearch]);
 
-  /* ---------------- Firestore search (robust) ---------------- */
+  /* ---------------- API search ---------------- */
   const searchProducts = useCallback(async (searchTerm: string) => {
-    const trimmed = searchTerm.trim().toLowerCase();
+    const trimmed = searchTerm.trim();
 
     if (!trimmed) {
       setSearchResults([]);
@@ -80,46 +79,22 @@ export default function SearchBar({ showSearch, setShowSearch }: SearchBarProps)
     setIsLoading(true);
 
     try {
-      const productsRef = collection(db, "products");
-      const snapshot = await getDocs(query(productsRef, limit(100))); // fetch batch
+      const { items } = await catalogApi.listProducts({
+        search: trimmed,
+        pageSize: 10,
+      });
 
-      const results: SearchResult[] = snapshot.docs
-        .map((doc) => {
-          const data = doc.data() as {
-            name: string;
-            type?: "product" | "book" | "remedy";
-            category?: string;
-            price?: number;
-            sellingPrice?: number;
-            originalPrice?: number;
-            description?: string;
-            imageUrl?: string;
-            images?: string[];
-            name_lowercase?: string;
-          };
-
-          return {
-            id: doc.id,
-            name: data.name,
-            type: data.type ?? "product",
-            category: data.category ?? "",
-            price: data.price,
-            sellingPrice: data.sellingPrice ?? data.price,
-            originalPrice: data.originalPrice,
-            description: data.description,
-            image:
-              data.imageUrl ??
-              (Array.isArray(data.images) ? data.images[0] : undefined),
-            name_lowercase: data.name_lowercase ?? data.name.toLowerCase(),
-          };
-        })
-        // Filter: match any word or partial match
-        .filter((item) =>
-          item.name_lowercase
-            .split(" ")
-            .some((word: string) => word.includes(trimmed))
-        )
-        .slice(0, 10); // limit to 10 results
+      const results: SearchResult[] = items.map((p) => ({
+        id: p.slug ?? p.id,
+        name: p.name,
+        type: "product",
+        category: p.category?.name ?? "",
+        price: Number(p.price) || undefined,
+        sellingPrice: Number(p.sellingPrice ?? p.price) || undefined,
+        originalPrice: p.originalPrice != null ? Number(p.originalPrice) : undefined,
+        description: p.shortDescription ?? p.description ?? undefined,
+        image: p.images[0],
+      }));
 
       setSearchResults(results);
     } catch (err) {

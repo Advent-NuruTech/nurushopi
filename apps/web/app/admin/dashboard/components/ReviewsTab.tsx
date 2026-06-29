@@ -3,28 +3,21 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
-
-type Review = {
-  id: string;
-  userName?: string;
-  message?: string;
-  productName?: string;
-  productId?: string;
-  createdAt?: string;
-  status?: string;
-};
+import { reviewsApi, ApiClientError } from "@/lib/api";
+import type { ReviewDTO } from "@nuru/types";
 
 export default function ReviewsTab() {
-  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviews, setReviews] = useState<ReviewDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
   const highlightId = searchParams.get("reviewId");
 
   const load = () => {
     setLoading(true);
-    fetch("/api/admin/reviews?status=pending", { credentials: "include" })
-      .then((r) => r.json())
-      .then((d) => setReviews(d.reviews ?? []))
+    reviewsApi.admin
+      .list({ status: "PENDING", pageSize: 100 })
+      .then((page) => setReviews(page.items))
+      .catch(() => setReviews([]))
       .finally(() => setLoading(false));
   };
 
@@ -38,14 +31,13 @@ export default function ReviewsTab() {
     row?.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [highlightId, reviews]);
 
-  const updateReview = async (reviewId: string, status: "approved" | "rejected") => {
-    const res = await fetch("/api/admin/reviews", {
-      method: "PUT",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ reviewId, status }),
-    });
-    if (res.ok) load();
+  const updateReview = async (reviewId: string, status: "APPROVED" | "REJECTED") => {
+    try {
+      await reviewsApi.admin.moderate(reviewId, { status });
+      load();
+    } catch (err) {
+      if (err instanceof ApiClientError) alert(err.message);
+    }
   };
 
   if (loading) return <LoadingSpinner text="Loading reviews..." />;
@@ -78,25 +70,28 @@ export default function ReviewsTab() {
                     {r.userName ?? "User"}
                   </p>
                   <p className="text-xs text-slate-500">
-                    {r.productName || r.productId}
+                    {"★".repeat(r.rating)}
+                    {"☆".repeat(Math.max(0, 5 - r.rating))} · {r.productId}
                   </p>
                 </div>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => updateReview(r.id, "approved")}
+                    onClick={() => updateReview(r.id, "APPROVED")}
                     className="px-3 py-1 rounded bg-emerald-600 text-white text-xs"
                   >
                     Approve
                   </button>
                   <button
-                    onClick={() => updateReview(r.id, "rejected")}
+                    onClick={() => updateReview(r.id, "REJECTED")}
                     className="px-3 py-1 rounded bg-red-600 text-white text-xs"
                   >
                     Reject
                   </button>
                 </div>
               </div>
-              <p className="text-sm text-slate-700 dark:text-slate-300">{r.message}</p>
+              {r.comment && (
+                <p className="text-sm text-slate-700 dark:text-slate-300">{r.comment}</p>
+              )}
             </div>
           ))}
         </div>

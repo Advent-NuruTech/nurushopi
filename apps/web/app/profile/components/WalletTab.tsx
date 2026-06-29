@@ -1,261 +1,142 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
-import { collection, getDocs, orderBy, query } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import React, { useEffect, useState } from "react";
+import { walletApi, ApiClientError } from "@/lib/api";
 import { formatPrice } from "@/lib/formatPrice";
+import type { WalletTransactionDTO, WalletRedemptionDTO } from "@nuru/types";
 
-type WalletTx = {
-  id: string;
-  type?: string;
-  source?: string;
-  amount?: number;
-  balanceAfter?: number;
-  createdAt?: { toDate?: () => Date } | string;
-};
+/** API-enforced minimum cash-out (mirrors the wallet module's MIN_REDEMPTION). */
+const MIN_REDEMPTION = 100;
 
-type Redemption = {
-  id: string;
-  type?: string;
-  amount?: number;
-  status?: string;
-  createdAt?: { toDate?: () => Date } | string;
-  productName?: string;
-};
-
-type ProductOption = {
-  id: string;
-  name: string;
-  price: number;
-};
-
-export default function WalletTab({ userId }: { userId: string }) {
+export default function WalletTab() {
   const [balance, setBalance] = useState(0);
-  const [transactions, setTransactions] = useState<WalletTx[]>([]);
-  const [redemptions, setRedemptions] = useState<Redemption[]>([]);
+  const [transactions, setTransactions] = useState<WalletTransactionDTO[]>([]);
+  const [redemptions, setRedemptions] = useState<WalletRedemptionDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const [redeemType, setRedeemType] = useState<"cash" | "product">("cash");
   const [redeemAmount, setRedeemAmount] = useState<number | "">("");
   const [redeemPhone, setRedeemPhone] = useState("");
   const [redeemBank, setRedeemBank] = useState("");
-  const [products, setProducts] = useState<ProductOption[]>([]);
-  const [selectedProductId, setSelectedProductId] = useState("");
 
-  const canRedeem = balance >= 150;
-
-  const selectedProduct = useMemo(
-    () => products.find((p) => p.id === selectedProductId) || null,
-    [products, selectedProductId]
-  );
+  const canRedeem = balance >= MIN_REDEMPTION;
 
   const loadWallet = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/wallet?userId=${encodeURIComponent(userId)}`);
-      const data = await res.json();
-      setBalance(Number(data.walletBalance ?? 0));
-      setTransactions(data.transactions ?? []);
-      setRedemptions(data.redemptions ?? []);
-    } catch {
-      setMessage("Unable to load wallet data.");
+      // The wallet endpoints are scoped to the signed-in user by the session cookie.
+      const [{ wallet }, txPage, redemptionPage] = await Promise.all([
+        walletApi.summary(),
+        walletApi.transactions({ pageSize: 50, sort: "newest" }),
+        walletApi.redemptions({ pageSize: 50, sort: "newest" }),
+      ]);
+      setBalance(Number(wallet.balance));
+      setTransactions(txPage.items);
+      setRedemptions(redemptionPage.items);
+    } catch (error) {
+      setMessage(
+        error instanceof ApiClientError ? error.message : "Unable to load wallet data.",
+      );
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadWallet();
-  }, [userId]);
-
-  useEffect(() => {
-    if (redeemType !== "product") return;
-    const fetchProducts = async () => {
-      const snap = await getDocs(
-        query(collection(db, "products"), orderBy("createdAt", "desc"))
-      );
-      const list = snap.docs.map((d) => {
-        const data = d.data() as Record<string, unknown>;
-        const price = Number(data.sellingPrice ?? data.price ?? 0);
-        return {
-          id: d.id,
-          name: String(data.name ?? "Product"),
-          price,
-        };
-      });
-      setProducts(list);
-    };
-    fetchProducts();
-  }, [redeemType]);
+    void loadWallet();
+  }, []);
 
   const submitRedemption = async () => {
     if (!canRedeem) return;
 
-    setSubmitting(true);
     setMessage(null);
     setSuccess(null);
+
+    const amount = Number(redeemAmount);
+    if (!redeemAmount || amount < MIN_REDEMPTION) {
+      setMessage(`Enter a valid amount (minimum ${formatPrice(MIN_REDEMPTION)}).`);
+      return;
+    }
+    if (amount > balance) {
+      setMessage("Amount exceeds your wallet balance.");
+      return;
+    }
+    const phone = redeemPhone.trim();
+    const bank = redeemBank.trim();
+    if (!phone && !bank) {
+      setMessage("Enter an M-Pesa phone number or bank details.");
+      return;
+    }
+
+    setSubmitting(true);
     try {
-      const payload: Record<string, unknown> = {
-        userId,
-        type: redeemType,
-      };
-
-      if (redeemType === "cash") {
-        payload.amount = Number(redeemAmount);
-        if (redeemPhone.trim()) payload.phone = redeemPhone.trim();
-        if (redeemBank.trim()) payload.bankDetails = redeemBank.trim();
-
-        if (!redeemAmount || Number(redeemAmount) < 150) {
-          setMessage("Enter a valid amount (minimum KSh 150).");
-          setSubmitting(false);
-          return;
-        }
-        if (Number(redeemAmount) > balance) {
-          setMessage("Amount exceeds your wallet balance.");
-          setSubmitting(false);
-          return;
-        }
-        if (!redeemPhone.trim() && !redeemBank.trim()) {
-          setMessage("Enter Mpesa phone number or bank details.");
-          setSubmitting(false);
-          return;
-        }
-      } else if (selectedProduct) {
-        payload.productId = selectedProduct.id;
-        payload.productName = selectedProduct.name;
-        if (!selectedProduct) {
-          setMessage("Select a product to redeem.");
-          setSubmitting(false);
-          return;
-        }
-      }
-
-      const res = await fetch("/api/wallet/redeem", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+      await walletApi.requestRedemption({
+        amount,
+        method: phone ? "mpesa" : "bank",
+        details: phone ? { phone } : { bank },
       });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        setMessage(err.error ?? "Failed to submit redemption.");
-        return;
-      }
-      setSuccess(
-        redeemType === "product"
-          ? "Congratulations for being part of NuruShop. Your product will be processed and delivered."
-          : "Your cash payout request was sent to admin. We will process it shortly."
-      );
+      setSuccess("Your cash payout request was sent to admin. We will process it shortly.");
       setRedeemAmount("");
       setRedeemPhone("");
       setRedeemBank("");
-      setSelectedProductId("");
       await loadWallet();
-    } catch {
-      setMessage("Failed to submit redemption.");
+    } catch (error) {
+      setMessage(
+        error instanceof ApiClientError ? error.message : "Failed to submit redemption.",
+      );
     } finally {
       setSubmitting(false);
     }
   };
 
-  const formatDate = (value: WalletTx["createdAt"]) => {
-    if (!value) return "";
-    if (typeof value === "string") return new Date(value).toLocaleDateString();
-    if (typeof value === "object" && "toDate" in value && value.toDate) {
-      return value.toDate().toLocaleDateString();
-    }
-    return "";
-  };
+  const formatDate = (value: string) =>
+    value ? new Date(value).toLocaleDateString() : "";
 
   return (
     <section className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Wallet</h2>
-        <span className="text-xl font-bold text-emerald-600">
-          {formatPrice(balance)}
-        </span>
+        <span className="text-xl font-bold text-emerald-600">{formatPrice(balance)}</span>
       </div>
 
       {!canRedeem && (
         <p className="text-sm text-slate-500">
-          Wallet redemption is available once your balance reaches KSh 150.
+          Wallet redemption is available once your balance reaches {formatPrice(MIN_REDEMPTION)}.
         </p>
       )}
 
       {canRedeem && (
         <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-4 space-y-4">
-          <div className="flex gap-2">
-            {(["cash", "product"] as const).map((t) => (
-              <button
-                key={t}
-                onClick={() => setRedeemType(t)}
-                className={`px-3 py-1 rounded text-sm font-medium ${
-                  redeemType === t
-                    ? "bg-sky-600 text-white"
-                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
-                }`}
-              >
-                {t === "cash" ? "Cash Payout" : "Product Redemption"}
-              </button>
-            ))}
+          <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Cash Payout</p>
+          <div className="space-y-3">
+            <input
+              type="number"
+              placeholder="Amount (KSh)"
+              value={redeemAmount}
+              onChange={(e) =>
+                setRedeemAmount(e.target.value === "" ? "" : Number(e.target.value))
+              }
+              className="w-full rounded border border-slate-200 dark:border-slate-700 p-2 text-sm bg-white dark:bg-slate-900"
+            />
+            <input
+              placeholder="M-Pesa phone number"
+              value={redeemPhone}
+              onChange={(e) => setRedeemPhone(e.target.value)}
+              className="w-full rounded border border-slate-200 dark:border-slate-700 p-2 text-sm bg-white dark:bg-slate-900"
+            />
+            <textarea
+              placeholder="Bank details (optional)"
+              value={redeemBank}
+              onChange={(e) => setRedeemBank(e.target.value)}
+              className="w-full rounded border border-slate-200 dark:border-slate-700 p-2 text-sm bg-white dark:bg-slate-900"
+              rows={3}
+            />
           </div>
 
-          {redeemType === "cash" ? (
-            <div className="space-y-3">
-              <input
-                type="number"
-                placeholder="Amount (KSh)"
-                value={redeemAmount}
-                onChange={(e) =>
-                  setRedeemAmount(e.target.value === "" ? "" : Number(e.target.value))
-                }
-                className="w-full rounded border border-slate-200 dark:border-slate-700 p-2 text-sm bg-white dark:bg-slate-900"
-              />
-              <input
-                placeholder="Mpesa phone number"
-                value={redeemPhone}
-                onChange={(e) => setRedeemPhone(e.target.value)}
-                className="w-full rounded border border-slate-200 dark:border-slate-700 p-2 text-sm bg-white dark:bg-slate-900"
-              />
-              <textarea
-                placeholder="Bank details (optional)"
-                value={redeemBank}
-                onChange={(e) => setRedeemBank(e.target.value)}
-                className="w-full rounded border border-slate-200 dark:border-slate-700 p-2 text-sm bg-white dark:bg-slate-900"
-                rows={3}
-              />
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <select
-                value={selectedProductId}
-                onChange={(e) => setSelectedProductId(e.target.value)}
-                className="w-full rounded border border-slate-200 dark:border-slate-700 p-2 text-sm bg-white dark:bg-slate-900"
-              >
-                <option value="">Select product</option>
-                {products.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name} - {formatPrice(p.price)}
-                  </option>
-                ))}
-              </select>
-              {selectedProduct && (
-                <p className="text-sm text-slate-500">
-                  This product will be processed and delivered after admin approval.
-                </p>
-              )}
-            </div>
-          )}
-
           <button
-            disabled={
-              submitting ||
-              (redeemType === "cash" && !redeemAmount) ||
-              (redeemType === "product" && !selectedProduct) ||
-              (redeemType === "cash" && !redeemPhone.trim() && !redeemBank.trim())
-            }
+            disabled={submitting || !redeemAmount || (!redeemPhone.trim() && !redeemBank.trim())}
             onClick={submitRedemption}
             className="w-full bg-emerald-600 text-white py-2 rounded-lg font-semibold text-sm hover:bg-emerald-700 disabled:opacity-60"
           >
@@ -267,7 +148,7 @@ export default function WalletTab({ userId }: { userId: string }) {
             <div className="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg p-3">
               <p>{success}</p>
               <a
-                href="/profile"
+                href="/profile?tab=invite"
                 className="inline-block mt-2 text-sky-700 font-medium hover:underline"
               >
                 Invite more people to keep earning →
@@ -294,17 +175,17 @@ export default function WalletTab({ userId }: { userId: string }) {
               >
                 <div>
                   <p className="font-medium capitalize">
-                    {tx.type} - {tx.source}
+                    {tx.type.toLowerCase()} - {tx.source.toLowerCase()}
                   </p>
                   <p className="text-slate-500">{formatDate(tx.createdAt)}</p>
                 </div>
                 <div className="text-right">
                   <p className="font-semibold">
-                    {tx.type === "debit" ? "-" : "+"}
-                    {formatPrice(Number(tx.amount ?? 0))}
+                    {tx.type === "DEBIT" ? "-" : "+"}
+                    {formatPrice(Number(tx.amount))}
                   </p>
                   <p className="text-xs text-slate-500">
-                    Balance: {formatPrice(Number(tx.balanceAfter ?? 0))}
+                    Balance: {formatPrice(Number(tx.balanceAfter))}
                   </p>
                 </div>
               </div>
@@ -327,14 +208,12 @@ export default function WalletTab({ userId }: { userId: string }) {
                 className="flex items-center justify-between text-sm border-b border-slate-100 dark:border-slate-800 py-2"
               >
                 <div>
-                  <p className="font-medium capitalize">
-                    {r.type} {r.productName ? `- ${r.productName}` : ""}
-                  </p>
+                  <p className="font-medium capitalize">{r.method ?? "cash"}</p>
                   <p className="text-slate-500">{formatDate(r.createdAt)}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold">{formatPrice(Number(r.amount ?? 0))}</p>
-                  <p className="text-xs text-slate-500">{r.status ?? "pending"}</p>
+                  <p className="font-semibold">{formatPrice(Number(r.amount))}</p>
+                  <p className="text-xs text-slate-500">{r.status.toLowerCase()}</p>
                 </div>
               </div>
             ))}

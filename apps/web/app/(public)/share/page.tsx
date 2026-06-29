@@ -1,42 +1,44 @@
-import { getAllProducts } from "@/lib/firestoreHelpers";
 import ShareableProductGrid from "@/components/ui/ShareableProductGrid";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import HeroSection from "@/components/ui/HeroSection";
-import { Product } from "@/lib/types";
+import { listProducts } from "@/lib/data/catalog";
+import type { Product } from "@/lib/types";
 
-export const dynamic = "force-dynamic";
+export const metadata = {
+  title: "Share Our Products – NuruShop",
+  description: "Help spread the word! Share NuruShop products with friends and family.",
+};
 
 export default async function SharePage() {
-  const products: Product[] = await getAllProducts();
+  const { items } = await listProducts({ pageSize: 60, sort: "newest" });
 
-  if (!products || products.length === 0) {
-    return (
-      <div className="flex justify-center items-center h-[60vh]">
-        <LoadingSpinner text="Loading Products..." />
-      </div>
-    );
-  }
-
-  const uiProducts = products.map((p) => {
-    return {
-      ...p,
-      // Use optional chaining for safer access to potentially undefined properties.
-      image: p.images?.[0] || "/assets/logo.jpg",
-      shortDescription:
-        p.shortDescription ||
-        p.description ||
-        "A quality product from NuruShop.",
-    };
-  });
+  // Map render-ready card view models to the shape the shareable grid expects.
+  const products: Product[] = items.map((p) => ({
+    id: p.id,
+    name: p.name,
+    shortDescription: p.shortDescription ?? "A quality product from NuruShop.",
+    price: p.sellingPrice,
+    sellingPrice: p.sellingPrice,
+    originalPrice: p.originalPrice,
+    images: p.images,
+    category: p.categorySlug ?? "",
+    slug: p.slug,
+    createdAt: p.createdAtMs,
+  }));
 
   return (
     <main className="min-h-screen bg-white dark:bg-gray-900">
       <HeroSection />
-      <ShareableProductGrid
-        products={uiProducts}
-        title="Share Our Products"
-        subtitle="Help spread the word! Share these products with your friends and family."
-      />
+      {products.length === 0 ? (
+        <div className="flex justify-center items-center h-[40vh] text-gray-500 dark:text-gray-400">
+          No products available to share yet.
+        </div>
+      ) : (
+        <ShareableProductGrid
+          products={products}
+          title="Share Our Products"
+          subtitle="Help spread the word! Share these products with your friends and family."
+        />
+      )}
     </main>
   );
 }

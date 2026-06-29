@@ -2,33 +2,25 @@
 
 import { useEffect, useState } from "react";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
-
-type PwaStats = {
-  totalInstalled: number;
-};
+import { pwaApi, ApiClientError } from "@/lib/api";
+import type { PwaInstallStatsDTO } from "@nuru/types";
 
 export default function PwaInstallsTab() {
-  const [stats, setStats] = useState<PwaStats | null>(null);
+  const [stats, setStats] = useState<PwaInstallStatsDTO | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    fetch("/api/admin/pwa-installs", { credentials: "include" })
-      .then(async (res) => {
-        const payload = (await res.json().catch(() => ({}))) as {
-          totalInstalled?: number;
-          error?: string;
-        };
-        if (!res.ok) throw new Error(payload.error || "Unable to load install stats.");
-        if (!cancelled) {
-          setStats({ totalInstalled: Number(payload.totalInstalled ?? 0) });
-        }
+    pwaApi.admin
+      .stats()
+      .then((payload) => {
+        if (!cancelled) setStats(payload);
       })
       .catch((err) => {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Unable to load install stats.");
+          setError(err instanceof ApiClientError ? err.message : "Unable to load install stats.");
         }
       })
       .finally(() => {

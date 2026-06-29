@@ -2,113 +2,65 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { vendorsApi, ApiClientError } from "@/lib/api";
+import type { VendorApplicationDTO, VendorApplicationStatus } from "@nuru/types";
 
-type VendorStatus = "pending" | "approved" | "rejected";
-
-interface VendorApplication {
-  id: string;
-  status: VendorStatus;
-  email: string;
-  phone?: string;
-  ownerName?: string;
-  businessName?: string;
-  businessType?: string;
-  denomination?: string;
-  country?: string;
-  county?: string;
-  city?: string;
-  address?: string;
-  category?: string;
-  description?: string;
-  products?: string[];
-  createdAt?: unknown;
-  reviewedAt?: unknown;
-  rejectionReason?: string | null;
-}
-
-interface ApplicationsResponse {
-  items: VendorApplication[];
-  total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-}
-
-const STATUS_OPTIONS: Array<{ value: "all" | VendorStatus; label: string }> = [
+const STATUS_OPTIONS: Array<{ value: "all" | VendorApplicationStatus; label: string }> = [
   { value: "all", label: "All" },
-  { value: "pending", label: "Pending" },
-  { value: "approved", label: "Approved" },
-  { value: "rejected", label: "Rejected" },
+  { value: "PENDING", label: "Pending" },
+  { value: "APPROVED", label: "Approved" },
+  { value: "REJECTED", label: "Rejected" },
 ];
 
-function toDisplayDate(value: unknown): string {
-  if (!value) return "N/A";
-  if (typeof value === "string" || typeof value === "number") {
-    return new Date(value).toLocaleString();
-  }
-  if (
-    typeof value === "object" &&
-    value !== null &&
-    "toDate" in value &&
-    typeof (value as { toDate?: () => Date }).toDate === "function"
-  ) {
-    return (value as { toDate: () => Date }).toLocaleString();
-  }
-  if (
-    typeof value === "object" &&
-    value !== null &&
-    "seconds" in value &&
-    typeof (value as { seconds?: number }).seconds === "number"
-  ) {
-    return new Date((value as { seconds: number }).seconds * 1000).toLocaleString();
-  }
-  return "N/A";
-}
-
-function StatusBadge({ status }: { status: VendorStatus }) {
+function StatusBadge({ status }: { status: VendorApplicationStatus }) {
   const styles =
-    status === "approved"
+    status === "APPROVED"
       ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
-      : status === "rejected"
+      : status === "REJECTED"
         ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300"
         : "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300";
 
-  return <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${styles}`}>{status}</span>;
+  return (
+    <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${styles}`}>
+      {status.charAt(0) + status.slice(1).toLowerCase()}
+    </span>
+  );
 }
 
 export default function VendorApplicationsTab() {
-  const [items, setItems] = useState<VendorApplication[]>([]);
+  const [items, setItems] = useState<VendorApplicationDTO[]>([]);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState<"all" | VendorStatus>("pending");
+  const [status, setStatus] = useState<"all" | VendorApplicationStatus>("PENDING");
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
-  const queryString = useMemo(() => {
-    const params = new URLSearchParams();
-    params.set("page", String(page));
-    params.set("pageSize", "10");
-    params.set("status", status);
-    if (search.trim()) params.set("search", search.trim());
-    return params.toString();
-  }, [page, search, status]);
+  const query = useMemo(
+    () => ({
+      page,
+      pageSize: 10,
+      ...(status !== "all" ? { status } : {}),
+      ...(search.trim() ? { search: search.trim() } : {}),
+    }),
+    [page, search, status],
+  );
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-
-    fetch(`/api/admin/vendor-applications?${queryString}`, {
-      credentials: "include",
-    })
-      .then((response) => response.json())
-      .then((data: ApplicationsResponse) => {
+    vendorsApi.admin
+      .list(query)
+      .then((data) => {
         if (cancelled) return;
-        setItems(data.items ?? []);
-        setTotal(data.total ?? 0);
-        setTotalPages(data.totalPages ?? 1);
+        setItems(data.items);
+        setTotal(data.total);
+        setTotalPages(data.totalPages);
+      })
+      .catch(() => {
+        if (!cancelled) setItems([]);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -117,32 +69,27 @@ export default function VendorApplicationsTab() {
     return () => {
       cancelled = true;
     };
-  }, [queryString]);
+  }, [query]);
 
   useEffect(() => {
     setPage(1);
   }, [search, status]);
 
-  const updateStatus = async (applicationId: string, nextStatus: VendorStatus) => {
+  const updateStatus = async (applicationId: string, nextStatus: VendorApplicationStatus) => {
     const previous = items;
     setUpdatingId(applicationId);
-
     setItems((current) =>
-      current.map((item) => (item.id === applicationId ? { ...item, status: nextStatus } : item))
+      current.map((item) => (item.id === applicationId ? { ...item, status: nextStatus } : item)),
     );
-
-    const response = await fetch("/api/admin/vendor-applications", {
-      method: "PUT",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: applicationId, status: nextStatus }),
-    });
-
-    if (!response.ok) {
+    try {
+      const { application } = await vendorsApi.admin.moderate(applicationId, { status: nextStatus });
+      setItems((current) => current.map((item) => (item.id === applicationId ? application : item)));
+    } catch (err) {
       setItems(previous);
+      if (err instanceof ApiClientError) alert(err.message);
+    } finally {
+      setUpdatingId(null);
     }
-
-    setUpdatingId(null);
   };
 
   if (loading) return <LoadingSpinner text="Loading vendor applications..." />;
@@ -161,7 +108,7 @@ export default function VendorApplicationsTab() {
           type="text"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          placeholder="Search by business, owner, email, phone, category"
+          placeholder="Search by business, contact, email"
           className="w-full md:max-w-md rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2 text-sm"
         />
         <div className="flex items-center gap-2">
@@ -201,12 +148,14 @@ export default function VendorApplicationsTab() {
                     </h3>
                     <StatusBadge status={application.status} />
                   </div>
-                  <p className="text-sm text-slate-600 dark:text-slate-300">{application.ownerName || "Unknown owner"}</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-300">
+                    {application.contactName || "Unknown contact"}
+                  </p>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
                     {application.email} · {application.phone || "No phone"}
                   </p>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                    Applied: {toDisplayDate(application.createdAt)}
+                    Applied: {new Date(application.createdAt).toLocaleString()}
                   </p>
                 </div>
 
@@ -219,12 +168,12 @@ export default function VendorApplicationsTab() {
                     {expanded === application.id ? "Hide details" : "View details"}
                   </button>
 
-                  {application.status === "pending" && (
+                  {application.status === "PENDING" && (
                     <>
                       <button
                         type="button"
                         disabled={updatingId === application.id}
-                        onClick={() => updateStatus(application.id, "approved")}
+                        onClick={() => updateStatus(application.id, "APPROVED")}
                         className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white text-sm"
                       >
                         Approve
@@ -232,7 +181,7 @@ export default function VendorApplicationsTab() {
                       <button
                         type="button"
                         disabled={updatingId === application.id}
-                        onClick={() => updateStatus(application.id, "rejected")}
+                        onClick={() => updateStatus(application.id, "REJECTED")}
                         className="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white text-sm"
                       >
                         Reject
@@ -244,22 +193,7 @@ export default function VendorApplicationsTab() {
 
               {expanded === application.id && (
                 <div className="mt-4 grid gap-3 sm:grid-cols-2 text-sm">
-                  <Detail label="Business type" value={application.businessType || "N/A"} />
-                  <Detail label="Denomination" value={application.denomination || "N/A"} />
-                  <Detail label="Category" value={application.category || "N/A"} />
-                  <Detail
-                    label="Location"
-                    value={[application.city, application.county, application.country].filter(Boolean).join(", ") || "N/A"}
-                  />
-                  <Detail label="Address" value={application.address || "N/A"} />
-                  <Detail
-                    label="Products"
-                    value={application.products?.length ? application.products.join(", ") : "N/A"}
-                  />
                   <Detail label="Description" value={application.description || "N/A"} />
-                  {application.rejectionReason && (
-                    <Detail label="Rejection reason" value={application.rejectionReason} />
-                  )}
                 </div>
               )}
             </article>

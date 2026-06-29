@@ -1,10 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Navbar from "@/components/ui/Navbar";
 
-import { onAuthStateChanged, User } from "firebase/auth";
-import { auth } from "@/lib/firebase";
 import { useAppUser } from "@/context/UserContext";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import ManageOrders from "../profile/components/ManageOrders";
@@ -15,18 +13,11 @@ import type { ApiOrder, OrderStatusFilter } from "../profile/types";
 
 export default function MyOrdersPage() {
   const { user: contextUser, isLoading } = useAppUser();
-  const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
   const [orderFilter, setOrderFilter] = useState<OrderStatusFilter>("all");
   const [selectedOrder, setSelectedOrder] = useState<ApiOrder | null>(null);
 
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, setFirebaseUser);
-    return () => unsub();
-  }, []);
-
-  const uid = firebaseUser?.uid ?? contextUser?.id ?? null;
-  const displayName =
-    contextUser?.name || firebaseUser?.displayName || "User";
+  const uid = contextUser?.id ?? null;
+  const displayName = contextUser?.name || "User";
   const { filteredOrders, ordersLoading } = useOrders({ uid, orderFilter });
 
   if (isLoading) {
@@ -37,7 +28,7 @@ export default function MyOrdersPage() {
     );
   }
 
-  if (!contextUser && !firebaseUser) {
+  if (!contextUser) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-slate-900 px-4 py-12">
         <AuthRequired />

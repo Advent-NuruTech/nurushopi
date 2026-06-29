@@ -4,6 +4,7 @@ import { useEffect, useState, FormEvent } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { ADMIN_DASHBOARD_PATH, adminRoute } from "@/lib/adminPaths";
+import { catalogApi, ApiClientError } from "@/lib/api";
 
 export default function EditBannerPage() {
   const params = useParams();
@@ -17,22 +18,19 @@ export default function EditBannerPage() {
   const [shortDescription, setShortDescription] = useState("");
   const [link, setLink] = useState("");
   const [imageUrl, setImageUrl] = useState("");
-  const [oldImageUrl, setOldImageUrl] = useState("");
 
   /* ---------------- Fetch banner ---------------- */
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch(`/api/admin/banners?id=${id}`);
-        const data = await res.json();
-
-        const banner = data.banner;
-
-        setTitle(banner.title || "");
-        setShortDescription(banner.shortDescription || "");
-        setLink(banner.link || "");
-        setImageUrl(banner.imageUrl || "");
-        setOldImageUrl(banner.imageUrl || "");
+        const { banners } = await catalogApi.admin.listBanners();
+        const banner = banners.find((b) => b.id === id);
+        if (banner) {
+          setTitle(banner.title || "");
+          setShortDescription(banner.subtitle || "");
+          setLink(banner.linkUrl || "");
+          setImageUrl(banner.imageUrl || "");
+        }
       } catch (e) {
         console.error("Load failed", e);
       } finally {
@@ -85,28 +83,18 @@ export default function EditBannerPage() {
 
       const finalLink = normalizeLink(link);
 
-      const res = await fetch("/api/admin/banners", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id,
-          title,
-          shortDescription,
-          link: finalLink,
-          imageUrl,
-          oldImageUrl,
-        }),
+      await catalogApi.admin.updateBanner(id, {
+        title: title.trim() || null,
+        subtitle: shortDescription.trim() || null,
+        linkUrl: finalLink || null,
+        imageUrl,
       });
-
-      const data = await res.json();
-
-      if (!data.success) throw new Error("Update failed");
 
       alert("Banner updated");
       router.push(adminRoute(ADMIN_DASHBOARD_PATH));
     } catch (e) {
       console.error(e);
-      alert("Update failed");
+      alert(e instanceof ApiClientError ? e.message : "Update failed");
     } finally {
       setSaving(false);
     }

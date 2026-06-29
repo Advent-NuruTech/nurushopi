@@ -103,6 +103,7 @@ model User {
   passwordHash  String? // null for OAuth-only accounts
   name          String?
   phone         String?
+  address       String?
   avatarUrl     String?
   emailVerified DateTime?
   isActive      Boolean   @default(true)
@@ -321,15 +322,24 @@ model Banner {
 }
 
 model HeroAnnouncement {
-  id        String    @id @default(cuid())
-  message   String
-  linkUrl   String?
-  isActive  Boolean   @default(true)
-  startsAt  DateTime?
-  endsAt    DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id           String    @id @default(cuid())
+  message      String
+  linkUrl      String?
+  /**
+   * Optional CSS gradient token rendered behind the marquee slide.
+   */
+  gradient     String?
+  /**
+   * Sort position in the marquee; lower shows first.
+   */
+  displayOrder Int       @default(0) @map("display_order")
+  isActive     Boolean   @default(true)
+  startsAt     DateTime?
+  endsAt       DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
+  @@index([isActive, displayOrder])
   @@map("hero_announcements")
 }
 
@@ -545,11 +555,15 @@ model PwaInstall {
 }
 
 model SabbathMessage {
-  id        String   @id @default(cuid())
-  message   String
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  message     String
+  // The Friday (YYYY-MM-DD) this devotional message is scheduled for. Validated
+  // app-side to fall on a Friday. Not unique: the latest by createdAt wins.
+  sabbathDate String
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
+  @@index([sabbathDate, createdAt])
   @@map("sabbath_messages")
 }

@@ -14,47 +14,23 @@ import {
 } from "lucide-react";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { formatPrice } from "@/lib/formatPrice";
+import { dashboardApi } from "@/lib/api";
 import type { AdminRole } from "./types";
-
-type Stats = {
-  users: number;
-  admins: number;
-  subAdmins: number;
-  products: number;
-  wholesaleProducts: number;
-  retailProducts: number;
-  totalSales: number;
-  totalCancellations: number;
-  totalReviews: number;
-  orders?: number;
-};
-
-const defaultStats: Stats = {
-  users: 0,
-  admins: 0,
-  subAdmins: 0,
-  products: 0,
-  wholesaleProducts: 0,
-  retailProducts: 0,
-  totalSales: 0,
-  totalCancellations: 0,
-  totalReviews: 0,
-};
+import type { DashboardStatsDTO } from "@nuru/types";
 
 export default function DashboardOverviewTab({ role }: { role: AdminRole }) {
-  const [stats, setStats] = useState<Stats>(defaultStats);
+  const [stats, setStats] = useState<DashboardStatsDTO | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/admin/dashboard/stats", { credentials: "include" })
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error("Failed to load stats"))))
-      .then((d: { stats?: Partial<Stats> }) => {
-        if (cancelled) return;
-        setStats({ ...defaultStats, ...(d.stats ?? {}) });
+    dashboardApi
+      .stats()
+      .then((d) => {
+        if (!cancelled) setStats(d.stats);
       })
       .catch(() => {
-        if (!cancelled) setStats(defaultStats);
+        if (!cancelled) setStats(null);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -65,28 +41,28 @@ export default function DashboardOverviewTab({ role }: { role: AdminRole }) {
   }, []);
 
   const cards = useMemo(() => {
+    if (!stats) return [];
     const base = [
-      { label: "Products", value: stats.products, icon: Package },
-      { label: "Wholesale", value: stats.wholesaleProducts, icon: Warehouse },
-      { label: "Retail", value: stats.retailProducts, icon: Store },
-      { label: "Total Sales", value: formatPrice(stats.totalSales), icon: TrendingUp },
-      { label: "Cancellations", value: stats.totalCancellations, icon: XCircle },
+      { label: "Products", value: stats.catalog.products, icon: Package },
+      { label: "Active Products", value: stats.catalog.activeProducts, icon: Store },
+      { label: "Low Stock", value: stats.catalog.lowStock, icon: Warehouse },
+      { label: "Out of Stock", value: stats.catalog.outOfStock, icon: XCircle },
+      { label: "Total Orders", value: stats.orders.total, icon: MessageSquare },
+      { label: "Pending Fulfilment", value: stats.orders.pendingFulfilment, icon: UserCog },
     ];
 
     if (role === "senior") {
       return [
-        { label: "Users", value: stats.users, icon: Users },
-        { label: "Admins", value: stats.admins, icon: ShieldCheck },
-        { label: "Sub Admins", value: stats.subAdmins, icon: UserCog },
+        { label: "Customers", value: stats.customers.total, icon: Users },
+        { label: "Paid Revenue", value: formatPrice(Number(stats.revenue.paidTotal)), icon: TrendingUp },
+        { label: "Paid Orders", value: stats.revenue.paidOrders, icon: ShieldCheck },
         ...base,
-        { label: "Reviews", value: stats.totalReviews, icon: MessageSquare },
+        { label: "Pending Redemptions", value: stats.wallet.pendingRedemptions, icon: MessageSquare },
+        { label: "Wallet Liability", value: formatPrice(Number(stats.wallet.outstandingBalance)), icon: TrendingUp },
       ];
     }
 
-    return [
-      ...base,
-      { label: "Managed Orders", value: stats.orders ?? 0, icon: MessageSquare },
-    ];
+    return base;
   }, [role, stats]);
 
   if (loading) return <LoadingSpinner text="Loading dashboard stats..." />;

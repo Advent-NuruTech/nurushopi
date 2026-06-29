@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { X, CheckCircle2, XCircle, ExternalLink } from "lucide-react";
 import { formatPrice } from "@/lib/formatPrice";
+import { orderApi, ApiClientError } from "@/lib/api";
 import { statusLabel, statusBadgeClass } from "./orderUtils";
 import ReceiptDownloadButton from "./ReceiptDownloadButton";
 
@@ -39,35 +40,25 @@ export default function OrderDetailsModal({
 
   const cancelOrder = async () => {
     if (!userId || !canCancel || cancelling) return;
+    // The API keys self-cancel on the unguessable order number and enforces the
+    // owner / pre-shipment / 24-hour rules server-side.
+    if (!order.orderNumber) {
+      setActionMessage("This order can't be cancelled here.");
+      return;
+    }
 
     setCancelling(true);
     setActionMessage(null);
     try {
-      const res = await fetch("/api/orders", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          orderId: order.id,
-          userId,
-          updates: {
-            status: "cancelled",
-            cancellationReason: cancelReason.trim() || null,
-          },
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        setActionMessage(String(data.error ?? "Failed to cancel order."));
-        return;
-      }
-
+      await orderApi.cancel(order.orderNumber);
       setActionMessage("Order cancelled successfully.");
       setShowCancelConfirm(false);
       setCancelReason("");
       onOrderUpdated?.(order.id, "cancelled");
-    } catch {
-      setActionMessage("Failed to cancel order.");
+    } catch (error) {
+      setActionMessage(
+        error instanceof ApiClientError ? error.message : "Failed to cancel order.",
+      );
     } finally {
       setCancelling(false);
     }

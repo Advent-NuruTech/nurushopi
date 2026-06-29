@@ -161,10 +161,17 @@ export interface BannerDTO {
 // Hero announcements
 // ---------------------------------------------------------------------------
 
+/** CSS gradient token rendered behind a marquee slide (free-form, capped). */
+const heroGradientSchema = z.string().trim().min(1).max(120);
+/** Sort position in the marquee; lower shows first. */
+const heroOrderSchema = z.coerce.number().int().min(0).max(100_000);
+
 export const heroCreateSchema = z
   .object({
     message: z.string().trim().min(1, "Message is required.").max(280),
     linkUrl: z.string().url("Link URL must be valid.").optional().nullable(),
+    gradient: heroGradientSchema.optional().nullable(),
+    order: heroOrderSchema.default(0),
     isActive: z.coerce.boolean().default(true),
     startsAt: z.coerce.date().optional().nullable(),
     endsAt: z.coerce.date().optional().nullable(),
@@ -179,6 +186,8 @@ export const heroUpdateSchema = z
   .object({
     message: z.string().trim().min(1).max(280).optional(),
     linkUrl: z.string().url().optional().nullable(),
+    gradient: heroGradientSchema.optional().nullable(),
+    order: heroOrderSchema.optional(),
     isActive: z.coerce.boolean().optional(),
     startsAt: z.coerce.date().optional().nullable(),
     endsAt: z.coerce.date().optional().nullable(),
@@ -193,6 +202,8 @@ export interface HeroAnnouncementDTO {
   id: string;
   message: string;
   linkUrl: string | null;
+  gradient: string | null;
+  order: number;
   isActive: boolean;
   startsAt: string | null;
   endsAt: string | null;

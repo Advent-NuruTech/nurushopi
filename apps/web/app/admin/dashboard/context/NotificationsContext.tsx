@@ -2,28 +2,11 @@
 "use client";
 
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
-import {
-  collection,
-  limit,
-  onSnapshot,
-  orderBy,
-  query,
-  where,
-} from "firebase/firestore";
-import { db } from "@/lib/firebase";
-
-interface NotificationItem {
-  id: string;
-  title?: string;
-  body?: string;
-  type?: string;
-  createdAt?: unknown;
-  readAt?: unknown;
-  relatedId?: string;
-}
+import { notificationsApi } from "@/lib/api";
+import type { NotificationDTO } from "@nuru/types";
 
 interface NotificationsContextType {
-  notifications: NotificationItem[];
+  notifications: NotificationDTO[];
   loadNotifications: () => Promise<void>;
   markRead: (id: string) => Promise<void>;
   markAllRead: () => Promise<void>;
@@ -33,103 +16,44 @@ interface NotificationsContextType {
 const NotificationsContext = createContext<NotificationsContextType | undefined>(undefined);
 
 export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
-  const [adminId, setAdminId] = useState<string | null>(null);
+  const [notifications, setNotifications] = useState<NotificationDTO[]>([]);
 
   const loadNotifications = useCallback(async () => {
     try {
-      const response = await fetch("/api/admin/notifications", { credentials: "include" });
-      if (!response.ok) {
-        setNotifications([]);
-        return;
-      }
-      const data = await response.json();
-      setNotifications(data.notifications ?? []);
+      const page = await notificationsApi.admin.list({ pageSize: 100 });
+      setNotifications(page.items);
     } catch {
       setNotifications([]);
     }
   }, []);
 
   const markRead = async (id: string) => {
-    const res = await fetch("/api/admin/notifications", {
-      method: "PUT",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
-    });
-    if (res.ok) {
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, readAt: new Date().toISOString() } : n))
-      );
+    try {
+      await notificationsApi.admin.markRead(id);
+      setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+    } catch {
+      // ignore — the badge will resync on next load
     }
   };
 
   const markAllRead = async () => {
-    const ids = notifications.filter((n) => !n.readAt).map((n) => n.id);
-    if (!ids.length) return;
-
-    const res = await fetch("/api/admin/notifications", {
-      method: "PUT",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ids }),
-    });
-    if (res.ok) {
-      setNotifications((prev) =>
-        prev.map((n) => ({ ...n, readAt: n.readAt ?? new Date().toISOString() }))
-      );
+    if (!notifications.some((n) => !n.read)) return;
+    try {
+      await notificationsApi.admin.markAllRead();
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    } catch {
+      // ignore
     }
   };
 
   useEffect(() => {
-    let cancelled = false;
-    fetch("/api/admin/me", { credentials: "include" })
-      .then((response) => (response.ok ? response.json() : null))
-      .then((data) => {
-        if (cancelled) return;
-        setAdminId(data?.admin?.adminId ?? null);
-      })
-      .catch(() => {
-        if (!cancelled) setAdminId(null);
-      });
+    loadNotifications();
+    // Light polling keeps the badge fresh without a websocket.
+    const interval = setInterval(loadNotifications, 60_000);
+    return () => clearInterval(interval);
+  }, [loadNotifications]);
 
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!adminId) {
-      setNotifications([]);
-      return;
-    }
-
-    const notificationsQuery = query(
-      collection(db, "notifications"),
-      where("recipientType", "==", "admin"),
-      where("recipientId", "==", adminId),
-      orderBy("createdAt", "desc"),
-      limit(100)
-    );
-
-    const unsubscribe = onSnapshot(
-      notificationsQuery,
-      (snapshot) => {
-        const next = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...(doc.data() as Record<string, unknown>),
-        })) as NotificationItem[];
-        setNotifications(next);
-      },
-      async () => {
-        await loadNotifications();
-      }
-    );
-
-    return () => unsubscribe();
-  }, [adminId, loadNotifications]);
-
-  const unreadCount = notifications.filter((n) => !n.readAt).length;
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
     <NotificationsContext.Provider value={{ notifications, loadNotifications, markRead, markAllRead, unreadCount }}>

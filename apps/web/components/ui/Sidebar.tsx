@@ -6,8 +6,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { LogIn, ChevronDown, ChevronRight, Package } from "lucide-react";
 import { useAppUser } from "@/context/UserContext";
-import { auth } from "@/lib/firebase";
-import { signOut } from "firebase/auth";
 
 interface Category {
   name: string;
@@ -25,10 +23,10 @@ interface SidebarProps {
 export default function Sidebar({ isOpen, setIsOpen, categories }: SidebarProps) {
   const [showCategories, setShowCategories] = useState(false);
   const sidebarRef = useRef<HTMLElement>(null);
-  const { user, isLoading } = useAppUser();
+  const { user, isLoading, logout } = useAppUser();
 
   const handleLogout = async () => {
-    await signOut(auth);
+    await logout();
     setIsOpen(false);
   };
 

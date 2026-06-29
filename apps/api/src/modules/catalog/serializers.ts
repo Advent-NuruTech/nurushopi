@@ -81,6 +81,8 @@ export function toHeroDTO(h: HeroAnnouncement): HeroAnnouncementDTO {
     id: h.id,
     message: h.message,
     linkUrl: h.linkUrl,
+    gradient: h.gradient,
+    order: h.displayOrder,
     isActive: h.isActive,
     startsAt: h.startsAt ? toIso(h.startsAt) : null,
     endsAt: h.endsAt ? toIso(h.endsAt) : null,

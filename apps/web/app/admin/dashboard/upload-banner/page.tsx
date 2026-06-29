@@ -4,6 +4,7 @@ import { useState } from "react";
 import { formatText } from "@/lib/formatText";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { catalogApi, ApiClientError } from "@/lib/api";
 
 export default function UploadBannerPage() {
   const [title, setTitle] = useState("");
@@ -59,23 +60,14 @@ export default function UploadBannerPage() {
 
       const finalLink = normalizeLink(link);
 
-      const res = await fetch("/api/admin/banners", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          shortDescription: description,
-          link: finalLink,
-          imageUrl: uploadedUrl,
-        }),
+      const { banner } = await catalogApi.admin.createBanner({
+        title: title.trim() || null,
+        subtitle: description.trim() || null,
+        linkUrl: finalLink || null,
+        imageUrl: uploadedUrl,
+        isActive: true,
+        sortOrder: 0,
       });
-
-      const data: { success?: boolean; message?: string; id?: string } =
-        await res.json();
-
-      if (!data.success) {
-        throw new Error(data.message || "Upload failed");
-      }
 
       setMessage("Banner uploaded successfully!");
       setTitle("");
@@ -84,8 +76,12 @@ export default function UploadBannerPage() {
       setFile(null);
       setImageUrl(null);
 
-      router.push(`/banners/${data.id}`);
+      router.push(`/banners/${banner.id}`);
     } catch (e: unknown) {
+      if (e instanceof ApiClientError) {
+        setMessage(e.message);
+        return;
+      }
       console.error(e);
 
       const errorMessage =

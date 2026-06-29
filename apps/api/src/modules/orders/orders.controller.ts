@@ -33,6 +33,13 @@ export async function trackOrder(req: Request, res: Response): Promise<void> {
   sendOk(res, { order: await orders.getByOrderNumber(param(req, "orderNumber")) });
 }
 
+export async function cancelMyOrder(req: Request, res: Response): Promise<void> {
+  if (!req.user) throw Errors.unauthorized();
+  sendOk(res, {
+    order: await orders.cancelOwnOrder(req.user.sub, param(req, "orderNumber")),
+  });
+}
+
 // ---- Admin ----
 
 export async function adminListOrders(req: Request, res: Response): Promise<void> {

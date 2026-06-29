@@ -3,17 +3,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { slugifyCategory } from "@/lib/categoryUtils"; // make sure this is imported
-
-interface Category {
-  id: string;
-  name: string;
-  slug: string;
-  icon?: string;
-  description?: string;
-}
+import { catalogApi, ApiClientError } from "@/lib/api";
+import type { CategoryDTO } from "@nuru/types";
 
 export default function CategoriesTab() {
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<CategoryDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [createForm, setCreateForm] = useState({
@@ -32,9 +26,10 @@ export default function CategoriesTab() {
 
   const load = () => {
     setLoading(true);
-    fetch("/api/admin/categories", { credentials: "include" })
-      .then((r) => r.json())
-      .then((d) => setCategories(d.categories ?? []))
+    catalogApi
+      .listCategories()
+      .then((d) => setCategories(d.categories))
+      .catch(() => setCategories([]))
       .finally(() => setLoading(false));
   };
 
@@ -52,19 +47,22 @@ export default function CategoriesTab() {
 
   const createCategory = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await fetch("/api/admin/categories", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(createForm),
-    });
-    if (res.ok) {
+    try {
+      await catalogApi.admin.createCategory({
+        name: createForm.name.trim(),
+        slug: createForm.slug.trim() || undefined,
+        icon: createForm.icon.trim() || null,
+        description: createForm.description.trim() || null,
+        sortOrder: 0,
+      });
       setCreateForm({ name: "", slug: "", icon: "", description: "" });
       load();
+    } catch (err) {
+      if (err instanceof ApiClientError) alert(err.message);
     }
   };
 
-  const startEdit = (cat: Category) => {
+  const startEdit = (cat: CategoryDTO) => {
     setEditingId(cat.id);
     setEditForm({
       name: cat.name ?? "",
@@ -76,15 +74,17 @@ export default function CategoriesTab() {
 
   const saveEdit = async () => {
     if (!editingId) return;
-    const res = await fetch("/api/admin/categories", {
-      method: "PUT",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: editingId, ...editForm }),
-    });
-    if (res.ok) {
+    try {
+      await catalogApi.admin.updateCategory(editingId, {
+        name: editForm.name.trim(),
+        slug: editForm.slug.trim() || undefined,
+        icon: editForm.icon.trim() || null,
+        description: editForm.description.trim() || null,
+      });
       setEditingId(null);
       load();
+    } catch (err) {
+      if (err instanceof ApiClientError) alert(err.message);
     }
   };
 
@@ -95,11 +95,12 @@ export default function CategoriesTab() {
       )
     )
       return;
-    const res = await fetch(`/api/admin/categories?id=${id}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
-    if (res.ok) setCategories((prev) => prev.filter((c) => c.id !== id));
+    try {
+      await catalogApi.admin.deleteCategory(id);
+      setCategories((prev) => prev.filter((c) => c.id !== id));
+    } catch (err) {
+      if (err instanceof ApiClientError) alert(err.message);
+    }
   };
 
   if (loading) return <LoadingSpinner text="Loading categories..." />;

@@ -13,6 +13,8 @@ export interface OrderItem {
 
 export interface ApiOrder {
   id: string;
+  /** The API's unguessable order number — used for customer self-cancel. */
+  orderNumber?: string;
   name: string;
   phone: string;
   email?: string | null;

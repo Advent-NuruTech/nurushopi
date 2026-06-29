@@ -1,9 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { addDoc, collection, serverTimestamp } from "firebase/firestore"
-import { db } from "@/lib/firebase"
-import { notifySeniorAdmins } from "@/lib/notifications"
+import { vendorsApi, ApiClientError } from "@/lib/api"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { 
@@ -231,37 +229,46 @@ export default function VendorForm() {
     setSubmitting(true)
 
     try {
-      // Simulate API call for demo (remove in production)
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      const applicationRef = await addDoc(collection(db, "vendorApplications"), {
-        ...formData,
-        products: products.filter(p => p.trim() !== ""),
-        status: "pending",
-        termsAgreed: true,
-        termsAgreedAt: serverTimestamp(),
-        createdAt: serverTimestamp(),
-        applicationStep: "completed"
-      })
+      const cleanProducts = products.filter(p => p.trim() !== "")
+      // The API's vendor-application DTO is intentionally lean (business name,
+      // contact, email, phone, description). Fold the rich onboarding detail this
+      // multi-step form collects into a single readable `description` so nothing
+      // is lost; admins read it from the vendor inbox.
+      const detailLines = [
+        formData.description?.trim() && `About: ${formData.description.trim()}`,
+        formData.businessType && `Business type: ${formData.businessType}`,
+        formData.denomination && `Denomination / faith: ${formData.denomination}`,
+        formData.businessRegistrationNumber &&
+          `Registration no.: ${formData.businessRegistrationNumber}`,
+        formData.category && `Category: ${formData.category}`,
+        cleanProducts.length > 0 && `Products: ${cleanProducts.join(", ")}`,
+        [formData.address, formData.city, formData.county, formData.country, formData.postalCode]
+          .filter(Boolean)
+          .join(", ") && `Location: ${[formData.address, formData.city, formData.county, formData.country, formData.postalCode].filter(Boolean).join(", ")}`,
+        formData.yearEstablished && `Established: ${formData.yearEstablished}`,
+        formData.employeeCount && `Employees: ${formData.employeeCount}`,
+        (formData.bankName || formData.bankAccountName || formData.bankAccountNumber) &&
+          `Banking: ${[formData.bankName, formData.bankAccountName, formData.bankAccountNumber].filter(Boolean).join(" / ")}`,
+      ].filter(Boolean) as string[]
 
-      try {
-        const vendorName = formData.businessName || formData.ownerName || "A vendor"
-        await notifySeniorAdmins({
-          title: "New vendor application",
-          body: `${vendorName} submitted a new vendor application.`,
-          type: "vendor_application",
-          relatedId: applicationRef.id
-        })
-      } catch (notificationError) {
-        console.error("Error notifying senior admins about vendor application:", notificationError)
-      }
+      await vendorsApi.apply({
+        businessName: formData.businessName.trim(),
+        contactName: formData.ownerName.trim() || null,
+        email: formData.email.trim(),
+        phone: formData.phone.trim() || null,
+        description: detailLines.join("\n") || null,
+      })
 
       setSubmitting(false)
       setSuccess(true)
     } catch (error) {
       console.error("Error submitting application:", error)
       setSubmitting(false)
-      alert("There was an error submitting your application. Please try again.")
+      const message =
+        error instanceof ApiClientError
+          ? error.message
+          : "There was an error submitting your application. Please try again."
+      alert(message)
     }
   }
 

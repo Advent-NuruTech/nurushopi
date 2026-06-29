@@ -5,37 +5,19 @@ import Link from "next/link";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { formatPrice } from "@/lib/formatPrice";
 import { ADMIN_DASHBOARD_PATH, adminRoute } from "@/lib/adminPaths";
-
-type AdminUser = {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  walletBalance: number;
-  totalOrders: number;
-  totalSpend: number;
-  lastLogin?: unknown;
-  createdAt?: unknown;
-};
-
-function formatDate(value: unknown) {
-  if (!value) return "";
-  if (typeof value === "string") return new Date(value).toLocaleDateString();
-  if (typeof value === "object" && (value as { toDate?: () => Date }).toDate) {
-    return (value as { toDate: () => Date }).toDate().toLocaleDateString();
-  }
-  return "";
-}
+import { usersApi, ApiClientError } from "@/lib/api";
+import type { AdminUserSummaryDTO } from "@nuru/types";
 
 export default function UsersTab({ role }: { role: "senior" | "sub" }) {
-  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [users, setUsers] = useState<AdminUserSummaryDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
 
   useEffect(() => {
-    fetch("/api/admin/users", { credentials: "include" })
-      .then((r) => r.json())
-      .then((d) => setUsers(d.users ?? []))
+    usersApi.admin
+      .list()
+      .then((d) => setUsers(d.users))
+      .catch(() => setUsers([]))
       .finally(() => setLoading(false));
   }, []);
 
@@ -43,7 +25,7 @@ export default function UsersTab({ role }: { role: "senior" | "sub" }) {
     const q = query.trim().toLowerCase();
     if (!q) return users;
     return users.filter((u) =>
-      [u.name, u.email, u.phone].some((v) => String(v).toLowerCase().includes(q))
+      [u.name, u.email, u.phone].some((v) => String(v ?? "").toLowerCase().includes(q))
     );
   }, [query, users]);
 
@@ -78,7 +60,6 @@ export default function UsersTab({ role }: { role: "senior" | "sub" }) {
               <th className="px-4 py-3 text-left">Orders</th>
               <th className="px-4 py-3 text-left">Total Spend</th>
               <th className="px-4 py-3 text-left">Wallet</th>
-              <th className="px-4 py-3 text-left">Last Login</th>
               <th className="px-4 py-3 text-left">Created</th>
               <th className="px-4 py-3 text-left">Actions</th>
             </tr>
@@ -86,14 +67,13 @@ export default function UsersTab({ role }: { role: "senior" | "sub" }) {
           <tbody>
             {filtered.map((u) => (
               <tr key={u.id} className="border-t border-slate-200 dark:border-slate-700">
-                <td className="px-4 py-3 font-medium">{u.name}</td>
+                <td className="px-4 py-3 font-medium">{u.name ?? "—"}</td>
                 <td className="px-4 py-3">{u.email}</td>
-                <td className="px-4 py-3">{u.phone}</td>
+                <td className="px-4 py-3">{u.phone ?? "—"}</td>
                 <td className="px-4 py-3">{u.totalOrders}</td>
-                <td className="px-4 py-3">{formatPrice(u.totalSpend)}</td>
-                <td className="px-4 py-3">{formatPrice(u.walletBalance)}</td>
-                <td className="px-4 py-3">{formatDate(u.lastLogin)}</td>
-                <td className="px-4 py-3">{formatDate(u.createdAt)}</td>
+                <td className="px-4 py-3">{formatPrice(Number(u.totalSpend))}</td>
+                <td className="px-4 py-3">{formatPrice(Number(u.walletBalance))}</td>
+                <td className="px-4 py-3">{new Date(u.createdAt).toLocaleDateString()}</td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
                     <Link
@@ -105,13 +85,12 @@ export default function UsersTab({ role }: { role: "senior" | "sub" }) {
                     {role === "senior" && (
                       <button
                         onClick={async () => {
-                          if (!confirm(`Delete ${u.name}? This cannot be undone.`)) return;
-                          const res = await fetch(`/api/admin/users/${u.id}`, {
-                            method: "DELETE",
-                            credentials: "include",
-                          });
-                          if (res.ok) {
+                          if (!confirm(`Delete ${u.name ?? u.email}? This cannot be undone.`)) return;
+                          try {
+                            await usersApi.admin.remove(u.id);
                             setUsers((prev) => prev.filter((x) => x.id !== u.id));
+                          } catch (err) {
+                            if (err instanceof ApiClientError) alert(err.message);
                           }
                         }}
                         className="text-red-600 hover:underline"

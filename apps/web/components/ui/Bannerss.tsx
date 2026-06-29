@@ -1,21 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { db } from "@/lib/firebase";
-import { collection, getDocs, orderBy, query, Timestamp } from "firebase/firestore";
+import type { BannerVM } from "@/lib/view/catalog";
 import SectionHeader from "./SectionHeader";
-
-interface Banner {
-  id: string;
-  title: string;
-  shortDescription: string;
-  image?: string;
-  createdAt?: Timestamp;
-  tag?: string;
-}
 
 function formatText(text: string) {
   if (!text) return "";
@@ -25,25 +14,11 @@ function formatText(text: string) {
     .replace(/\n+/g, " ");
 }
 
-export default function Bannerss() {
-  const [banners, setBanners] = useState<Banner[]>([]);
-
-  useEffect(() => {
-    const fetchBanners = async () => {
-      const q = query(collection(db, "banners"), orderBy("createdAt", "desc"));
-      const snapshot = await getDocs(q);
-
-      setBanners(
-        snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...(doc.data() as Omit<Banner, "id">),
-        }))
-      );
-    };
-
-    fetchBanners();
-  }, []);
-
+/**
+ * Presentational promotions/offers rail. Banners are fetched on the server
+ * (`lib/data/catalog#listBanners`) and passed in as props.
+ */
+export default function Bannerss({ banners }: { banners: BannerVM[] }) {
   if (!banners.length) return null;
 
   return (
@@ -55,7 +30,7 @@ export default function Bannerss() {
           {banners.map((banner) => (
             <Link
               key={banner.id}
-              href={`/banners/${banner.id}`}
+              href={banner.href}
               className="flex-none snap-start w-[320px] sm:w-[400px] lg:w-[480px] h-[200px] sm:h-[260px] lg:h-[300px] relative"
             >
               <motion.div
@@ -63,7 +38,6 @@ export default function Bannerss() {
                 transition={{ duration: 0.3 }}
                 className="relative w-full h-full rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow bg-gray-100 dark:bg-gray-900"
               >
-                {/* Banner Image */}
                 {banner.image && (
                   <Image
                     src={banner.image}
@@ -74,24 +48,18 @@ export default function Bannerss() {
                   />
                 )}
 
-                {/* Overlay gradient for text visibility */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent z-10" />
 
-                {/* Optional tag */}
-                {banner.tag && (
-                  <span className="absolute top-3 left-3 px-2 py-1 bg-red-500 text-white text-xs font-bold rounded-full z-20">
-                    {banner.tag}
-                  </span>
-                )}
-
-                {/* Overlay text */}
                 <div className="absolute bottom-4 left-4 z-20 w-[90%]">
                   <h3 className="font-bold text-white text-sm sm:text-base lg:text-lg line-clamp-1">
                     {banner.title}
                   </h3>
-                  <p className="text-white text-xs sm:text-sm line-clamp-2 mt-1">
-                    {formatText(banner.shortDescription)}
-                  </p>
+                  {banner.subtitle && (
+                    <p
+                      className="text-white text-xs sm:text-sm line-clamp-2 mt-1"
+                      dangerouslySetInnerHTML={{ __html: formatText(banner.subtitle) }}
+                    />
+                  )}
                 </div>
               </motion.div>
             </Link>

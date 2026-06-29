@@ -13,8 +13,7 @@ import Sidebar from "./Sidebar";
 import UserNotificationsBell from "./UserNotificationsBell";
 
 import { useAppUser } from "@/context/UserContext";
-import { auth } from "@/lib/firebase";
-import { signOut } from "firebase/auth";
+import { catalogApi } from "@/lib/api";
 
 interface Category {
   name: string;
@@ -37,7 +36,7 @@ export default function Navbar() {
     ? cart.reduce((count, item) => count + item.quantity, 0)
     : 0;
 
-  const { user, isLoading } = useAppUser();
+  const { user, isLoading, logout } = useAppUser();
 
   useEffect(() => {
     setIsClient(true);
@@ -78,22 +77,30 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/categories")
-      .then((r) => r.json())
-      .then((data) => {
-        const items = (data.categories ?? []).map((c: { name: string; slug: string; icon?: string }) => ({
-          name: c.name,
-          href: "/shop",
-          query: { category: c.slug },
-          icon: c.icon,
-        }));
-        setCategories(items);
+    let cancelled = false;
+    catalogApi
+      .listCategories()
+      .then(({ categories: cats }) => {
+        if (cancelled) return;
+        setCategories(
+          cats.map((c) => ({
+            name: c.name,
+            href: "/shop",
+            query: { category: c.slug },
+            icon: c.icon ?? undefined,
+          }))
+        );
       })
-      .catch(() => setCategories([]));
+      .catch(() => {
+        if (!cancelled) setCategories([]);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleLogout = async () => {
-    await signOut(auth);
+    await logout();
   };
 
   return (

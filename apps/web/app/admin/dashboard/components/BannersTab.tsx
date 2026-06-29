@@ -1,65 +1,45 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { ADMIN_DASHBOARD_PATH, adminRoute } from "@/lib/adminPaths";
-
-interface Banner {
-  id: string;
-  title: string;
-  shortDescription: string;
-  imageUrl: string;
-  link: string;
-}
+import { catalogApi, ApiClientError } from "@/lib/api";
+import type { BannerDTO } from "@nuru/types";
 
 export default function BannersTab() {
-  const [banners, setBanners] = useState<Banner[]>([]);
-  const [filtered, setFiltered] = useState<Banner[]>([]);
+  const [banners, setBanners] = useState<BannerDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
   /* ---------------- Fetch banners ---------------- */
   useEffect(() => {
-    fetch("/api/admin/banners", { credentials: "include" })
-      .then((r) => r.json())
-      .then((d) => {
-        const allBanners: Banner[] = d.banners ?? [];
-        setBanners(allBanners);
-        setFiltered(allBanners);
-      })
+    catalogApi.admin
+      .listBanners()
+      .then((d) => setBanners(d.banners))
+      .catch(() => setBanners([]))
       .finally(() => setLoading(false));
   }, []);
 
   /* ---------------- Search filter ---------------- */
-  useEffect(() => {
-    if (!search.trim()) {
-      setFiltered(banners);
-      return;
-    }
-
-    const query = search.toLowerCase();
-    setFiltered(
-      banners.filter(
-        (b) =>
-          b.title.toLowerCase().includes(query) ||
-          b.shortDescription.toLowerCase().includes(query)
-      )
+  const filtered = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return banners;
+    return banners.filter(
+      (b) =>
+        (b.title ?? "").toLowerCase().includes(query) ||
+        (b.subtitle ?? "").toLowerCase().includes(query)
     );
   }, [search, banners]);
 
   /* ---------------- Remove banner ---------------- */
   const remove = async (id: string) => {
     if (!confirm("Delete this banner?")) return;
-
-    const res = await fetch(`/api/admin/banners?id=${id}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
-
-    if (res.ok) {
+    try {
+      await catalogApi.admin.deleteBanner(id);
       setBanners((prev) => prev.filter((b) => b.id !== id));
-      setFiltered((prev) => prev.filter((b) => b.id !== id));
+    } catch (err) {
+      if (err instanceof ApiClientError) alert(err.message);
     }
   };
 
@@ -101,27 +81,28 @@ export default function BannersTab() {
             key={b.id}
             className="border rounded-lg overflow-hidden bg-slate-50 dark:bg-slate-800"
           >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={b.imageUrl}
-              alt={b.title}
+              alt={b.title ?? "Banner"}
               className="w-full h-32 object-cover"
             />
 
             <div className="p-3 space-y-2">
               <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm truncate">
-                {b.title}
+                {b.title || "Untitled banner"}
               </h3>
 
               <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-2">
-                {b.shortDescription || "No description"}
+                {b.subtitle || "No description"}
               </p>
 
               <a
-                href={b.link || "#"}
+                href={b.linkUrl || "#"}
                 target="_blank"
                 className="text-sky-600 text-sm block truncate"
               >
-                {b.link || "No link"}
+                {b.linkUrl || "No link"}
               </a>
 
               <div className="flex justify-between text-sm mt-2">

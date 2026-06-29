@@ -241,6 +241,32 @@ export async function updateStatus(id: string, status: OrderStatus): Promise<Ord
   return toOrderDTO(order as OrderWithItems);
 }
 
+/** How long after placing an order a customer may still cancel it themselves. */
+const SELF_CANCEL_WINDOW_MS = 24 * 60 * 60 * 1000;
+/** Statuses a customer may self-cancel from (pre-shipment, live states only). */
+const SELF_CANCELLABLE: ReadonlySet<OrderStatus> = new Set(["PENDING", "CONFIRMED", "PROCESSING"]);
+
+/**
+ * Customer self-cancel: only the order's owner, only from a pre-shipment state,
+ * and only within {@link SELF_CANCEL_WINDOW_MS} of placing it. Delegates to
+ * {@link updateStatus} so stock + wallet credit are released atomically.
+ * A non-owner is given a 404 (not 403) so order existence isn't leaked.
+ */
+export async function cancelOwnOrder(userId: string, orderNumber: string): Promise<OrderDTO> {
+  const order = await prisma.order.findUnique({
+    where: { orderNumber },
+    select: { id: true, userId: true, status: true, createdAt: true },
+  });
+  if (!order || order.userId !== userId) throw Errors.notFound("Order not found.");
+  if (!SELF_CANCELLABLE.has(order.status)) {
+    throw Errors.badRequest("This order can no longer be cancelled.");
+  }
+  if (Date.now() - order.createdAt.getTime() > SELF_CANCEL_WINDOW_MS) {
+    throw Errors.badRequest("The 24-hour cancellation window for this order has passed.");
+  }
+  return updateStatus(order.id, "CANCELLED");
+}
+
 export async function updatePayment(
   id: string,
   paymentStatus: PaymentStatus,

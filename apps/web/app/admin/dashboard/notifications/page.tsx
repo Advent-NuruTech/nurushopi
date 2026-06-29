@@ -4,28 +4,14 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Route } from "next";
 import { ADMIN_DASHBOARD_PATH } from "@/lib/adminPaths";
+import { notificationsApi } from "@/lib/api";
+import type { NotificationDTO } from "@nuru/types";
 
-interface NotificationItem {
-  id: string;
-  title?: string;
-  body?: string;
-  type?: string;
-  createdAt?: unknown;
-  readAt?: unknown;
-  relatedId?: string;
-}
+type NotificationItem = NotificationDTO;
 
-const toDisplayDate = (value: unknown): string => {
+const toDisplayDate = (value: string): string => {
   if (!value) return "";
-  if (typeof value === "string") return new Date(value).toLocaleString();
-  if (typeof value === "number") return new Date(value).toLocaleString();
-  if (typeof (value as { toDate?: () => Date }).toDate === "function") {
-    return (value as { toDate: () => Date }).toDate().toLocaleString();
-  }
-  if (typeof (value as { seconds?: number }).seconds === "number") {
-    return new Date((value as { seconds: number }).seconds * 1000).toLocaleString();
-  }
-  return "";
+  return new Date(value).toLocaleString();
 };
 
 const getNotificationRoute = (n: NotificationItem): Route | null => {
@@ -51,9 +37,9 @@ export default function NotificationsPage() {
   const router = useRouter();
 
   const loadNotifications = () => {
-    fetch("/api/admin/notifications", { credentials: "include" })
-      .then((res) => res.json())
-      .then((data) => setNotifications(data.notifications ?? []))
+    notificationsApi.admin
+      .list({ pageSize: 100 })
+      .then((page) => setNotifications(page.items))
       .catch(() => setNotifications([]));
   };
 
@@ -63,13 +49,8 @@ export default function NotificationsPage() {
 
   const handleClick = async (notification: NotificationItem) => {
     // Mark as read if not already
-    if (!notification.readAt) {
-      await fetch("/api/admin/notifications", {
-        method: "PUT",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: notification.id }),
-      });
+    if (!notification.read) {
+      await notificationsApi.admin.markRead(notification.id).catch(() => {});
       loadNotifications();
     }
 
@@ -92,7 +73,7 @@ export default function NotificationsPage() {
               key={n.id}
               onClick={() => handleClick(n)}
               className={`cursor-pointer px-4 py-3 border rounded-lg transition ${
-                n.readAt ? "bg-white dark:bg-slate-900" : "bg-slate-50 dark:bg-slate-800/70"
+                n.read ? "bg-white dark:bg-slate-900" : "bg-slate-50 dark:bg-slate-800/70"
               } hover:bg-sky-50 dark:hover:bg-slate-700`}
             >
               <p className="font-medium text-slate-900 dark:text-white">

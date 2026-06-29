@@ -12,7 +12,9 @@ function model() {
     create: vi.fn(),
     update: vi.fn(),
     updateMany: vi.fn(),
+    upsert: vi.fn(),
     delete: vi.fn(),
+    deleteMany: vi.fn(),
   };
 }
 
@@ -106,6 +108,11 @@ export function makeDbMock() {
     message: model(),
     contact: model(),
     vendorApplication: model(),
+    admin: model(),
+    adminInvite: model(),
+    loginAttempt: model(),
+    pwaInstall: model(),
+    sabbathMessage: model(),
     // Supports both the array form (Promise.all) and the interactive callback
     // form (`$transaction(async (tx) => …)`), passing the mock itself as `tx`.
     $transaction: vi.fn((arg: unknown) =>

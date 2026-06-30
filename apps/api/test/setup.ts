@@ -8,3 +8,6 @@ process.env.WEB_ORIGIN ??= "http://localhost:3000";
 process.env.API_PUBLIC_URL ??= "http://localhost:4000";
 process.env.WEB_APP_URL ??= "http://localhost:3000";
 process.env.SENIOR_ADMIN_CODE ??= "test-senior-admin-code-0123456789";
+// Enables the legacy (Firebase scrypt) login path so the lazy-rehash flow is
+// testable. The actual scrypt verifier is mocked in the relevant test.
+process.env.FIREBASE_SCRYPT_SIGNER_KEY ??= "test-firebase-signer-key";

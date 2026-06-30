@@ -111,6 +111,7 @@ export function makeDbMock() {
     admin: model(),
     adminInvite: model(),
     loginAttempt: model(),
+    legacyPasswordImport: model(),
     pwaInstall: model(),
     sabbathMessage: model(),
     // Supports both the array form (Promise.all) and the interactive callback

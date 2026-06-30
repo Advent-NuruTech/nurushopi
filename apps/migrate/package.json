@@ -1,0 +1,27 @@
+{
+  "name": "migrate",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Isolated, one-shot Firebase (Firestore + Auth) -> PostgreSQL migration utility for NuruShop. NOT part of the production runtime.",
+  "scripts": {
+    "discover": "tsx src/discover-cli.ts",
+    "migrate": "tsx src/migrate.ts",
+    "migrate:dry": "DRY_RUN=true tsx src/migrate.ts",
+    "validate": "tsx src/validate.ts",
+    "smoke": "tsx src/api-smoke.ts",
+    "rollback": "tsx src/rollback.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@nuru/db": "workspace:*",
+    "dotenv": "^16.4.7",
+    "firebase-admin": "^13.0.2"
+  },
+  "devDependencies": {
+    "@nuru/config": "workspace:*",
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

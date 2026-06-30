@@ -1,8 +1,9 @@
 import { prisma, type User } from "@nuru/db";
-import { hashPassword, verifyPassword } from "@nuru/auth/password";
+import { hashPassword, verifyPassword, verifyFirebaseScrypt } from "@nuru/auth/password";
 import { generateOpaqueToken, hashToken, generateCode } from "@nuru/auth/crypto";
 import type { AuthUser, ProfileUpdateInput, SignupInput } from "@nuru/types";
 import { Errors } from "../../lib/errors.js";
+import { legacyPasswordLoginEnabled, firebaseScryptParams } from "../../env.js";
 import { sendPasswordResetEmail, sendVerificationEmail } from "./email.js";
 
 const LOCKOUT = { maxFailedAttempts: 5, lockMs: 15 * 60 * 1000 };
@@ -106,10 +107,21 @@ export async function login(email: string, password: string): Promise<User> {
     throw Errors.locked("Account locked due to failed attempts. Try again later or reset your password.");
   }
 
-  const user = await prisma.user.findUnique({ where: { email } });
-  const valid = user?.passwordHash
+  let user = await prisma.user.findUnique({ where: { email } });
+  let valid = user?.passwordHash
     ? await verifyPassword(password, user.passwordHash)
     : false;
+
+  // Migration fallback: a user imported from Firebase has no bcrypt hash (or it
+  // doesn't match). Verify once against their Firebase scrypt hash and, on
+  // success, transparently upgrade them to bcrypt so the legacy record is gone.
+  if (user && !valid && legacyPasswordLoginEnabled) {
+    const upgraded = await tryLegacyLogin(user, password);
+    if (upgraded) {
+      user = upgraded;
+      valid = true;
+    }
+  }
 
   if (!user || !valid) {
     await recordFailedAttempt(email);
@@ -119,6 +131,34 @@ export async function login(email: string, password: string): Promise<User> {
 
   await prisma.loginAttempt.deleteMany({ where: { identifier: email } });
   return user;
+}
+
+/**
+ * One-time Firebase-scrypt → bcrypt password upgrade. Returns the updated user
+ * on a correct password, else null. The bcrypt write + legacy-row delete happen
+ * in a single transaction so the upgrade is atomic; the user never needs to
+ * reset their password.
+ */
+async function tryLegacyLogin(user: User, password: string): Promise<User | null> {
+  const legacy = await prisma.legacyPasswordImport.findUnique({
+    where: { userId: user.id },
+  });
+  if (!legacy) return null;
+
+  const ok = await verifyFirebaseScrypt(
+    password,
+    legacy.salt,
+    legacy.hash,
+    firebaseScryptParams,
+  );
+  if (!ok) return null;
+
+  const passwordHash = await hashPassword(password);
+  const [updated] = await prisma.$transaction([
+    prisma.user.update({ where: { id: user.id }, data: { passwordHash } }),
+    prisma.legacyPasswordImport.delete({ where: { userId: user.id } }),
+  ]);
+  return updated;
 }
 
 async function recordFailedAttempt(email: string): Promise<void> {

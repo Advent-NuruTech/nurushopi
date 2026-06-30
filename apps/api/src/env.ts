@@ -31,6 +31,18 @@ const envSchema = z.object({
   REFRESH_TOKEN_TTL: z.coerce.number().default(2_592_000),
   COOKIE_DOMAIN: z.string().optional(),
 
+  // Firebase scrypt password-hash params (Firebase console → Authentication →
+  // ⋯ → Password hash parameters). Only needed during the migration window so
+  // imported users can log in with their existing password (lazily re-hashed to
+  // bcrypt on first login). When SIGNER_KEY is blank, legacy login is disabled.
+  FIREBASE_SCRYPT_SIGNER_KEY: z.preprocess(
+    (v) => (v === "" ? undefined : v),
+    z.string().optional(),
+  ),
+  FIREBASE_SCRYPT_SALT_SEPARATOR: z.string().default("Bw=="),
+  FIREBASE_SCRYPT_ROUNDS: z.coerce.number().default(8),
+  FIREBASE_SCRYPT_MEM_COST: z.coerce.number().default(14),
+
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
   GOOGLE_REDIRECT_URI: z.string().optional(),
@@ -59,6 +71,21 @@ export const allowedOrigins = env.WEB_ORIGIN.split(",").map((o) => o.trim());
 
 /** Whether self-service senior admin signup (via SENIOR_ADMIN_CODE) is enabled. */
 export const seniorSignupEnabled = Boolean(env.SENIOR_ADMIN_CODE);
+
+/**
+ * Whether one-time legacy (Firebase scrypt) password verification is enabled.
+ * True only while the migration signer key is configured; once all imported
+ * users have logged in (and `legacy_password_imports` is empty) it can be unset.
+ */
+export const legacyPasswordLoginEnabled = Boolean(env.FIREBASE_SCRYPT_SIGNER_KEY);
+
+/** Firebase scrypt params bundle for `verifyFirebaseScrypt`. */
+export const firebaseScryptParams = {
+  signerKey: env.FIREBASE_SCRYPT_SIGNER_KEY ?? "",
+  saltSeparator: env.FIREBASE_SCRYPT_SALT_SEPARATOR,
+  rounds: env.FIREBASE_SCRYPT_ROUNDS,
+  memCost: env.FIREBASE_SCRYPT_MEM_COST,
+};
 
 export const googleOAuthConfigured = Boolean(
   env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET && env.GOOGLE_REDIRECT_URI,

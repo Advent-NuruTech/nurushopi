@@ -176,6 +176,13 @@ exports.Prisma.PasswordResetTokenScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.LegacyPasswordImportScalarFieldEnum = {
+  userId: 'userId',
+  hash: 'hash',
+  salt: 'salt',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.LoginAttemptScalarFieldEnum = {
   id: 'id',
   identifier: 'identifier',
@@ -531,6 +538,7 @@ exports.Prisma.ModelName = {
   RefreshToken: 'RefreshToken',
   EmailVerificationToken: 'EmailVerificationToken',
   PasswordResetToken: 'PasswordResetToken',
+  LegacyPasswordImport: 'LegacyPasswordImport',
   LoginAttempt: 'LoginAttempt',
   Admin: 'Admin',
   AdminInvite: 'AdminInvite',

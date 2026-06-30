@@ -122,6 +122,7 @@ model User {
   refreshTokens          RefreshToken[]
   emailVerificationTokens EmailVerificationToken[]
   passwordResetTokens    PasswordResetToken[]
+  legacyPassword         LegacyPasswordImport?
   orders                 Order[]
   reviews                Review[]
   walletTransactions     WalletTransaction[]
@@ -191,6 +192,22 @@ model PasswordResetToken {
 
   @@index([userId])
   @@map("password_reset_tokens")
+}
+
+// Imported Firebase Auth scrypt password hashes, kept ONLY to let migrated
+// users keep their existing password through one transparent login. On the
+// first successful legacy verification the password is re-hashed to bcrypt
+// (stored on `users.passwordHash`) and the matching row here is deleted —
+// so this table naturally drains to empty as users return. Never written by
+// the normal app; populated by the migration tool, consumed by login.
+model LegacyPasswordImport {
+  userId    String   @id
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  hash      String // Firebase passwordHash (base64)
+  salt      String // Firebase passwordSalt (base64)
+  createdAt DateTime @default(now())
+
+  @@map("legacy_password_imports")
 }
 
 // Brute-force lockout tracking, keyed by the login identifier (email).

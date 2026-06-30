@@ -39,6 +39,11 @@ export type EmailVerificationToken = $Result.DefaultSelection<Prisma.$EmailVerif
  */
 export type PasswordResetToken = $Result.DefaultSelection<Prisma.$PasswordResetTokenPayload>
 /**
+ * Model LegacyPasswordImport
+ * 
+ */
+export type LegacyPasswordImport = $Result.DefaultSelection<Prisma.$LegacyPasswordImportPayload>
+/**
  * Model LoginAttempt
  * 
  */
@@ -476,6 +481,16 @@ export class PrismaClient<
     * ```
     */
   get passwordResetToken(): Prisma.PasswordResetTokenDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.legacyPasswordImport`: Exposes CRUD operations for the **LegacyPasswordImport** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more LegacyPasswordImports
+    * const legacyPasswordImports = await prisma.legacyPasswordImport.findMany()
+    * ```
+    */
+  get legacyPasswordImport(): Prisma.LegacyPasswordImportDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.loginAttempt`: Exposes CRUD operations for the **LoginAttempt** model.
@@ -1132,6 +1147,7 @@ export namespace Prisma {
     RefreshToken: 'RefreshToken',
     EmailVerificationToken: 'EmailVerificationToken',
     PasswordResetToken: 'PasswordResetToken',
+    LegacyPasswordImport: 'LegacyPasswordImport',
     LoginAttempt: 'LoginAttempt',
     Admin: 'Admin',
     AdminInvite: 'AdminInvite',
@@ -1171,7 +1187,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "oAuthAccount" | "refreshToken" | "emailVerificationToken" | "passwordResetToken" | "loginAttempt" | "admin" | "adminInvite" | "adminLog" | "category" | "product" | "banner" | "heroAnnouncement" | "wholesaleItem" | "order" | "orderItem" | "review" | "walletTransaction" | "walletRedemption" | "referral" | "notification" | "message" | "contact" | "vendorApplication" | "pwaInstall" | "sabbathMessage"
+      modelProps: "user" | "oAuthAccount" | "refreshToken" | "emailVerificationToken" | "passwordResetToken" | "legacyPasswordImport" | "loginAttempt" | "admin" | "adminInvite" | "adminLog" | "category" | "product" | "banner" | "heroAnnouncement" | "wholesaleItem" | "order" | "orderItem" | "review" | "walletTransaction" | "walletRedemption" | "referral" | "notification" | "message" | "contact" | "vendorApplication" | "pwaInstall" | "sabbathMessage"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1542,6 +1558,80 @@ export namespace Prisma {
           count: {
             args: Prisma.PasswordResetTokenCountArgs<ExtArgs>
             result: $Utils.Optional<PasswordResetTokenCountAggregateOutputType> | number
+          }
+        }
+      }
+      LegacyPasswordImport: {
+        payload: Prisma.$LegacyPasswordImportPayload<ExtArgs>
+        fields: Prisma.LegacyPasswordImportFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.LegacyPasswordImportFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LegacyPasswordImportPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.LegacyPasswordImportFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LegacyPasswordImportPayload>
+          }
+          findFirst: {
+            args: Prisma.LegacyPasswordImportFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LegacyPasswordImportPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.LegacyPasswordImportFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LegacyPasswordImportPayload>
+          }
+          findMany: {
+            args: Prisma.LegacyPasswordImportFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LegacyPasswordImportPayload>[]
+          }
+          create: {
+            args: Prisma.LegacyPasswordImportCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LegacyPasswordImportPayload>
+          }
+          createMany: {
+            args: Prisma.LegacyPasswordImportCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.LegacyPasswordImportCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LegacyPasswordImportPayload>[]
+          }
+          delete: {
+            args: Prisma.LegacyPasswordImportDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LegacyPasswordImportPayload>
+          }
+          update: {
+            args: Prisma.LegacyPasswordImportUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LegacyPasswordImportPayload>
+          }
+          deleteMany: {
+            args: Prisma.LegacyPasswordImportDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.LegacyPasswordImportUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.LegacyPasswordImportUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LegacyPasswordImportPayload>[]
+          }
+          upsert: {
+            args: Prisma.LegacyPasswordImportUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LegacyPasswordImportPayload>
+          }
+          aggregate: {
+            args: Prisma.LegacyPasswordImportAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateLegacyPasswordImport>
+          }
+          groupBy: {
+            args: Prisma.LegacyPasswordImportGroupByArgs<ExtArgs>
+            result: $Utils.Optional<LegacyPasswordImportGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.LegacyPasswordImportCountArgs<ExtArgs>
+            result: $Utils.Optional<LegacyPasswordImportCountAggregateOutputType> | number
           }
         }
       }
@@ -3200,6 +3290,7 @@ export namespace Prisma {
     refreshToken?: RefreshTokenOmit
     emailVerificationToken?: EmailVerificationTokenOmit
     passwordResetToken?: PasswordResetTokenOmit
+    legacyPasswordImport?: LegacyPasswordImportOmit
     loginAttempt?: LoginAttemptOmit
     admin?: AdminOmit
     adminInvite?: AdminInviteOmit
@@ -3866,6 +3957,7 @@ export namespace Prisma {
     refreshTokens?: boolean | User$refreshTokensArgs<ExtArgs>
     emailVerificationTokens?: boolean | User$emailVerificationTokensArgs<ExtArgs>
     passwordResetTokens?: boolean | User$passwordResetTokensArgs<ExtArgs>
+    legacyPassword?: boolean | User$legacyPasswordArgs<ExtArgs>
     orders?: boolean | User$ordersArgs<ExtArgs>
     reviews?: boolean | User$reviewsArgs<ExtArgs>
     walletTransactions?: boolean | User$walletTransactionsArgs<ExtArgs>
@@ -3938,6 +4030,7 @@ export namespace Prisma {
     refreshTokens?: boolean | User$refreshTokensArgs<ExtArgs>
     emailVerificationTokens?: boolean | User$emailVerificationTokensArgs<ExtArgs>
     passwordResetTokens?: boolean | User$passwordResetTokensArgs<ExtArgs>
+    legacyPassword?: boolean | User$legacyPasswordArgs<ExtArgs>
     orders?: boolean | User$ordersArgs<ExtArgs>
     reviews?: boolean | User$reviewsArgs<ExtArgs>
     walletTransactions?: boolean | User$walletTransactionsArgs<ExtArgs>
@@ -3964,6 +4057,7 @@ export namespace Prisma {
       refreshTokens: Prisma.$RefreshTokenPayload<ExtArgs>[]
       emailVerificationTokens: Prisma.$EmailVerificationTokenPayload<ExtArgs>[]
       passwordResetTokens: Prisma.$PasswordResetTokenPayload<ExtArgs>[]
+      legacyPassword: Prisma.$LegacyPasswordImportPayload<ExtArgs> | null
       orders: Prisma.$OrderPayload<ExtArgs>[]
       reviews: Prisma.$ReviewPayload<ExtArgs>[]
       walletTransactions: Prisma.$WalletTransactionPayload<ExtArgs>[]
@@ -4388,6 +4482,7 @@ export namespace Prisma {
     refreshTokens<T extends User$refreshTokensArgs<ExtArgs> = {}>(args?: Subset<T, User$refreshTokensArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RefreshTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     emailVerificationTokens<T extends User$emailVerificationTokensArgs<ExtArgs> = {}>(args?: Subset<T, User$emailVerificationTokensArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EmailVerificationTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     passwordResetTokens<T extends User$passwordResetTokensArgs<ExtArgs> = {}>(args?: Subset<T, User$passwordResetTokensArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PasswordResetTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    legacyPassword<T extends User$legacyPasswordArgs<ExtArgs> = {}>(args?: Subset<T, User$legacyPasswordArgs<ExtArgs>>): Prisma__LegacyPasswordImportClient<$Result.GetResult<Prisma.$LegacyPasswordImportPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     orders<T extends User$ordersArgs<ExtArgs> = {}>(args?: Subset<T, User$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     reviews<T extends User$reviewsArgs<ExtArgs> = {}>(args?: Subset<T, User$reviewsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     walletTransactions<T extends User$walletTransactionsArgs<ExtArgs> = {}>(args?: Subset<T, User$walletTransactionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WalletTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -4971,6 +5066,25 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: PasswordResetTokenScalarFieldEnum | PasswordResetTokenScalarFieldEnum[]
+  }
+
+  /**
+   * User.legacyPassword
+   */
+  export type User$legacyPasswordArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LegacyPasswordImport
+     */
+    select?: LegacyPasswordImportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LegacyPasswordImport
+     */
+    omit?: LegacyPasswordImportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LegacyPasswordImportInclude<ExtArgs> | null
+    where?: LegacyPasswordImportWhereInput
   }
 
   /**
@@ -9491,6 +9605,1051 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: PasswordResetTokenInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model LegacyPasswordImport
+   */
+
+  export type AggregateLegacyPasswordImport = {
+    _count: LegacyPasswordImportCountAggregateOutputType | null
+    _min: LegacyPasswordImportMinAggregateOutputType | null
+    _max: LegacyPasswordImportMaxAggregateOutputType | null
+  }
+
+  export type LegacyPasswordImportMinAggregateOutputType = {
+    userId: string | null
+    hash: string | null
+    salt: string | null
+    createdAt: Date | null
+  }
+
+  export type LegacyPasswordImportMaxAggregateOutputType = {
+    userId: string | null
+    hash: string | null
+    salt: string | null
+    createdAt: Date | null
+  }
+
+  export type LegacyPasswordImportCountAggregateOutputType = {
+    userId: number
+    hash: number
+    salt: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type LegacyPasswordImportMinAggregateInputType = {
+    userId?: true
+    hash?: true
+    salt?: true
+    createdAt?: true
+  }
+
+  export type LegacyPasswordImportMaxAggregateInputType = {
+    userId?: true
+    hash?: true
+    salt?: true
+    createdAt?: true
+  }
+
+  export type LegacyPasswordImportCountAggregateInputType = {
+    userId?: true
+    hash?: true
+    salt?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type LegacyPasswordImportAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which LegacyPasswordImport to aggregate.
+     */
+    where?: LegacyPasswordImportWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LegacyPasswordImports to fetch.
+     */
+    orderBy?: LegacyPasswordImportOrderByWithRelationInput | LegacyPasswordImportOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: LegacyPasswordImportWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LegacyPasswordImports from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LegacyPasswordImports.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned LegacyPasswordImports
+    **/
+    _count?: true | LegacyPasswordImportCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: LegacyPasswordImportMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: LegacyPasswordImportMaxAggregateInputType
+  }
+
+  export type GetLegacyPasswordImportAggregateType<T extends LegacyPasswordImportAggregateArgs> = {
+        [P in keyof T & keyof AggregateLegacyPasswordImport]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateLegacyPasswordImport[P]>
+      : GetScalarType<T[P], AggregateLegacyPasswordImport[P]>
+  }
+
+
+
+
+  export type LegacyPasswordImportGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: LegacyPasswordImportWhereInput
+    orderBy?: LegacyPasswordImportOrderByWithAggregationInput | LegacyPasswordImportOrderByWithAggregationInput[]
+    by: LegacyPasswordImportScalarFieldEnum[] | LegacyPasswordImportScalarFieldEnum
+    having?: LegacyPasswordImportScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: LegacyPasswordImportCountAggregateInputType | true
+    _min?: LegacyPasswordImportMinAggregateInputType
+    _max?: LegacyPasswordImportMaxAggregateInputType
+  }
+
+  export type LegacyPasswordImportGroupByOutputType = {
+    userId: string
+    hash: string
+    salt: string
+    createdAt: Date
+    _count: LegacyPasswordImportCountAggregateOutputType | null
+    _min: LegacyPasswordImportMinAggregateOutputType | null
+    _max: LegacyPasswordImportMaxAggregateOutputType | null
+  }
+
+  type GetLegacyPasswordImportGroupByPayload<T extends LegacyPasswordImportGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<LegacyPasswordImportGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof LegacyPasswordImportGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], LegacyPasswordImportGroupByOutputType[P]>
+            : GetScalarType<T[P], LegacyPasswordImportGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type LegacyPasswordImportSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    userId?: boolean
+    hash?: boolean
+    salt?: boolean
+    createdAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["legacyPasswordImport"]>
+
+  export type LegacyPasswordImportSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    userId?: boolean
+    hash?: boolean
+    salt?: boolean
+    createdAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["legacyPasswordImport"]>
+
+  export type LegacyPasswordImportSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    userId?: boolean
+    hash?: boolean
+    salt?: boolean
+    createdAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["legacyPasswordImport"]>
+
+  export type LegacyPasswordImportSelectScalar = {
+    userId?: boolean
+    hash?: boolean
+    salt?: boolean
+    createdAt?: boolean
+  }
+
+  export type LegacyPasswordImportOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"userId" | "hash" | "salt" | "createdAt", ExtArgs["result"]["legacyPasswordImport"]>
+  export type LegacyPasswordImportInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type LegacyPasswordImportIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type LegacyPasswordImportIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $LegacyPasswordImportPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "LegacyPasswordImport"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      userId: string
+      hash: string
+      salt: string
+      createdAt: Date
+    }, ExtArgs["result"]["legacyPasswordImport"]>
+    composites: {}
+  }
+
+  type LegacyPasswordImportGetPayload<S extends boolean | null | undefined | LegacyPasswordImportDefaultArgs> = $Result.GetResult<Prisma.$LegacyPasswordImportPayload, S>
+
+  type LegacyPasswordImportCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<LegacyPasswordImportFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: LegacyPasswordImportCountAggregateInputType | true
+    }
+
+  export interface LegacyPasswordImportDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['LegacyPasswordImport'], meta: { name: 'LegacyPasswordImport' } }
+    /**
+     * Find zero or one LegacyPasswordImport that matches the filter.
+     * @param {LegacyPasswordImportFindUniqueArgs} args - Arguments to find a LegacyPasswordImport
+     * @example
+     * // Get one LegacyPasswordImport
+     * const legacyPasswordImport = await prisma.legacyPasswordImport.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends LegacyPasswordImportFindUniqueArgs>(args: SelectSubset<T, LegacyPasswordImportFindUniqueArgs<ExtArgs>>): Prisma__LegacyPasswordImportClient<$Result.GetResult<Prisma.$LegacyPasswordImportPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one LegacyPasswordImport that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {LegacyPasswordImportFindUniqueOrThrowArgs} args - Arguments to find a LegacyPasswordImport
+     * @example
+     * // Get one LegacyPasswordImport
+     * const legacyPasswordImport = await prisma.legacyPasswordImport.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends LegacyPasswordImportFindUniqueOrThrowArgs>(args: SelectSubset<T, LegacyPasswordImportFindUniqueOrThrowArgs<ExtArgs>>): Prisma__LegacyPasswordImportClient<$Result.GetResult<Prisma.$LegacyPasswordImportPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first LegacyPasswordImport that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LegacyPasswordImportFindFirstArgs} args - Arguments to find a LegacyPasswordImport
+     * @example
+     * // Get one LegacyPasswordImport
+     * const legacyPasswordImport = await prisma.legacyPasswordImport.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends LegacyPasswordImportFindFirstArgs>(args?: SelectSubset<T, LegacyPasswordImportFindFirstArgs<ExtArgs>>): Prisma__LegacyPasswordImportClient<$Result.GetResult<Prisma.$LegacyPasswordImportPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first LegacyPasswordImport that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LegacyPasswordImportFindFirstOrThrowArgs} args - Arguments to find a LegacyPasswordImport
+     * @example
+     * // Get one LegacyPasswordImport
+     * const legacyPasswordImport = await prisma.legacyPasswordImport.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends LegacyPasswordImportFindFirstOrThrowArgs>(args?: SelectSubset<T, LegacyPasswordImportFindFirstOrThrowArgs<ExtArgs>>): Prisma__LegacyPasswordImportClient<$Result.GetResult<Prisma.$LegacyPasswordImportPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more LegacyPasswordImports that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LegacyPasswordImportFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all LegacyPasswordImports
+     * const legacyPasswordImports = await prisma.legacyPasswordImport.findMany()
+     * 
+     * // Get first 10 LegacyPasswordImports
+     * const legacyPasswordImports = await prisma.legacyPasswordImport.findMany({ take: 10 })
+     * 
+     * // Only select the `userId`
+     * const legacyPasswordImportWithUserIdOnly = await prisma.legacyPasswordImport.findMany({ select: { userId: true } })
+     * 
+     */
+    findMany<T extends LegacyPasswordImportFindManyArgs>(args?: SelectSubset<T, LegacyPasswordImportFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LegacyPasswordImportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a LegacyPasswordImport.
+     * @param {LegacyPasswordImportCreateArgs} args - Arguments to create a LegacyPasswordImport.
+     * @example
+     * // Create one LegacyPasswordImport
+     * const LegacyPasswordImport = await prisma.legacyPasswordImport.create({
+     *   data: {
+     *     // ... data to create a LegacyPasswordImport
+     *   }
+     * })
+     * 
+     */
+    create<T extends LegacyPasswordImportCreateArgs>(args: SelectSubset<T, LegacyPasswordImportCreateArgs<ExtArgs>>): Prisma__LegacyPasswordImportClient<$Result.GetResult<Prisma.$LegacyPasswordImportPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many LegacyPasswordImports.
+     * @param {LegacyPasswordImportCreateManyArgs} args - Arguments to create many LegacyPasswordImports.
+     * @example
+     * // Create many LegacyPasswordImports
+     * const legacyPasswordImport = await prisma.legacyPasswordImport.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends LegacyPasswordImportCreateManyArgs>(args?: SelectSubset<T, LegacyPasswordImportCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many LegacyPasswordImports and returns the data saved in the database.
+     * @param {LegacyPasswordImportCreateManyAndReturnArgs} args - Arguments to create many LegacyPasswordImports.
+     * @example
+     * // Create many LegacyPasswordImports
+     * const legacyPasswordImport = await prisma.legacyPasswordImport.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many LegacyPasswordImports and only return the `userId`
+     * const legacyPasswordImportWithUserIdOnly = await prisma.legacyPasswordImport.createManyAndReturn({
+     *   select: { userId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends LegacyPasswordImportCreateManyAndReturnArgs>(args?: SelectSubset<T, LegacyPasswordImportCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LegacyPasswordImportPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a LegacyPasswordImport.
+     * @param {LegacyPasswordImportDeleteArgs} args - Arguments to delete one LegacyPasswordImport.
+     * @example
+     * // Delete one LegacyPasswordImport
+     * const LegacyPasswordImport = await prisma.legacyPasswordImport.delete({
+     *   where: {
+     *     // ... filter to delete one LegacyPasswordImport
+     *   }
+     * })
+     * 
+     */
+    delete<T extends LegacyPasswordImportDeleteArgs>(args: SelectSubset<T, LegacyPasswordImportDeleteArgs<ExtArgs>>): Prisma__LegacyPasswordImportClient<$Result.GetResult<Prisma.$LegacyPasswordImportPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one LegacyPasswordImport.
+     * @param {LegacyPasswordImportUpdateArgs} args - Arguments to update one LegacyPasswordImport.
+     * @example
+     * // Update one LegacyPasswordImport
+     * const legacyPasswordImport = await prisma.legacyPasswordImport.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends LegacyPasswordImportUpdateArgs>(args: SelectSubset<T, LegacyPasswordImportUpdateArgs<ExtArgs>>): Prisma__LegacyPasswordImportClient<$Result.GetResult<Prisma.$LegacyPasswordImportPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more LegacyPasswordImports.
+     * @param {LegacyPasswordImportDeleteManyArgs} args - Arguments to filter LegacyPasswordImports to delete.
+     * @example
+     * // Delete a few LegacyPasswordImports
+     * const { count } = await prisma.legacyPasswordImport.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends LegacyPasswordImportDeleteManyArgs>(args?: SelectSubset<T, LegacyPasswordImportDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more LegacyPasswordImports.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LegacyPasswordImportUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many LegacyPasswordImports
+     * const legacyPasswordImport = await prisma.legacyPasswordImport.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends LegacyPasswordImportUpdateManyArgs>(args: SelectSubset<T, LegacyPasswordImportUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more LegacyPasswordImports and returns the data updated in the database.
+     * @param {LegacyPasswordImportUpdateManyAndReturnArgs} args - Arguments to update many LegacyPasswordImports.
+     * @example
+     * // Update many LegacyPasswordImports
+     * const legacyPasswordImport = await prisma.legacyPasswordImport.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more LegacyPasswordImports and only return the `userId`
+     * const legacyPasswordImportWithUserIdOnly = await prisma.legacyPasswordImport.updateManyAndReturn({
+     *   select: { userId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends LegacyPasswordImportUpdateManyAndReturnArgs>(args: SelectSubset<T, LegacyPasswordImportUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LegacyPasswordImportPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one LegacyPasswordImport.
+     * @param {LegacyPasswordImportUpsertArgs} args - Arguments to update or create a LegacyPasswordImport.
+     * @example
+     * // Update or create a LegacyPasswordImport
+     * const legacyPasswordImport = await prisma.legacyPasswordImport.upsert({
+     *   create: {
+     *     // ... data to create a LegacyPasswordImport
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the LegacyPasswordImport we want to update
+     *   }
+     * })
+     */
+    upsert<T extends LegacyPasswordImportUpsertArgs>(args: SelectSubset<T, LegacyPasswordImportUpsertArgs<ExtArgs>>): Prisma__LegacyPasswordImportClient<$Result.GetResult<Prisma.$LegacyPasswordImportPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of LegacyPasswordImports.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LegacyPasswordImportCountArgs} args - Arguments to filter LegacyPasswordImports to count.
+     * @example
+     * // Count the number of LegacyPasswordImports
+     * const count = await prisma.legacyPasswordImport.count({
+     *   where: {
+     *     // ... the filter for the LegacyPasswordImports we want to count
+     *   }
+     * })
+    **/
+    count<T extends LegacyPasswordImportCountArgs>(
+      args?: Subset<T, LegacyPasswordImportCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], LegacyPasswordImportCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a LegacyPasswordImport.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LegacyPasswordImportAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends LegacyPasswordImportAggregateArgs>(args: Subset<T, LegacyPasswordImportAggregateArgs>): Prisma.PrismaPromise<GetLegacyPasswordImportAggregateType<T>>
+
+    /**
+     * Group by LegacyPasswordImport.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LegacyPasswordImportGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends LegacyPasswordImportGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: LegacyPasswordImportGroupByArgs['orderBy'] }
+        : { orderBy?: LegacyPasswordImportGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, LegacyPasswordImportGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetLegacyPasswordImportGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the LegacyPasswordImport model
+   */
+  readonly fields: LegacyPasswordImportFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for LegacyPasswordImport.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__LegacyPasswordImportClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the LegacyPasswordImport model
+   */
+  interface LegacyPasswordImportFieldRefs {
+    readonly userId: FieldRef<"LegacyPasswordImport", 'String'>
+    readonly hash: FieldRef<"LegacyPasswordImport", 'String'>
+    readonly salt: FieldRef<"LegacyPasswordImport", 'String'>
+    readonly createdAt: FieldRef<"LegacyPasswordImport", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * LegacyPasswordImport findUnique
+   */
+  export type LegacyPasswordImportFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LegacyPasswordImport
+     */
+    select?: LegacyPasswordImportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LegacyPasswordImport
+     */
+    omit?: LegacyPasswordImportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LegacyPasswordImportInclude<ExtArgs> | null
+    /**
+     * Filter, which LegacyPasswordImport to fetch.
+     */
+    where: LegacyPasswordImportWhereUniqueInput
+  }
+
+  /**
+   * LegacyPasswordImport findUniqueOrThrow
+   */
+  export type LegacyPasswordImportFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LegacyPasswordImport
+     */
+    select?: LegacyPasswordImportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LegacyPasswordImport
+     */
+    omit?: LegacyPasswordImportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LegacyPasswordImportInclude<ExtArgs> | null
+    /**
+     * Filter, which LegacyPasswordImport to fetch.
+     */
+    where: LegacyPasswordImportWhereUniqueInput
+  }
+
+  /**
+   * LegacyPasswordImport findFirst
+   */
+  export type LegacyPasswordImportFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LegacyPasswordImport
+     */
+    select?: LegacyPasswordImportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LegacyPasswordImport
+     */
+    omit?: LegacyPasswordImportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LegacyPasswordImportInclude<ExtArgs> | null
+    /**
+     * Filter, which LegacyPasswordImport to fetch.
+     */
+    where?: LegacyPasswordImportWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LegacyPasswordImports to fetch.
+     */
+    orderBy?: LegacyPasswordImportOrderByWithRelationInput | LegacyPasswordImportOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for LegacyPasswordImports.
+     */
+    cursor?: LegacyPasswordImportWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LegacyPasswordImports from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LegacyPasswordImports.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of LegacyPasswordImports.
+     */
+    distinct?: LegacyPasswordImportScalarFieldEnum | LegacyPasswordImportScalarFieldEnum[]
+  }
+
+  /**
+   * LegacyPasswordImport findFirstOrThrow
+   */
+  export type LegacyPasswordImportFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LegacyPasswordImport
+     */
+    select?: LegacyPasswordImportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LegacyPasswordImport
+     */
+    omit?: LegacyPasswordImportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LegacyPasswordImportInclude<ExtArgs> | null
+    /**
+     * Filter, which LegacyPasswordImport to fetch.
+     */
+    where?: LegacyPasswordImportWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LegacyPasswordImports to fetch.
+     */
+    orderBy?: LegacyPasswordImportOrderByWithRelationInput | LegacyPasswordImportOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for LegacyPasswordImports.
+     */
+    cursor?: LegacyPasswordImportWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LegacyPasswordImports from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LegacyPasswordImports.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of LegacyPasswordImports.
+     */
+    distinct?: LegacyPasswordImportScalarFieldEnum | LegacyPasswordImportScalarFieldEnum[]
+  }
+
+  /**
+   * LegacyPasswordImport findMany
+   */
+  export type LegacyPasswordImportFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LegacyPasswordImport
+     */
+    select?: LegacyPasswordImportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LegacyPasswordImport
+     */
+    omit?: LegacyPasswordImportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LegacyPasswordImportInclude<ExtArgs> | null
+    /**
+     * Filter, which LegacyPasswordImports to fetch.
+     */
+    where?: LegacyPasswordImportWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LegacyPasswordImports to fetch.
+     */
+    orderBy?: LegacyPasswordImportOrderByWithRelationInput | LegacyPasswordImportOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing LegacyPasswordImports.
+     */
+    cursor?: LegacyPasswordImportWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LegacyPasswordImports from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LegacyPasswordImports.
+     */
+    skip?: number
+    distinct?: LegacyPasswordImportScalarFieldEnum | LegacyPasswordImportScalarFieldEnum[]
+  }
+
+  /**
+   * LegacyPasswordImport create
+   */
+  export type LegacyPasswordImportCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LegacyPasswordImport
+     */
+    select?: LegacyPasswordImportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LegacyPasswordImport
+     */
+    omit?: LegacyPasswordImportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LegacyPasswordImportInclude<ExtArgs> | null
+    /**
+     * The data needed to create a LegacyPasswordImport.
+     */
+    data: XOR<LegacyPasswordImportCreateInput, LegacyPasswordImportUncheckedCreateInput>
+  }
+
+  /**
+   * LegacyPasswordImport createMany
+   */
+  export type LegacyPasswordImportCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many LegacyPasswordImports.
+     */
+    data: LegacyPasswordImportCreateManyInput | LegacyPasswordImportCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * LegacyPasswordImport createManyAndReturn
+   */
+  export type LegacyPasswordImportCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LegacyPasswordImport
+     */
+    select?: LegacyPasswordImportSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the LegacyPasswordImport
+     */
+    omit?: LegacyPasswordImportOmit<ExtArgs> | null
+    /**
+     * The data used to create many LegacyPasswordImports.
+     */
+    data: LegacyPasswordImportCreateManyInput | LegacyPasswordImportCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LegacyPasswordImportIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * LegacyPasswordImport update
+   */
+  export type LegacyPasswordImportUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LegacyPasswordImport
+     */
+    select?: LegacyPasswordImportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LegacyPasswordImport
+     */
+    omit?: LegacyPasswordImportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LegacyPasswordImportInclude<ExtArgs> | null
+    /**
+     * The data needed to update a LegacyPasswordImport.
+     */
+    data: XOR<LegacyPasswordImportUpdateInput, LegacyPasswordImportUncheckedUpdateInput>
+    /**
+     * Choose, which LegacyPasswordImport to update.
+     */
+    where: LegacyPasswordImportWhereUniqueInput
+  }
+
+  /**
+   * LegacyPasswordImport updateMany
+   */
+  export type LegacyPasswordImportUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update LegacyPasswordImports.
+     */
+    data: XOR<LegacyPasswordImportUpdateManyMutationInput, LegacyPasswordImportUncheckedUpdateManyInput>
+    /**
+     * Filter which LegacyPasswordImports to update
+     */
+    where?: LegacyPasswordImportWhereInput
+    /**
+     * Limit how many LegacyPasswordImports to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * LegacyPasswordImport updateManyAndReturn
+   */
+  export type LegacyPasswordImportUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LegacyPasswordImport
+     */
+    select?: LegacyPasswordImportSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the LegacyPasswordImport
+     */
+    omit?: LegacyPasswordImportOmit<ExtArgs> | null
+    /**
+     * The data used to update LegacyPasswordImports.
+     */
+    data: XOR<LegacyPasswordImportUpdateManyMutationInput, LegacyPasswordImportUncheckedUpdateManyInput>
+    /**
+     * Filter which LegacyPasswordImports to update
+     */
+    where?: LegacyPasswordImportWhereInput
+    /**
+     * Limit how many LegacyPasswordImports to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LegacyPasswordImportIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * LegacyPasswordImport upsert
+   */
+  export type LegacyPasswordImportUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LegacyPasswordImport
+     */
+    select?: LegacyPasswordImportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LegacyPasswordImport
+     */
+    omit?: LegacyPasswordImportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LegacyPasswordImportInclude<ExtArgs> | null
+    /**
+     * The filter to search for the LegacyPasswordImport to update in case it exists.
+     */
+    where: LegacyPasswordImportWhereUniqueInput
+    /**
+     * In case the LegacyPasswordImport found by the `where` argument doesn't exist, create a new LegacyPasswordImport with this data.
+     */
+    create: XOR<LegacyPasswordImportCreateInput, LegacyPasswordImportUncheckedCreateInput>
+    /**
+     * In case the LegacyPasswordImport was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<LegacyPasswordImportUpdateInput, LegacyPasswordImportUncheckedUpdateInput>
+  }
+
+  /**
+   * LegacyPasswordImport delete
+   */
+  export type LegacyPasswordImportDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LegacyPasswordImport
+     */
+    select?: LegacyPasswordImportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LegacyPasswordImport
+     */
+    omit?: LegacyPasswordImportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LegacyPasswordImportInclude<ExtArgs> | null
+    /**
+     * Filter which LegacyPasswordImport to delete.
+     */
+    where: LegacyPasswordImportWhereUniqueInput
+  }
+
+  /**
+   * LegacyPasswordImport deleteMany
+   */
+  export type LegacyPasswordImportDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which LegacyPasswordImports to delete
+     */
+    where?: LegacyPasswordImportWhereInput
+    /**
+     * Limit how many LegacyPasswordImports to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * LegacyPasswordImport without action
+   */
+  export type LegacyPasswordImportDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LegacyPasswordImport
+     */
+    select?: LegacyPasswordImportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LegacyPasswordImport
+     */
+    omit?: LegacyPasswordImportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LegacyPasswordImportInclude<ExtArgs> | null
   }
 
 
@@ -33106,6 +34265,16 @@ export namespace Prisma {
   export type PasswordResetTokenScalarFieldEnum = (typeof PasswordResetTokenScalarFieldEnum)[keyof typeof PasswordResetTokenScalarFieldEnum]
 
 
+  export const LegacyPasswordImportScalarFieldEnum: {
+    userId: 'userId',
+    hash: 'hash',
+    salt: 'salt',
+    createdAt: 'createdAt'
+  };
+
+  export type LegacyPasswordImportScalarFieldEnum = (typeof LegacyPasswordImportScalarFieldEnum)[keyof typeof LegacyPasswordImportScalarFieldEnum]
+
+
   export const LoginAttemptScalarFieldEnum: {
     id: 'id',
     identifier: 'identifier',
@@ -33749,6 +34918,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenListRelationFilter
     emailVerificationTokens?: EmailVerificationTokenListRelationFilter
     passwordResetTokens?: PasswordResetTokenListRelationFilter
+    legacyPassword?: XOR<LegacyPasswordImportNullableScalarRelationFilter, LegacyPasswordImportWhereInput> | null
     orders?: OrderListRelationFilter
     reviews?: ReviewListRelationFilter
     walletTransactions?: WalletTransactionListRelationFilter
@@ -33780,6 +34950,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenOrderByRelationAggregateInput
     emailVerificationTokens?: EmailVerificationTokenOrderByRelationAggregateInput
     passwordResetTokens?: PasswordResetTokenOrderByRelationAggregateInput
+    legacyPassword?: LegacyPasswordImportOrderByWithRelationInput
     orders?: OrderOrderByRelationAggregateInput
     reviews?: ReviewOrderByRelationAggregateInput
     walletTransactions?: WalletTransactionOrderByRelationAggregateInput
@@ -33814,6 +34985,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenListRelationFilter
     emailVerificationTokens?: EmailVerificationTokenListRelationFilter
     passwordResetTokens?: PasswordResetTokenListRelationFilter
+    legacyPassword?: XOR<LegacyPasswordImportNullableScalarRelationFilter, LegacyPasswordImportWhereInput> | null
     orders?: OrderListRelationFilter
     reviews?: ReviewListRelationFilter
     walletTransactions?: WalletTransactionListRelationFilter
@@ -34115,6 +35287,56 @@ export namespace Prisma {
     expiresAt?: DateTimeWithAggregatesFilter<"PasswordResetToken"> | Date | string
     usedAt?: DateTimeNullableWithAggregatesFilter<"PasswordResetToken"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"PasswordResetToken"> | Date | string
+  }
+
+  export type LegacyPasswordImportWhereInput = {
+    AND?: LegacyPasswordImportWhereInput | LegacyPasswordImportWhereInput[]
+    OR?: LegacyPasswordImportWhereInput[]
+    NOT?: LegacyPasswordImportWhereInput | LegacyPasswordImportWhereInput[]
+    userId?: StringFilter<"LegacyPasswordImport"> | string
+    hash?: StringFilter<"LegacyPasswordImport"> | string
+    salt?: StringFilter<"LegacyPasswordImport"> | string
+    createdAt?: DateTimeFilter<"LegacyPasswordImport"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }
+
+  export type LegacyPasswordImportOrderByWithRelationInput = {
+    userId?: SortOrder
+    hash?: SortOrder
+    salt?: SortOrder
+    createdAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type LegacyPasswordImportWhereUniqueInput = Prisma.AtLeast<{
+    userId?: string
+    AND?: LegacyPasswordImportWhereInput | LegacyPasswordImportWhereInput[]
+    OR?: LegacyPasswordImportWhereInput[]
+    NOT?: LegacyPasswordImportWhereInput | LegacyPasswordImportWhereInput[]
+    hash?: StringFilter<"LegacyPasswordImport"> | string
+    salt?: StringFilter<"LegacyPasswordImport"> | string
+    createdAt?: DateTimeFilter<"LegacyPasswordImport"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }, "userId">
+
+  export type LegacyPasswordImportOrderByWithAggregationInput = {
+    userId?: SortOrder
+    hash?: SortOrder
+    salt?: SortOrder
+    createdAt?: SortOrder
+    _count?: LegacyPasswordImportCountOrderByAggregateInput
+    _max?: LegacyPasswordImportMaxOrderByAggregateInput
+    _min?: LegacyPasswordImportMinOrderByAggregateInput
+  }
+
+  export type LegacyPasswordImportScalarWhereWithAggregatesInput = {
+    AND?: LegacyPasswordImportScalarWhereWithAggregatesInput | LegacyPasswordImportScalarWhereWithAggregatesInput[]
+    OR?: LegacyPasswordImportScalarWhereWithAggregatesInput[]
+    NOT?: LegacyPasswordImportScalarWhereWithAggregatesInput | LegacyPasswordImportScalarWhereWithAggregatesInput[]
+    userId?: StringWithAggregatesFilter<"LegacyPasswordImport"> | string
+    hash?: StringWithAggregatesFilter<"LegacyPasswordImport"> | string
+    salt?: StringWithAggregatesFilter<"LegacyPasswordImport"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"LegacyPasswordImport"> | Date | string
   }
 
   export type LoginAttemptWhereInput = {
@@ -35719,6 +36941,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     emailVerificationTokens?: EmailVerificationTokenCreateNestedManyWithoutUserInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    legacyPassword?: LegacyPasswordImportCreateNestedOneWithoutUserInput
     orders?: OrderCreateNestedManyWithoutUserInput
     reviews?: ReviewCreateNestedManyWithoutUserInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutUserInput
@@ -35749,6 +36972,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     emailVerificationTokens?: EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    legacyPassword?: LegacyPasswordImportUncheckedCreateNestedOneWithoutUserInput
     orders?: OrderUncheckedCreateNestedManyWithoutUserInput
     reviews?: ReviewUncheckedCreateNestedManyWithoutUserInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutUserInput
@@ -35779,6 +37003,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     emailVerificationTokens?: EmailVerificationTokenUpdateManyWithoutUserNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    legacyPassword?: LegacyPasswordImportUpdateOneWithoutUserNestedInput
     orders?: OrderUpdateManyWithoutUserNestedInput
     reviews?: ReviewUpdateManyWithoutUserNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutUserNestedInput
@@ -35809,6 +37034,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     emailVerificationTokens?: EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    legacyPassword?: LegacyPasswordImportUncheckedUpdateOneWithoutUserNestedInput
     orders?: OrderUncheckedUpdateManyWithoutUserNestedInput
     reviews?: ReviewUncheckedUpdateManyWithoutUserNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutUserNestedInput
@@ -36128,6 +37354,54 @@ export namespace Prisma {
     tokenHash?: StringFieldUpdateOperationsInput | string
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
     usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LegacyPasswordImportCreateInput = {
+    hash: string
+    salt: string
+    createdAt?: Date | string
+    user: UserCreateNestedOneWithoutLegacyPasswordInput
+  }
+
+  export type LegacyPasswordImportUncheckedCreateInput = {
+    userId: string
+    hash: string
+    salt: string
+    createdAt?: Date | string
+  }
+
+  export type LegacyPasswordImportUpdateInput = {
+    hash?: StringFieldUpdateOperationsInput | string
+    salt?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutLegacyPasswordNestedInput
+  }
+
+  export type LegacyPasswordImportUncheckedUpdateInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    hash?: StringFieldUpdateOperationsInput | string
+    salt?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LegacyPasswordImportCreateManyInput = {
+    userId: string
+    hash: string
+    salt: string
+    createdAt?: Date | string
+  }
+
+  export type LegacyPasswordImportUpdateManyMutationInput = {
+    hash?: StringFieldUpdateOperationsInput | string
+    salt?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LegacyPasswordImportUncheckedUpdateManyInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    hash?: StringFieldUpdateOperationsInput | string
+    salt?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -37983,6 +39257,11 @@ export namespace Prisma {
     none?: PasswordResetTokenWhereInput
   }
 
+  export type LegacyPasswordImportNullableScalarRelationFilter = {
+    is?: LegacyPasswordImportWhereInput | null
+    isNot?: LegacyPasswordImportWhereInput | null
+  }
+
   export type OrderListRelationFilter = {
     every?: OrderWhereInput
     some?: OrderWhereInput
@@ -38346,6 +39625,27 @@ export namespace Prisma {
     tokenHash?: SortOrder
     expiresAt?: SortOrder
     usedAt?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type LegacyPasswordImportCountOrderByAggregateInput = {
+    userId?: SortOrder
+    hash?: SortOrder
+    salt?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type LegacyPasswordImportMaxOrderByAggregateInput = {
+    userId?: SortOrder
+    hash?: SortOrder
+    salt?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type LegacyPasswordImportMinOrderByAggregateInput = {
+    userId?: SortOrder
+    hash?: SortOrder
+    salt?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -39614,6 +40914,12 @@ export namespace Prisma {
     connect?: PasswordResetTokenWhereUniqueInput | PasswordResetTokenWhereUniqueInput[]
   }
 
+  export type LegacyPasswordImportCreateNestedOneWithoutUserInput = {
+    create?: XOR<LegacyPasswordImportCreateWithoutUserInput, LegacyPasswordImportUncheckedCreateWithoutUserInput>
+    connectOrCreate?: LegacyPasswordImportCreateOrConnectWithoutUserInput
+    connect?: LegacyPasswordImportWhereUniqueInput
+  }
+
   export type OrderCreateNestedManyWithoutUserInput = {
     create?: XOR<OrderCreateWithoutUserInput, OrderUncheckedCreateWithoutUserInput> | OrderCreateWithoutUserInput[] | OrderUncheckedCreateWithoutUserInput[]
     connectOrCreate?: OrderCreateOrConnectWithoutUserInput | OrderCreateOrConnectWithoutUserInput[]
@@ -39703,6 +41009,12 @@ export namespace Prisma {
     connectOrCreate?: PasswordResetTokenCreateOrConnectWithoutUserInput | PasswordResetTokenCreateOrConnectWithoutUserInput[]
     createMany?: PasswordResetTokenCreateManyUserInputEnvelope
     connect?: PasswordResetTokenWhereUniqueInput | PasswordResetTokenWhereUniqueInput[]
+  }
+
+  export type LegacyPasswordImportUncheckedCreateNestedOneWithoutUserInput = {
+    create?: XOR<LegacyPasswordImportCreateWithoutUserInput, LegacyPasswordImportUncheckedCreateWithoutUserInput>
+    connectOrCreate?: LegacyPasswordImportCreateOrConnectWithoutUserInput
+    connect?: LegacyPasswordImportWhereUniqueInput
   }
 
   export type OrderUncheckedCreateNestedManyWithoutUserInput = {
@@ -39867,6 +41179,16 @@ export namespace Prisma {
     update?: PasswordResetTokenUpdateWithWhereUniqueWithoutUserInput | PasswordResetTokenUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: PasswordResetTokenUpdateManyWithWhereWithoutUserInput | PasswordResetTokenUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: PasswordResetTokenScalarWhereInput | PasswordResetTokenScalarWhereInput[]
+  }
+
+  export type LegacyPasswordImportUpdateOneWithoutUserNestedInput = {
+    create?: XOR<LegacyPasswordImportCreateWithoutUserInput, LegacyPasswordImportUncheckedCreateWithoutUserInput>
+    connectOrCreate?: LegacyPasswordImportCreateOrConnectWithoutUserInput
+    upsert?: LegacyPasswordImportUpsertWithoutUserInput
+    disconnect?: LegacyPasswordImportWhereInput | boolean
+    delete?: LegacyPasswordImportWhereInput | boolean
+    connect?: LegacyPasswordImportWhereUniqueInput
+    update?: XOR<XOR<LegacyPasswordImportUpdateToOneWithWhereWithoutUserInput, LegacyPasswordImportUpdateWithoutUserInput>, LegacyPasswordImportUncheckedUpdateWithoutUserInput>
   }
 
   export type OrderUpdateManyWithoutUserNestedInput = {
@@ -40051,6 +41373,16 @@ export namespace Prisma {
     deleteMany?: PasswordResetTokenScalarWhereInput | PasswordResetTokenScalarWhereInput[]
   }
 
+  export type LegacyPasswordImportUncheckedUpdateOneWithoutUserNestedInput = {
+    create?: XOR<LegacyPasswordImportCreateWithoutUserInput, LegacyPasswordImportUncheckedCreateWithoutUserInput>
+    connectOrCreate?: LegacyPasswordImportCreateOrConnectWithoutUserInput
+    upsert?: LegacyPasswordImportUpsertWithoutUserInput
+    disconnect?: LegacyPasswordImportWhereInput | boolean
+    delete?: LegacyPasswordImportWhereInput | boolean
+    connect?: LegacyPasswordImportWhereUniqueInput
+    update?: XOR<XOR<LegacyPasswordImportUpdateToOneWithWhereWithoutUserInput, LegacyPasswordImportUpdateWithoutUserInput>, LegacyPasswordImportUncheckedUpdateWithoutUserInput>
+  }
+
   export type OrderUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<OrderCreateWithoutUserInput, OrderUncheckedCreateWithoutUserInput> | OrderCreateWithoutUserInput[] | OrderUncheckedCreateWithoutUserInput[]
     connectOrCreate?: OrderCreateOrConnectWithoutUserInput | OrderCreateOrConnectWithoutUserInput[]
@@ -40217,6 +41549,20 @@ export namespace Prisma {
     upsert?: UserUpsertWithoutPasswordResetTokensInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutPasswordResetTokensInput, UserUpdateWithoutPasswordResetTokensInput>, UserUncheckedUpdateWithoutPasswordResetTokensInput>
+  }
+
+  export type UserCreateNestedOneWithoutLegacyPasswordInput = {
+    create?: XOR<UserCreateWithoutLegacyPasswordInput, UserUncheckedCreateWithoutLegacyPasswordInput>
+    connectOrCreate?: UserCreateOrConnectWithoutLegacyPasswordInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserUpdateOneRequiredWithoutLegacyPasswordNestedInput = {
+    create?: XOR<UserCreateWithoutLegacyPasswordInput, UserUncheckedCreateWithoutLegacyPasswordInput>
+    connectOrCreate?: UserCreateOrConnectWithoutLegacyPasswordInput
+    upsert?: UserUpsertWithoutLegacyPasswordInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutLegacyPasswordInput, UserUpdateWithoutLegacyPasswordInput>, UserUncheckedUpdateWithoutLegacyPasswordInput>
   }
 
   export type IntFieldUpdateOperationsInput = {
@@ -41304,6 +42650,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     emailVerificationTokens?: EmailVerificationTokenCreateNestedManyWithoutUserInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    legacyPassword?: LegacyPasswordImportCreateNestedOneWithoutUserInput
     orders?: OrderCreateNestedManyWithoutUserInput
     reviews?: ReviewCreateNestedManyWithoutUserInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutUserInput
@@ -41333,6 +42680,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     emailVerificationTokens?: EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    legacyPassword?: LegacyPasswordImportUncheckedCreateNestedOneWithoutUserInput
     orders?: OrderUncheckedCreateNestedManyWithoutUserInput
     reviews?: ReviewUncheckedCreateNestedManyWithoutUserInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutUserInput
@@ -41367,6 +42715,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     emailVerificationTokens?: EmailVerificationTokenCreateNestedManyWithoutUserInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    legacyPassword?: LegacyPasswordImportCreateNestedOneWithoutUserInput
     orders?: OrderCreateNestedManyWithoutUserInput
     reviews?: ReviewCreateNestedManyWithoutUserInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutUserInput
@@ -41396,6 +42745,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     emailVerificationTokens?: EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    legacyPassword?: LegacyPasswordImportUncheckedCreateNestedOneWithoutUserInput
     orders?: OrderUncheckedCreateNestedManyWithoutUserInput
     reviews?: ReviewUncheckedCreateNestedManyWithoutUserInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutUserInput
@@ -41522,6 +42872,23 @@ export namespace Prisma {
   export type PasswordResetTokenCreateManyUserInputEnvelope = {
     data: PasswordResetTokenCreateManyUserInput | PasswordResetTokenCreateManyUserInput[]
     skipDuplicates?: boolean
+  }
+
+  export type LegacyPasswordImportCreateWithoutUserInput = {
+    hash: string
+    salt: string
+    createdAt?: Date | string
+  }
+
+  export type LegacyPasswordImportUncheckedCreateWithoutUserInput = {
+    hash: string
+    salt: string
+    createdAt?: Date | string
+  }
+
+  export type LegacyPasswordImportCreateOrConnectWithoutUserInput = {
+    where: LegacyPasswordImportWhereUniqueInput
+    create: XOR<LegacyPasswordImportCreateWithoutUserInput, LegacyPasswordImportUncheckedCreateWithoutUserInput>
   }
 
   export type OrderCreateWithoutUserInput = {
@@ -41814,6 +43181,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     emailVerificationTokens?: EmailVerificationTokenUpdateManyWithoutUserNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    legacyPassword?: LegacyPasswordImportUpdateOneWithoutUserNestedInput
     orders?: OrderUpdateManyWithoutUserNestedInput
     reviews?: ReviewUpdateManyWithoutUserNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutUserNestedInput
@@ -41843,6 +43211,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     emailVerificationTokens?: EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    legacyPassword?: LegacyPasswordImportUncheckedUpdateOneWithoutUserNestedInput
     orders?: OrderUncheckedUpdateManyWithoutUserNestedInput
     reviews?: ReviewUncheckedUpdateManyWithoutUserNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutUserNestedInput
@@ -42001,6 +43370,29 @@ export namespace Prisma {
     expiresAt?: DateTimeFilter<"PasswordResetToken"> | Date | string
     usedAt?: DateTimeNullableFilter<"PasswordResetToken"> | Date | string | null
     createdAt?: DateTimeFilter<"PasswordResetToken"> | Date | string
+  }
+
+  export type LegacyPasswordImportUpsertWithoutUserInput = {
+    update: XOR<LegacyPasswordImportUpdateWithoutUserInput, LegacyPasswordImportUncheckedUpdateWithoutUserInput>
+    create: XOR<LegacyPasswordImportCreateWithoutUserInput, LegacyPasswordImportUncheckedCreateWithoutUserInput>
+    where?: LegacyPasswordImportWhereInput
+  }
+
+  export type LegacyPasswordImportUpdateToOneWithWhereWithoutUserInput = {
+    where?: LegacyPasswordImportWhereInput
+    data: XOR<LegacyPasswordImportUpdateWithoutUserInput, LegacyPasswordImportUncheckedUpdateWithoutUserInput>
+  }
+
+  export type LegacyPasswordImportUpdateWithoutUserInput = {
+    hash?: StringFieldUpdateOperationsInput | string
+    salt?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LegacyPasswordImportUncheckedUpdateWithoutUserInput = {
+    hash?: StringFieldUpdateOperationsInput | string
+    salt?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type OrderUpsertWithWhereUniqueWithoutUserInput = {
@@ -42259,6 +43651,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     emailVerificationTokens?: EmailVerificationTokenCreateNestedManyWithoutUserInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    legacyPassword?: LegacyPasswordImportCreateNestedOneWithoutUserInput
     orders?: OrderCreateNestedManyWithoutUserInput
     reviews?: ReviewCreateNestedManyWithoutUserInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutUserInput
@@ -42288,6 +43681,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     emailVerificationTokens?: EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    legacyPassword?: LegacyPasswordImportUncheckedCreateNestedOneWithoutUserInput
     orders?: OrderUncheckedCreateNestedManyWithoutUserInput
     reviews?: ReviewUncheckedCreateNestedManyWithoutUserInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutUserInput
@@ -42333,6 +43727,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     emailVerificationTokens?: EmailVerificationTokenUpdateManyWithoutUserNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    legacyPassword?: LegacyPasswordImportUpdateOneWithoutUserNestedInput
     orders?: OrderUpdateManyWithoutUserNestedInput
     reviews?: ReviewUpdateManyWithoutUserNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutUserNestedInput
@@ -42362,6 +43757,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     emailVerificationTokens?: EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    legacyPassword?: LegacyPasswordImportUncheckedUpdateOneWithoutUserNestedInput
     orders?: OrderUncheckedUpdateManyWithoutUserNestedInput
     reviews?: ReviewUncheckedUpdateManyWithoutUserNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutUserNestedInput
@@ -42391,6 +43787,7 @@ export namespace Prisma {
     oauthAccounts?: OAuthAccountCreateNestedManyWithoutUserInput
     emailVerificationTokens?: EmailVerificationTokenCreateNestedManyWithoutUserInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    legacyPassword?: LegacyPasswordImportCreateNestedOneWithoutUserInput
     orders?: OrderCreateNestedManyWithoutUserInput
     reviews?: ReviewCreateNestedManyWithoutUserInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutUserInput
@@ -42420,6 +43817,7 @@ export namespace Prisma {
     oauthAccounts?: OAuthAccountUncheckedCreateNestedManyWithoutUserInput
     emailVerificationTokens?: EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    legacyPassword?: LegacyPasswordImportUncheckedCreateNestedOneWithoutUserInput
     orders?: OrderUncheckedCreateNestedManyWithoutUserInput
     reviews?: ReviewUncheckedCreateNestedManyWithoutUserInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutUserInput
@@ -42465,6 +43863,7 @@ export namespace Prisma {
     oauthAccounts?: OAuthAccountUpdateManyWithoutUserNestedInput
     emailVerificationTokens?: EmailVerificationTokenUpdateManyWithoutUserNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    legacyPassword?: LegacyPasswordImportUpdateOneWithoutUserNestedInput
     orders?: OrderUpdateManyWithoutUserNestedInput
     reviews?: ReviewUpdateManyWithoutUserNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutUserNestedInput
@@ -42494,6 +43893,7 @@ export namespace Prisma {
     oauthAccounts?: OAuthAccountUncheckedUpdateManyWithoutUserNestedInput
     emailVerificationTokens?: EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    legacyPassword?: LegacyPasswordImportUncheckedUpdateOneWithoutUserNestedInput
     orders?: OrderUncheckedUpdateManyWithoutUserNestedInput
     reviews?: ReviewUncheckedUpdateManyWithoutUserNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutUserNestedInput
@@ -42523,6 +43923,7 @@ export namespace Prisma {
     oauthAccounts?: OAuthAccountCreateNestedManyWithoutUserInput
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    legacyPassword?: LegacyPasswordImportCreateNestedOneWithoutUserInput
     orders?: OrderCreateNestedManyWithoutUserInput
     reviews?: ReviewCreateNestedManyWithoutUserInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutUserInput
@@ -42552,6 +43953,7 @@ export namespace Prisma {
     oauthAccounts?: OAuthAccountUncheckedCreateNestedManyWithoutUserInput
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    legacyPassword?: LegacyPasswordImportUncheckedCreateNestedOneWithoutUserInput
     orders?: OrderUncheckedCreateNestedManyWithoutUserInput
     reviews?: ReviewUncheckedCreateNestedManyWithoutUserInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutUserInput
@@ -42597,6 +43999,7 @@ export namespace Prisma {
     oauthAccounts?: OAuthAccountUpdateManyWithoutUserNestedInput
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    legacyPassword?: LegacyPasswordImportUpdateOneWithoutUserNestedInput
     orders?: OrderUpdateManyWithoutUserNestedInput
     reviews?: ReviewUpdateManyWithoutUserNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutUserNestedInput
@@ -42626,6 +44029,7 @@ export namespace Prisma {
     oauthAccounts?: OAuthAccountUncheckedUpdateManyWithoutUserNestedInput
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    legacyPassword?: LegacyPasswordImportUncheckedUpdateOneWithoutUserNestedInput
     orders?: OrderUncheckedUpdateManyWithoutUserNestedInput
     reviews?: ReviewUncheckedUpdateManyWithoutUserNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutUserNestedInput
@@ -42655,6 +44059,7 @@ export namespace Prisma {
     oauthAccounts?: OAuthAccountCreateNestedManyWithoutUserInput
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     emailVerificationTokens?: EmailVerificationTokenCreateNestedManyWithoutUserInput
+    legacyPassword?: LegacyPasswordImportCreateNestedOneWithoutUserInput
     orders?: OrderCreateNestedManyWithoutUserInput
     reviews?: ReviewCreateNestedManyWithoutUserInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutUserInput
@@ -42684,6 +44089,7 @@ export namespace Prisma {
     oauthAccounts?: OAuthAccountUncheckedCreateNestedManyWithoutUserInput
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     emailVerificationTokens?: EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+    legacyPassword?: LegacyPasswordImportUncheckedCreateNestedOneWithoutUserInput
     orders?: OrderUncheckedCreateNestedManyWithoutUserInput
     reviews?: ReviewUncheckedCreateNestedManyWithoutUserInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutUserInput
@@ -42729,6 +44135,7 @@ export namespace Prisma {
     oauthAccounts?: OAuthAccountUpdateManyWithoutUserNestedInput
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     emailVerificationTokens?: EmailVerificationTokenUpdateManyWithoutUserNestedInput
+    legacyPassword?: LegacyPasswordImportUpdateOneWithoutUserNestedInput
     orders?: OrderUpdateManyWithoutUserNestedInput
     reviews?: ReviewUpdateManyWithoutUserNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutUserNestedInput
@@ -42758,6 +44165,143 @@ export namespace Prisma {
     oauthAccounts?: OAuthAccountUncheckedUpdateManyWithoutUserNestedInput
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     emailVerificationTokens?: EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+    legacyPassword?: LegacyPasswordImportUncheckedUpdateOneWithoutUserNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutUserNestedInput
+    reviews?: ReviewUncheckedUpdateManyWithoutUserNestedInput
+    walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutUserNestedInput
+    walletRedemptions?: WalletRedemptionUncheckedUpdateManyWithoutUserNestedInput
+    sentMessages?: MessageUncheckedUpdateManyWithoutSenderUserNestedInput
+    vendorApplications?: VendorApplicationUncheckedUpdateManyWithoutUserNestedInput
+    referralEvents?: ReferralUncheckedUpdateManyWithoutReferrerNestedInput
+    referredEvents?: ReferralUncheckedUpdateManyWithoutReferredNestedInput
+  }
+
+  export type UserCreateWithoutLegacyPasswordInput = {
+    id?: string
+    email: string
+    passwordHash?: string | null
+    name?: string | null
+    phone?: string | null
+    address?: string | null
+    avatarUrl?: string | null
+    emailVerified?: Date | string | null
+    isActive?: boolean
+    walletBalance?: Decimal | DecimalJsLike | number | string
+    referralCode?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    referredBy?: UserCreateNestedOneWithoutReferralsInput
+    referrals?: UserCreateNestedManyWithoutReferredByInput
+    oauthAccounts?: OAuthAccountCreateNestedManyWithoutUserInput
+    refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
+    emailVerificationTokens?: EmailVerificationTokenCreateNestedManyWithoutUserInput
+    passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    orders?: OrderCreateNestedManyWithoutUserInput
+    reviews?: ReviewCreateNestedManyWithoutUserInput
+    walletTransactions?: WalletTransactionCreateNestedManyWithoutUserInput
+    walletRedemptions?: WalletRedemptionCreateNestedManyWithoutUserInput
+    sentMessages?: MessageCreateNestedManyWithoutSenderUserInput
+    vendorApplications?: VendorApplicationCreateNestedManyWithoutUserInput
+    referralEvents?: ReferralCreateNestedManyWithoutReferrerInput
+    referredEvents?: ReferralCreateNestedManyWithoutReferredInput
+  }
+
+  export type UserUncheckedCreateWithoutLegacyPasswordInput = {
+    id?: string
+    email: string
+    passwordHash?: string | null
+    name?: string | null
+    phone?: string | null
+    address?: string | null
+    avatarUrl?: string | null
+    emailVerified?: Date | string | null
+    isActive?: boolean
+    walletBalance?: Decimal | DecimalJsLike | number | string
+    referralCode?: string | null
+    referredById?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    referrals?: UserUncheckedCreateNestedManyWithoutReferredByInput
+    oauthAccounts?: OAuthAccountUncheckedCreateNestedManyWithoutUserInput
+    refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+    emailVerificationTokens?: EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+    passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    orders?: OrderUncheckedCreateNestedManyWithoutUserInput
+    reviews?: ReviewUncheckedCreateNestedManyWithoutUserInput
+    walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutUserInput
+    walletRedemptions?: WalletRedemptionUncheckedCreateNestedManyWithoutUserInput
+    sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderUserInput
+    vendorApplications?: VendorApplicationUncheckedCreateNestedManyWithoutUserInput
+    referralEvents?: ReferralUncheckedCreateNestedManyWithoutReferrerInput
+    referredEvents?: ReferralUncheckedCreateNestedManyWithoutReferredInput
+  }
+
+  export type UserCreateOrConnectWithoutLegacyPasswordInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutLegacyPasswordInput, UserUncheckedCreateWithoutLegacyPasswordInput>
+  }
+
+  export type UserUpsertWithoutLegacyPasswordInput = {
+    update: XOR<UserUpdateWithoutLegacyPasswordInput, UserUncheckedUpdateWithoutLegacyPasswordInput>
+    create: XOR<UserCreateWithoutLegacyPasswordInput, UserUncheckedCreateWithoutLegacyPasswordInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutLegacyPasswordInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutLegacyPasswordInput, UserUncheckedUpdateWithoutLegacyPasswordInput>
+  }
+
+  export type UserUpdateWithoutLegacyPasswordInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    walletBalance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referredBy?: UserUpdateOneWithoutReferralsNestedInput
+    referrals?: UserUpdateManyWithoutReferredByNestedInput
+    oauthAccounts?: OAuthAccountUpdateManyWithoutUserNestedInput
+    refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
+    emailVerificationTokens?: EmailVerificationTokenUpdateManyWithoutUserNestedInput
+    passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    orders?: OrderUpdateManyWithoutUserNestedInput
+    reviews?: ReviewUpdateManyWithoutUserNestedInput
+    walletTransactions?: WalletTransactionUpdateManyWithoutUserNestedInput
+    walletRedemptions?: WalletRedemptionUpdateManyWithoutUserNestedInput
+    sentMessages?: MessageUpdateManyWithoutSenderUserNestedInput
+    vendorApplications?: VendorApplicationUpdateManyWithoutUserNestedInput
+    referralEvents?: ReferralUpdateManyWithoutReferrerNestedInput
+    referredEvents?: ReferralUpdateManyWithoutReferredNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutLegacyPasswordInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    walletBalance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
+    referredById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referrals?: UserUncheckedUpdateManyWithoutReferredByNestedInput
+    oauthAccounts?: OAuthAccountUncheckedUpdateManyWithoutUserNestedInput
+    refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+    emailVerificationTokens?: EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+    passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
     orders?: OrderUncheckedUpdateManyWithoutUserNestedInput
     reviews?: ReviewUncheckedUpdateManyWithoutUserNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutUserNestedInput
@@ -43432,6 +44976,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     emailVerificationTokens?: EmailVerificationTokenCreateNestedManyWithoutUserInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    legacyPassword?: LegacyPasswordImportCreateNestedOneWithoutUserInput
     reviews?: ReviewCreateNestedManyWithoutUserInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutUserInput
     walletRedemptions?: WalletRedemptionCreateNestedManyWithoutUserInput
@@ -43461,6 +45006,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     emailVerificationTokens?: EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    legacyPassword?: LegacyPasswordImportUncheckedCreateNestedOneWithoutUserInput
     reviews?: ReviewUncheckedCreateNestedManyWithoutUserInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutUserInput
     walletRedemptions?: WalletRedemptionUncheckedCreateNestedManyWithoutUserInput
@@ -43534,6 +45080,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     emailVerificationTokens?: EmailVerificationTokenUpdateManyWithoutUserNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    legacyPassword?: LegacyPasswordImportUpdateOneWithoutUserNestedInput
     reviews?: ReviewUpdateManyWithoutUserNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutUserNestedInput
     walletRedemptions?: WalletRedemptionUpdateManyWithoutUserNestedInput
@@ -43563,6 +45110,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     emailVerificationTokens?: EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    legacyPassword?: LegacyPasswordImportUncheckedUpdateOneWithoutUserNestedInput
     reviews?: ReviewUncheckedUpdateManyWithoutUserNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutUserNestedInput
     walletRedemptions?: WalletRedemptionUncheckedUpdateManyWithoutUserNestedInput
@@ -43792,6 +45340,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     emailVerificationTokens?: EmailVerificationTokenCreateNestedManyWithoutUserInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    legacyPassword?: LegacyPasswordImportCreateNestedOneWithoutUserInput
     orders?: OrderCreateNestedManyWithoutUserInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutUserInput
     walletRedemptions?: WalletRedemptionCreateNestedManyWithoutUserInput
@@ -43821,6 +45370,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     emailVerificationTokens?: EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    legacyPassword?: LegacyPasswordImportUncheckedCreateNestedOneWithoutUserInput
     orders?: OrderUncheckedCreateNestedManyWithoutUserInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutUserInput
     walletRedemptions?: WalletRedemptionUncheckedCreateNestedManyWithoutUserInput
@@ -43911,6 +45461,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     emailVerificationTokens?: EmailVerificationTokenUpdateManyWithoutUserNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    legacyPassword?: LegacyPasswordImportUpdateOneWithoutUserNestedInput
     orders?: OrderUpdateManyWithoutUserNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutUserNestedInput
     walletRedemptions?: WalletRedemptionUpdateManyWithoutUserNestedInput
@@ -43940,6 +45491,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     emailVerificationTokens?: EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    legacyPassword?: LegacyPasswordImportUncheckedUpdateOneWithoutUserNestedInput
     orders?: OrderUncheckedUpdateManyWithoutUserNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutUserNestedInput
     walletRedemptions?: WalletRedemptionUncheckedUpdateManyWithoutUserNestedInput
@@ -44020,6 +45572,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     emailVerificationTokens?: EmailVerificationTokenCreateNestedManyWithoutUserInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    legacyPassword?: LegacyPasswordImportCreateNestedOneWithoutUserInput
     orders?: OrderCreateNestedManyWithoutUserInput
     reviews?: ReviewCreateNestedManyWithoutUserInput
     walletRedemptions?: WalletRedemptionCreateNestedManyWithoutUserInput
@@ -44049,6 +45602,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     emailVerificationTokens?: EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    legacyPassword?: LegacyPasswordImportUncheckedCreateNestedOneWithoutUserInput
     orders?: OrderUncheckedCreateNestedManyWithoutUserInput
     reviews?: ReviewUncheckedCreateNestedManyWithoutUserInput
     walletRedemptions?: WalletRedemptionUncheckedCreateNestedManyWithoutUserInput
@@ -44094,6 +45648,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     emailVerificationTokens?: EmailVerificationTokenUpdateManyWithoutUserNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    legacyPassword?: LegacyPasswordImportUpdateOneWithoutUserNestedInput
     orders?: OrderUpdateManyWithoutUserNestedInput
     reviews?: ReviewUpdateManyWithoutUserNestedInput
     walletRedemptions?: WalletRedemptionUpdateManyWithoutUserNestedInput
@@ -44123,6 +45678,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     emailVerificationTokens?: EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    legacyPassword?: LegacyPasswordImportUncheckedUpdateOneWithoutUserNestedInput
     orders?: OrderUncheckedUpdateManyWithoutUserNestedInput
     reviews?: ReviewUncheckedUpdateManyWithoutUserNestedInput
     walletRedemptions?: WalletRedemptionUncheckedUpdateManyWithoutUserNestedInput
@@ -44152,6 +45708,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     emailVerificationTokens?: EmailVerificationTokenCreateNestedManyWithoutUserInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    legacyPassword?: LegacyPasswordImportCreateNestedOneWithoutUserInput
     orders?: OrderCreateNestedManyWithoutUserInput
     reviews?: ReviewCreateNestedManyWithoutUserInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutUserInput
@@ -44181,6 +45738,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     emailVerificationTokens?: EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    legacyPassword?: LegacyPasswordImportUncheckedCreateNestedOneWithoutUserInput
     orders?: OrderUncheckedCreateNestedManyWithoutUserInput
     reviews?: ReviewUncheckedCreateNestedManyWithoutUserInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutUserInput
@@ -44226,6 +45784,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     emailVerificationTokens?: EmailVerificationTokenUpdateManyWithoutUserNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    legacyPassword?: LegacyPasswordImportUpdateOneWithoutUserNestedInput
     orders?: OrderUpdateManyWithoutUserNestedInput
     reviews?: ReviewUpdateManyWithoutUserNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutUserNestedInput
@@ -44255,6 +45814,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     emailVerificationTokens?: EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    legacyPassword?: LegacyPasswordImportUncheckedUpdateOneWithoutUserNestedInput
     orders?: OrderUncheckedUpdateManyWithoutUserNestedInput
     reviews?: ReviewUncheckedUpdateManyWithoutUserNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutUserNestedInput
@@ -44284,6 +45844,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     emailVerificationTokens?: EmailVerificationTokenCreateNestedManyWithoutUserInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    legacyPassword?: LegacyPasswordImportCreateNestedOneWithoutUserInput
     orders?: OrderCreateNestedManyWithoutUserInput
     reviews?: ReviewCreateNestedManyWithoutUserInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutUserInput
@@ -44313,6 +45874,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     emailVerificationTokens?: EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    legacyPassword?: LegacyPasswordImportUncheckedCreateNestedOneWithoutUserInput
     orders?: OrderUncheckedCreateNestedManyWithoutUserInput
     reviews?: ReviewUncheckedCreateNestedManyWithoutUserInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutUserInput
@@ -44347,6 +45909,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     emailVerificationTokens?: EmailVerificationTokenCreateNestedManyWithoutUserInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    legacyPassword?: LegacyPasswordImportCreateNestedOneWithoutUserInput
     orders?: OrderCreateNestedManyWithoutUserInput
     reviews?: ReviewCreateNestedManyWithoutUserInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutUserInput
@@ -44376,6 +45939,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     emailVerificationTokens?: EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    legacyPassword?: LegacyPasswordImportUncheckedCreateNestedOneWithoutUserInput
     orders?: OrderUncheckedCreateNestedManyWithoutUserInput
     reviews?: ReviewUncheckedCreateNestedManyWithoutUserInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutUserInput
@@ -44421,6 +45985,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     emailVerificationTokens?: EmailVerificationTokenUpdateManyWithoutUserNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    legacyPassword?: LegacyPasswordImportUpdateOneWithoutUserNestedInput
     orders?: OrderUpdateManyWithoutUserNestedInput
     reviews?: ReviewUpdateManyWithoutUserNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutUserNestedInput
@@ -44450,6 +46015,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     emailVerificationTokens?: EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    legacyPassword?: LegacyPasswordImportUncheckedUpdateOneWithoutUserNestedInput
     orders?: OrderUncheckedUpdateManyWithoutUserNestedInput
     reviews?: ReviewUncheckedUpdateManyWithoutUserNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutUserNestedInput
@@ -44490,6 +46056,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     emailVerificationTokens?: EmailVerificationTokenUpdateManyWithoutUserNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    legacyPassword?: LegacyPasswordImportUpdateOneWithoutUserNestedInput
     orders?: OrderUpdateManyWithoutUserNestedInput
     reviews?: ReviewUpdateManyWithoutUserNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutUserNestedInput
@@ -44519,6 +46086,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     emailVerificationTokens?: EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    legacyPassword?: LegacyPasswordImportUncheckedUpdateOneWithoutUserNestedInput
     orders?: OrderUncheckedUpdateManyWithoutUserNestedInput
     reviews?: ReviewUncheckedUpdateManyWithoutUserNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutUserNestedInput
@@ -44548,6 +46116,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     emailVerificationTokens?: EmailVerificationTokenCreateNestedManyWithoutUserInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    legacyPassword?: LegacyPasswordImportCreateNestedOneWithoutUserInput
     orders?: OrderCreateNestedManyWithoutUserInput
     reviews?: ReviewCreateNestedManyWithoutUserInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutUserInput
@@ -44577,6 +46146,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     emailVerificationTokens?: EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    legacyPassword?: LegacyPasswordImportUncheckedCreateNestedOneWithoutUserInput
     orders?: OrderUncheckedCreateNestedManyWithoutUserInput
     reviews?: ReviewUncheckedCreateNestedManyWithoutUserInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutUserInput
@@ -44622,6 +46192,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     emailVerificationTokens?: EmailVerificationTokenUpdateManyWithoutUserNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    legacyPassword?: LegacyPasswordImportUpdateOneWithoutUserNestedInput
     orders?: OrderUpdateManyWithoutUserNestedInput
     reviews?: ReviewUpdateManyWithoutUserNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutUserNestedInput
@@ -44651,6 +46222,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     emailVerificationTokens?: EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    legacyPassword?: LegacyPasswordImportUncheckedUpdateOneWithoutUserNestedInput
     orders?: OrderUncheckedUpdateManyWithoutUserNestedInput
     reviews?: ReviewUncheckedUpdateManyWithoutUserNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutUserNestedInput
@@ -44680,6 +46252,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
     emailVerificationTokens?: EmailVerificationTokenCreateNestedManyWithoutUserInput
     passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    legacyPassword?: LegacyPasswordImportCreateNestedOneWithoutUserInput
     orders?: OrderCreateNestedManyWithoutUserInput
     reviews?: ReviewCreateNestedManyWithoutUserInput
     walletTransactions?: WalletTransactionCreateNestedManyWithoutUserInput
@@ -44709,6 +46282,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
     emailVerificationTokens?: EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
     passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    legacyPassword?: LegacyPasswordImportUncheckedCreateNestedOneWithoutUserInput
     orders?: OrderUncheckedCreateNestedManyWithoutUserInput
     reviews?: ReviewUncheckedCreateNestedManyWithoutUserInput
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutUserInput
@@ -44754,6 +46328,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     emailVerificationTokens?: EmailVerificationTokenUpdateManyWithoutUserNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    legacyPassword?: LegacyPasswordImportUpdateOneWithoutUserNestedInput
     orders?: OrderUpdateManyWithoutUserNestedInput
     reviews?: ReviewUpdateManyWithoutUserNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutUserNestedInput
@@ -44783,6 +46358,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     emailVerificationTokens?: EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    legacyPassword?: LegacyPasswordImportUncheckedUpdateOneWithoutUserNestedInput
     orders?: OrderUncheckedUpdateManyWithoutUserNestedInput
     reviews?: ReviewUncheckedUpdateManyWithoutUserNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutUserNestedInput
@@ -44950,6 +46526,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
     emailVerificationTokens?: EmailVerificationTokenUpdateManyWithoutUserNestedInput
     passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    legacyPassword?: LegacyPasswordImportUpdateOneWithoutUserNestedInput
     orders?: OrderUpdateManyWithoutUserNestedInput
     reviews?: ReviewUpdateManyWithoutUserNestedInput
     walletTransactions?: WalletTransactionUpdateManyWithoutUserNestedInput
@@ -44979,6 +46556,7 @@ export namespace Prisma {
     refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
     emailVerificationTokens?: EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
     passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    legacyPassword?: LegacyPasswordImportUncheckedUpdateOneWithoutUserNestedInput
     orders?: OrderUncheckedUpdateManyWithoutUserNestedInput
     reviews?: ReviewUncheckedUpdateManyWithoutUserNestedInput
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutUserNestedInput

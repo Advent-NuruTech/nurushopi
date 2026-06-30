@@ -1,0 +1,9 @@
+# Migration tool — never commit secrets or generated reports
+.env
+out/
+*.log
+# Firebase service-account keys, if placed here
+*serviceAccount*.json
+*firebase-adminsdk*.json
+firebase-service-account.json
+firebase-password-hashes.json

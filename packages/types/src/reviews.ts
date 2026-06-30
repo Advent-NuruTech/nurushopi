@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { paginationQuerySchema } from "./catalog.js";
+import { idSchema, paginationQuerySchema } from "./catalog.js";
 
 // ---------------------------------------------------------------------------
 // Product reviews
@@ -26,7 +26,7 @@ const commentSchema = z.string().trim().max(2000, "Comment is too long.");
 /** Customer payload to create a review. */
 export const reviewCreateSchema = z
   .object({
-    productId: z.string().cuid("Invalid product reference."),
+    productId: idSchema,
     rating: ratingSchema,
     comment: commentSchema.optional().nullable(),
   })
@@ -66,8 +66,8 @@ export type ProductReviewQuery = z.infer<typeof productReviewQuerySchema>;
 /** Admin review listing across all products / statuses. */
 export const reviewQuerySchema = paginationQuerySchema.extend({
   status: z.enum(REVIEW_STATUSES).optional(),
-  productId: z.string().cuid().optional(),
-  userId: z.string().cuid().optional(),
+  productId: idSchema.optional(),
+  userId: idSchema.optional(),
   rating: ratingSchema.optional(),
   sort: reviewSortSchema,
 });

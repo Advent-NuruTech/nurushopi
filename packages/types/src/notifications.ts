@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { emailSchema } from "./auth.js";
-import { paginationQuerySchema } from "./catalog.js";
+import { idSchema, paginationQuerySchema } from "./catalog.js";
 
 // ---------------------------------------------------------------------------
 // Engagement: notifications, support messages, contact form
@@ -37,7 +37,7 @@ export type NotificationQuery = z.infer<typeof notificationQuerySchema>;
  */
 export const notificationCreateSchema = z
   .object({
-    recipientId: z.string().cuid("Invalid user reference.").optional().nullable(),
+    recipientId: idSchema.optional().nullable(),
     title: z.string().trim().min(1, "Title is required.").max(160),
     body: z.string().trim().max(2000).optional().nullable(),
     type: z.string().trim().max(40).optional().nullable(),

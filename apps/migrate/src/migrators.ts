@@ -276,8 +276,19 @@ export const ordersMigrator: Migrator = {
       refunded: OrderStatus.REFUNDED,
     };
     for (const d of batch) {
-      const userId = toStr(pick(d.data, "userId"));
-      const resolvedUser = userId && ctx.userIds.has(userId) ? userId : null;
+      // The legacy data named the buyer inconsistently across order docs; check
+      // the known aliases (mirrors the reviews/wallet migrators) so a migrated
+      // order still links to its owner and shows up in their "my orders".
+      const userId = toStr(pick(d.data, "userId", "uid", "customerId", "buyerId", "userUID"));
+      const orderEmail = toStr(pick(d.data, "email", "contactEmail", "userEmail"))?.toLowerCase();
+      // Direct id match first; otherwise fall back to email. Orders placed under
+      // the shop's previous Clerk auth carry ids like `user_xxx` that don't map
+      // to any Firebase uid, so without the email bridge those buyers would
+      // never see their order history.
+      const resolvedUser =
+        userId && ctx.userIds.has(userId)
+          ? userId
+          : (orderEmail && ctx.userIdByEmail.get(orderEmail)) || null;
 
       const items = Array.isArray(d.data.items) ? (d.data.items as Record<string, unknown>[]) : [];
       let computedSubtotal = 0;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -12,21 +12,6 @@ import { useCart } from "@/context/CartContext";
 import FormattedDescription from "@/components/ui/FormattedDescription";
 import { useSabbathStatus } from "@/lib/useSabbathStatus";
 import type { WholesaleCardVM } from "@/lib/view/catalog";
-
-interface Review {
-  id: string;
-  userName: string;
-  message: string;
-  createdAt?: string;
-}
-
-function reviewDate(value: unknown): string {
-  if (!value) return "";
-  if (typeof value === "string" || typeof value === "number") {
-    return new Date(value).toLocaleDateString();
-  }
-  return "";
-}
 
 function getShortDescription(text: string, words = 60): string {
   const parts = text.split(" ");
@@ -47,22 +32,6 @@ export default function WholesaleDetailView({
 
   const [mainImage, setMainImage] = useState(product.images[0]);
   const [isDescriptionOpen, setIsDescriptionOpen] = useState(false);
-  const [reviews, setReviews] = useState<Review[]>([]);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch(`/api/reviews?productId=${encodeURIComponent(product.id)}`)
-      .then((r) => r.json())
-      .then((d) => {
-        if (!cancelled) setReviews(d.reviews ?? []);
-      })
-      .catch(() => {
-        if (!cancelled) setReviews([]);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [product.id]);
 
   const minQty = product.minQuantity > 0 ? product.minQuantity : 1;
 
@@ -194,21 +163,6 @@ export default function WholesaleDetailView({
                   Min: {rel.minQuantity > 0 ? rel.minQuantity : 1} unit
                 </p>
               </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {reviews.length > 0 && (
-        <section className="max-w-6xl mx-auto mt-16">
-          <h2 className="text-xl font-semibold mb-4">What people say about this product</h2>
-          <div className="grid gap-4 md:grid-cols-2">
-            {reviews.map((r) => (
-              <div key={r.id} className="border rounded-xl p-4 bg-white dark:bg-slate-900">
-                <p className="text-sm text-slate-500">{reviewDate(r.createdAt)}</p>
-                <p className="font-semibold text-slate-900 dark:text-white">{r.userName}</p>
-                <p className="text-slate-700 dark:text-slate-300 mt-2">{r.message}</p>
-              </div>
             ))}
           </div>
         </section>

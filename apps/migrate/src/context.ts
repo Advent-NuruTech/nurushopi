@@ -12,6 +12,13 @@
 export interface Context {
   categoryIdBySlug: Map<string, string>;
   userIds: Set<string>;
+  /**
+   * lowercased email -> userId. Used to relink records whose stored userId no
+   * longer resolves directly — notably orders placed under the shop's previous
+   * Clerk auth (ids like `user_xxx`) that don't match the current Firebase uids.
+   * Email is the stable bridge across that auth migration.
+   */
+  userIdByEmail: Map<string, string>;
   productIds: Set<string>;
   adminIds: Set<string>;
 }
@@ -20,6 +27,7 @@ export function emptyContext(): Context {
   return {
     categoryIdBySlug: new Map(),
     userIds: new Set(),
+    userIdByEmail: new Map(),
     productIds: new Set(),
     adminIds: new Set(),
   };

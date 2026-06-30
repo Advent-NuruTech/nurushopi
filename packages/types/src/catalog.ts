@@ -13,6 +13,20 @@ export const slugSchema = z
   .max(140)
   .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug may only contain lowercase letters, numbers and hyphens.");
 
+/**
+ * Entity id accepted in write/query payloads.
+ *
+ * New rows are created with cuid primary keys, but rows imported from the
+ * legacy Firebase data keep their ORIGINAL Firestore/Auth ids — and some carry
+ * synthetic ids such as `cat_<slug>` or `<orderId>__item_<n>`. None of those are
+ * cuids, so enforcing `.cuid()` here would reject every migrated record (e.g.
+ * editing a migrated product would fail with "Invalid request data" because its
+ * `categoryId` is a Firebase id). We therefore accept any reasonable, non-empty
+ * id string. Referential integrity is still guaranteed by the database foreign
+ * keys, not by the id's shape.
+ */
+export const idSchema = z.string().trim().min(1).max(191);
+
 /** Non-negative money amount accepted as a number or numeric string. */
 export const moneySchema = z.coerce
   .number({ invalid_type_error: "Must be a number." })
@@ -80,7 +94,7 @@ export const productCreateSchema = z
     stock: z.coerce.number().int().min(0).default(0),
     isActive: z.coerce.boolean().default(true),
     isFeatured: z.coerce.boolean().default(false),
-    categoryId: z.string().cuid().optional().nullable(),
+    categoryId: idSchema.optional().nullable(),
   })
   .strict();
 export type ProductCreateInput = z.infer<typeof productCreateSchema>;
@@ -96,7 +110,7 @@ export type ProductSort = z.infer<typeof productSortSchema>;
 /** Public product listing filters (merged with pagination). */
 export const productQuerySchema = paginationQuerySchema.extend({
   search: z.string().trim().max(120).optional(),
-  categoryId: z.string().cuid().optional(),
+  categoryId: idSchema.optional(),
   categorySlug: slugSchema.optional(),
   isActive: z.coerce.boolean().optional(),
   isFeatured: z.coerce.boolean().optional(),

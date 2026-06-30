@@ -26,9 +26,17 @@ describe("checkoutSchema", () => {
     expect(checkoutSchema.safeParse({ ...base, items: [] }).success).toBe(false);
   });
 
-  it("rejects a non-cuid productId", () => {
+  it("accepts a legacy (non-cuid) productId but rejects an empty one", () => {
+    // Migrated products keep their original Firebase ids, which are not cuids;
+    // the schema must accept them so legacy items can still be checked out.
     expect(
-      checkoutSchema.safeParse({ ...base, items: [{ productId: "nope", quantity: 1 }] }).success,
+      checkoutSchema.safeParse({
+        ...base,
+        items: [{ productId: "8f3kFireBaseId20chars", quantity: 1 }],
+      }).success,
+    ).toBe(true);
+    expect(
+      checkoutSchema.safeParse({ ...base, items: [{ productId: "", quantity: 1 }] }).success,
     ).toBe(false);
   });
 

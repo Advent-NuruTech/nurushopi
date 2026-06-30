@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { emailSchema } from "./auth.js";
-import { paginationQuerySchema } from "./catalog.js";
+import { idSchema, paginationQuerySchema } from "./catalog.js";
 
 // ---------------------------------------------------------------------------
 // Orders & checkout
@@ -35,7 +35,7 @@ export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
 /** A single line in a checkout request: a product reference + quantity. */
 export const checkoutItemSchema = z
   .object({
-    productId: z.string().cuid("Invalid product reference."),
+    productId: idSchema,
     quantity: z.coerce
       .number({ invalid_type_error: "Quantity must be a number." })
       .int("Quantity must be a whole number.")
@@ -75,7 +75,7 @@ export const orderQuerySchema = paginationQuerySchema.extend({
   status: z.enum(ORDER_STATUSES).optional(),
   paymentStatus: z.enum(PAYMENT_STATUSES).optional(),
   search: z.string().trim().max(120).optional(),
-  userId: z.string().cuid().optional(),
+  userId: idSchema.optional(),
   sort: orderSortSchema,
 });
 export type OrderQuery = z.infer<typeof orderQuerySchema>;

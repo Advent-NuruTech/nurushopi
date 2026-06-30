@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { HERO_DEFAULT_GRADIENT, resolveHeroGradient } from "@/lib/heroGradients";
+import { catalogApi } from "@/lib/api";
 
 type HeroAnnouncement = {
   id: string;
@@ -15,25 +16,23 @@ export default function HeroSection() {
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/hero")
-      .then((r) => r.json())
+    // Active announcements come from the Express API (public catalog endpoint).
+    // The DTO carries the copy in `message`; this marquee renders it as `text`.
+    catalogApi
+      .listHero()
       .then((d) => {
         if (cancelled) return;
-        const list = Array.isArray(d.announcements) ? d.announcements : [];
-        const cleaned = list
-          .map((item: Partial<HeroAnnouncement>, index: number) => ({
-            id: String(item.id ?? `hero-${index}`),
-            text: String(item.text ?? "").trim(),
+        const cleaned = d.announcements
+          .map((item, index) => ({
+            id: item.id,
+            text: (item.message ?? "").trim(),
             gradient: resolveHeroGradient(
-              String(item.gradient ?? "").trim() || HERO_DEFAULT_GRADIENT
+              (item.gradient ?? "").trim() || HERO_DEFAULT_GRADIENT
             ),
-            order:
-              typeof item.order === "number" && Number.isFinite(item.order)
-                ? item.order
-                : index,
+            order: Number.isFinite(item.order) ? item.order : index,
           }))
-          .filter((item: HeroAnnouncement) => item.text.length > 0)
-          .sort((a: HeroAnnouncement, b: HeroAnnouncement) => a.order - b.order);
+          .filter((item) => item.text.length > 0)
+          .sort((a, b) => a.order - b.order);
         setAnnouncements(cleaned);
       })
       .catch(() => {

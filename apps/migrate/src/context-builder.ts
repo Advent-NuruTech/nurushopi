@@ -26,6 +26,7 @@ const COLLECTIONS = {
 export async function buildContext(): Promise<BuiltContext> {
   const ctx = emptyContext();
   const db = firestore();
+  
 
   // --- categories collection -> slug map ---
   const catSnap = await db.collection(COLLECTIONS.categories).get();
@@ -58,19 +59,32 @@ export async function buildContext(): Promise<BuiltContext> {
   );
 
   // --- users (Firestore docs) ---
-  const userSnap = await db.collection(COLLECTIONS.users).select().get();
-  userSnap.docs.forEach((d) => ctx.userIds.add(d.id));
+  // Pull email too so we can build the email -> userId bridge (used to relink
+  // pre-Firebase-auth orders by email). First writer wins for an email so a
+  // Firestore profile id is preferred and the map stays stable across re-runs.
+  const userSnap = await db.collection(COLLECTIONS.users).select("email").get();
+  userSnap.docs.forEach((d) => {
+    ctx.userIds.add(d.id);
+    const email = toStr(pick(d.data(), "email"))?.toLowerCase();
+    if (email && !ctx.userIdByEmail.has(email)) ctx.userIdByEmail.set(email, d.id);
+  });
 
   // --- users (Firebase Auth UIDs) ---
   let authCount = 0;
   let pageToken: string | undefined;
   do {
     const res = await firebaseAuth().listUsers(1000, pageToken);
-    res.users.forEach((u) => ctx.userIds.add(u.uid));
+    res.users.forEach((u) => {
+      ctx.userIds.add(u.uid);
+      const email = u.email?.toLowerCase();
+      if (email && !ctx.userIdByEmail.has(email)) ctx.userIdByEmail.set(email, u.uid);
+    });
     authCount += res.users.length;
     pageToken = res.pageToken;
   } while (pageToken);
-  log.info(`Context: ${ctx.userIds.size} user ids (${authCount} from Auth)`);
+  log.info(
+    `Context: ${ctx.userIds.size} user ids (${authCount} from Auth); ${ctx.userIdByEmail.size} email->id`,
+  );
 
   // --- admins ---
   const adminSnap = await db.collection(COLLECTIONS.admins).select().get();

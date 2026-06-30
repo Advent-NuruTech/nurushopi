@@ -12,6 +12,7 @@ import { useCart } from "@/context/CartContext";
 import { getDiscountPercent, getOriginalPrice, getSellingPrice } from "@/lib/pricing";
 import FormattedDescription from "@/components/ui/FormattedDescription";
 import { useSabbathStatus } from "@/lib/useSabbathStatus";
+import { reviewsApi } from "@/lib/api";
 import type { ProductCardVM, ProductDetailVM } from "@/lib/view/catalog";
 
 interface Review {
@@ -57,10 +58,20 @@ export default function ProductDetailView({
 
   useEffect(() => {
     let cancelled = false;
-    fetch(`/api/reviews?productId=${encodeURIComponent(product.id)}`)
-      .then((r) => r.json())
-      .then((d) => {
-        if (!cancelled) setReviews(d.reviews ?? []);
+    // Approved reviews for this product come from the Express API. The DTO
+    // exposes the body as `comment`; this view renders it as `message`.
+    reviewsApi
+      .listForProduct(product.id)
+      .then((page) => {
+        if (cancelled) return;
+        setReviews(
+          page.items.map((rv) => ({
+            id: rv.id,
+            userName: rv.userName ?? "Anonymous",
+            message: rv.comment ?? "",
+            createdAt: rv.createdAt,
+          })),
+        );
       })
       .catch(() => {
         if (!cancelled) setReviews([]);

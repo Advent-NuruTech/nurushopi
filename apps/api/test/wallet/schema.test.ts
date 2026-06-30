@@ -49,9 +49,11 @@ describe("walletAdjustmentSchema", () => {
     expect(walletAdjustmentSchema.parse({ ...base, type: "DEBIT" }).type).toBe("DEBIT");
   });
 
-  it("rejects an invalid type or non-cuid userId", () => {
+  it("rejects an invalid type or empty userId but accepts a legacy id", () => {
     expect(walletAdjustmentSchema.safeParse({ ...base, type: "BOGUS" }).success).toBe(false);
-    expect(walletAdjustmentSchema.safeParse({ ...base, userId: "nope" }).success).toBe(false);
+    expect(walletAdjustmentSchema.safeParse({ ...base, userId: "" }).success).toBe(false);
+    // Migrated users keep their original Firebase uid (not a cuid).
+    expect(walletAdjustmentSchema.safeParse({ ...base, userId: "FireBaseUid28charslong000000" }).success).toBe(true);
   });
 
   it("rejects a non-positive amount", () => {

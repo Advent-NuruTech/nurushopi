@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { moneySchema, paginationQuerySchema } from "./catalog.js";
+import { idSchema, moneySchema, paginationQuerySchema } from "./catalog.js";
 
 // ---------------------------------------------------------------------------
 // Wallet & referral
@@ -61,14 +61,14 @@ export type ApplyReferralInput = z.infer<typeof applyReferralSchema>;
 export const walletTransactionQuerySchema = paginationQuerySchema.extend({
   type: z.enum(WALLET_TX_TYPES).optional(),
   source: z.enum(WALLET_TX_SOURCES).optional(),
-  userId: z.string().cuid().optional(),
+  userId: idSchema.optional(),
   sort: z.enum(["newest", "oldest"]).default("newest"),
 });
 export type WalletTransactionQuery = z.infer<typeof walletTransactionQuerySchema>;
 
 export const redemptionQuerySchema = paginationQuerySchema.extend({
   status: z.enum(REDEMPTION_STATUSES).optional(),
-  userId: z.string().cuid().optional(),
+  userId: idSchema.optional(),
   sort: z.enum(["newest", "oldest"]).default("newest"),
 });
 export type RedemptionQuery = z.infer<typeof redemptionQuerySchema>;
@@ -84,7 +84,7 @@ export type RedemptionStatusUpdateInput = z.infer<typeof redemptionStatusUpdateS
 /** Admin manual wallet adjustment (always writes a ledger row). */
 export const walletAdjustmentSchema = z
   .object({
-    userId: z.string().cuid("Invalid user reference."),
+    userId: idSchema,
     type: z.enum(WALLET_TX_TYPES),
     amount: positiveAmountSchema,
     note: z.string().trim().max(500).optional().nullable(),

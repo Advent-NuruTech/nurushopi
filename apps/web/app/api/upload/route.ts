@@ -1,13 +1,5 @@
 import { NextResponse } from "next/server";
 
-// --- Validate environment variables ---
-if (
-  !process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ||
-  !process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
-) {
-  throw new Error("❌ Missing Cloudinary unsigned upload environment variables");
-}
-
 // --- Define expected Cloudinary response type ---
 interface CloudinaryUploadResponse {
   secure_url: string;
@@ -22,6 +14,18 @@ interface CloudinaryUploadResponse {
 // --- POST handler for unsigned uploads ---
 export async function POST(req: Request) {
   try {
+    // Validate config at request time (NOT at module load) so `next build`
+    // can collect page data in environments where these vars aren't present.
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+    if (!cloudName || !uploadPreset) {
+      console.error("❌ Missing Cloudinary unsigned upload environment variables");
+      return NextResponse.json(
+        { success: false, error: "Image uploads are not configured." },
+        { status: 500 }
+      );
+    }
+
     const formData = await req.formData();
     const file = formData.get("file");
 
@@ -31,9 +35,6 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
-
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
-    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!;
 
     // Prepare upload form
     const uploadData = new FormData();

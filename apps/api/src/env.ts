@@ -3,7 +3,12 @@ import { z } from "zod";
 
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
-  API_PORT: z.coerce.number().default(4000),
+  // Hosts like Render inject the listening port via PORT; prefer it, then
+  // fall back to an explicit API_PORT, then the local-dev default.
+  API_PORT: z.preprocess(
+    (v) => v ?? process.env.PORT,
+    z.coerce.number().default(4000),
+  ),
 
   WEB_ORIGIN: z.string().default("http://localhost:3000"),
   API_PUBLIC_URL: z.string().url().default("http://localhost:4000"),

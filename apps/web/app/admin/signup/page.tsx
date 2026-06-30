@@ -11,15 +11,20 @@ function AdminSignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const inviteToken = searchParams.get("invite") ?? "";
+  const invitedEmail = (searchParams.get("email") ?? "").trim().toLowerCase();
 
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(invitedEmail);
   const [password, setPassword] = useState("");
   const [seniorCode, setSeniorCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const isSubSignup = !!inviteToken;
+  const isInviteSignup = !!inviteToken;
+  // Lock the email to the invited address when the link carries it: the server
+  // rejects an invite redeemed with any other email, so editing it can only break
+  // the flow. Legacy links without an email param stay editable as a fallback.
+  const lockEmail = isInviteSignup && !!invitedEmail;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,11 +59,11 @@ function AdminSignupForm() {
           <div className="text-center mb-8">
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center justify-center gap-2">
               <UserPlus size={28} />
-              {isSubSignup ? "Sub Admin Signup" : "Create Senior Admin"}
+              {isInviteSignup ? "Accept Admin Invite" : "Create Senior Admin"}
             </h1>
             <p className="text-slate-600 dark:text-slate-400 mt-1">
-              {isSubSignup
-                ? "You were invited to join as Sub Admin. Complete the form below."
+              {isInviteSignup
+                ? "You were invited to join NuruShop. Complete the form below to activate your admin account."
                 : "Register the first admin (Senior) for NuruShop."}
             </p>
           </div>
@@ -98,10 +103,21 @@ function AdminSignupForm() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  readOnly={lockEmail}
+                  aria-readonly={lockEmail}
                   placeholder="admin@nurushop.co.ke"
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                  className={`w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 ${
+                    lockEmail
+                      ? "bg-slate-100 dark:bg-slate-800/60 cursor-not-allowed"
+                      : "bg-white dark:bg-slate-800"
+                  }`}
                 />
               </div>
+              {lockEmail && (
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  This invite is tied to this email address.
+                </p>
+              )}
             </div>
 
             <div>
@@ -122,7 +138,7 @@ function AdminSignupForm() {
               </div>
             </div>
 
-            {!isSubSignup && (
+            {!isInviteSignup && (
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Senior admin code

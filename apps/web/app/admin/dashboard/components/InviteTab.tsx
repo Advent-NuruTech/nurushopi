@@ -26,7 +26,11 @@ export default function InviteTab() {
         return;
       }
       const origin = typeof window !== "undefined" ? window.location.origin : "";
-      setLink(`${origin}${ADMIN_SIGNUP_PATH}?invite=${encodeURIComponent(invite.token)}`);
+      // Carry the canonical invited email so the signup form can prefill and lock
+      // it — the server requires an exact match, so a hand-typed email is the
+      // most common reason an invite fails to redeem.
+      const params = new URLSearchParams({ invite: invite.token, email: invite.email });
+      setLink(`${origin}${ADMIN_SIGNUP_PATH}?${params.toString()}`);
     } catch (err) {
       setError(err instanceof ApiClientError ? err.message : "Failed to generate invite.");
     } finally {

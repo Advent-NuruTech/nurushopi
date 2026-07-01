@@ -1,7 +1,13 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": [".env"],
-  "globalEnv": ["NODE_ENV"],
+  "globalEnv": [
+    "NODE_ENV",
+    "CLERK_SECRET_KEY",
+    "API_INTERNAL_URL",
+    "REVALIDATE_SECRET",
+    "NEXT_PUBLIC_API_URL"
+  ],
   "tasks": {
     "db:generate": {
       "cache": false

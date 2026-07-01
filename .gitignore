@@ -19,6 +19,9 @@ coverage/
 # next.js
 .next/
 out/
+apps/web/public/sw.js
+apps/web/public/workbox-*.js
+apps/web/public/fallback-*.js
 
 # build outputs
 build/
@@ -48,3 +51,4 @@ next-env.d.ts
 
 # prisma
 packages/db/prisma/*.db
+packages/db/generated/client/*.tmp*

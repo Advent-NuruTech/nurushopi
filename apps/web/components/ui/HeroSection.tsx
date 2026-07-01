@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import { ShieldCheck, Truck } from "lucide-react";
 import { HERO_DEFAULT_GRADIENT, resolveHeroGradient } from "@/lib/heroGradients";
 import { catalogApi } from "@/lib/api";
 
@@ -48,55 +49,60 @@ export default function HeroSection() {
     return [...announcements, ...announcements];
   }, [announcements]);
 
-  if (marqueeItems.length === 0) return null;
+  const items =
+    marqueeItems.length > 0
+      ? marqueeItems
+      : [
+          {
+            id: "fallback-1",
+            text: "Fast delivery across Kenya",
+            gradient: "from-emerald-600 via-sky-600 to-blue-700",
+            order: 1,
+          },
+          {
+            id: "fallback-2",
+            text: "Secure checkout and verified products",
+            gradient: "from-blue-700 via-indigo-600 to-emerald-600",
+            order: 2,
+          },
+        ];
 
   return (
     <section
       className="
         relative
         w-full
-        rounded-lg
-        py-3
+        py-2
         px-4
         mt-0
-        mb-4
+        mb-0
         overflow-hidden
-        bg-gradient-to-r
-        from-emerald-50
-        via-white
-        to-sky-50
-        dark:from-gray-900
-        dark:via-gray-950
-        dark:to-gray-900
+        border-b
+        border-slate-200
+        bg-slate-950
+        text-white
       "
     >
-      <div className="absolute top-0 left-0 w-48 h-48 bg-emerald-400/20 dark:bg-emerald-600/10 blur-3xl rounded-full" />
-      <div className="absolute bottom-0 right-0 w-48 h-48 bg-sky-400/20 dark:bg-sky-600/10 blur-3xl rounded-full" />
+      <div className="relative mx-auto flex max-w-7xl items-center gap-4 overflow-hidden text-xs sm:text-sm">
+        <div className="hidden shrink-0 items-center gap-3 font-semibold text-emerald-200 md:flex">
+          <span className="inline-flex items-center gap-1.5">
+            <Truck size={15} /> Nationwide delivery
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <ShieldCheck size={15} /> Buyer protection
+          </span>
+        </div>
 
-      {[...Array(6)].map((_, i) => (
-        <div
-          key={i}
-          className="absolute w-2 h-2 rounded-full bg-black/10 dark:bg-white/10 animate-float"
-          style={{
-            top: `${20 + i * 10}%`,
-            left: `${10 + i * 15}%`,
-            animationDuration: `${(14 + i * 3) * 2}s`,
-          }}
-        />
-      ))}
-
-      <div className="relative max-w-5xl mx-auto flex items-center overflow-hidden py-1">
-        <div className="flex whitespace-nowrap animate-scroll">
-          {marqueeItems.map((item, i) => {
+        <div className="flex min-w-0 flex-1 overflow-hidden">
+          <div className="flex whitespace-nowrap animate-scroll">
+          {items.map((item, i) => {
             const offsetY = Number((Math.sin(i * 2) * 3).toFixed(5));
             return (
               <span
                 key={`${item.id}-${i}`}
                 className={`
-                  mx-24
-                  text-2xl
-                  sm:text-3xl
-                  font-extrabold
+                  mx-10
+                  font-semibold
                   transition-transform
                   duration-300
                   hover:scale-110
@@ -112,6 +118,7 @@ export default function HeroSection() {
               </span>
             );
           })}
+          </div>
         </div>
       </div>
     </section>

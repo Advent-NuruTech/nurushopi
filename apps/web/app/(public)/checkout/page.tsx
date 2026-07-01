@@ -5,7 +5,19 @@ import { useCart } from "@/context/CartContext";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { Minus, Plus, AlertCircle, XCircle } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowRight,
+  CreditCard,
+  Minus,
+  PackageCheck,
+  Plus,
+  ShieldCheck,
+  ShoppingBag,
+  Trash2,
+  Truck,
+  XCircle,
+} from "lucide-react";
 import PhoneInput, { validatePhoneForSubmission } from "@/components/ui/PhoneInput";
 import { useSabbathStatus } from "@/lib/useSabbathStatus";
 import { useAppUser } from "@/context/UserContext";
@@ -296,8 +308,29 @@ function CheckoutContent() {
 
   // -------------------- Render --------------------
   return (
-    <main className="min-h-screen bg-white dark:bg-gray-900 pt-24 pb-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
+    <main className="min-h-screen bg-slate-50 dark:bg-gray-950 pt-24 pb-16 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wide text-blue-700 dark:text-blue-400">
+              Secure checkout
+            </p>
+            <h1 className="mt-2 text-3xl font-black text-slate-950 dark:text-white sm:text-4xl">
+              Review your cart
+            </h1>
+            <p className="mt-2 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
+              Confirm quantities, sign in to save your order, then share delivery details.
+            </p>
+          </div>
+          <Link
+            href="/shop"
+            className="inline-flex w-fit items-center gap-2 rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-blue-300 hover:text-blue-700 dark:border-slate-700 dark:bg-gray-900 dark:text-slate-200"
+          >
+            Continue shopping
+            <ArrowRight size={16} />
+          </Link>
+        </div>
 
        {/* Error Message */}
       {errorMessage && (
@@ -310,37 +343,47 @@ function CheckoutContent() {
           temporarily disabled until {sabbathEndsAt.toLocaleString()}.
         </div>
       )}
-        <h1 className="text-3xl font-bold text-blue-700 mb-8">Checkout</h1>
-
         {cart.length === 0 ? (
-          <p className="text-gray-600">Your cart is empty.</p>
+          <div className="rounded-lg border border-slate-200 bg-white p-10 text-center shadow-sm dark:border-slate-800 dark:bg-gray-900">
+            <ShoppingBag className="mx-auto mb-4 text-slate-400" size={48} />
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Your cart is empty</h2>
+            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+              Add products to your cart before placing an order.
+            </p>
+            <Link
+              href="/shop"
+              className="mt-6 inline-flex items-center gap-2 rounded-md bg-blue-600 px-5 py-3 text-sm font-bold text-white hover:bg-blue-700"
+            >
+              Browse products
+              <ArrowRight size={17} />
+            </Link>
+          </div>
         ) : (
-          <>
+          <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
  {/* Cart Items */}
-            <div className="space-y-5">
+            <div className="space-y-4">
               {cart.map((item) => (
                 <div
                   key={item.id}
-                  className="flex flex-col sm:flex-row justify-between items-center border rounded-lg p-4 shadow-sm hover:shadow-md transition bg-white dark:bg-gray-800"
+                  className="grid gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md dark:border-slate-800 dark:bg-gray-900 sm:grid-cols-[96px_1fr_auto]"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="relative w-20 h-20">
+                    <div className="relative h-24 w-24 overflow-hidden rounded-md bg-slate-50 dark:bg-slate-800">
                       <Image
                         src={item.image || "/assets/logo.jpg"}
                         alt={item.name}
                         fill
-                        className="object-cover rounded-md"
+                        className="object-contain p-2"
                       />
                     </div>
-                    <div>
-                      <p className="font-semibold text-gray-900 dark:text-gray-100">
+                    <div className="min-w-0">
+                      <p className="line-clamp-2 font-semibold text-gray-900 dark:text-gray-100">
                         {item.name}
                       </p>
                       <p className="text-gray-500 text-sm">
                         KSh {item.price.toFixed(2)}
                       </p>
-                      <div className="mt-1 flex items-center gap-2 text-xs">
-                        <span className="text-gray-500 dark:text-gray-400">
+                      <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
+                        <span className="break-all text-gray-500 dark:text-gray-400">
                           Product ID: <code className="font-mono">{item.id}</code>
                         </span>
                         <Link
@@ -353,28 +396,30 @@ function CheckoutContent() {
                       <div className="flex items-center gap-2 mt-2">
                         <button
                           onClick={() => decreaseQuantity(item.id, item.quantity)}
-                          className="px-2 py-1 bg-gray-200 rounded hover:bg-blue-100 text-blue-700 hover:text-blue-300 text-sm"
+                          className="grid h-8 w-8 place-items-center rounded-md bg-gray-100 text-blue-700 hover:bg-blue-100 dark:bg-gray-800"
+                          aria-label="Decrease quantity"
                         >
                           <Minus size={14} />
                         </button>
                         <span className="w-10 text-center">{item.quantity}</span>
                         <button
                           onClick={() => increaseQuantity(item.id, item.quantity)}
-                          className="px-2 py-1 bg-gray-200 rounded hover:bg-blue-100 text-blue-700 hover:text-blue-300 text-sm"
+                          className="grid h-8 w-8 place-items-center rounded-md bg-gray-100 text-blue-700 hover:bg-blue-100 dark:bg-gray-800"
+                          aria-label="Increase quantity"
                         >
                           <Plus size={14} />
                         </button>
                       </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-3 mt-3 sm:mt-0">
-                    <p className="font-semibold text-blue-700">
+                  <div className="flex items-center justify-between gap-3 sm:flex-col sm:items-end">
+                    <p className="font-bold text-blue-700">
                       KSh {(item.price * item.quantity).toFixed(2)}
                     </p>
                     <button
                       onClick={() => removeFromCart(item.id)}
-                      className="text-red-600 hover:underline text-sm"
+                      className="inline-flex items-center gap-1 text-sm font-semibold text-red-600 hover:underline"
                     >
+                      <Trash2 size={15} />
                       Remove
                     </button>
                   </div>
@@ -383,10 +428,26 @@ function CheckoutContent() {
             </div>
 
             {/* Total & Place Order */}
-            <div className="mt-8 border-t pt-6 flex flex-col sm:flex-row items-center justify-between">
-              <p className="text-xl font-semibold">
-                Total: <span className="text-blue-700">KSh {total.toFixed(2)}</span>
-              </p>
+            <aside className="h-fit rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-gray-900">
+              <h2 className="text-lg font-bold text-slate-950 dark:text-white">Order summary</h2>
+              <div className="mt-4 space-y-3 border-b border-slate-200 pb-4 text-sm dark:border-slate-800">
+                <div className="flex justify-between text-slate-600 dark:text-slate-300">
+                  <span>Items</span>
+                  <span>{cart.reduce((count, item) => count + item.quantity, 0)}</span>
+                </div>
+                <div className="flex justify-between text-slate-600 dark:text-slate-300">
+                  <span>Subtotal</span>
+                  <span>KSh {total.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-slate-600 dark:text-slate-300">
+                  <span>Delivery</span>
+                  <span>Confirmed after order</span>
+                </div>
+              </div>
+              <div className="mt-4 flex items-center justify-between">
+                <span className="text-base font-bold text-slate-900 dark:text-white">Total</span>
+                <span className="text-2xl font-black text-blue-700">KSh {total.toFixed(2)}</span>
+              </div>
               <button
                 onClick={() => {
                   if (total <= 0) return;
@@ -403,12 +464,25 @@ function CheckoutContent() {
                   setShowForm(true);
                 }}
                 disabled={sabbathClosed}
-                className="mt-5 sm:mt-0 bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
+                className="mt-5 flex w-full items-center justify-center gap-2 rounded-md bg-orange-500 px-8 py-3 font-bold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Place Order
+                Place order
+                <CreditCard size={18} />
               </button>
-            </div>
-          </>
+              <div className="mt-5 grid gap-3 text-xs text-slate-500 dark:text-slate-400">
+                {[
+                  { icon: ShieldCheck, text: "Secure checkout and saved order history" },
+                  { icon: Truck, text: "Delivery details confirmed by customer care" },
+                  { icon: PackageCheck, text: "WhatsApp order confirmation available" },
+                ].map((item) => (
+                  <div key={item.text} className="flex items-center gap-2">
+                    <item.icon className="text-blue-700 dark:text-blue-400" size={16} />
+                    <span>{item.text}</span>
+                  </div>
+                ))}
+              </div>
+            </aside>
+          </div>
         )}
       </div>
 

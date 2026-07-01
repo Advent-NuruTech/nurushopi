@@ -47,6 +47,14 @@ export interface ProductListResult {
   totalPages: number;
 }
 
+function emptyProductList(pageSize = 0): ProductListResult {
+  return { items: [], page: 1, pageSize, total: 0, totalPages: 0 };
+}
+
+function canRenderStorefrontFallback(err: unknown): boolean {
+  return err instanceof ApiError;
+}
+
 export async function listProducts(
   params: ListProductsParams = {},
 ): Promise<ProductListResult> {
@@ -60,10 +68,19 @@ export async function listProducts(
     sort: params.sort,
   });
 
-  const data = await apiGet<Paginated<ProductDTO>>(`/catalog/products${query}`, {
-    tags: [CacheTags.products],
-    revalidate: Revalidate.short,
-  });
+  let data: Paginated<ProductDTO>;
+  try {
+    data = await apiGet<Paginated<ProductDTO>>(`/catalog/products${query}`, {
+      tags: [CacheTags.products],
+      revalidate: Revalidate.short,
+    });
+  } catch (err) {
+    if (canRenderStorefrontFallback(err)) {
+      console.warn("Catalog products unavailable; rendering an empty storefront section.");
+      return emptyProductList(params.pageSize ?? 0);
+    }
+    throw err;
+  }
 
   return {
     items: data.items.map(toProductCardVM),
@@ -96,6 +113,7 @@ export async function getProduct(idOrSlug: string): Promise<ProductDetailVM | nu
     return toProductDetailVM(product);
   } catch (err) {
     if (err instanceof ApiError && err.isNotFound) return null;
+    if (canRenderStorefrontFallback(err)) return null;
     throw err;
   }
 }
@@ -119,10 +137,19 @@ export interface CategoryVM {
 }
 
 export async function listCategories(withCounts = false): Promise<CategoryVM[]> {
-  const { categories } = await apiGet<{ categories: CategoryDTO[] }>(
-    `/catalog/categories${withCounts ? "?withCounts=true" : ""}`,
-    { tags: [CacheTags.categories], revalidate: Revalidate.default },
-  );
+  let categories: CategoryDTO[];
+  try {
+    ({ categories } = await apiGet<{ categories: CategoryDTO[] }>(
+      `/catalog/categories${withCounts ? "?withCounts=true" : ""}`,
+      { tags: [CacheTags.categories], revalidate: Revalidate.default },
+    ));
+  } catch (err) {
+    if (canRenderStorefrontFallback(err)) {
+      console.warn("Catalog categories unavailable; rendering fallback category navigation.");
+      return [];
+    }
+    throw err;
+  }
   return categories.map((c) => ({
     id: c.id,
     name: c.name,
@@ -132,10 +159,16 @@ export async function listCategories(withCounts = false): Promise<CategoryVM[]> 
 }
 
 export async function listBanners(): Promise<BannerVM[]> {
-  const { banners } = await apiGet<{ banners: BannerDTO[] }>("/catalog/banners", {
-    tags: [CacheTags.banners],
-    revalidate: Revalidate.default,
-  });
+  let banners: BannerDTO[];
+  try {
+    ({ banners } = await apiGet<{ banners: BannerDTO[] }>("/catalog/banners", {
+      tags: [CacheTags.banners],
+      revalidate: Revalidate.default,
+    }));
+  } catch (err) {
+    if (canRenderStorefrontFallback(err)) return [];
+    throw err;
+  }
   return banners.map(toBannerVM);
 }
 
@@ -145,9 +178,15 @@ export async function getBanner(id: string): Promise<BannerVM | null> {
 }
 
 export async function listHeroAnnouncements(): Promise<HeroAnnouncementDTO[]> {
-  const { announcements } = await apiGet<{ announcements: HeroAnnouncementDTO[] }>(
-    "/catalog/hero",
-    { tags: [CacheTags.hero], revalidate: Revalidate.default },
-  );
+  let announcements: HeroAnnouncementDTO[];
+  try {
+    ({ announcements } = await apiGet<{ announcements: HeroAnnouncementDTO[] }>(
+      "/catalog/hero",
+      { tags: [CacheTags.hero], revalidate: Revalidate.default },
+    ));
+  } catch (err) {
+    if (canRenderStorefrontFallback(err)) return [];
+    throw err;
+  }
   return announcements;
 }

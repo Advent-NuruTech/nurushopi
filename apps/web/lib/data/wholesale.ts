@@ -26,6 +26,14 @@ export interface WholesaleListResult {
   totalPages: number;
 }
 
+function emptyWholesaleList(pageSize = 0): WholesaleListResult {
+  return { items: [], page: 1, pageSize, total: 0, totalPages: 0 };
+}
+
+function canRenderStorefrontFallback(err: unknown): boolean {
+  return err instanceof ApiError;
+}
+
 export async function listWholesaleItems(
   params: ListWholesaleParams = {},
 ): Promise<WholesaleListResult> {
@@ -37,10 +45,19 @@ export async function listWholesaleItems(
     sort: params.sort,
   });
 
-  const data = await apiGet<Paginated<WholesaleItemDTO>>(`/wholesale/items${query}`, {
-    tags: [CacheTags.wholesale],
-    revalidate: Revalidate.short,
-  });
+  let data: Paginated<WholesaleItemDTO>;
+  try {
+    data = await apiGet<Paginated<WholesaleItemDTO>>(`/wholesale/items${query}`, {
+      tags: [CacheTags.wholesale],
+      revalidate: Revalidate.short,
+    });
+  } catch (err) {
+    if (canRenderStorefrontFallback(err)) {
+      console.warn("Wholesale items unavailable; rendering an empty storefront section.");
+      return emptyWholesaleList(params.pageSize ?? 0);
+    }
+    throw err;
+  }
 
   return {
     items: data.items.map(toWholesaleCardVM),
@@ -63,6 +80,7 @@ export async function getWholesaleItem(idOrSlug: string): Promise<WholesaleCardV
     return toWholesaleCardVM(item);
   } catch (err) {
     if (err instanceof ApiError && err.isNotFound) return null;
+    if (canRenderStorefrontFallback(err)) return null;
     throw err;
   }
 }

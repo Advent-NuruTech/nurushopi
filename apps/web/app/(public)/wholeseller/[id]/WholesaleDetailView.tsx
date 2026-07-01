@@ -34,9 +34,10 @@ export default function WholesaleDetailView({
   const [isDescriptionOpen, setIsDescriptionOpen] = useState(false);
 
   const minQty = product.minQuantity > 0 ? product.minQuantity : 1;
+  const inStock = product.inStock && product.stock >= minQty;
 
   const handleAddToCart = () => {
-    if (sabbathClosed) return;
+    if (sabbathClosed || !inStock) return;
     addToCart({
       id: product.id,
       name: product.name,
@@ -91,18 +92,30 @@ export default function WholesaleDetailView({
               size="lg"
               variant="outline"
               onClick={handleAddToCart}
-              disabled={sabbathClosed}
+              disabled={sabbathClosed || !inStock}
               className="disabled:cursor-not-allowed"
-              title={sabbathClosed ? "Shopping is paused for Sabbath" : "Add to cart"}
+              title={
+                !inStock
+                  ? "Out of stock"
+                  : sabbathClosed
+                  ? "Shopping is paused for Sabbath"
+                  : "Add to cart"
+              }
             >
-              Add to Cart
+              {inStock ? "Add to Cart" : "Out of Stock"}
             </Button>
             <Button
               size="lg"
               onClick={() => router.push("/checkout" as Route)}
-              disabled={sabbathClosed}
+              disabled={sabbathClosed || !inStock}
               className="disabled:cursor-not-allowed"
-              title={sabbathClosed ? "Shopping is paused for Sabbath" : "Buy now"}
+              title={
+                !inStock
+                  ? "Out of stock"
+                  : sabbathClosed
+                  ? "Shopping is paused for Sabbath"
+                  : "Buy now"
+              }
             >
               Buy Now
             </Button>
@@ -122,6 +135,9 @@ export default function WholesaleDetailView({
               <span className="font-semibold text-slate-900 dark:text-white">
                 {formatPrice(product.unitPrice)}
               </span>
+            </p>
+            <p className={`text-sm font-semibold ${inStock ? "text-green-700" : "text-red-600"}`}>
+              {inStock ? `${product.stock} units in stock` : "Out of stock - ordering is disabled"}
             </p>
           </div>
 

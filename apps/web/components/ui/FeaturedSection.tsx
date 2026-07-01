@@ -21,6 +21,7 @@ interface Product {
   sellingPrice?: number;
   shortDescription?: string;
   description?: string;
+  inStock?: boolean;
   createdAt?: number | string | null;
 }
 
@@ -32,6 +33,7 @@ interface Category {
 interface FeaturedSectionProps {
   products: Product[];
   categories?: Category[];
+  title?: string;
 }
 
 const FEATURED_LIMIT = 8;
@@ -46,7 +48,7 @@ function toMillis(value: Product["createdAt"]): number {
   return 0;
 }
 
-export default function FeaturedSection({ products, categories = [] }: FeaturedSectionProps) {
+export default function FeaturedSection({ products, categories = [], title }: FeaturedSectionProps) {
   const { addToCart } = useCart();
   const { isClosed: sabbathClosed } = useSabbathStatus();
 
@@ -75,7 +77,7 @@ export default function FeaturedSection({ products, categories = [] }: FeaturedS
     .filter((group) => group.items.length > 0);
 
   const handleAddToCart = (product: Product) => {
-    if (sabbathClosed) return;
+    if (sabbathClosed || product.inStock === false) return;
     const sellingPrice = getSellingPrice(product);
     addToCart({
       id: product.id,
@@ -89,22 +91,18 @@ export default function FeaturedSection({ products, categories = [] }: FeaturedS
   return (
     <section className="relative w-full px-0 sm:px-1 py-4 bg-white dark:bg-black transition-colors">
       <div className="flex flex-col gap-14 w-full max-w-7xl mx-auto">
-        {featuredByCategory.map((group) => (
-          <div key={group.category.slug} className="w-full">
+        {title ? (
+          <div className="w-full">
             <div className="mb-5 px-1 sm:px-3">
-              <SectionHeader
-                title={group.category.name || formatCategoryLabel(group.category.slug)}
-                href={`/shop?category=${group.category.slug}`}
-                showViewAll={group.totalCount > FEATURED_LIMIT}
-              />
+              <SectionHeader title={title} href="/shop" showViewAll={false} />
             </div>
-
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
-              {group.items.map((item) => {
+              {products.slice(0, FEATURED_LIMIT).map((item) => {
                 const discountPercent = getDiscountPercent(item);
                 const originalPrice = getOriginalPrice(item);
                 const sellingPrice = getSellingPrice(item);
                 const isNew = Date.now() - toMillis(item.createdAt) <= NEW_WINDOW_MS;
+                const inStock = item.inStock !== false;
 
                 return (
                   <motion.div
@@ -121,6 +119,11 @@ export default function FeaturedSection({ products, categories = [] }: FeaturedS
                     {isNew && (
                       <div className="absolute top-2 left-2 z-10 bg-green-600 text-white text-xs font-semibold px-2 py-1 rounded-full">
                         NEW
+                      </div>
+                    )}
+                    {!inStock && (
+                      <div className="absolute inset-x-2 top-11 z-10 rounded-full bg-slate-900/85 px-2 py-1 text-center text-xs font-semibold text-white">
+                        Out of stock
                       </div>
                     )}
                     <Link href={`/products/${item.id}`} className="flex-grow block">
@@ -158,8 +161,111 @@ export default function FeaturedSection({ products, categories = [] }: FeaturedS
                       </div>
                       <Button
                         size="sm"
-                        disabled={sabbathClosed}
-                        title={sabbathClosed ? "Shopping is paused for Sabbath" : "Add to cart"}
+                        disabled={sabbathClosed || !inStock}
+                        title={
+                          !inStock
+                            ? "Out of stock"
+                            : sabbathClosed
+                            ? "Shopping is paused for Sabbath"
+                            : "Add to cart"
+                        }
+                        className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 disabled:bg-slate-300 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg disabled:cursor-not-allowed"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAddToCart(item);
+                        }}
+                      >
+                        +
+                      </Button>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        ) : featuredByCategory.map((group) => (
+          <div key={group.category.slug} className="w-full">
+            <div className="mb-5 px-1 sm:px-3">
+              <SectionHeader
+                title={group.category.name || formatCategoryLabel(group.category.slug)}
+                href={`/shop?category=${group.category.slug}`}
+                showViewAll={group.totalCount > FEATURED_LIMIT}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
+              {group.items.map((item) => {
+                const discountPercent = getDiscountPercent(item);
+                const originalPrice = getOriginalPrice(item);
+                const sellingPrice = getSellingPrice(item);
+                const isNew = Date.now() - toMillis(item.createdAt) <= NEW_WINDOW_MS;
+                const inStock = item.inStock !== false;
+
+                return (
+                  <motion.div
+                    key={item.id}
+                    whileHover={{ scale: 1.03 }}
+                    transition={{ duration: 0.3 }}
+                    className="relative bg-white dark:bg-gray-900 rounded-xl shadow-md dark:shadow-gray-700 hover:shadow-lg dark:hover:shadow-gray-600 flex flex-col overflow-hidden transition-all duration-300"
+                  >
+                    {discountPercent && (
+                      <div className="absolute top-2 right-2 z-10 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                        {discountPercent}% OFF
+                      </div>
+                    )}
+                    {isNew && (
+                      <div className="absolute top-2 left-2 z-10 bg-green-600 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                        NEW
+                      </div>
+                    )}
+                    {!inStock && (
+                      <div className="absolute inset-x-2 top-11 z-10 rounded-full bg-slate-900/85 px-2 py-1 text-center text-xs font-semibold text-white">
+                        Out of stock
+                      </div>
+                    )}
+                    <Link href={`/products/${item.id}`} className="flex-grow block">
+                      <div className="relative w-full h-40 sm:h-56 bg-white dark:bg-gray-800">
+                        <Image
+                          src={item.image}
+                          alt={item.name}
+                          fill
+                          className="object-contain"
+                          sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+                        />
+                      </div>
+
+                      <div className="p-3 text-center">
+                        <h4 className="font-semibold text-black dark:text-white text-sm sm:text-base line-clamp-1">
+                          {item.name}
+                        </h4>
+                        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
+                          {item.shortDescription ||
+                            "A premium item to uplift your faith and wellbeing."}
+                        </p>
+                      </div>
+                    </Link>
+
+                    <div className="flex justify-between items-center px-3 pb-3">
+                      <div className="flex flex-col">
+                        {discountPercent && originalPrice && (
+                          <span className="text-xs text-gray-400 line-through">
+                            {formatPrice(originalPrice)}
+                          </span>
+                        )}
+                        <span className="text-blue-600 dark:text-blue-400 font-bold text-sm">
+                          {formatPrice(sellingPrice)}
+                        </span>
+                      </div>
+                      <Button
+                        size="sm"
+                        disabled={sabbathClosed || !inStock}
+                        title={
+                          !inStock
+                            ? "Out of stock"
+                            : sabbathClosed
+                            ? "Shopping is paused for Sabbath"
+                            : "Add to cart"
+                        }
                         className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 disabled:bg-slate-300 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg disabled:cursor-not-allowed"
                         onClick={(e) => {
                           e.stopPropagation();

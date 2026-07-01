@@ -21,6 +21,7 @@ interface ProductFormData {
   name: string;
   price: number | "";
   originalPrice: number | "";
+  stock: number | "";
   description: string;
   categoryId: string;
   files: FileList | null;
@@ -31,6 +32,7 @@ export default function UploadProductPage() {
     name: "",
     price: "",
     originalPrice: "",
+    stock: "",
     description: "",
     categoryId: "",
     files: null
@@ -139,7 +141,7 @@ export default function UploadProductPage() {
         shortDescription: formData.description.slice(0, 160) || null,
         categoryId: formData.categoryId || null,
         images: uploaded.slice(0, 3), // API accepts up to 3; first is the cover
-        stock: 0,
+        stock: formData.stock === "" ? 0 : Number(formData.stock),
         isActive: true,
         isFeatured: false,
       });
@@ -161,6 +163,7 @@ export default function UploadProductPage() {
       name: "",
       price: "",
       originalPrice: "",
+      stock: "",
       description: "",
       categoryId: "",
       files: null
@@ -323,6 +326,34 @@ export default function UploadProductPage() {
                 </span>
               </div>
             )}
+          </div>
+
+          {/* Category */}
+          <div>
+            <label className={`font-semibold mb-2 block ${
+              darkMode ? "text-gray-300" : "text-gray-700"
+            }`}>
+              Quantity in Stock
+            </label>
+            <input
+              type="number"
+              min={0}
+              value={formData.stock}
+              onChange={e =>
+                setFormData({
+                  ...formData,
+                  stock: e.target.value === "" ? "" : Number(e.target.value)
+                })
+              }
+              className={`w-full p-3 rounded transition-colors duration-300 ${
+                darkMode
+                  ? "bg-gray-700 border-gray-600 text-gray-100 focus:border-blue-500 focus:ring-blue-500"
+                  : "border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+              } border focus:outline-none focus:ring-2`}
+            />
+            <p className={`text-sm mt-2 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
+              When stock reaches 0, customers cannot order this product.
+            </p>
           </div>
 
           {/* Category */}

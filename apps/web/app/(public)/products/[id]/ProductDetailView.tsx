@@ -12,8 +12,8 @@ import { useCart } from "@/context/CartContext";
 import { getDiscountPercent, getOriginalPrice, getSellingPrice } from "@/lib/pricing";
 import FormattedDescription from "@/components/ui/FormattedDescription";
 import { useSabbathStatus } from "@/lib/useSabbathStatus";
-import { reviewsApi } from "@/lib/api";
-import type { ProductCardVM, ProductDetailVM } from "@/lib/view/catalog";
+import { catalogApi, reviewsApi } from "@/lib/api";
+import { toProductCardVM, type ProductCardVM, type ProductDetailVM } from "@/lib/view/catalog";
 
 interface Review {
   id: string;
@@ -55,6 +55,7 @@ export default function ProductDetailView({
   const [mainImage, setMainImage] = useState(product.images[0]);
   const [isDescriptionOpen, setIsDescriptionOpen] = useState(false);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [recommendations, setRecommendations] = useState<ProductCardVM[]>(related);
 
   useEffect(() => {
     let cancelled = false;
@@ -81,8 +82,29 @@ export default function ProductDetailView({
     };
   }, [product.id]);
 
+  useEffect(() => {
+    let sessionId = localStorage.getItem("nurushop-view-session");
+    if (!sessionId) {
+      sessionId = crypto.randomUUID();
+      localStorage.setItem("nurushop-view-session", sessionId);
+    }
+    void catalogApi.recordProductView(product.id, sessionId).catch(() => undefined);
+    let cancelled = false;
+    catalogApi
+      .recommendProducts({ productId: product.id, limit: 8 })
+      .then(({ products }) => {
+        if (!cancelled && products.length > 0) {
+          setRecommendations(products.map(toProductCardVM));
+        }
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [product.id]);
+
   const handleAddToCart = () => {
-    if (sabbathClosed) return;
+    if (sabbathClosed || !product.inStock) return;
     addToCart({
       id: product.id,
       name: product.name,
@@ -148,18 +170,30 @@ export default function ProductDetailView({
               size="lg"
               variant="outline"
               onClick={handleAddToCart}
-              disabled={sabbathClosed}
+              disabled={sabbathClosed || !product.inStock}
               className="disabled:cursor-not-allowed"
-              title={sabbathClosed ? "Shopping is paused for Sabbath" : "Add to cart"}
+              title={
+                !product.inStock
+                  ? "Out of stock"
+                  : sabbathClosed
+                  ? "Shopping is paused for Sabbath"
+                  : "Add to cart"
+              }
             >
-              Add to Cart
+              {product.inStock ? "Add to Cart" : "Out of Stock"}
             </Button>
 
             <Button
               size="lg"
-              disabled={sabbathClosed}
+              disabled={sabbathClosed || !product.inStock}
               className="disabled:cursor-not-allowed"
-              title={sabbathClosed ? "Shopping is paused for Sabbath" : "Buy now"}
+              title={
+                !product.inStock
+                  ? "Out of stock"
+                  : sabbathClosed
+                  ? "Shopping is paused for Sabbath"
+                  : "Buy now"
+              }
               onClick={() => router.push("/checkout" as Route)}
             >
               Buy Now
@@ -168,6 +202,9 @@ export default function ProductDetailView({
 
           <div>
             <h1 className="text-3xl font-bold">{product.name}</h1>
+            <p className={`mt-2 text-sm font-medium ${product.inStock ? "text-green-700" : "text-red-600"}`}>
+              {product.inStock ? "In stock" : "Out of stock - ordering is disabled"}
+            </p>
           </div>
 
           <section className="pt-6 border-t">
@@ -220,11 +257,11 @@ export default function ProductDetailView({
         </section>
       )}
 
-      {related.length > 0 && (
+      {recommendations.length > 0 && (
         <section className="max-w-6xl mx-auto mt-16">
-          <h2 className="text-xl font-semibold mb-6">Related Products</h2>
+          <h2 className="text-xl font-semibold mb-6">You may also like</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
-            {related.map((rel) => {
+            {recommendations.map((rel) => {
               const relDiscount = getDiscountPercent(rel);
               const relOriginal = getOriginalPrice(rel);
               const relSelling = getSellingPrice(rel);

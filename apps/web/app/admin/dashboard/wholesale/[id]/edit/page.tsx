@@ -14,6 +14,7 @@ interface WholesaleForm {
   description: string;
   unitPrice: number;
   minQuantity: number;
+  stock: number;
   images: string[];
 }
 
@@ -42,6 +43,7 @@ export default function WholesaleEditPage() {
           description: i.description ?? "",
           unitPrice: Number(i.unitPrice),
           minQuantity: i.minQuantity,
+          stock: i.stock,
           images: i.images,
         }),
       )
@@ -107,6 +109,7 @@ export default function WholesaleEditPage() {
         description: item.description || null,
         unitPrice: item.unitPrice,
         minQuantity: item.minQuantity,
+        stock: item.stock,
         images: item.images.slice(0, 3),
       });
       setFeedback({ type: "success", text: "Wholesale item updated successfully." });
@@ -182,6 +185,20 @@ export default function WholesaleEditPage() {
           onChange={(e) => update("minQuantity", Number(e.target.value))}
           placeholder="Minimum Order Quantity"
         />
+
+        <input
+          className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 p-3 rounded"
+          type="number"
+          min={0}
+          value={item.stock}
+          onChange={(e) => update("stock", Math.max(0, Number(e.target.value)))}
+          placeholder="Quantity in stock"
+        />
+        <p className={`text-sm font-medium ${item.stock > 0 ? "text-green-700" : "text-red-600"}`}>
+          {item.stock > 0
+            ? `${item.stock} in stock`
+            : "Out of stock - ordering is disabled and admins will be notified"}
+        </p>
 
         <textarea
           className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 p-3 rounded"

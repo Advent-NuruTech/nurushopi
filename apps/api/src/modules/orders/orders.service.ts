@@ -159,6 +159,18 @@ export async function checkout(input: CheckoutInput, userId?: string): Promise<O
       if (res.count === 0) {
         throw Errors.conflict(`"${product.name}" just went out of stock.`);
       }
+      if (product.stock - quantity === 0) {
+        await tx.notification.create({
+          data: {
+            recipientType: "ADMIN",
+            recipientId: null,
+            title: "Product out of stock",
+            body: `${product.name} is now out of stock.`,
+            type: "inventory",
+            relatedId: product.id,
+          },
+        });
+      }
     }
 
     // Decide how much wallet credit to apply — server-side only. The amount is
@@ -195,6 +207,16 @@ export async function checkout(input: CheckoutInput, userId?: string): Promise<O
     // Deduct the applied credit from the wallet ledger, atomically with the order.
     if (userId && walletApplied.greaterThan(0)) {
       await debitWallet(tx, userId, walletApplied, "REDEEM", { orderId: created.id });
+    }
+    if (userId) {
+      await tx.user.update({
+        where: { id: userId },
+        data: {
+          name: input.contactName.trim() || undefined,
+          phone: input.contactPhone.trim() || undefined,
+          address: input.address.trim() || undefined,
+        },
+      });
     }
     // Pay a referrer once their referred user makes their first purchase.
     if (userId) await rewardReferralOnFirstOrder(tx, userId);

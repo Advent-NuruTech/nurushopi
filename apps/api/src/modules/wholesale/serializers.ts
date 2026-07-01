@@ -11,6 +11,8 @@ export function toWholesaleItemDTO(w: WholesaleItem): WholesaleItemDTO {
     description: w.description,
     unitPrice: w.unitPrice.toString(),
     minQuantity: w.minQuantity,
+    stock: w.stock,
+    inStock: w.stock > 0,
     images: w.images,
     isActive: w.isActive,
     createdAt: toIso(w.createdAt),

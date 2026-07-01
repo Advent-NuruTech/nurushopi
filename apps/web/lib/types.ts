@@ -16,6 +16,8 @@ export interface Product {
   originalPrice?: number;
   sellingPrice?: number;
   images: string[]; // Up to 3 images per product
+  stock?: number;
+  inStock?: boolean;
   
   category: string;
   slug?: string;

@@ -34,10 +34,11 @@ export default function ProductCard({ product }: { product: Product }) {
       ? Date.parse(product.createdAt)
       : 0;
   const isNew = Number.isFinite(createdAtMs) && createdAtMs > 0 && Date.now() - createdAtMs <= 7 * 24 * 60 * 60 * 1000;
+  const inStock = product.inStock ?? (product.stock ?? 1) > 0;
 
   // ✅ Handle add to cart
   const handleAddToCart = () => {
-    if (sabbathClosed) return;
+    if (sabbathClosed || !inStock) return;
     addToCart({
       id: product.id,
       name: product.name,
@@ -69,6 +70,11 @@ export default function ProductCard({ product }: { product: Product }) {
       {isNew && (
         <div className="absolute top-2 left-2 z-10 bg-green-600 text-white text-xs font-semibold px-2 py-1 rounded-full">
           NEW
+        </div>
+      )}
+      {!inStock && (
+        <div className="absolute inset-x-2 top-11 z-10 rounded-full bg-slate-900/85 px-2 py-1 text-center text-xs font-semibold text-white">
+          Out of stock
         </div>
       )}
       {/* ✅ Product Link */}
@@ -111,8 +117,14 @@ export default function ProductCard({ product }: { product: Product }) {
 
         <Button
           size="sm"
-          disabled={sabbathClosed}
-          title={sabbathClosed ? "Shopping is paused for Sabbath" : "Add to cart"}
+          disabled={sabbathClosed || !inStock}
+          title={
+            !inStock
+              ? "Out of stock"
+              : sabbathClosed
+              ? "Shopping is paused for Sabbath"
+              : "Add to cart"
+          }
           className="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white rounded-full w-8 h-8 flex items-center justify-center disabled:cursor-not-allowed"
           onClick={(e) => {
             e.stopPropagation();

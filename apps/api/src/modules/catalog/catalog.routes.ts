@@ -1,13 +1,16 @@
 import { Router } from "express";
 import { asyncHandler } from "../../lib/asyncHandler.js";
 import { requireAdmin } from "../../middleware/requireAdmin.js";
+import { optionalAuth } from "../../middleware/optionalAuth.js";
 import * as ctrl from "./catalog.controller.js";
 
 /** Public, read-only catalog endpoints mounted at /api/v1/catalog. */
 export const catalogPublicRouter: Router = Router();
 
 catalogPublicRouter.get("/products", asyncHandler(ctrl.listProducts));
+catalogPublicRouter.get("/products/recommendations", optionalAuth, asyncHandler(ctrl.recommendProducts));
 catalogPublicRouter.get("/products/:id", asyncHandler(ctrl.getProduct));
+catalogPublicRouter.post("/products/:id/view", optionalAuth, asyncHandler(ctrl.recordProductView));
 catalogPublicRouter.get("/categories", asyncHandler(ctrl.listCategories));
 catalogPublicRouter.get("/categories/:id", asyncHandler(ctrl.getCategory));
 catalogPublicRouter.get("/banners", asyncHandler(ctrl.listBanners));

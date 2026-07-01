@@ -27,7 +27,7 @@ import {
  * and a single `revalidateTag` purges all pages that depend on the data.
  */
 
-export type ProductSort = "newest" | "oldest" | "price_asc" | "price_desc" | "name";
+export type ProductSort = "newest" | "oldest" | "price_asc" | "price_desc" | "name" | "most_viewed_today";
 
 export interface ListProductsParams {
   page?: number;

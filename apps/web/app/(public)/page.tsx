@@ -33,21 +33,24 @@ function toFeaturedProduct(p: ProductCardVM) {
     originalPrice: p.originalPrice,
     sellingPrice: p.sellingPrice,
     shortDescription: p.shortDescription ?? undefined,
+    inStock: p.inStock,
     createdAt: p.createdAtMs,
   };
 }
 
 export default async function HomePage() {
-  const [productsResult, categories, newArrivals, banners, wholesaleResult] =
+  const [productsResult, categories, newArrivals, banners, wholesaleResult, mostViewedResult] =
     await Promise.all([
       listProducts({ pageSize: 60, sort: "newest" }),
       listCategories(),
       listNewArrivals(12),
       listBanners(),
       listWholesaleItems({ pageSize: 12, sort: "newest" }),
+      listProducts({ pageSize: 12, sort: "most_viewed_today", inStock: true }),
     ]);
 
   const featuredProducts = productsResult.items.map(toFeaturedProduct);
+  const mostViewed = mostViewedResult.items.map(toFeaturedProduct);
   const categoryOptions = categories.map((c) => ({ name: c.name, slug: c.slug }));
   const wholesaleProducts = wholesaleResult.items;
 
@@ -56,6 +59,10 @@ export default async function HomePage() {
       <HeroSection />
       <SabbathExperience />
       <NewArrivals products={newArrivals} />
+
+      {mostViewed.length > 0 && (
+        <FeaturedSection products={mostViewed} categories={categoryOptions} title="Most Viewed Today" />
+      )}
 
       <FeaturedHero products={featuredProducts} categories={categoryOptions} />
 

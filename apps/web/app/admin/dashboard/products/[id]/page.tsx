@@ -14,6 +14,7 @@ interface ProductForm {
   name: string;
   price: number;
   originalPrice: number | null;
+  stock: number;
   categoryId: string | null;
   description: string;
   shortDescription: string;
@@ -45,6 +46,7 @@ export default function ProductEditPage() {
           name: p.name,
           price: Number(p.sellingPrice ?? p.price),
           originalPrice: p.originalPrice != null ? Number(p.originalPrice) : null,
+          stock: p.stock,
           categoryId: p.categoryId,
           description: p.description ?? "",
           shortDescription: p.shortDescription ?? "",
@@ -124,6 +126,7 @@ export default function ProductEditPage() {
         price: product.price,
         sellingPrice: product.price,
         originalPrice: product.originalPrice,
+        stock: product.stock,
         categoryId: product.categoryId,
         description: product.description || null,
         shortDescription: product.shortDescription || null,
@@ -213,6 +216,20 @@ export default function ProductEditPage() {
             updateField("originalPrice", e.target.value === "" ? null : Number(e.target.value))
           }
         />
+
+        <input
+          className="w-full border p-3 rounded"
+          type="number"
+          min={0}
+          placeholder="Quantity in stock"
+          value={product.stock}
+          onChange={(e) => updateField("stock", Math.max(0, Number(e.target.value)))}
+        />
+        <p className={`text-sm font-medium ${product.stock > 0 ? "text-green-700" : "text-red-600"}`}>
+          {product.stock > 0
+            ? `${product.stock} in stock`
+            : "Out of stock - ordering is disabled and admins will be notified"}
+        </p>
 
         <div className="text-sm text-gray-600 flex items-center gap-3">
           {discountPercent ? (

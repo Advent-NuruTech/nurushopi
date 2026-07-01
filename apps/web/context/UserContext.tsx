@@ -9,6 +9,8 @@ interface AppUser {
   name: string | null;
   email: string | null;
   imageUrl?: string | null;
+  phone: string | null;
+  address: string | null;
   emailVerified: boolean;
   walletBalance: string;
   referralCode: string | null;
@@ -30,6 +32,8 @@ function toAppUser(authUser: AuthUser): AppUser {
     name: authUser.name,
     email: authUser.email,
     imageUrl: authUser.avatarUrl,
+    phone: authUser.phone,
+    address: authUser.address,
     emailVerified: authUser.emailVerified,
     walletBalance: authUser.walletBalance,
     referralCode: authUser.referralCode,

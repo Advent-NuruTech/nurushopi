@@ -58,6 +58,11 @@ function ProductCard({
             </span>
           )}
         </div>
+        {!product.inStock && (
+          <div className="absolute inset-x-2 bottom-2 rounded-full bg-slate-900/85 px-2 py-1 text-center text-xs font-semibold text-white">
+            Out of stock
+          </div>
+        )}
       </div>
 
       <div className="p-3 sm:p-4 flex flex-col flex-1">

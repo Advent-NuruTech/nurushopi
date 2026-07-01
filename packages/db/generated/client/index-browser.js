@@ -287,6 +287,7 @@ exports.Prisma.WholesaleItemScalarFieldEnum = {
   description: 'description',
   unitPrice: 'unitPrice',
   minQuantity: 'minQuantity',
+  stock: 'stock',
   images: 'images',
   isActive: 'isActive',
   createdAt: 'createdAt',
@@ -330,6 +331,14 @@ exports.Prisma.ReviewScalarFieldEnum = {
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ProductViewScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  userId: 'userId',
+  sessionId: 'sessionId',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.WalletTransactionScalarFieldEnum = {
@@ -551,6 +560,7 @@ exports.Prisma.ModelName = {
   Order: 'Order',
   OrderItem: 'OrderItem',
   Review: 'Review',
+  ProductView: 'ProductView',
   WalletTransaction: 'WalletTransaction',
   WalletRedemption: 'WalletRedemption',
   Referral: 'Referral',

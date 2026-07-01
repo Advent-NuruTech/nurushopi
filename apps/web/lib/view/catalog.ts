@@ -91,6 +91,8 @@ export interface WholesaleCardVM {
   images: string[];
   unitPrice: number;
   minQuantity: number;
+  stock: number;
+  inStock: boolean;
   description: string | null;
 }
 
@@ -105,6 +107,8 @@ export function toWholesaleCardVM(w: WholesaleItemDTO): WholesaleCardVM {
     images: w.images.length > 0 ? w.images : [FALLBACK_IMAGE],
     unitPrice: money(w.unitPrice),
     minQuantity: w.minQuantity,
+    stock: w.stock,
+    inStock: w.inStock,
     description: w.description,
   };
 }

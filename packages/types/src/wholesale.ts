@@ -21,6 +21,7 @@ export const wholesaleItemCreateSchema = z
       .min(1, "Minimum quantity must be at least 1.")
       .max(1_000_000, "Minimum quantity is too large.")
       .default(1),
+    stock: z.coerce.number().int().min(0).default(0),
     images: z.array(z.string().url("Each image must be a valid URL.")).max(3).default([]),
     isActive: z.coerce.boolean().default(true),
   })
@@ -42,6 +43,7 @@ export const wholesaleItemQuerySchema = paginationQuerySchema.extend({
   minPrice: moneySchema.optional(),
   maxPrice: moneySchema.optional(),
   minQuantity: z.coerce.number().int().min(1).optional(),
+  inStock: z.coerce.boolean().optional(),
   sort: wholesaleSortSchema,
 });
 export type WholesaleItemQuery = z.infer<typeof wholesaleItemQuerySchema>;
@@ -54,6 +56,8 @@ export interface WholesaleItemDTO {
   /** Decimal serialised as a string to avoid float precision loss. */
   unitPrice: string;
   minQuantity: number;
+  stock: number;
+  inStock: boolean;
   images: string[];
   isActive: boolean;
   createdAt: string;

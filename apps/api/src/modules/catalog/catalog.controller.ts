@@ -9,6 +9,7 @@ import {
   productCreateSchema,
   productQuerySchema,
   productUpdateSchema,
+  productViewSchema,
 } from "@nuru/types";
 import { sendOk } from "../../lib/response.js";
 import { Errors } from "../../lib/errors.js";
@@ -59,6 +60,28 @@ export async function listProducts(req: Request, res: Response): Promise<void> {
 
 export async function getProduct(req: Request, res: Response): Promise<void> {
   sendOk(res, { product: await products.getByIdOrSlug(idParam(req), { activeOnly: true }) });
+}
+
+export async function recordProductView(req: Request, res: Response): Promise<void> {
+  const input = productViewSchema.parse(req.body ?? {});
+  await products.recordView(idParam(req), req.user?.sub, input.sessionId);
+  sendOk(res, { success: true }, 201);
+}
+
+export async function recommendProducts(req: Request, res: Response): Promise<void> {
+  const productId =
+    typeof req.query.productId === "string" && req.query.productId.trim()
+      ? req.query.productId.trim()
+      : undefined;
+  const limit =
+    typeof req.query.limit === "string" ? Number.parseInt(req.query.limit, 10) : undefined;
+  sendOk(res, {
+    products: await products.recommendations({
+      userId: req.user?.sub,
+      productIdOrSlug: productId,
+      limit: Number.isFinite(limit) ? limit : undefined,
+    }),
+  });
 }
 
 export async function adminListProducts(req: Request, res: Response): Promise<void> {

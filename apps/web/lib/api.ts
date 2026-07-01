@@ -76,6 +76,7 @@ type WholesaleQuery = Partial<{
   minPrice: number;
   maxPrice: number;
   minQuantity: number;
+  inStock: boolean;
   sort: "newest" | "oldest" | "price_asc" | "price_desc" | "name";
 }>;
 
@@ -120,7 +121,7 @@ type ProductQuery = Partial<{
   minPrice: number;
   maxPrice: number;
   inStock: boolean;
-  sort: "newest" | "oldest" | "price_asc" | "price_desc" | "name";
+  sort: "newest" | "oldest" | "price_asc" | "price_desc" | "name" | "most_viewed_today";
 }>;
 
 const API_URL =
@@ -243,8 +244,14 @@ export const catalogApi = {
   // Public reads
   listProducts: (query: ProductQuery = {}) =>
     api.get<Paginated<ProductDTO>>(`/catalog/products${qs(query)}`),
+  recommendProducts: (query: Partial<{ productId: string; limit: number }> = {}) =>
+    api.get<{ products: ProductDTO[] }>(`/catalog/products/recommendations${qs(query)}`),
   getProduct: (idOrSlug: string) =>
     api.get<{ product: ProductDTO }>(`/catalog/products/${encodeURIComponent(idOrSlug)}`),
+  recordProductView: (idOrSlug: string, sessionId?: string | null) =>
+    api.post<{ success: boolean }>(`/catalog/products/${encodeURIComponent(idOrSlug)}/view`, {
+      sessionId,
+    }),
   listCategories: (withCounts = false) =>
     api.get<{ categories: CategoryDTO[] }>(`/catalog/categories${withCounts ? "?withCounts=true" : ""}`),
   getCategory: (idOrSlug: string) =>

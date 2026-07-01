@@ -22,6 +22,7 @@ interface WholesaleFormData {
   retailPrice: number | "";
   wholesalePrice: number | "";
   wholesaleMinQty: number | "";
+  stock: number | "";
   wholesaleUnit: string;
   description: string;
   category: string;
@@ -42,6 +43,7 @@ export default function UploadWholesalePage() {
     retailPrice: "",
     wholesalePrice: "",
     wholesaleMinQty: "",
+    stock: "",
     wholesaleUnit: "",
     description: "",
     category: "",
@@ -113,6 +115,7 @@ export default function UploadWholesalePage() {
       retailPrice: "",
       wholesalePrice: "",
       wholesaleMinQty: "",
+      stock: "",
       wholesaleUnit: "",
       description: "",
       category: "",
@@ -174,6 +177,7 @@ export default function UploadWholesalePage() {
         description: formData.description.trim() || null,
         unitPrice: Number(formData.wholesalePrice),
         minQuantity: Number(formData.wholesaleMinQty) || 1,
+        stock: formData.stock === "" ? 0 : Number(formData.stock),
         images: uploaded.slice(0, 3),
         isActive: true,
       });
@@ -277,6 +281,24 @@ export default function UploadWholesalePage() {
                 }
                 className="w-full rounded border border-slate-300 bg-white p-3 text-slate-900 outline-none ring-sky-500 focus:ring-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
               />
+            </div>
+            <div>
+              <label className="mb-2 block font-semibold">Quantity in Stock</label>
+              <input
+                type="number"
+                min={0}
+                value={formData.stock}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    stock: e.target.value === "" ? "" : Number(e.target.value),
+                  }))
+                }
+                className="w-full rounded border border-slate-300 bg-white p-3 text-slate-900 outline-none ring-sky-500 focus:ring-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+              />
+              <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                When stock reaches 0, customers cannot order this wholesale item.
+              </p>
             </div>
           </div>
 

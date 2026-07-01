@@ -74,10 +74,18 @@ function CheckoutContent() {
   // Prefill contact details from the signed-in user.
   useEffect(() => {
     if (!user) return;
+    const addressParts = (user.address ?? "")
+      .split(",")
+      .map((part) => part.trim())
+      .filter(Boolean);
     setFormData((prev) => ({
       ...prev,
       email: user.email ?? prev.email,
       name: prev.name || user.name || prev.name,
+      phone: prev.phone || user.phone || prev.phone,
+      locality: prev.locality || addressParts.slice(0, -2).join(", ") || addressParts[0] || "",
+      county: prev.county || addressParts.at(-2) || "",
+      country: prev.country || addressParts.at(-1) || "",
     }));
   }, [user]);
 
@@ -104,11 +112,18 @@ function CheckoutContent() {
   useEffect(() => {
     let cancelled = false;
     catalogApi
-      .listProducts({ sort: "newest", pageSize: 4 })
+      .recommendProducts({ limit: 4 })
       .then((res) => {
-        if (!cancelled) setRelatedProducts(res.items.map(toRelated));
+        if (!cancelled) setRelatedProducts(res.products.map(toRelated));
       })
-      .catch((err) => console.error("Error fetching products:", err));
+      .catch(() =>
+        catalogApi
+          .listProducts({ sort: "most_viewed_today", pageSize: 4, inStock: true })
+          .then((res) => {
+            if (!cancelled) setRelatedProducts(res.items.map(toRelated));
+          })
+          .catch((err) => console.error("Error fetching products:", err)),
+      );
     return () => {
       cancelled = true;
     };

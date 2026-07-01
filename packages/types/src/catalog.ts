@@ -103,7 +103,7 @@ export const productUpdateSchema = productCreateSchema.partial();
 export type ProductUpdateInput = z.infer<typeof productUpdateSchema>;
 
 export const productSortSchema = z
-  .enum(["newest", "oldest", "price_asc", "price_desc", "name"])
+  .enum(["newest", "oldest", "price_asc", "price_desc", "name", "most_viewed_today"])
   .default("newest");
 export type ProductSort = z.infer<typeof productSortSchema>;
 
@@ -141,6 +141,13 @@ export interface ProductDTO {
   createdAt: string;
   updatedAt: string;
 }
+
+export const productViewSchema = z
+  .object({
+    sessionId: z.string().trim().min(1).max(191).optional().nullable(),
+  })
+  .strict();
+export type ProductViewInput = z.infer<typeof productViewSchema>;
 
 // ---------------------------------------------------------------------------
 // Banners

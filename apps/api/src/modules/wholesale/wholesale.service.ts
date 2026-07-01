@@ -7,6 +7,7 @@ import type {
   WholesaleItemUpdateInput,
 } from "@nuru/types";
 import { Errors } from "../../lib/errors.js";
+import { deleteCloudinaryImages } from "../../lib/cloudinary.js";
 import { uniqueSlug } from "../../lib/slug.js";
 import { toWholesaleItemDTO } from "./serializers.js";
 
@@ -28,6 +29,7 @@ function buildWhere(
   else if (query.isActive !== undefined) where.isActive = query.isActive;
 
   if (query.minQuantity !== undefined) where.minQuantity = { gte: query.minQuantity };
+  if (query.inStock) where.stock = { gt: 0 };
 
   if (query.minPrice !== undefined || query.maxPrice !== undefined) {
     where.unitPrice = {
@@ -111,6 +113,7 @@ export async function create(input: WholesaleItemCreateInput) {
       description: input.description ?? null,
       unitPrice: input.unitPrice,
       minQuantity: input.minQuantity ?? 1,
+      stock: input.stock ?? 0,
       images: input.images ?? [],
       isActive: input.isActive ?? true,
     },
@@ -136,16 +139,35 @@ export async function update(id: string, input: WholesaleItemUpdateInput) {
       ...(input.description !== undefined ? { description: input.description } : {}),
       ...(input.unitPrice !== undefined ? { unitPrice: input.unitPrice } : {}),
       ...(input.minQuantity !== undefined ? { minQuantity: input.minQuantity } : {}),
+      ...(input.stock !== undefined ? { stock: input.stock } : {}),
       ...(input.images !== undefined ? { images: input.images } : {}),
       ...(input.isActive !== undefined ? { isActive: input.isActive } : {}),
     },
   });
+  if (input.images !== undefined) {
+    const next = new Set(input.images);
+    await deleteCloudinaryImages(current.images.filter((url) => !next.has(url)));
+  }
+  if (input.stock !== undefined && current.stock > 0 && input.stock === 0) {
+    await prisma.notification.create({
+      data: {
+        recipientType: "ADMIN",
+        recipientId: null,
+        title: "Wholesale item out of stock",
+        body: `${row.name} is now out of stock.`,
+        type: "inventory",
+        relatedId: row.id,
+      },
+    });
+  }
   return toWholesaleItemDTO(row);
 }
 
 export async function remove(id: string): Promise<void> {
+  const current = await prisma.wholesaleItem.findUnique({ where: { id }, select: { images: true } });
   try {
     await prisma.wholesaleItem.delete({ where: { id } });
+    await deleteCloudinaryImages(current?.images ?? []);
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") {
       throw Errors.notFound("Wholesale item not found.");

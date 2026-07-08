@@ -25,6 +25,13 @@ interface SearchResult {
   image?: string;
 }
 
+// Define the API params type
+interface ListProductsParams {
+  search?: string;
+  pageSize?: number;
+  signal?: AbortSignal;
+}
+
 export default function SearchBar({ showSearch, setShowSearch }: SearchBarProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
@@ -117,11 +124,13 @@ export default function SearchBar({ showSearch, setShowSearch }: SearchBarProps)
     const abortController = new AbortController();
 
     try {
-      const { items } = await catalogApi.listProducts({
+      const params: ListProductsParams = {
         search: trimmed,
         pageSize: 10,
         signal: abortController.signal,
-      } as any);
+      };
+
+      const { items } = await catalogApi.listProducts(params);
 
       const results: SearchResult[] = items.map((p) => ({
         id: p.slug ?? p.id,
@@ -375,7 +384,7 @@ export default function SearchBar({ showSearch, setShowSearch }: SearchBarProps)
                   <Search size={32} className="mx-auto opacity-50" />
                 </div>
                 <div className="text-sm text-gray-500 dark:text-gray-400">
-                  No results found for "<span className="font-semibold text-gray-700 dark:text-gray-300">{searchQuery}</span>"
+                  No results found for &quot;<span className="font-semibold text-gray-700 dark:text-gray-300">{searchQuery}</span>&quot;
                 </div>
                 <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                   Try different keywords or check your spelling

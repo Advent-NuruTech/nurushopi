@@ -1,5 +1,22 @@
 import React from "react";
 import Link from "next/link";
+import { 
+  FaLeaf, 
+  FaLightbulb, 
+  FaStar, 
+  FaSeedling, 
+  FaHandsHelping, 
+  FaPrayingHands, 
+  FaLaptopCode, 
+  FaUsers,
+  FaShoppingBag,
+  FaExternalLinkAlt,
+  FaArrowRight,
+  FaGem,
+  FaBookOpen,
+  FaHeart,
+  FaGlobeAfrica
+} from "react-icons/fa";
 
 export const metadata = {
   title: "About NuruShop",
@@ -9,18 +26,19 @@ export const metadata = {
 
 export default function AboutPage() {
   return (
-   <main className="min-h-screen bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 px-4 md:px-8 lg:px-16 pt-20 md:pt-24 pb-8 md:pb-12 transition-colors duration-300">
-  <section className="max-w-4xl mx-auto">
-    {/* Header with decorative elements - Now visible below navbar */}
-    <div className="mb-8 md:mb-12">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="h-10 w-2 bg-emerald-500 rounded-full"></div>
-        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-sky-700 dark:text-emerald-400">
-          About NuruShop
-        </h1>
-      </div>
-      <div className="h-1 w-20 bg-gradient-to-r from-sky-500 to-emerald-500 rounded-full mb-6"></div>
-    </div>
+    <main className="min-h-screen bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 px-4 md:px-8 lg:px-16 pt-20 md:pt-24 pb-8 md:pb-12 transition-colors duration-300">
+      <section className="max-w-4xl mx-auto">
+        {/* Header with decorative elements - Now visible below navbar */}
+        <div className="mb-8 md:mb-12">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="h-10 w-2 bg-emerald-500 rounded-full"></div>
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-sky-700 dark:text-emerald-400">
+              About NuruShop
+            </h1>
+          </div>
+          <div className="h-1 w-20 bg-gradient-to-r from-sky-500 to-emerald-500 rounded-full mb-6"></div>
+        </div>
+
         {/* Introduction with improved typography */}
         <div className="space-y-6 mb-10">
           <div className="bg-gradient-to-br from-sky-50 to-emerald-50 dark:from-slate-800 dark:to-slate-800/50 p-6 rounded-2xl border border-sky-100 dark:border-slate-700 shadow-sm">
@@ -54,7 +72,7 @@ export default function AboutPage() {
           <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-sky-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2 bg-sky-100 dark:bg-sky-900/30 rounded-lg">
-                <span className="text-2xl">🌿</span>
+                <FaLeaf className="text-2xl text-sky-600 dark:text-emerald-400" />
               </div>
               <h2 className="text-2xl font-semibold text-sky-600 dark:text-emerald-400">
                 Our Mission
@@ -70,7 +88,7 @@ export default function AboutPage() {
           <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-sky-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
-                <span className="text-2xl">💡</span>
+                <FaLightbulb className="text-2xl text-emerald-600 dark:text-emerald-400" />
               </div>
               <h2 className="text-2xl font-semibold text-sky-600 dark:text-emerald-400">
                 Our Vision
@@ -95,19 +113,19 @@ export default function AboutPage() {
           
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
-              { title: "Integrity", desc: "We deliver what we promise.", icon: "✨" },
-              { title: "Purity", desc: "Every product is carefully sourced and verified.", icon: "🌱" },
-              { title: "Service", desc: "We exist to uplift lives, not just make sales.", icon: "🤝" },
-              { title: "Faith", desc: "Guided by divine principles of stewardship.", icon: "🙏" },
-              { title: "Innovation", desc: "Using technology to make wellness accessible.", icon: "💻" },
-              { title: "Community", desc: "Building connections through shared values.", icon: "👥" }
+              { title: "Integrity", desc: "We deliver what we promise.", icon: FaGem },
+              { title: "Purity", desc: "Every product is carefully sourced and verified.", icon: FaSeedling },
+              { title: "Service", desc: "We exist to uplift lives, not just make sales.", icon: FaHandsHelping },
+              { title: "Faith", desc: "Guided by divine principles of stewardship.", icon: FaPrayingHands },
+              { title: "Innovation", desc: "Using technology to make wellness accessible.", icon: FaLaptopCode },
+              { title: "Community", desc: "Building connections through shared values.", icon: FaUsers }
             ].map((value, index) => (
               <div 
                 key={index} 
                 className="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-sky-300 dark:hover:border-emerald-500 transition-all hover:translate-y-[-2px]"
               >
                 <div className="flex items-start gap-3">
-                  <span className="text-2xl">{value.icon}</span>
+                  <value.icon className="text-2xl text-sky-600 dark:text-emerald-400 shrink-0 mt-1" />
                   <div>
                     <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100 mb-1">
                       {value.title}
@@ -144,8 +162,9 @@ export default function AboutPage() {
                 href="/shop"
                 className="inline-flex items-center gap-2 bg-sky-600 hover:bg-sky-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-sm hover:shadow-md"
               >
+                <FaShoppingBag />
                 <span>Browse Products</span>
-                <span>→</span>
+                <FaArrowRight className="text-sm" />
               </Link>
               
               <Link 
@@ -155,7 +174,7 @@ export default function AboutPage() {
                 className="inline-flex items-center gap-2 bg-white dark:bg-slate-800 border border-sky-300 dark:border-emerald-500 text-sky-700 dark:text-emerald-400 hover:bg-sky-50 dark:hover:bg-slate-700 px-6 py-3 rounded-lg font-medium transition-colors"
               >
                 <span>Visit Advent NuruTech</span>
-                <span>↗</span>
+                <FaExternalLinkAlt className="text-sm" />
               </Link>
             </div>
           </div>
@@ -166,7 +185,7 @@ export default function AboutPage() {
           <div className="bg-gradient-to-br from-sky-500/10 via-emerald-500/10 to-transparent dark:from-sky-900/20 dark:via-emerald-900/20 p-8 rounded-2xl border-2 border-sky-200 dark:border-emerald-900/50">
             <div className="flex items-center gap-4 mb-4">
               <div className="p-3 bg-sky-100 dark:bg-sky-900/40 rounded-xl">
-                <span className="text-3xl">✨</span>
+                <FaHeart className="text-3xl text-sky-600 dark:text-emerald-400" />
               </div>
               <h3 className="text-2xl font-bold text-sky-700 dark:text-emerald-400">
                 Our Commitment
@@ -190,11 +209,17 @@ export default function AboutPage() {
             
             <div className="grid sm:grid-cols-2 gap-4 mt-6">
               <div className="bg-white/50 dark:bg-slate-800/50 p-4 rounded-lg">
-                <h4 className="font-bold text-sky-700 dark:text-emerald-400 mb-2">🌾 Community Impact</h4>
+                <h4 className="font-bold text-sky-700 dark:text-emerald-400 mb-2 flex items-center gap-2">
+                  <FaGlobeAfrica className="text-xl" />
+                  <span>Community Impact</span>
+                </h4>
                 <p className="text-slate-700 dark:text-slate-300">Supporting local farmers and artisans</p>
               </div>
               <div className="bg-white/50 dark:bg-slate-800/50 p-4 rounded-lg">
-                <h4 className="font-bold text-sky-700 dark:text-emerald-400 mb-2">📚 Educational Resources</h4>
+                <h4 className="font-bold text-sky-700 dark:text-emerald-400 mb-2 flex items-center gap-2">
+                  <FaBookOpen className="text-xl" />
+                  <span>Educational Resources</span>
+                </h4>
                 <p className="text-slate-700 dark:text-slate-300">Free wellness guides and tutorials</p>
               </div>
             </div>
@@ -207,21 +232,23 @@ export default function AboutPage() {
             <p className="text-xl italic text-slate-700 dark:text-slate-300 mb-4">
               &quot;Let your food be your medicine, and your mind be filled with light.&quot;
             </p>
-            <div className="flex justify-center items-center gap-4">
+            <div className="flex justify-center items-center gap-4 flex-wrap">
               <Link 
                 href="/shop"
-                className="text-sky-600 dark:text-emerald-400 hover:text-sky-800 dark:hover:text-emerald-300 font-medium hover:underline"
+                className="text-sky-600 dark:text-emerald-400 hover:text-sky-800 dark:hover:text-emerald-300 font-medium hover:underline inline-flex items-center gap-1"
               >
                 Shop Natural Products
+                <FaArrowRight className="text-xs" />
               </Link>
               <span className="text-slate-400">•</span>
               <Link 
                 href="https://adventnurutech.xyz"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sky-600 dark:text-emerald-400 hover:text-sky-800 dark:hover:text-emerald-300 font-medium hover:underline"
+                className="text-sky-600 dark:text-emerald-400 hover:text-sky-800 dark:hover:text-emerald-300 font-medium hover:underline inline-flex items-center gap-1"
               >
                 Learn About Our Mission
+                <FaExternalLinkAlt className="text-xs" />
               </Link>
             </div>
           </div>

@@ -70,7 +70,7 @@ export default async function HomePage() {
   return (
     <main className="bg-slate-50 dark:bg-black">
       <HeroSection />
-      <section className="bg-white pt-24 dark:bg-gray-950">
+      <section className="bg-white pt-3 dark:bg-gray-950">
         <div className="mx-auto grid max-w-7xl gap-6 px-4 pb-8 sm:px-6 lg:grid-cols-[260px_1fr_280px]">
           <aside className="hidden rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-gray-900 lg:block">
             <div className="mb-2 flex items-center gap-2 px-2 text-sm font-bold text-slate-900 dark:text-white">

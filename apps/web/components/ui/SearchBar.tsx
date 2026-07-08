@@ -120,7 +120,8 @@ export default function SearchBar({ showSearch, setShowSearch }: SearchBarProps)
       const { items } = await catalogApi.listProducts({
         search: trimmed,
         pageSize: 10,
-      }, { signal: abortController.signal });
+        signal: abortController.signal,
+      } as any);
 
       const results: SearchResult[] = items.map((p) => ({
         id: p.slug ?? p.id,

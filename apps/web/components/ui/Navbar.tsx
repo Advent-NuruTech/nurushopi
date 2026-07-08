@@ -31,6 +31,14 @@ interface Category {
   icon?: string;
 }
 
+// Helper function to get initials from name
+const getInitials = (name: string): string => {
+  if (!name) return "U";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+};
+
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
@@ -121,14 +129,14 @@ export default function Navbar() {
         </div>
 
         <div className="hidden items-center gap-5 text-sm font-semibold text-slate-700 dark:text-slate-300 md:flex">
-          <Link href="/" className="hover:text-blue-600">
+          <Link href="/" className="hover:text-sky-600 dark:hover:text-emerald-400">
             Home
           </Link>
-          <Link href="/shop" className="inline-flex items-center gap-1.5 hover:text-blue-600">
+          <Link href="/shop" className="inline-flex items-center gap-1.5 hover:text-sky-600 dark:hover:text-emerald-400">
             <Store size={16} />
             Shop
           </Link>
-          <Link href="/wholeseller" className="flex items-center gap-2 hover:text-blue-600">
+          <Link href="/wholeseller" className="flex items-center gap-2 hover:text-sky-600 dark:hover:text-emerald-400">
             <Package size={16} />
             Wholesale
             <span className="rounded-full bg-orange-500 px-2 py-0.5 text-[10px] font-bold uppercase text-white">
@@ -141,7 +149,7 @@ export default function Navbar() {
             onMouseEnter={() => setShowDropdown(true)}
             onMouseLeave={() => setShowDropdown(false)}
           >
-            <button className="flex items-center gap-1 hover:text-blue-600">
+            <button className="flex items-center gap-1 hover:text-sky-600 dark:hover:text-emerald-400">
               <Grid3X3 size={16} />
               Categories <ChevronDown size={16} />
             </button>
@@ -160,7 +168,7 @@ export default function Navbar() {
                       <Link
                         key={cat.name}
                         href={{ pathname: cat.href, query: cat.query }}
-                        className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm hover:bg-blue-50 dark:hover:bg-gray-800"
+                        className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm hover:bg-sky-50 dark:hover:bg-gray-800"
                       >
                         <span className="grid h-8 w-8 place-items-center rounded-md bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200">
                           {cat.icon || <Package size={16} />}
@@ -171,7 +179,7 @@ export default function Navbar() {
                   ) : (
                     <Link
                       href="/shop"
-                      className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm hover:bg-blue-50 dark:hover:bg-gray-800"
+                      className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm hover:bg-sky-50 dark:hover:bg-gray-800"
                     >
                       <span className="grid h-8 w-8 place-items-center rounded-md bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200">
                         <Search size={16} />
@@ -184,10 +192,10 @@ export default function Navbar() {
             </AnimatePresence>
           </div>
 
-          <Link href="/about" className="hover:text-blue-600">
+          <Link href="/about" className="hover:text-sky-600 dark:hover:text-emerald-400">
             About
           </Link>
-          <Link href="/contact" className="hover:text-blue-600">
+          <Link href="/contact" className="hover:text-sky-600 dark:hover:text-emerald-400">
             Contact
           </Link>
         </div>
@@ -200,7 +208,7 @@ export default function Navbar() {
 
           <Link
             href="/checkout"
-            className="relative rounded-full border border-slate-200 p-2 hover:border-blue-300 hover:text-blue-600 dark:border-slate-700"
+            className="relative rounded-full border border-slate-200 p-2 hover:border-sky-300 hover:text-sky-600 dark:border-slate-700 dark:hover:border-emerald-500 dark:hover:text-emerald-400"
             aria-label="Open checkout"
           >
             <ShoppingCart size={22} />
@@ -213,28 +221,30 @@ export default function Navbar() {
 
           <div className="hidden items-center gap-2 md:flex">
             {!isLoading && user ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <Link
                   href="/profile"
-                  className="flex items-center gap-2 rounded-full p-1.5 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="flex items-center gap-2 rounded-full p-1 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
                   title="User Profile"
                   aria-label="Open profile"
                 >
-                  <Image
-                    src={user.imageUrl || "/assets/logo.jpg"}
-                    alt="User Avatar"
-                    width={32}
-                    height={32}
-                    className="rounded-full object-cover ring-2 ring-sky-500/30 dark:ring-sky-400/30"
-                  />
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
-                    {user.name || "User"}
-                  </span>
-                  <User size={16} className="text-slate-500 dark:text-slate-400" />
+                  {user.imageUrl ? (
+                    <Image
+                      src={user.imageUrl}
+                      alt={`${user.name || "User"}'s avatar`}
+                      width={32}
+                      height={32}
+                      className="rounded-full object-cover ring-2 ring-sky-500/30 dark:ring-emerald-400/30"
+                    />
+                  ) : (
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-emerald-500 text-sm font-bold text-white ring-2 ring-sky-500/30 dark:ring-emerald-400/30">
+                      {getInitials(user.name || "User")}
+                    </div>
+                  )}
                 </Link>
                 <button
                   onClick={logout}
-                  className="rounded-md bg-slate-900 px-3 py-1.5 text-sm text-white transition-colors hover:bg-slate-700 dark:bg-white dark:text-slate-950"
+                  className="rounded-md bg-slate-900 px-3 py-1.5 text-sm text-white transition-colors hover:bg-slate-700 dark:bg-white dark:text-slate-950 dark:hover:bg-gray-200"
                 >
                   Logout
                 </button>
@@ -242,7 +252,7 @@ export default function Navbar() {
             ) : (
               <Link
                 href="/auth/login"
-                className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                className="rounded-md bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-sky-700 dark:bg-emerald-600 dark:hover:bg-emerald-700"
               >
                 Sign in
               </Link>

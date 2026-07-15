@@ -64,7 +64,7 @@ export const metadata = {
     siteName: "NuruShop",
     images: [
       {
-        url: "/assets/logo.jpg",
+        url: "/assets/logo.png",
         width: 1200,
         height: 630,
         alt: "NuruShop Natural Health Marketplace",
@@ -79,7 +79,7 @@ export const metadata = {
     title: "NuruShop â€“ Health & Truth Marketplace",
     description:
       "Discover natural healing products, organic foods, and inspiring spiritual books at NuruShop.",
-    images: ["/assets/logo.jpg"],
+    images: ["/assets/logo.png"],
   },
 
   manifest: "/manifest.json",

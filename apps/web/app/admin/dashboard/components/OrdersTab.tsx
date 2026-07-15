@@ -152,7 +152,7 @@ export default function OrdersTab({ role }: OrdersTabProps) {
                       <div key={item.id} className="flex gap-3 rounded-lg border border-slate-200 dark:border-slate-700 p-2">
                         <div className="relative h-12 w-12 rounded-md overflow-hidden bg-slate-100 dark:bg-slate-800 shrink-0">
                           <Image
-                            src={item.imageUrl || "/assets/logo.jpg"}
+                            src={item.imageUrl || "/assets/logo.png"}
                             alt={item.productName || "Product"}
                             fill
                             sizes="48px"

@@ -112,7 +112,7 @@ export default function Navbar() {
           aria-label="NuruShop Home"
         >
           <Image
-            src="/assets/logo.jpg"
+            src="/assets/logo.png"
             alt="NuruShop Logo"
             width={40}
             height={40}

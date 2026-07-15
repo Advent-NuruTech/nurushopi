@@ -101,6 +101,22 @@ function SignupForm() {
           />
 
           <form onSubmit={handleSignup}>
+            {/* Google Button - Placed at the top */}
+            <button
+              type="button"
+              onClick={handleGoogleSignup}
+              className="w-full flex items-center justify-center gap-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 py-3 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition mb-6"
+            >
+              <FcGoogle className="w-5 h-5" />
+              Continue with Google
+            </button>
+
+            <div className="my-6 flex items-center gap-3">
+              <span className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
+              <span className="text-xs uppercase tracking-wide text-gray-400">or sign up with email</span>
+              <span className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
+            </div>
+
             <div className="mb-4">
               <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
                 Email Address
@@ -108,7 +124,7 @@ function SignupForm() {
               <input
                 type="email"
                 placeholder="you@example.com"
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#009933] focus:border-[#009933] outline-none bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -124,7 +140,7 @@ function SignupForm() {
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-10 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition"
+                  className="w-full pl-10 pr-10 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#009933] focus:border-[#009933] outline-none bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -148,7 +164,7 @@ function SignupForm() {
                 <input
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-10 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition"
+                  className="w-full pl-10 pr-10 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#009933] focus:border-[#009933] outline-none bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
@@ -168,7 +184,7 @@ function SignupForm() {
               disabled={loading}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-[#009933] text-white py-3 rounded-lg font-semibold shadow-lg hover:bg-[#006B2C] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <div className="flex items-center justify-center gap-2">
@@ -181,27 +197,12 @@ function SignupForm() {
             </motion.button>
           </form>
 
-          <div className="my-6 flex items-center gap-3">
-            <span className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
-            <span className="text-xs uppercase tracking-wide text-gray-400">or</span>
-            <span className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
-          </div>
-
-          <button
-            type="button"
-            onClick={handleGoogleSignup}
-            className="w-full flex items-center justify-center gap-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 py-3 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition"
-          >
-            <FcGoogle className="w-5 h-5" />
-            Continue with Google
-          </button>
-
           <div className="mt-6 text-center">
             <p className="text-gray-600 dark:text-gray-400">
               Already have an account?{" "}
               <Link
                 href={loginHref}
-                className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-semibold"
+                className="text-[#009933] dark:text-[#009933] hover:text-[#006B2C] dark:hover:text-[#006B2C] font-semibold"
               >
                 Sign in
               </Link>
@@ -220,7 +221,7 @@ export default function SignupPage() {
         <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 transition-colors">
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
-              <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+              <div className="w-8 h-8 border-2 border-[#009933] border-t-transparent rounded-full animate-spin mx-auto"></div>
               <p className="mt-2 text-gray-600 dark:text-gray-400">Loading...</p>
             </div>
           </div>

@@ -84,7 +84,7 @@ export default function Sidebar({ isOpen, setIsOpen, categories }: SidebarProps)
             <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between bg-white dark:bg-gray-900">
               <div className="flex items-center gap-3">
                 <Image
-                  src="/assets/logo.jpg"
+                  src="/assets/logo.png"
                   alt="NuruShop Logo"
                   width={36}
                   height={36}
@@ -213,7 +213,7 @@ export default function Sidebar({ isOpen, setIsOpen, categories }: SidebarProps)
                     className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors"
                   >
                     <Image
-                      src={user.imageUrl || "/assets/logo.jpg"}
+                      src={user.imageUrl || "/assets/logo.png"}
                       alt="User Avatar"
                       width={32}
                       height={32}

@@ -279,7 +279,7 @@ export default function VendorForm() {
         <div className="text-center max-w-md mx-auto">
           <div className="relative w-32 h-32 mx-auto mb-6">
             <Image
-              src="/assets/logo.jpg"
+              src="/assets/logo.png"
               alt="NuruShop"
               fill
               className="object-contain animate-pulse"
@@ -1031,7 +1031,7 @@ export default function VendorForm() {
           <div className="flex justify-center mb-3">
             <div className="relative w-24 h-24">
               <Image
-                src="/assets/logo.jpg"
+                src="/assets/logo.png"
                 alt="NuruShop"
                 fill
                 className="object-contain"

@@ -242,12 +242,12 @@ export default function FeaturedSection({ products, categories = [] }: FeaturedS
                     <Link href={`/products/${item.id}`} className="flex-grow block">
                       <div className="relative w-full h-40 sm:h-44 bg-gray-100 dark:bg-gray-800 rounded-t-xl overflow-hidden">
                         <Image
-                          src={item.image || "/assets/logo.jpg"}
+                          src={item.image || "/assets/logo.png"}
                           alt={item.name}
                           fill
                           className="object-contain"
                           placeholder="blur"
-                          blurDataURL="/assets/logo.jpg"
+                          blurDataURL="/assets/logo.png"
                         />
                       </div>
 

@@ -20,7 +20,7 @@ export default function ProductCard({ product }: { product: Product }) {
   // ✅ Set main image safely
   useEffect(() => {
     if (product) {
-      setMainImage(product.images?.[0] || "/assets/logo.jpg");
+      setMainImage(product.images?.[0] || "/assets/logo.png");
     }
   }, [product]);
 

@@ -46,7 +46,7 @@ function toRelated(p: ProductDTO): RelatedProduct {
     id: p.id,
     name: p.name,
     price: Number(p.sellingPrice ?? p.price) || 0,
-    image: p.images[0] || "/assets/logo.jpg",
+    image: p.images[0] || "/assets/logo.png",
   };
 }
 
@@ -369,7 +369,7 @@ function CheckoutContent() {
                 >
                     <div className="relative h-24 w-24 overflow-hidden rounded-md bg-slate-50 dark:bg-slate-800">
                       <Image
-                        src={item.image || "/assets/logo.jpg"}
+                        src={item.image || "/assets/logo.png"}
                         alt={item.name}
                         fill
                         className="object-contain p-2"

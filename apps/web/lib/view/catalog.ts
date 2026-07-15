@@ -11,7 +11,7 @@ import type { BannerDTO, ProductDTO, WholesaleItemDTO } from "@nuru/types";
  * is absorbed here instead of rippling through every component.
  */
 
-const FALLBACK_IMAGE = "/assets/logo.jpg";
+const FALLBACK_IMAGE = "/assets/logo.png";
 const NEW_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 
 /** Parse a decimal-string money field to a finite number (0 on failure). */

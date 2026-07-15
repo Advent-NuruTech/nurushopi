@@ -18,13 +18,13 @@ export default function AuthCard({ children, title, subtitle, icon }: AuthCardPr
       transition={{ duration: 0.3 }}
       className="max-w-md w-full"
     >
-      <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-700 transition-colors">
-        {/* Top Gradient */}
-        <div className="h-2 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
+      <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden border-2 border-[#009933]/20 dark:border-[#009933]/20 transition-colors hover:border-[#009933]/40 dark:hover:border-[#009933]/40">
+        {/* Top Gradient - Green */}
+        <div className="h-2 bg-gradient-to-r from-[#009933] via-[#00b33c] to-[#006B2C]"></div>
 
         <div className="p-8">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-400 transition-colors">
+            <div className="p-2 rounded-lg bg-[#009933]/10 dark:bg-[#009933]/20 text-[#009933] dark:text-[#009933] transition-colors">
               {icon}
             </div>
             <div>

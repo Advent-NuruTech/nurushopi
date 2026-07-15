@@ -155,7 +155,7 @@ function ProfilePageContent() {
   const displayName = profile?.fullName || appUser?.name || "User";
   const firstName = displayName.split(" ")[0];
   const email = appUser?.email || "";
-  const avatarUrl = appUser?.imageUrl || "/assets/logo.jpg";
+  const avatarUrl = appUser?.imageUrl || "/assets/logo.png";
 
   /* ------------------- Notifications ------------------- */
   const notificationCount = unreadMessages + pendingOrders + unreadReviewPrompts;

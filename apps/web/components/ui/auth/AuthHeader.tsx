@@ -11,10 +11,10 @@ export default function AuthHeader() {
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: "spring", stiffness: 260, damping: 20 }}
-          className="relative w-24 h-24 rounded-full overflow-hidden shadow-2xl ring-4 ring-blue-500 dark:ring-blue-400 flex items-center justify-center"
+          className="relative w-24 h-24 rounded-full overflow-hidden shadow-2xl ring-4 ring-[#009933] dark:ring-[#009933] flex items-center justify-center"
         >
           <Image
-            src="/assets/logo.jpg"
+            src="/assets/logo.png"
             alt="Nurushop Logo"
             fill
             className="object-contain"
@@ -22,7 +22,7 @@ export default function AuthHeader() {
         </motion.div>
       </div>
       <div className="mt-4 text-center">
-        <h1 className="font-bold text-2xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+        <h1 className="font-bold text-2xl text-[#009933] dark:text-[#009933]">
           Nurushop
         </h1>
         <p className="text-gray-600 dark:text-gray-300 mt-1 text-sm">

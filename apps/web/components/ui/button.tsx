@@ -14,9 +14,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const base =
       "inline-flex items-center justify-center font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50";
     const variants = {
-      default: "bg-blue-600 text-white hover:bg-blue-700",
-      outline: "border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white",
-      ghost: "text-blue-700 hover:bg-blue-50",
+      default: "bg-[#009933] text-white hover:bg-[#006B2C] focus:ring-[#00C83A]/50",
+      outline: "border-2 border-[#009933] text-[#009933] hover:bg-[#009933] hover:text-white focus:ring-[#00C83A]/50",
+      ghost: "text-[#009933] hover:bg-[#00C83A]/10 hover:text-[#006B2C]",
     };
     const sizes = {
       sm: "px-3 py-1 text-sm",

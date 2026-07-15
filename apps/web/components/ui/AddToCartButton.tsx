@@ -26,7 +26,7 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({ product }) => {
       className={`px-4 py-2 rounded-lg flex items-center gap-2 transition 
         ${sabbathClosed 
           ? "bg-gray-400 cursor-not-allowed" 
-          : "bg-green-600 hover:bg-green-700 text-white"
+          : "bg-[#009933] hover:bg-[#006B2C] text-white"
         }`}
       onClick={() => {
         if (!sabbathClosed) {

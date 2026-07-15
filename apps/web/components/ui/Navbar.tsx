@@ -251,11 +251,11 @@ export default function Navbar() {
               </div>
             ) : (
               <Link
-                href="/auth/login"
-                className="rounded-md bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-sky-700 dark:bg-emerald-600 dark:hover:bg-emerald-700"
-              >
-                Sign in
-              </Link>
+  href="/auth/login"
+  className="rounded-md bg-[#009933] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#006B2C]"
+>
+  Sign in
+</Link>
             )}
           </div>
 

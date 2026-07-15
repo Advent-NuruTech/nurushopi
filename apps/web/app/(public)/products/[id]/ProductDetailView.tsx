@@ -37,11 +37,6 @@ function getShortDescription(text: string, words = 60): string {
   return parts.slice(0, words).join(" ") + "...";
 }
 
-/**
- * Interactive product detail UI. All catalog data arrives as props from the
- * server component; only cart actions, the image gallery, the description modal
- * and (user-specific) reviews are handled on the client.
- */
 export default function ProductDetailView({
   product,
   related,
@@ -57,11 +52,10 @@ export default function ProductDetailView({
   const [isDescriptionOpen, setIsDescriptionOpen] = useState(false);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [recommendations, setRecommendations] = useState<ProductCardVM[]>(related);
+  const [isStickyVisible, setIsStickyVisible] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    // Approved reviews for this product come from the Express API. The DTO
-    // exposes the body as `comment`; this view renders it as `message`.
     reviewsApi
       .listForProduct(product.id)
       .then((page) => {
@@ -104,6 +98,26 @@ export default function ProductDetailView({
     };
   }, [product.id]);
 
+  // Intersection Observer to show/hide sticky bar
+  useEffect(() => {
+    const target = document.getElementById("product-actions");
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // Show sticky bar when the original buttons are not visible
+        setIsStickyVisible(!entry.isIntersecting);
+      },
+      {
+        threshold: 0,
+        rootMargin: "0px 0px -60px 0px", // Adjust based on sticky bar height
+      }
+    );
+
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, []);
+
   const handleAddToCart = () => {
     if (sabbathClosed || !product.inStock) return;
     addToCart({
@@ -113,6 +127,11 @@ export default function ProductDetailView({
       quantity: 1,
       image: mainImage,
     });
+  };
+
+  const handleBuyNow = () => {
+    if (sabbathClosed || !product.inStock) return;
+    router.push("/checkout" as Route);
   };
 
   const discountPercent = getDiscountPercent(product);
@@ -173,7 +192,7 @@ export default function ProductDetailView({
           )}
         </section>
 
-        <aside className="space-y-5">
+        <aside className="space-y-5 pb-20 lg:pb-0">
           <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-gray-900 sm:p-6">
             <div className="mb-3 flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
@@ -187,7 +206,8 @@ export default function ProductDetailView({
               )}
             </div>
 
-            <h1 className="text-2xl font-black leading-tight text-slate-950 dark:text-white sm:text-4xl">
+            {/* Amazon-style product name - medium size with line-clamp for long names */}
+            <h1 className="text-lg font-medium leading-snug text-slate-950 dark:text-white sm:text-xl lg:text-2xl line-clamp-3">
               {product.name}
             </h1>
 
@@ -201,19 +221,19 @@ export default function ProductDetailView({
             </div>
 
             <div className="mt-5 flex flex-wrap items-end gap-3">
-            {discountPercent && originalPrice && (
-              <span className="text-lg text-gray-400 line-through">
-                {formatPrice(originalPrice)}
-              </span>
-            )}
-            <div className="text-3xl font-black text-blue-700 dark:text-blue-400">
-              {formatPrice(sellingPrice)}
-            </div>
-            {discountPercent && (
-              <span className="rounded-full bg-orange-500 px-2 py-1 text-xs font-bold text-white">
-                {discountPercent}% OFF
-              </span>
-            )}
+              {discountPercent && originalPrice && (
+                <span className="text-lg text-gray-400 line-through">
+                  {formatPrice(originalPrice)}
+                </span>
+              )}
+              <div className="text-3xl font-black text-blue-700 dark:text-blue-400">
+                {formatPrice(sellingPrice)}
+              </div>
+              {discountPercent && (
+                <span className="rounded-full bg-orange-500 px-2 py-1 text-xs font-bold text-white">
+                  {discountPercent}% OFF
+                </span>
+              )}
             </div>
 
             <p className={`mt-4 inline-flex items-center gap-2 text-sm font-bold ${product.inStock ? "text-green-700" : "text-red-600"}`}>
@@ -221,7 +241,8 @@ export default function ProductDetailView({
               {product.inStock ? "In stock and ready to order" : "Out of stock - ordering is disabled"}
             </p>
 
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            {/* Original buttons with ID for intersection observer */}
+            <div id="product-actions" className="mt-6 grid gap-3 sm:grid-cols-2">
               <Button
                 size="lg"
                 variant="outline"
@@ -239,11 +260,10 @@ export default function ProductDetailView({
                 <ShoppingCart size={18} />
                 {product.inStock ? "Add to cart" : "Out of stock"}
               </Button>
-
               <Button
                 size="lg"
                 disabled={sabbathClosed || !product.inStock}
-                className="h-12 gap-2 bg-orange-500 hover:bg-orange-600 disabled:cursor-not-allowed"
+                className="h-12 gap-2 bg-[#009933] hover:bg-[#006B2C] disabled:cursor-not-allowed"
                 title={
                   !product.inStock
                     ? "Out of stock"
@@ -251,7 +271,7 @@ export default function ProductDetailView({
                     ? "Shopping is paused for Sabbath"
                     : "Buy now"
                 }
-                onClick={() => router.push("/checkout" as Route)}
+                onClick={handleBuyNow}
               >
                 <CreditCard size={18} />
                 Buy now
@@ -296,6 +316,130 @@ export default function ProductDetailView({
             ))}
           </section>
         </aside>
+      </div>
+
+      {/* Sticky mobile bottom bar for Add to Cart & Buy Now */}
+      <div
+        className={`fixed bottom-0 left-0 right-0 z-40 transition-transform duration-300 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-t border-slate-200 dark:border-slate-800 shadow-lg lg:hidden ${
+          isStickyVisible ? "translate-y-0" : "translate-y-full"
+        }`}
+      >
+        <div className="flex items-center gap-3 p-3 max-w-7xl mx-auto">
+          <div className="flex-1 hidden sm:block">
+            <p className="text-sm font-semibold text-slate-900 dark:text-white line-clamp-1">
+              {product.name}
+            </p>
+            <p className="text-lg font-bold text-blue-700 dark:text-blue-400">
+              {formatPrice(sellingPrice)}
+            </p>
+          </div>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={handleAddToCart}
+              disabled={sabbathClosed || !product.inStock}
+              className="flex-1 sm:flex-none h-12 gap-2 disabled:cursor-not-allowed"
+              title={
+                !product.inStock
+                  ? "Out of stock"
+                  : sabbathClosed
+                  ? "Shopping is paused for Sabbath"
+                  : "Add to cart"
+              }
+            >
+              <ShoppingCart size={18} />
+              <span className="sm:hidden">Cart</span>
+              <span className="hidden sm:inline">{product.inStock ? "Add to cart" : "Out of stock"}</span>
+            </Button>
+            <Button
+              size="lg"
+              disabled={sabbathClosed || !product.inStock}
+              className="flex-1 sm:flex-none h-12 gap-2 bg-[#009933] hover:bg-[#006B2C] disabled:cursor-not-allowed"
+              title={
+                !product.inStock
+                  ? "Out of stock"
+                  : sabbathClosed
+                  ? "Shopping is paused for Sabbath"
+                  : "Buy now"
+              }
+              onClick={handleBuyNow}
+            >
+              <CreditCard size={18} />
+              Buy now
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Sticky desktop bottom bar for Add to Cart & Buy Now */}
+      <div
+        className={`fixed bottom-0 left-0 right-0 z-40 transition-transform duration-300 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-t border-slate-200 dark:border-slate-800 shadow-[0_-4px_20px_rgba(0,0,0,0.1)] hidden lg:block ${
+          isStickyVisible ? "translate-y-0" : "translate-y-full"
+        }`}
+      >
+        <div className="flex items-center justify-between gap-6 px-6 py-3 max-w-7xl mx-auto">
+          <div className="flex items-center gap-4 min-w-0">
+            <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-800">
+              <Image src={mainImage} alt={product.name} fill className="object-contain p-1" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-slate-900 dark:text-white line-clamp-1">
+                {product.name}
+              </p>
+              <div className="flex items-center gap-2">
+                {discountPercent && originalPrice && (
+                  <span className="text-xs text-gray-400 line-through">
+                    {formatPrice(originalPrice)}
+                  </span>
+                )}
+                <p className="text-lg font-bold text-blue-700 dark:text-blue-400">
+                  {formatPrice(sellingPrice)}
+                </p>
+                {discountPercent && (
+                  <span className="rounded-full bg-orange-500 px-2 py-0.5 text-[10px] font-bold text-white">
+                    {discountPercent}% OFF
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 shrink-0">
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={handleAddToCart}
+              disabled={sabbathClosed || !product.inStock}
+              className="h-11 gap-2 disabled:cursor-not-allowed"
+              title={
+                !product.inStock
+                  ? "Out of stock"
+                  : sabbathClosed
+                  ? "Shopping is paused for Sabbath"
+                  : "Add to cart"
+              }
+            >
+              <ShoppingCart size={18} />
+              {product.inStock ? "Add to cart" : "Out of stock"}
+            </Button>
+            <Button
+              size="lg"
+              disabled={sabbathClosed || !product.inStock}
+              className="h-11 gap-2 bg-[#009933] hover:bg-[#006B2C] disabled:cursor-not-allowed"
+              title={
+                !product.inStock
+                  ? "Out of stock"
+                  : sabbathClosed
+                  ? "Shopping is paused for Sabbath"
+                  : "Buy now"
+              }
+              onClick={handleBuyNow}
+            >
+              <CreditCard size={18} />
+              Buy now
+            </Button>
+          </div>
+        </div>
       </div>
 
       {reviews.length > 0 && (
@@ -358,7 +502,7 @@ export default function ProductDetailView({
                   <div className="relative w-full h-40 rounded overflow-hidden">
                     <Image src={rel.image} alt={rel.name} fill className="object-contain p-2" />
                   </div>
-                  <h3 className="mt-2 font-medium text-sm">{rel.name}</h3>
+                  <h3 className="mt-2 font-medium text-sm line-clamp-2">{rel.name}</h3>
                   <div className="mt-1">
                     {relDiscount && relOriginal && (
                       <span className="text-xs text-gray-400 line-through">
@@ -378,7 +522,7 @@ export default function ProductDetailView({
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
           <div className="w-full max-w-3xl overflow-hidden rounded-lg bg-white shadow-xl dark:bg-gray-900">
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white line-clamp-1">
                 {product.name} - Description
               </h3>
               <button

@@ -241,14 +241,14 @@ export default function Sidebar({ isOpen, setIsOpen, categories }: SidebarProps)
                   </div>
                 </div>
               ) : (
-                <Link
-                  href="/auth/login"
-                  onClick={handleLinkClick}
-                  className="flex items-center justify-center gap-3 px-3 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors w-full"
-                >
-                  <LogIn size={20} />
-                  Sign In / Register
-                </Link>
+               <Link
+  href="/auth/login"
+  onClick={handleLinkClick}
+  className="flex items-center justify-center gap-3 px-3 py-3 rounded-lg bg-[#009933] hover:bg-[#006B2C] text-white font-medium transition-colors w-full"
+>
+  <LogIn size={20} />
+  Sign In / Register
+</Link>
               )}
 
               <div className="text-center pt-4 border-t border-gray-200 dark:border-gray-700">

@@ -16,6 +16,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 
       {/* Main content */}
       <main className="flex-1 container mx-auto px-2 sm:px-4 lg:px-8 pt-[3.5rem] pb-8">
+       
         {children}
       </main>
 

@@ -38,6 +38,7 @@ export const metadata = {
     "faith based bookstore",
     "health reform products",
     "Kenya online natural shop",
+    "Best Natural Products Shop in Kenya",
     "organic lifestyle products",
     "natural oils and herbs",
     "health and wellness marketplace",

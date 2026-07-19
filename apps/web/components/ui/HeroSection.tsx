@@ -113,7 +113,7 @@ export default function HeroSection() {
           </div>
 
           <Link
-            href="/vendors"
+            href="/vendors/meet"
             className="flex items-center gap-2 rounded-full bg-[#009933] px-5 py-3 text-sm font-bold text-white shadow-xl transition hover:scale-105 hover:bg-[#006B2C]"
           >
             <Sparkles size={16} />
@@ -157,7 +157,7 @@ export default function HeroSection() {
         <div className="md:hidden shrink-0">
 
           <Link
-            href="/vendors"
+            href="/vendors/meet"
             className="rounded-full bg-[#009933] px-4 py-2 text-xs font-bold text-white shadow-lg"
           >
             Sell Here

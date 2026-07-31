@@ -56,16 +56,29 @@ export default function Sidebar({ isOpen, setIsOpen, categories }: SidebarProps)
     return () => document.removeEventListener("keydown", handleEscape);
   }, [isOpen]);
 
+  // Prevent body scroll when sidebar is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   return (
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
+          {/* Backdrop with blur */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
             onClick={() => setIsOpen(false)}
           />
 
@@ -76,7 +89,7 @@ export default function Sidebar({ isOpen, setIsOpen, categories }: SidebarProps)
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="fixed top-0 right-0 h-screen w-80 max-w-[85%] bg-white dark:bg-gray-900 shadow-xl z-50 flex flex-col md:hidden"
+            className="fixed top-0 right-0 h-screen w-80 max-w-[85%] bg-white dark:bg-gray-900 shadow-2xl z-50 flex flex-col"
             role="dialog"
             aria-label="Main navigation menu"
           >

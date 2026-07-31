@@ -7,6 +7,7 @@ import {
   resolveHeroGradient,
 } from "@/lib/heroGradients";
 import { catalogApi } from "@/lib/api";
+import { useSabbathStatus } from "@/lib/useSabbathStatus";
 import Link from "next/link";
 
 type HeroAnnouncement = {
@@ -17,6 +18,7 @@ type HeroAnnouncement = {
 };
 
 export default function HeroSection() {
+  const { isClosed: isSabbath } = useSabbathStatus();
   const [announcements, setAnnouncements] = useState<
     HeroAnnouncement[]
   >([]);
@@ -117,7 +119,7 @@ export default function HeroSection() {
             className="flex items-center gap-2 rounded-full bg-[#009933] px-5 py-3 text-sm font-bold text-white shadow-xl transition hover:scale-105 hover:bg-[#006B2C]"
           >
             <Sparkles size={16} />
-            Sell on NuruShop
+            {isSabbath ? "Happy Sabbath" : "Sell on NuruShop"}
           </Link>
         </div>
 
@@ -160,7 +162,7 @@ export default function HeroSection() {
             href="/vendors/meet"
             className="rounded-full bg-[#009933] px-4 py-2 text-xs font-bold text-white shadow-lg"
           >
-            Sell Here
+            {isSabbath ? "Happy Sabbath" : "Sell on NuruShop"}
           </Link>
         </div>
       </div>

@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSabbathStatus } from "@/lib/useSabbathStatus";
+import { sabbathApi } from "@/lib/api";
 
 /* ─────────────────────── types ─────────────────────── */
 type SabbathMessage = {
@@ -349,21 +350,13 @@ export default function SabbathExperience() {
       setPageIndex(0);
       return;
     }
-    const controller = new AbortController();
+    let cancelled = false;
     const load = async () => {
       setLoading(true);
       setHistoryLoading(true);
       try {
-        const res = await fetch(
-          `/api/sabbath-messages?date=${encodeURIComponent(sabbathDate)}&limit=${HISTORY_LIMIT}`,
-          { cache: "no-store", signal: controller.signal }
-        );
-        const payload = (await res.json().catch(() => ({}))) as {
-          currentMessage?: SabbathMessage | null;
-          messages?: SabbathMessage[];
-          nextCursor?: HistoryCursor | null;
-        };
-        if (!res.ok) return;
+        const payload = await sabbathApi.list({ date: sabbathDate, limit: HISTORY_LIMIT });
+        if (cancelled) return;
         setCurrentMessage(payload.currentMessage ?? null);
 
         // Only keep strictly past sabbaths (not current, not future)
@@ -375,12 +368,16 @@ export default function SabbathExperience() {
       } catch {
         /* silent */
       } finally {
-        setLoading(false);
-        setHistoryLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+          setHistoryLoading(false);
+        }
       }
     };
     load();
-    return () => controller.abort();
+    return () => {
+      cancelled = true;
+    };
   }, [isClosed, sabbathDate]);
 
   const currentPage = historyPages[pageIndex];
@@ -407,17 +404,11 @@ export default function SabbathExperience() {
     setHistoryLoading(true);
     try {
       const cursor = currentPage.nextCursor;
-      const res = await fetch(
-        `/api/sabbath-messages?limit=${HISTORY_LIMIT}&cursorDate=${encodeURIComponent(
-          cursor.sabbathDate
-        )}&cursorCreatedAt=${encodeURIComponent(cursor.createdAt ?? "")}`,
-        { cache: "no-store" }
-      );
-      const payload = (await res.json().catch(() => ({}))) as {
-        messages?: SabbathMessage[];
-        nextCursor?: HistoryCursor | null;
-      };
-      if (!res.ok) return;
+      const payload = await sabbathApi.list({
+        limit: HISTORY_LIMIT,
+        cursorDate: cursor.sabbathDate,
+        cursorCreatedAt: cursor.createdAt ?? "",
+      });
       const pastOnly = (payload.messages ?? []).filter((m) =>
         isStrictlyPastSabbath(m.sabbathDate, sabbathDate)
       );

@@ -64,6 +64,7 @@ export default function Footer() {
                 { label: "Shop All", href: "/shop" },
                 { label: "About Us", href: "/about" },
                 { label: "Contact", href: "/contact" },
+                { label: "Sabbath Archives", href: "/sabbath-archives" },
                 { label: "Blog", href: "" },
                 { label: "FAQs", href: "" }
               ].map((link) => (

@@ -20,6 +20,10 @@ export async function list(req: Request, res: Response): Promise<void> {
   sendOk(res, await sabbathService.list(query));
 }
 
+export async function months(req: Request, res: Response): Promise<void> {
+  sendOk(res, { months: await sabbathService.months() });
+}
+
 export async function adminList(req: Request, res: Response): Promise<void> {
   const query = sabbathMessageAdminQuerySchema.parse(req.query);
   sendOk(res, { messages: await sabbathService.adminList(query) });

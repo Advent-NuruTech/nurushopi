@@ -87,6 +87,58 @@ describe("sabbath.list (public)", () => {
     expect(where.OR[1].sabbathDate).toBe("2026-06-26");
     expect(where.OR[1].createdAt.lt).toBeInstanceOf(Date);
   });
+
+  it("filters history by month prefix", async () => {
+    p.sabbathMessage.findMany.mockResolvedValue([]);
+    await sabbath.list({ limit: 5, month: "2026-07" } as never);
+    const where = p.sabbathMessage.findMany.mock.calls[0][0].where;
+    expect(where).toEqual({ sabbathDate: { startsWith: "2026-07" } });
+  });
+
+  it("filters history by case-insensitive search text", async () => {
+    p.sabbathMessage.findMany.mockResolvedValue([]);
+    await sabbath.list({ limit: 5, q: "rest" } as never);
+    const where = p.sabbathMessage.findMany.mock.calls[0][0].where;
+    expect(where.message.contains).toBe("rest");
+    expect(where.message.mode).toBe("insensitive");
+  });
+
+  it("combines month + search + cursor filters with AND", async () => {
+    p.sabbathMessage.findMany.mockResolvedValue([]);
+    await sabbath.list({
+      limit: 5,
+      month: "2026-07",
+      q: "rest",
+      cursorDate: "2026-07-10",
+      cursorCreatedAt: "2026-07-10T10:00:00Z",
+    } as never);
+    const where = p.sabbathMessage.findMany.mock.calls[0][0].where;
+    expect(where.AND).toHaveLength(2);
+    expect(where.AND[0].sabbathDate).toEqual({ startsWith: "2026-07" });
+    expect(where.AND[0].message.contains).toBe("rest");
+    expect(where.AND[1].OR).toBeDefined();
+  });
+});
+
+describe("sabbath.months (public)", () => {
+  it("aggregates distinct months newest first with counts", async () => {
+    p.sabbathMessage.groupBy.mockResolvedValue([
+      { sabbathDate: "2026-07-03" },
+      { sabbathDate: "2026-07-10" },
+      { sabbathDate: "2026-06-26" },
+    ]);
+    const res = await sabbath.months();
+    expect(p.sabbathMessage.groupBy.mock.calls[0][0].by).toEqual(["sabbathDate"]);
+    expect(res).toEqual([
+      { month: "2026-07", count: 2 },
+      { month: "2026-06", count: 1 },
+    ]);
+  });
+
+  it("returns an empty list when no messages exist", async () => {
+    p.sabbathMessage.groupBy.mockResolvedValue([]);
+    expect(await sabbath.months()).toEqual([]);
+  });
 });
 
 describe("sabbath.adminList", () => {

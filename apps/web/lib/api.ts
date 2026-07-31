@@ -31,6 +31,7 @@ import type {
   SabbathMessageDTO,
   SabbathMessageListDTO,
   SabbathMessageUpdateInput,
+  SabbathMonthsDTO,
   ProductReviewQuery,
   ReviewCreateInput,
   ReviewDTO,
@@ -544,6 +545,8 @@ export const pwaApi = {
 /** Public Sabbath listing filters (all optional). */
 type SabbathQuery = Partial<{
   date: string;
+  month: string;
+  q: string;
   limit: number;
   cursorDate: string;
   cursorCreatedAt: string;
@@ -553,6 +556,10 @@ export const sabbathApi = {
   // Public: current message for a date + paginated history.
   list: (query: SabbathQuery = {}) =>
     api.get<SabbathMessageListDTO>(`/sabbath-messages${qs(query)}`),
+
+  // Public: distinct archive months (newest first) with message counts.
+  months: () =>
+    api.get<{ months: SabbathMonthsDTO }>("/sabbath-messages/months"),
 
   // Admin authoring (read: any admin; write: senior admin — enforced server-side)
   admin: {

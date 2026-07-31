@@ -59,7 +59,15 @@ export const sabbathMessageQuerySchema = z
       .trim()
       .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date.")
       .optional(),
-    limit: z.coerce.number().int().min(1).max(20).default(5),
+    /** Archive filter: a single month in YYYY-MM form. */
+    month: z
+      .string()
+      .trim()
+      .regex(/^\d{4}-\d{2}$/, "Invalid month.")
+      .optional(),
+    /** Archive filter: free-text search over message content. */
+    q: z.string().trim().max(120, "Search is too long.").optional(),
+    limit: z.coerce.number().int().min(1).max(50).default(20),
     cursorDate: z.string().trim().optional(),
     cursorCreatedAt: z.string().trim().optional(),
   })
@@ -94,3 +102,12 @@ export interface SabbathMessageListDTO {
   messages: SabbathMessageDTO[];
   nextCursor: SabbathCursor | null;
 }
+
+/** One available archive month with its message count. */
+export interface SabbathMonthDTO {
+  /** YYYY-MM of the Friday dates in this bucket. */
+  month: string;
+  count: number;
+}
+
+export type SabbathMonthsDTO = SabbathMonthDTO[];

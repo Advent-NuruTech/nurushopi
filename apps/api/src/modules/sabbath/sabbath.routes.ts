@@ -8,6 +8,7 @@ import * as ctrl from "./sabbath.controller.js";
 // ---- Public Sabbath messages: /api/v1/sabbath-messages ----
 export const sabbathPublicRouter: Router = Router();
 sabbathPublicRouter.get("/", asyncHandler(ctrl.list));
+sabbathPublicRouter.get("/months", asyncHandler(ctrl.months));
 
 // ---- Admin Sabbath messages: /api/v1/admin/sabbath-messages ----
 // Reads are open to any admin; writes are restricted to senior admins.

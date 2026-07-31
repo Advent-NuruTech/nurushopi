@@ -5,6 +5,7 @@ import type {
   SabbathMessageDTO,
   SabbathMessageListDTO,
   SabbathMessageQuery,
+  SabbathMonthDTO,
   SabbathMessageUpdateInput,
 } from "@nuru/types";
 import { Errors } from "../../lib/errors.js";
@@ -43,7 +44,9 @@ export async function list(query: SabbathMessageQuery): Promise<SabbathMessageLi
       })
     : Promise.resolve(null);
 
-  const where = keysetWhere(query.cursorDate, query.cursorCreatedAt);
+  const filters = filterWhere(query.month, query.q);
+  const cursorWhere = keysetWhere(query.cursorDate, query.cursorCreatedAt);
+  const where = combineWhere(filters, cursorWhere);
   const [current, rows] = await Promise.all([
     currentPromise,
     prisma.sabbathMessage.findMany({ where, orderBy: HISTORY_ORDER, take: query.limit }),
@@ -58,6 +61,48 @@ export async function list(query: SabbathMessageQuery): Promise<SabbathMessageLi
         ? { sabbathDate: last.sabbathDate, createdAt: last.createdAt.toISOString() }
         : null,
   };
+}
+
+/** Month + free-text filters for the archive view. */
+function filterWhere(
+  month?: string,
+  q?: string,
+): Prisma.SabbathMessageWhereInput | undefined {
+  if (!month && !q) return undefined;
+  return {
+    ...(month ? { sabbathDate: { startsWith: month } } : {}),
+    ...(q ? { message: { contains: q, mode: "insensitive" } } : {}),
+  };
+}
+
+/** Combine filter predicate and keyset cursor predicate into one WHERE. */
+function combineWhere(
+  filters?: Prisma.SabbathMessageWhereInput,
+  cursor?: Prisma.SabbathMessageWhereInput,
+): Prisma.SabbathMessageWhereInput | undefined {
+  if (!filters && !cursor) return undefined;
+  if (!filters) return cursor;
+  if (!cursor) return filters;
+  return { AND: [filters, cursor] };
+}
+
+/**
+ * Distinct archive months, newest first, with the number of messages in each.
+ * Bounded by distinct Friday dates (≈52 per year), so it stays small even
+ * with thousands of messages.
+ */
+export async function months(): Promise<SabbathMonthDTO[]> {
+  const grouped = await prisma.sabbathMessage.groupBy({
+    by: ["sabbathDate"],
+  });
+  const byMonth = new Map<string, number>();
+  for (const row of grouped) {
+    const month = row.sabbathDate.slice(0, 7);
+    byMonth.set(month, (byMonth.get(month) ?? 0) + 1);
+  }
+  return [...byMonth.entries()]
+    .map(([month, count]) => ({ month, count }))
+    .sort((a, b) => (a.month < b.month ? 1 : -1));
 }
 
 /** Keyset predicate for "strictly after" (sabbathDate desc, createdAt desc). */

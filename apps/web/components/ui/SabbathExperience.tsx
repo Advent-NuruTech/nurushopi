@@ -69,6 +69,23 @@ const formatDateLabel = (value: string) => {
 };
 
 /**
+ * Heading shown when no message was published for the current Sabbath.
+ * Falls back to the most recent published message and says when it was.
+ */
+const fallbackHeading = (value: string, currentSabbathDate: string): string => {
+  const saturday = toSaturdayDateString(value);
+  const msgDate = new Date(`${saturday}T00:00:00`);
+  const nowSaturday = toSaturdayDateString(currentSabbathDate);
+  const nowDate = new Date(`${nowSaturday}T00:00:00`);
+  if (Number.isNaN(msgDate.getTime()) || Number.isNaN(nowDate.getTime())) return "";
+  const daysAgo = Math.round((nowDate.getTime() - msgDate.getTime()) / 86_400_000);
+  if (daysAgo <= 7) return "This was the Sabbath message last week";
+  if (daysAgo <= 14) return "This was the Sabbath message two weeks ago";
+  if (daysAgo <= 31) return "This was the Sabbath message last month";
+  return `This was the Sabbath message on ${formatDateLabel(value)}`;
+};
+
+/**
  * Returns true only for sabbaths that are strictly in the past
  * (not the current sabbath, not future).
  */
@@ -370,7 +387,19 @@ export default function SabbathExperience() {
   const hasPrev = pageIndex > 0;
   const hasNext = Boolean(currentPage?.nextCursor?.createdAt);
   const historyMessages = currentPage?.messages ?? [];
-  const hasHistory = historyMessages.length > 0;
+
+  // When no message was published for the current Sabbath, surface the most
+  // recent past message instead so the Sabbath is never left blank.
+  const fallbackMessage = currentMessage
+    ? null
+    : (historyPages[0]?.messages?.[0] ?? null);
+  const isFallback = !currentMessage && !!fallbackMessage;
+
+  // Keep the archive free of the message already shown above.
+  const archiveMessages = fallbackMessage
+    ? historyMessages.filter((m) => m.id !== fallbackMessage.id)
+    : historyMessages;
+  const hasHistory = archiveMessages.length > 0;
 
   const handleNext = async () => {
     if (!currentPage?.nextCursor?.createdAt || historyLoading) return;
@@ -462,7 +491,8 @@ export default function SabbathExperience() {
   }
 
   /* ── SABBATH ACTIVE ── */
-  const messageText = currentMessage?.message?.trim() ?? "";
+  const displayMessage = currentMessage ?? fallbackMessage;
+  const messageText = displayMessage?.message?.trim() ?? "";
 
   return (
     <>
@@ -547,14 +577,31 @@ export default function SabbathExperience() {
         >
           <div className="px-8 sm:px-10 pt-7 pb-5 border-b" style={{ borderColor: "#e2e8f0" }}>
             <p className="text-[10px] uppercase tracking-[0.3em] text-green-700/50 font-semibold mb-1">
-              Today&apos;s Message
+              {isFallback ? "Last Published Message" : "Today's Message"}
             </p>
-            <h3
-              style={{ fontFamily: "'Playfair Display', serif" }}
-              className="text-xl sm:text-2xl text-green-900 font-normal italic"
-            >
-              {formatDateLabel(sabbathDate)}
-            </h3>
+            {isFallback ? (
+              <>
+                <h3
+                  style={{ fontFamily: "'Playfair Display', serif" }}
+                  className="text-xl sm:text-2xl text-green-900 font-normal italic"
+                >
+                  {fallbackHeading(fallbackMessage!.sabbathDate, sabbathDate)}
+                </h3>
+                <p
+                  style={{ fontFamily: "'Crimson Pro', serif" }}
+                  className="text-sm text-green-700/60 font-light mt-1"
+                >
+                  {formatDateLabel(fallbackMessage!.sabbathDate)}
+                </p>
+              </>
+            ) : (
+              <h3
+                style={{ fontFamily: "'Playfair Display', serif" }}
+                className="text-xl sm:text-2xl text-green-900 font-normal italic"
+              >
+                {formatDateLabel(sabbathDate)}
+              </h3>
+            )}
           </div>
 
           <div className="px-3 sm:px-10 py-5">
@@ -653,7 +700,7 @@ export default function SabbathExperience() {
               </div>
 
               <div className="px-2 sm:px-5 py-6 space-y-5">
-                {historyLoading && historyMessages.length === 0 && (
+                {historyLoading && archiveMessages.length === 0 && (
                   <div className="space-y-3 py-2">
                     {[3, 5, 4, 2].map((w, i) => (
                       <div
@@ -674,7 +721,7 @@ export default function SabbathExperience() {
                     transition={{ duration: 0.3 }}
                     className="space-y-5"
                   >
-                    {historyMessages.map((msg, idx) => (
+                    {archiveMessages.map((msg, idx) => (
                       <motion.article
                         key={msg.id}
                         initial={{ opacity: 0, y: 8 }}

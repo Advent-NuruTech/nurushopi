@@ -21,6 +21,12 @@ export const metadata = {
 
   keywords: [
     "NuruShop",
+    "online store",
+    "natural remedies",
+    "organic foods",
+    "founded by Byron Otieno  Onyango",
+    "Reformers resources in one place ",
+    "shop powered by advent nurutech",
     "natural remedies Kenya",
     "herbal medicine shop",
     "organic food store Kenya",
@@ -39,6 +45,7 @@ export const metadata = {
     "health reform products",
     "Kenya online natural shop",
     "Best Natural Products Shop in Kenya",
+    "Essential Oils Kenya",
     "organic lifestyle products",
     "natural oils and herbs",
     "health and wellness marketplace",

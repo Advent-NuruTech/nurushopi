@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Truck, Sparkles, Zap } from "lucide-react";
 import {
   HERO_DEFAULT_GRADIENT,
@@ -17,11 +17,16 @@ type HeroAnnouncement = {
   order: number;
 };
 
+/** Constant scroll speed in px/second, independent of content length. */
+const SCROLL_SPEED_PX_PER_SEC = 25;
+
 export default function HeroSection() {
   const { isClosed: isSabbath } = useSabbathStatus();
   const [announcements, setAnnouncements] = useState<
     HeroAnnouncement[]
   >([]);
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const [scrollDuration, setScrollDuration] = useState(56);
 
   useEffect(() => {
     let cancelled = false;
@@ -56,6 +61,26 @@ export default function HeroSection() {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    const measure = () => {
+      const halfWidth = track.scrollWidth / 2;
+      if (halfWidth > 0) {
+        setScrollDuration(halfWidth / SCROLL_SPEED_PX_PER_SEC);
+      }
+    };
+
+    measure();
+    const rafId = requestAnimationFrame(measure);
+    window.addEventListener("resize", measure);
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", measure);
+    };
+  }, [announcements]);
 
   const marqueeItems = useMemo(() => {
     if (!announcements.length) return [];
@@ -126,7 +151,11 @@ export default function HeroSection() {
         {/* Marquee */}
         <div className="flex-1 overflow-hidden">
 
-          <div className="flex animate-scroll whitespace-nowrap gap-8">
+          <div
+            ref={trackRef}
+            className="flex animate-scroll whitespace-nowrap gap-8"
+            style={{ animationDuration: `${scrollDuration}s` }}
+          >
 
             {items.map((item, i) => (
               <div

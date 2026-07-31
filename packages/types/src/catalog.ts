@@ -189,7 +189,7 @@ const heroOrderSchema = z.coerce.number().int().min(0).max(100_000);
 
 export const heroCreateSchema = z
   .object({
-    message: z.string().trim().min(1, "Message is required.").max(280),
+    message: z.string().trim().min(1, "Message is required."),
     linkUrl: z.string().url("Link URL must be valid.").optional().nullable(),
     gradient: heroGradientSchema.optional().nullable(),
     order: heroOrderSchema.default(0),
@@ -205,7 +205,7 @@ export type HeroCreateInput = z.infer<typeof heroCreateSchema>;
 
 export const heroUpdateSchema = z
   .object({
-    message: z.string().trim().min(1).max(280).optional(),
+    message: z.string().trim().min(1).optional(),
     linkUrl: z.string().url().optional().nullable(),
     gradient: heroGradientSchema.optional().nullable(),
     order: heroOrderSchema.optional(),

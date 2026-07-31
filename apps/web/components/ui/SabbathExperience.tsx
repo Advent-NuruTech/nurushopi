@@ -95,7 +95,7 @@ const linkify = (text: string) => {
         href={url}
         target="_blank"
         rel="noreferrer noopener"
-        className="underline decoration-amber-500/60 hover:decoration-amber-600 text-amber-700 hover:text-amber-800 transition-colors"
+        className="underline decoration-green-500/60 hover:decoration-green-600 text-green-700 hover:text-green-800 transition-colors"
       >
         {url}
       </a>
@@ -123,7 +123,7 @@ function BibleAnimation() {
       {/* Ambient glow */}
       <motion.div
         className="absolute inset-0 rounded-full blur-xl"
-        style={{ background: "radial-gradient(ellipse, #f7c97e33 0%, transparent 70%)" }}
+        style={{ background: "radial-gradient(ellipse, #4ade8033 0%, transparent 70%)" }}
         animate={{ opacity: [0.4, 0.9, 0.4] }}
         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
       />
@@ -131,7 +131,7 @@ function BibleAnimation() {
       {/* Spine */}
       <div
         className="absolute left-1/2 -translate-x-px bottom-1 w-0.5 h-[52px] rounded-full"
-        style={{ background: "linear-gradient(to bottom, #92400e88, #92400e22)" }}
+        style={{ background: "linear-gradient(to bottom, #16653488, #16653422)" }}
       />
 
       {/* Left cover */}
@@ -141,7 +141,7 @@ function BibleAnimation() {
           width: 34,
           height: 50,
           marginLeft: -34,
-          background: "linear-gradient(135deg, #7c2d12 0%, #92400e 40%, #b45309 100%)",
+          background: "linear-gradient(135deg, #14532d 0%, #166534 40%, #15803d 100%)",
           boxShadow: "-2px 2px 8px #00000044",
         }}
         animate={{ rotateY: [0, -8, 0] }}
@@ -150,11 +150,11 @@ function BibleAnimation() {
         {/* Embossed cross */}
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="relative w-4 h-5">
-            <div className="absolute left-1/2 -translate-x-px top-0 bottom-0 w-px bg-amber-400/40 rounded-full" />
-            <div className="absolute top-[35%] left-0 right-0 h-px bg-amber-400/40 rounded-full" />
+            <div className="absolute left-1/2 -translate-x-px top-0 bottom-0 w-px bg-green-400/40 rounded-full" />
+            <div className="absolute top-[35%] left-0 right-0 h-px bg-green-400/40 rounded-full" />
           </div>
         </div>
-        <div className="absolute right-0 top-1 bottom-1 w-px bg-amber-400/30" />
+        <div className="absolute right-0 top-1 bottom-1 w-px bg-green-400/30" />
       </motion.div>
 
       {/* Right cover */}
@@ -163,13 +163,13 @@ function BibleAnimation() {
         style={{
           width: 34,
           height: 50,
-          background: "linear-gradient(225deg, #7c2d12 0%, #92400e 40%, #b45309 100%)",
+          background: "linear-gradient(225deg, #14532d 0%, #166534 40%, #15803d 100%)",
           boxShadow: "2px 2px 8px #00000044",
         }}
         animate={{ rotateY: [0, 8, 0] }}
         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
       >
-        <div className="absolute left-0 top-1 bottom-1 w-px bg-amber-400/30" />
+        <div className="absolute left-0 top-1 bottom-1 w-px bg-green-400/30" />
       </motion.div>
 
       {/* Pages — right side */}
@@ -197,7 +197,7 @@ function BibleAnimation() {
                 <div
                   key={line}
                   className="absolute left-2 right-1 h-px rounded-full"
-                  style={{ top: 8 + line * 7, background: "#92400e18" }}
+                  style={{ top: 8 + line * 7, background: "#16653418" }}
                 />
               ))}
           </motion.div>
@@ -227,7 +227,7 @@ function BibleAnimation() {
                 <div
                   key={line}
                   className="absolute left-1 right-2 h-px rounded-full"
-                  style={{ top: 8 + line * 7, background: "#92400e18" }}
+                  style={{ top: 8 + line * 7, background: "#16653418" }}
                 />
               ))}
           </motion.div>
@@ -239,7 +239,7 @@ function BibleAnimation() {
         <motion.div
           key={p.id}
           className="absolute w-1 h-1 rounded-full"
-          style={{ background: "#f7c97e", left: `${p.x}%`, bottom: "60%", filter: "blur(0.5px)" }}
+          style={{ background: "#4ade80", left: `${p.x}%`, bottom: "60%", filter: "blur(0.5px)" }}
           animate={{ y: [0, -18, -32], opacity: [0, 0.8, 0], scale: [0.5, 1, 0.3] }}
           transition={{ duration: 2.2, delay: p.delay, repeat: Infinity, ease: "easeOut" }}
         />
@@ -268,7 +268,7 @@ function StarField() {
       {stars.map((s) => (
         <motion.div
           key={s.id}
-          className="absolute rounded-full bg-amber-100"
+          className="absolute rounded-full bg-green-100"
           style={{ left: `${s.x}%`, top: `${s.y}%`, width: s.size, height: s.size }}
           animate={{ opacity: [0.2, 0.9, 0.2] }}
           transition={{ duration: s.duration, delay: s.delay, repeat: Infinity, ease: "easeInOut" }}
@@ -285,8 +285,8 @@ function CountdownUnit({ value, label }: { value: string; label: string }) {
       <div
         className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl flex items-center justify-center"
         style={{
-          background: "linear-gradient(135deg, #2d1b0e 0%, #1a0f07 100%)",
-          boxShadow: "0 0 24px #f7c97e22, inset 0 1px 0 #f7c97e33",
+          background: "linear-gradient(135deg, #052e16 0%, #0a3d1a 100%)",
+          boxShadow: "0 0 24px #4ade8022, inset 0 1px 0 #4ade8033",
         }}
       >
         <AnimatePresence mode="popLayout">
@@ -296,13 +296,13 @@ function CountdownUnit({ value, label }: { value: string; label: string }) {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 10, opacity: 0 }}
             transition={{ duration: 0.25 }}
-            className="text-2xl sm:text-3xl font-mono text-amber-200 tabular-nums"
+            className="text-2xl sm:text-3xl font-mono text-green-200 tabular-nums"
           >
             {value}
           </motion.span>
         </AnimatePresence>
       </div>
-      <span className="text-[10px] uppercase tracking-[0.2em] text-amber-700/70 font-medium">
+      <span className="text-[10px] uppercase tracking-[0.2em] text-green-700/70 font-medium">
         {label}
       </span>
     </div>
@@ -416,42 +416,41 @@ export default function SabbathExperience() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            className="relative overflow-hidden rounded-3xl p-8 sm:p-10"
+            className="relative overflow-hidden rounded-3xl p-8 sm:p-10 bg-white"
             style={{
-              background: "linear-gradient(160deg, #1a0f07 0%, #2d1b0e 50%, #1f1208 100%)",
-              boxShadow: "0 24px 64px #00000066, 0 0 0 1px #f7c97e22",
+              boxShadow: "0 24px 64px #0000000a, 0 0 0 1px #e2e8f0",
             }}
           >
             <StarField />
             <div className="relative z-10 flex flex-col items-center gap-8 text-center">
               <BibleAnimation />
               <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-amber-500/80 font-medium mb-2">
+                <p className="text-xs uppercase tracking-[0.3em] text-green-600/80 font-medium mb-2">
                   Sabbath Begins Soon
                 </p>
                 <h2
                   style={{ fontFamily: "'Playfair Display', serif" }}
-                  className="text-2xl sm:text-3xl text-amber-100 font-normal"
+                  className="text-2xl sm:text-3xl text-green-900 font-normal"
                 >
                   Our shop rests for the Sabbath
                 </h2>
                 <p
                   style={{ fontFamily: "'Crimson Pro', serif" }}
-                  className="mt-2 text-amber-300/60 text-lg font-light"
+                  className="mt-2 text-green-700/60 text-lg font-light"
                 >
                   From Friday sunset to Saturday sunset
                 </p>
               </div>
               <div className="flex items-end gap-3">
                 <CountdownUnit value={hours} label="hours" />
-                <span className="text-3xl text-amber-600/60 font-light mb-6">:</span>
+                <span className="text-3xl text-green-600/60 font-light mb-6">:</span>
                 <CountdownUnit value={minutes} label="minutes" />
-                <span className="text-3xl text-amber-600/60 font-light mb-6">:</span>
+                <span className="text-3xl text-green-600/60 font-light mb-6">:</span>
                 <CountdownUnit value={seconds} label="seconds" />
               </div>
               <p
                 style={{ fontFamily: "'Crimson Pro', serif" }}
-                className="text-amber-200/50 text-base italic font-light max-w-xs"
+                className="text-green-800/50 text-base italic font-light max-w-xs"
               >
                 Kindly shop now and Take a moment to rest. We&apos;ll be back.
               </p>
@@ -477,13 +476,13 @@ export default function SabbathExperience() {
           float: left;
           margin-right: 0.08em;
           margin-top: 0.08em;
-          color: #92400e;
+          color: #166534;
           font-weight: 600;
         }
 
         @keyframes breathe {
-          0%, 100% { box-shadow: 0 0 32px #f7c97e0a, 0 0 0 1px #f7c97e18; }
-          50%       { box-shadow: 0 0 48px #f7c97e1a, 0 0 0 1px #f7c97e2a; }
+          0%, 100% { box-shadow: 0 0 32px #4ade800a, 0 0 0 1px #4ade8018; }
+          50%       { box-shadow: 0 0 48px #4ade801a, 0 0 0 1px #4ade802a; }
         }
         .sabbath-glow { animation: breathe 5s ease-in-out infinite; }
       `}</style>
@@ -495,16 +494,15 @@ export default function SabbathExperience() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          className="relative overflow-hidden rounded-3xl sabbath-glow"
+          className="relative overflow-hidden rounded-3xl sabbath-glow bg-white"
           style={{
-            background: "linear-gradient(160deg, #1a0f07 0%, #2d1b0e 45%, #1f130a 100%)",
-            boxShadow: "0 20px 60px #00000055, 0 0 0 1px #f7c97e18",
+            boxShadow: "0 20px 60px #00000008, 0 0 0 1px #e2e8f0",
           }}
         >
           <StarField />
           <div
             className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-px"
-            style={{ background: "linear-gradient(to right, transparent, #f7c97e44, transparent)" }}
+            style={{ background: "linear-gradient(to right, transparent, #4ade8044, transparent)" }}
           />
 
           <div className="relative z-10 px-8 sm:px-12 py-10 flex flex-col sm:flex-row sm:items-center gap-8">
@@ -512,18 +510,18 @@ export default function SabbathExperience() {
               <BibleAnimation />
             </div>
             <div>
-              <p className="text-[11px] uppercase tracking-[0.3em] text-amber-500/70 font-medium mb-2">
+              <p className="text-[11px] uppercase tracking-[0.3em] text-green-600/70 font-medium mb-2">
                 Shabbat Shalom
               </p>
               <h2
                 style={{ fontFamily: "'Playfair Display', serif" }}
-                className="text-2xl sm:text-3xl text-amber-100 font-semibold leading-snug"
+                className="text-2xl sm:text-3xl text-green-900 font-semibold leading-snug"
               >
                 Our shop is at rest
               </h2>
               <p
                 style={{ fontFamily: "'Crimson Pro', serif" }}
-                className="mt-2 text-amber-300/60 text-base sm:text-lg font-light leading-relaxed"
+                className="mt-2 text-green-700/60 text-base sm:text-lg font-light leading-relaxed"
               >
                 Friday sunset to Saturday sunset — we observe the Sabbath. Regular shopping resumes
                 when the sabbath is ended.
@@ -533,7 +531,7 @@ export default function SabbathExperience() {
 
           <div
             className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-px"
-            style={{ background: "linear-gradient(to right, transparent, #f7c97e22, transparent)" }}
+            style={{ background: "linear-gradient(to right, transparent, #4ade8022, transparent)" }}
           />
         </motion.div>
 
@@ -542,20 +540,18 @@ export default function SabbathExperience() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-          className="rounded-3xl overflow-hidden border"
+          className="rounded-3xl overflow-hidden border bg-white"
           style={{
-            borderColor: "#f7c97e22",
-            background: "linear-gradient(180deg, #fffdf5 0%, #fdf8ec 100%)",
+            borderColor: "#e2e8f0",
           }}
         >
-          <div className="px-8 sm:px-10 pt-7 pb-5 border-b" style={{ borderColor: "#f0e0b433" }}>
-            <p className="text-[10px] uppercase tracking-[0.3em] text-amber-700/50 font-semibold mb-1">
+          <div className="px-8 sm:px-10 pt-7 pb-5 border-b" style={{ borderColor: "#e2e8f0" }}>
+            <p className="text-[10px] uppercase tracking-[0.3em] text-green-700/50 font-semibold mb-1">
               Today&apos;s Message
             </p>
-            {/* formatDateLabel handles the Friday→Saturday shift internally */}
             <h3
               style={{ fontFamily: "'Playfair Display', serif" }}
-              className="text-xl sm:text-2xl text-stone-800 font-normal italic"
+              className="text-xl sm:text-2xl text-green-900 font-normal italic"
             >
               {formatDateLabel(sabbathDate)}
             </h3>
@@ -567,7 +563,7 @@ export default function SabbathExperience() {
                 {[4, 3, 5, 2, 4].map((w, i) => (
                   <div
                     key={i}
-                    className="h-4 rounded-full bg-amber-100 animate-pulse"
+                    className="h-4 rounded-full bg-green-100 animate-pulse"
                     style={{ width: `${w * 13}%`, animationDelay: `${i * 80}ms` }}
                   />
                 ))}
@@ -592,12 +588,12 @@ export default function SabbathExperience() {
           <div className="mx-8 sm:mx-10 mb-6 flex items-center gap-3">
             <div
               className="flex-1 h-px"
-              style={{ background: "linear-gradient(to right, transparent, #e8c98066)" }}
+              style={{ background: "linear-gradient(to right, transparent, #4ade8066)" }}
             />
-            <div className="w-1.5 h-1.5 rounded-full bg-amber-300/60" />
+            <div className="w-1.5 h-1.5 rounded-full bg-green-300/60" />
             <div
               className="flex-1 h-px"
-              style={{ background: "linear-gradient(to left, transparent, #e8c98066)" }}
+              style={{ background: "linear-gradient(to left, transparent, #4ade8066)" }}
             />
           </div>
         </motion.div>
@@ -612,12 +608,12 @@ export default function SabbathExperience() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 8 }}
               transition={{ duration: 0.5, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
-              className="rounded-3xl overflow-hidden border"
-              style={{ borderColor: "#e2d5c444", background: "#fafaf8" }}
+              className="rounded-3xl overflow-hidden border bg-white"
+              style={{ borderColor: "#e2e8f0" }}
             >
               <div
                 className="px-3 sm:px-3 pt-7 pb-4 border-b flex items-start justify-between gap-4"
-                style={{ borderColor: "#e8dcc866" }}
+                style={{ borderColor: "#e2e8f0" }}
               >
                 <div>
                   <p className="text-[10px] uppercase tracking-[0.3em] text-stone-400 font-semibold mb-1">
@@ -684,11 +680,10 @@ export default function SabbathExperience() {
                         initial={{ opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.35, delay: idx * 0.06 }}
-                        className="group rounded-2xl border p-5 sm:p-6 hover:border-amber-200/60 hover:bg-amber-50/40 transition-all duration-300"
-                        style={{ borderColor: "#e8dcc877", background: "#fdfcf9" }}
+                        className="group rounded-2xl border p-5 sm:p-6 hover:border-green-200/60 hover:bg-green-50/40 transition-all duration-300 bg-white"
+                        style={{ borderColor: "#e2e8f0" }}
                       >
-                        {/* Each past message also shows its Saturday date */}
-                        <p className="text-[10px] uppercase tracking-[0.25em] text-amber-700/50 font-semibold mb-2">
+                        <p className="text-[10px] uppercase tracking-[0.25em] text-green-700/50 font-semibold mb-2">
                           {formatDateLabel(msg.sabbathDate)}
                         </p>
                         <div

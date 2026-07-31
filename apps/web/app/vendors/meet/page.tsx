@@ -13,7 +13,6 @@ import {
   FaMapMarkerAlt,
   FaCalendarAlt,
   FaClock,
-
 } from "react-icons/fa";
 
 export default function VendorMeetingBooking() {
@@ -25,7 +24,6 @@ export default function VendorMeetingBooking() {
     location: "",
     preferredDate: "",
     preferredTime: "",
-  
   });
 
   const handleChange = (
@@ -65,7 +63,6 @@ The applicant is requesting a 15-minute onboarding meeting.
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 py-16 px-4">
       <div className="max-w-4xl mx-auto">
-
         {/* Header Section */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-lg shadow-emerald-200 dark:shadow-emerald-900/30 mb-6">
@@ -77,13 +74,11 @@ The applicant is requesting a 15-minute onboarding meeting.
           </h1>
 
           <p className="text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
-             Before selling on NuruShop, we invite you
+            Before selling on NuruShop, we invite you
             to schedule a short virtual meeting with our team.
-
             During this atleast 15-minute session we will understand your
             products, answer your questions, and determine if
             NuruShop is the right marketplace for you.
-
             If approved, our team will send you the official seller
             onboarding link to start listing your products.
           </p>
@@ -91,7 +86,6 @@ The applicant is requesting a 15-minute onboarding meeting.
 
         {/* Main Form Card */}
         <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50 p-8 md:p-10 border border-slate-100 dark:border-slate-700">
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -186,8 +180,7 @@ The applicant is requesting a 15-minute onboarding meeting.
             </div>
 
             <div className="relative md:col-span-2">
-              
-             
+              {/* Empty div removed */}
             </div>
           </div>
 
@@ -200,7 +193,7 @@ The applicant is requesting a 15-minute onboarding meeting.
           </button>
 
           <p className="text-center text-sm text-slate-500 dark:text-slate-400 mt-4">
-            We'll respond within 24 hours
+            We&apos;ll respond within 24 hours
           </p>
         </div>
 
@@ -218,8 +211,6 @@ The applicant is requesting a 15-minute onboarding meeting.
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {[
-                 
-              
                   "A meeting link will be shared",
                   "15-minute virtual discussion",
                   "Approved sellers receive onboarding link",
@@ -235,7 +226,6 @@ The applicant is requesting a 15-minute onboarding meeting.
             </div>
           </div>
         </div>
-
       </div>
     </main>
   );

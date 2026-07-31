@@ -65,18 +65,18 @@ export default function Sidebar({ isOpen, setIsOpen, categories }: SidebarProps)
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-40 md:hidden"
+            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
             onClick={() => setIsOpen(false)}
           />
 
           {/* Sidebar */}
           <motion.aside
             ref={sidebarRef}
-            initial={{ x: "-100%" }}
+            initial={{ x: "100%" }}
             animate={{ x: 0 }}
-            exit={{ x: "-100%" }}
+            exit={{ x: "100%" }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="fixed top-0 left-0 h-screen w-80 max-w-[85%] bg-white dark:bg-gray-900 shadow-xl z-50 flex flex-col md:hidden"
+            className="fixed top-0 right-0 h-screen w-80 max-w-[85%] bg-white dark:bg-gray-900 shadow-xl z-50 flex flex-col md:hidden"
             role="dialog"
             aria-label="Main navigation menu"
           >

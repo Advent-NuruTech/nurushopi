@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { Facebook, Instagram, Twitter, Mail, Phone, MapPin, ShoppingBag, Heart, Shield, ChevronRight } from "lucide-react";
+import Link from "next/link";
+import { Mail, Phone, MapPin, ShoppingBag, Heart, Shield, ChevronRight } from "lucide-react";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -33,24 +34,6 @@ export default function Footer() {
             <p className="text-sm text-slate-600 dark:text-gray-400 leading-relaxed max-w-xs">
               Your trusted source for authentic natural products that nurture wellness and vitality.
             </p>
-            
-            {/* Social Links */}
-            <div className="flex gap-2 pt-2">
-              {[
-                { Icon: Facebook, label: "Facebook", color: "hover:bg-[#1877f2]/10 hover:text-[#1877f2]" },
-                { Icon: Instagram, label: "Instagram", color: "hover:bg-[#e4405f]/10 hover:text-[#e4405f]" },
-                { Icon: Twitter, label: "Twitter", color: "hover:bg-[#000000]/10 hover:text-[#000000] dark:hover:text-white" }
-              ].map(({ Icon, label, color }) => (
-                <a 
-                  key={label}
-                  href="#" 
-                  className={`w-10 h-10 rounded-xl bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border border-slate-200/50 dark:border-gray-700/50 flex items-center justify-center text-slate-600 dark:text-gray-400 hover:scale-110 hover:shadow-lg transition-all duration-300 ${color}`}
-                  aria-label={label}
-                >
-                  <Icon className="w-4 h-4" />
-                </a>
-              ))}
-            </div>
           </div>
 
           {/* Quick Links */}
@@ -60,24 +43,23 @@ export default function Footer() {
               <span className="absolute -bottom-2 left-0 w-8 h-0.5 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full"></span>
             </h4>
             <ul className="space-y-3">
-              {[
+              {([
                 { label: "Shop All", href: "/shop" },
                 { label: "About Us", href: "/about" },
                 { label: "Contact", href: "/contact" },
                 { label: "Sabbath Archives", href: "/sabbath-archives" },
-                { label: "Blog", href: "" },
-                { label: "FAQs", href: "" }
-              ].map((link) => (
+                { label: "FAQs", href: "/faq" }
+              ] as const).map((link) => (
                 <li key={link.label}>
-                  <a 
-                    href={link.href} 
+                  <Link
+                    href={link.href}
                     className="group flex items-center gap-2 text-sm text-slate-600 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all duration-200"
                   >
                     <ChevronRight className="w-3 h-3 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-emerald-500" />
                     <span className="group-hover:translate-x-1 transition-transform duration-200">
                       {link.label}
                     </span>
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -171,18 +153,18 @@ export default function Footer() {
               © {currentYear} <span className="font-semibold text-slate-700 dark:text-gray-300">NuruShop</span> — Health & Truth. All Rights Reserved.
             </p>
             <div className="flex flex-wrap justify-center gap-4 md:gap-6">
-              {[
+              {([
                 { label: "Privacy Policy", href: "/privacy" },
                 { label: "Terms of Service", href: "/terms" },
-                { label: "Shipping Policy", href: "" }
-              ].map((link) => (
-                <a 
+                { label: "Shipping Policy", href: "/shipping-policy" }
+              ] as const).map((link) => (
+                <Link
                   key={link.label}
-                  href={link.href} 
+                  href={link.href}
                   className="text-slate-500 dark:text-gray-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors duration-200 hover:underline underline-offset-2"
                 >
                   {link.label}
-                </a>
+                </Link>
               ))}
             </div>
           </div>

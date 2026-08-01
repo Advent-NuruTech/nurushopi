@@ -574,7 +574,7 @@ const faqCategories: FaqCategory[] = [
             <ul className="mt-2 space-y-1">
               <li>
                 <FaWhatsapp className="inline mr-1 text-green-600" /> WhatsApp:{" "}
-                <a href="https://wa.me/254105178685" target="_blank" rel="noopener noreferrer" className="text-sky-600 dark:text-emerald-400 hover:underline">+254 105 178 685</a>
+                <a href="https://wa.me/254142225233" target="_blank" rel="noopener noreferrer" className="text-sky-600 dark:text-emerald-400 hover:underline">+254 142 225 233</a>
               </li>
             <li>
               <FaPhoneAlt className="inline mr-1 text-sky-600" /> Phone:{" "}
@@ -766,7 +766,7 @@ export default function FaqPage() {
               Contact Us
             </Link>
             <a
-              href="https://wa.me/254105178685?text=Hello%21%20I%20have%20a%20question%20about%20NuruShop."
+              href="https://wa.me/254142225233?text=Hello%21%20I%20have%20a%20question%20about%20NuruShop."
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 bg-white dark:bg-slate-800 border border-sky-300 dark:border-emerald-500 text-sky-700 dark:text-emerald-400 hover:bg-sky-50 dark:hover:bg-slate-700 px-6 py-3 rounded-lg font-medium transition-colors"

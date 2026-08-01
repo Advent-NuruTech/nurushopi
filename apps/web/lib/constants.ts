@@ -3,7 +3,7 @@
 export const COMPANY_NAME = "NuruShop – Health & Truth";
 export const COMPANY_PHONE = "+254759167209";
 export const COMPANY_EMAIL = "nurushoponline@gmail.com";
-export const COMPANY_WHATSAPP = "0105178685";
+export const COMPANY_WHATSAPP = "0142225233";
 export const COMPANY_LOCATION = "Maasai Mara University, Kenya";
 
 export const PAYMENT_INFO = {

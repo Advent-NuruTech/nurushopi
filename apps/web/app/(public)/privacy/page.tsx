@@ -94,7 +94,7 @@ const PrivacyPolicy: React.FC = () => {
         <p>If you have questions or concerns about your privacy:</p>
         <ul className="list-disc list-inside space-y-1">
           <li>Nurushop Support</li>
-          <li>Phone: +254105178685</li>
+          <li>Phone: +254142225233</li>
           <li>Email: nurushoponline@gmail.com</li>
           <li>Website: nurushop.co.ke</li>
         </ul>

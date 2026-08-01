@@ -78,10 +78,10 @@ export default function Footer() {
                 </div>
                 <div className="flex-1">
                   <a 
-                    href="tel:+254105178685" 
+                    href="tel:+254142225233" 
                     className="text-slate-600 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors font-medium"
                   >
-                    +254 105 178 685
+                    +254 142 225 233
                   </a>
                 </div>
               </li>
@@ -91,7 +91,7 @@ export default function Footer() {
                 </div>
                 <div className="flex-1">
                   <a 
-                    href="https://wa.me/254105178685" 
+                    href="https://wa.me/254142225233" 
                     className="text-slate-600 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors font-medium"
                   >
                     WhatsApp Chat

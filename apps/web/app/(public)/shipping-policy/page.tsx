@@ -119,8 +119,8 @@ const ShippingPolicy: React.FC = () => {
         <h2 className="text-2xl font-semibold mt-6 mb-2">8. Questions?</h2>
         <p>For any delivery questions, contact Nurushop Support:</p>
         <ul className="list-disc list-inside space-y-1">
-          <li>Phone: +254 759 167 209 / +254 105 178 685</li>
-          <li>WhatsApp: +254 105 178 685</li>
+          <li>Phone: +254 759 167 209 / +254 142 225 233</li>
+          <li>WhatsApp: +254 142 225 233</li>
           <li>Email: nurushoponline@gmail.com</li>
           <li>
             Website:{" "}

@@ -243,7 +243,7 @@ function CheckoutContent() {
 
       const whatsappMessage = `🛍️ *New Order ${order.orderNumber}*%0A--------------------------------%0A*Name:* ${name}%0A*Phone:* ${normalizedPhone}%0A*Address:* ${address}%0A--------------------------------%0A${productList}%0A--------------------------------%0A*Total:* KSh ${Number(order.total).toFixed(2)}%0AThank you!`;
 
-      const phoneNumber = "254105178685";
+      const phoneNumber = "254142225233";
       window.open(`https://wa.me/${phoneNumber}?text=${whatsappMessage}`, "_blank");
 
       setOrderNumber(order.orderNumber);

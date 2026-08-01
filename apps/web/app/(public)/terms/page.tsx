@@ -180,7 +180,7 @@ const Terms: React.FC = () => {
         <p>For support or questions:</p>
         <ul className="list-disc list-inside space-y-1">
           <li>Nurushop Support</li>
-          <li>Phone: +254 105178685</li>
+          <li>Phone: +254 142225233</li>
           <li>Email: nurushoponline@gmail.com</li>
           <li>Website: nurushop.co.ke</li>
         </ul>

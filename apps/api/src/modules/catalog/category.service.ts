@@ -5,16 +5,27 @@ import { uniqueSlug } from "./slug.js";
 import { toCategoryDTO, type CategoryWithCount } from "./serializers.js";
 
 const withCount = { _count: { select: { products: true } } } as const;
+const withLatestProductImage = {
+  products: {
+    where: { isActive: true, images: { isEmpty: false } },
+    orderBy: { createdAt: "desc" as const },
+    take: 1,
+    select: { images: true },
+  },
+} as const;
 
 async function slugTaken(slug: string, excludeId?: string): Promise<boolean> {
   const existing = await prisma.category.findUnique({ where: { slug }, select: { id: true } });
   return existing != null && existing.id !== excludeId;
 }
 
-export async function list(includeCounts = false) {
+export async function list(includeCounts = false, onlyWithActiveProducts = false) {
   const rows = await prisma.category.findMany({
+    ...(onlyWithActiveProducts
+      ? { where: { products: { some: { isActive: true } } } }
+      : {}),
     orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
-    ...(includeCounts ? { include: withCount } : {}),
+    include: { ...withLatestProductImage, ...(includeCounts ? withCount : {}) },
   });
   return rows.map((r) => toCategoryDTO(r as CategoryWithCount));
 }
@@ -22,7 +33,7 @@ export async function list(includeCounts = false) {
 export async function getByIdOrSlug(idOrSlug: string) {
   const row = await prisma.category.findFirst({
     where: { OR: [{ id: idOrSlug }, { slug: idOrSlug }] },
-    include: withCount,
+    include: { ...withCount, ...withLatestProductImage },
   });
   if (!row) throw Errors.notFound("Category not found.");
   return toCategoryDTO(row as CategoryWithCount);
@@ -35,10 +46,11 @@ export async function create(input: CategoryCreateInput) {
       name: input.name,
       slug,
       icon: input.icon ?? null,
+      imageUrl: input.imageUrl ?? null,
       description: input.description ?? null,
       sortOrder: input.sortOrder ?? 0,
     },
-    include: withCount,
+    include: { ...withCount, ...withLatestProductImage },
   });
   return toCategoryDTO(row as CategoryWithCount);
 }
@@ -59,10 +71,11 @@ export async function update(id: string, input: CategoryUpdateInput) {
       ...(input.name !== undefined ? { name: input.name } : {}),
       slug,
       ...(input.icon !== undefined ? { icon: input.icon } : {}),
+      ...(input.imageUrl !== undefined ? { imageUrl: input.imageUrl } : {}),
       ...(input.description !== undefined ? { description: input.description } : {}),
       ...(input.sortOrder !== undefined ? { sortOrder: input.sortOrder } : {}),
     },
-    include: withCount,
+    include: { ...withCount, ...withLatestProductImage },
   });
   return toCategoryDTO(row as CategoryWithCount);
 }

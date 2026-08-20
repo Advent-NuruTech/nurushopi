@@ -1,7 +1,7 @@
 // Edge-safe JWT helpers (jose only — no Node built-ins).
 // Safe to import from Next.js middleware (Edge runtime).
 import { SignJWT, jwtVerify, type JWTPayload } from "jose";
-import type { AccessTokenClaims, AdminAccessTokenClaims } from "@nuru/types";
+import type { AccessTokenClaims, AdminAccessTokenClaims, VendorAccessTokenClaims } from "@nuru/types";
 
 const encoder = new TextEncoder();
 
@@ -59,6 +59,31 @@ export async function verifyAdminAccessToken(
     const { payload } = await jwtVerify(token, secretKey(secret));
     if ((payload as JWTPayload & { type?: string }).type !== "admin_access") return null;
     return payload as unknown as AdminAccessTokenClaims;
+  } catch {
+    return null;
+  }
+}
+
+export async function signVendorAccessToken(
+  claims: Omit<VendorAccessTokenClaims, "type">,
+  opts: SignOptions,
+): Promise<string> {
+  return new SignJWT({ ...claims, type: "vendor_access" })
+    .setProtectedHeader({ alg: "HS256" })
+    .setSubject(claims.sub)
+    .setIssuedAt()
+    .setExpirationTime(`${opts.ttlSeconds}s`)
+    .sign(secretKey(opts.secret));
+}
+
+export async function verifyVendorAccessToken(
+  token: string,
+  secret: string,
+): Promise<VendorAccessTokenClaims | null> {
+  try {
+    const { payload } = await jwtVerify(token, secretKey(secret));
+    if ((payload as JWTPayload & { type?: string }).type !== "vendor_access") return null;
+    return payload as unknown as VendorAccessTokenClaims;
   } catch {
     return null;
   }

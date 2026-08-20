@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Truck, Sparkles, Zap } from "lucide-react";
+import { Sparkles, Zap } from "lucide-react";
 import {
   HERO_DEFAULT_GRADIENT,
   resolveHeroGradient,
@@ -120,24 +120,6 @@ export default function HeroSection() {
 
         {/* Nationwide Delivery */}
         <div className="hidden md:flex shrink-0 items-center gap-4">
-
-          <div className="flex items-center gap-3 rounded-full bg-gradient-to-r from-yellow-400 via-orange-400 to-red-500 px-6 py-3 shadow-2xl animate-pulse">
-
-            <Truck
-              size={24}
-              className="text-white"
-            />
-
-            <div className="flex flex-col leading-none">
-              <span className="text-[11px] uppercase tracking-widest text-white/90">
-                We Deliver
-              </span>
-
-              <span className="text-lg font-black text-white">
-                NATIONWIDE DELIVERY
-              </span>
-            </div>
-          </div>
 
           <Link
             href="/vendors/meet"

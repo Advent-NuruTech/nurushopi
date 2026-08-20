@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { emailSchema } from "./auth.js";
+import { emailSchema, passwordSchema } from "./auth.js";
 import { paginationQuerySchema } from "./catalog.js";
 
 // ---------------------------------------------------------------------------
@@ -48,4 +48,46 @@ export interface VendorApplicationDTO {
   status: VendorApplicationStatus;
   createdAt: string;
   updatedAt: string;
+}
+
+// ---------------------------------------------------------------------------
+// Vendor authentication
+//
+// Vendors are invited by admins after their application is approved. They get
+// their own login system separate from admin auth.
+// ---------------------------------------------------------------------------
+
+export const vendorLoginSchema = z.object({
+  email: emailSchema,
+  password: z.string().min(1, "Password is required."),
+});
+export type VendorLoginInput = z.infer<typeof vendorLoginSchema>;
+
+export const vendorSignupSchema = z.object({
+  name: z.string().trim().min(1, "Name is required.").max(120),
+  email: emailSchema,
+  password: passwordSchema,
+  inviteToken: z.string().trim().min(1, "Invite token is required.").max(200),
+});
+export type VendorSignupInput = z.infer<typeof vendorSignupSchema>;
+
+/** Public shape of a vendor account returned by the API. */
+export interface VendorUserDTO {
+  id: string;
+  email: string;
+  name: string;
+  applicationId: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+/** A created vendor invite, returned to the admin who made it. */
+export interface VendorInviteDTO {
+  id: string;
+  email: string;
+  applicationId: string;
+  token?: string;
+  status: "PENDING" | "ACCEPTED" | "REVOKED" | "EXPIRED";
+  expiresAt: string;
+  createdAt: string;
 }

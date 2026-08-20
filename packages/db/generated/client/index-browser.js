@@ -230,6 +230,7 @@ exports.Prisma.CategoryScalarFieldEnum = {
   name: 'name',
   slug: 'slug',
   icon: 'icon',
+  imageUrl: 'imageUrl',
   description: 'description',
   sortOrder: 'sortOrder',
   createdAt: 'createdAt',
@@ -423,6 +424,28 @@ exports.Prisma.VendorApplicationScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.VendorAccountScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  passwordHash: 'passwordHash',
+  name: 'name',
+  applicationId: 'applicationId',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.VendorInviteScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  applicationId: 'applicationId',
+  tokenHash: 'tokenHash',
+  status: 'status',
+  expiresAt: 'expiresAt',
+  acceptedAt: 'acceptedAt',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.PwaInstallScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -568,6 +591,8 @@ exports.Prisma.ModelName = {
   Message: 'Message',
   Contact: 'Contact',
   VendorApplication: 'VendorApplication',
+  VendorAccount: 'VendorAccount',
+  VendorInvite: 'VendorInvite',
   PwaInstall: 'PwaInstall',
   SabbathMessage: 'SabbathMessage'
 };

@@ -134,13 +134,14 @@ export interface CategoryVM {
   name: string;
   slug: string;
   productCount?: number;
+  image: string;
 }
 
 export async function listCategories(withCounts = false): Promise<CategoryVM[]> {
   let categories: CategoryDTO[];
   try {
     ({ categories } = await apiGet<{ categories: CategoryDTO[] }>(
-      `/catalog/categories${withCounts ? "?withCounts=true" : ""}`,
+      `/catalog/categories?onlyWithProducts=true${withCounts ? "&withCounts=true" : ""}`,
       { tags: [CacheTags.categories], revalidate: Revalidate.default },
     ));
   } catch (err) {
@@ -155,6 +156,7 @@ export async function listCategories(withCounts = false): Promise<CategoryVM[]> 
     name: c.name,
     slug: c.slug,
     productCount: c.productCount,
+    image: c.imageUrl || "/assets/logo.png",
   }));
 }
 

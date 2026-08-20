@@ -144,6 +144,16 @@ export type Contact = $Result.DefaultSelection<Prisma.$ContactPayload>
  */
 export type VendorApplication = $Result.DefaultSelection<Prisma.$VendorApplicationPayload>
 /**
+ * Model VendorAccount
+ * 
+ */
+export type VendorAccount = $Result.DefaultSelection<Prisma.$VendorAccountPayload>
+/**
+ * Model VendorInvite
+ * 
+ */
+export type VendorInvite = $Result.DefaultSelection<Prisma.$VendorInvitePayload>
+/**
  * Model PwaInstall
  * 
  */
@@ -698,6 +708,26 @@ export class PrismaClient<
   get vendorApplication(): Prisma.VendorApplicationDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.vendorAccount`: Exposes CRUD operations for the **VendorAccount** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more VendorAccounts
+    * const vendorAccounts = await prisma.vendorAccount.findMany()
+    * ```
+    */
+  get vendorAccount(): Prisma.VendorAccountDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.vendorInvite`: Exposes CRUD operations for the **VendorInvite** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more VendorInvites
+    * const vendorInvites = await prisma.vendorInvite.findMany()
+    * ```
+    */
+  get vendorInvite(): Prisma.VendorInviteDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.pwaInstall`: Exposes CRUD operations for the **PwaInstall** model.
     * Example usage:
     * ```ts
@@ -1183,6 +1213,8 @@ export namespace Prisma {
     Message: 'Message',
     Contact: 'Contact',
     VendorApplication: 'VendorApplication',
+    VendorAccount: 'VendorAccount',
+    VendorInvite: 'VendorInvite',
     PwaInstall: 'PwaInstall',
     SabbathMessage: 'SabbathMessage'
   };
@@ -1203,7 +1235,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "oAuthAccount" | "refreshToken" | "emailVerificationToken" | "passwordResetToken" | "legacyPasswordImport" | "loginAttempt" | "admin" | "adminInvite" | "adminLog" | "category" | "product" | "banner" | "heroAnnouncement" | "wholesaleItem" | "order" | "orderItem" | "review" | "productView" | "walletTransaction" | "walletRedemption" | "referral" | "notification" | "message" | "contact" | "vendorApplication" | "pwaInstall" | "sabbathMessage"
+      modelProps: "user" | "oAuthAccount" | "refreshToken" | "emailVerificationToken" | "passwordResetToken" | "legacyPasswordImport" | "loginAttempt" | "admin" | "adminInvite" | "adminLog" | "category" | "product" | "banner" | "heroAnnouncement" | "wholesaleItem" | "order" | "orderItem" | "review" | "productView" | "walletTransaction" | "walletRedemption" | "referral" | "notification" | "message" | "contact" | "vendorApplication" | "vendorAccount" | "vendorInvite" | "pwaInstall" | "sabbathMessage"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -3131,6 +3163,154 @@ export namespace Prisma {
           }
         }
       }
+      VendorAccount: {
+        payload: Prisma.$VendorAccountPayload<ExtArgs>
+        fields: Prisma.VendorAccountFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.VendorAccountFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VendorAccountPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.VendorAccountFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VendorAccountPayload>
+          }
+          findFirst: {
+            args: Prisma.VendorAccountFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VendorAccountPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.VendorAccountFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VendorAccountPayload>
+          }
+          findMany: {
+            args: Prisma.VendorAccountFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VendorAccountPayload>[]
+          }
+          create: {
+            args: Prisma.VendorAccountCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VendorAccountPayload>
+          }
+          createMany: {
+            args: Prisma.VendorAccountCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.VendorAccountCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VendorAccountPayload>[]
+          }
+          delete: {
+            args: Prisma.VendorAccountDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VendorAccountPayload>
+          }
+          update: {
+            args: Prisma.VendorAccountUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VendorAccountPayload>
+          }
+          deleteMany: {
+            args: Prisma.VendorAccountDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.VendorAccountUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.VendorAccountUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VendorAccountPayload>[]
+          }
+          upsert: {
+            args: Prisma.VendorAccountUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VendorAccountPayload>
+          }
+          aggregate: {
+            args: Prisma.VendorAccountAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateVendorAccount>
+          }
+          groupBy: {
+            args: Prisma.VendorAccountGroupByArgs<ExtArgs>
+            result: $Utils.Optional<VendorAccountGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.VendorAccountCountArgs<ExtArgs>
+            result: $Utils.Optional<VendorAccountCountAggregateOutputType> | number
+          }
+        }
+      }
+      VendorInvite: {
+        payload: Prisma.$VendorInvitePayload<ExtArgs>
+        fields: Prisma.VendorInviteFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.VendorInviteFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VendorInvitePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.VendorInviteFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VendorInvitePayload>
+          }
+          findFirst: {
+            args: Prisma.VendorInviteFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VendorInvitePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.VendorInviteFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VendorInvitePayload>
+          }
+          findMany: {
+            args: Prisma.VendorInviteFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VendorInvitePayload>[]
+          }
+          create: {
+            args: Prisma.VendorInviteCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VendorInvitePayload>
+          }
+          createMany: {
+            args: Prisma.VendorInviteCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.VendorInviteCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VendorInvitePayload>[]
+          }
+          delete: {
+            args: Prisma.VendorInviteDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VendorInvitePayload>
+          }
+          update: {
+            args: Prisma.VendorInviteUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VendorInvitePayload>
+          }
+          deleteMany: {
+            args: Prisma.VendorInviteDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.VendorInviteUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.VendorInviteUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VendorInvitePayload>[]
+          }
+          upsert: {
+            args: Prisma.VendorInviteUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VendorInvitePayload>
+          }
+          aggregate: {
+            args: Prisma.VendorInviteAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateVendorInvite>
+          }
+          groupBy: {
+            args: Prisma.VendorInviteGroupByArgs<ExtArgs>
+            result: $Utils.Optional<VendorInviteGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.VendorInviteCountArgs<ExtArgs>
+            result: $Utils.Optional<VendorInviteCountAggregateOutputType> | number
+          }
+        }
+      }
       PwaInstall: {
         payload: Prisma.$PwaInstallPayload<ExtArgs>
         fields: Prisma.PwaInstallFieldRefs
@@ -3401,6 +3581,8 @@ export namespace Prisma {
     message?: MessageOmit
     contact?: ContactOmit
     vendorApplication?: VendorApplicationOmit
+    vendorAccount?: VendorAccountOmit
+    vendorInvite?: VendorInviteOmit
     pwaInstall?: PwaInstallOmit
     sabbathMessage?: SabbathMessageOmit
   }
@@ -3783,6 +3965,37 @@ export namespace Prisma {
    */
   export type OrderCountOutputTypeCountItemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: OrderItemWhereInput
+  }
+
+
+  /**
+   * Count Type VendorApplicationCountOutputType
+   */
+
+  export type VendorApplicationCountOutputType = {
+    vendorInvites: number
+  }
+
+  export type VendorApplicationCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    vendorInvites?: boolean | VendorApplicationCountOutputTypeCountVendorInvitesArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * VendorApplicationCountOutputType without action
+   */
+  export type VendorApplicationCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VendorApplicationCountOutputType
+     */
+    select?: VendorApplicationCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * VendorApplicationCountOutputType without action
+   */
+  export type VendorApplicationCountOutputTypeCountVendorInvitesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: VendorInviteWhereInput
   }
 
 
@@ -15250,6 +15463,7 @@ export namespace Prisma {
     name: string | null
     slug: string | null
     icon: string | null
+    imageUrl: string | null
     description: string | null
     sortOrder: number | null
     createdAt: Date | null
@@ -15261,6 +15475,7 @@ export namespace Prisma {
     name: string | null
     slug: string | null
     icon: string | null
+    imageUrl: string | null
     description: string | null
     sortOrder: number | null
     createdAt: Date | null
@@ -15272,6 +15487,7 @@ export namespace Prisma {
     name: number
     slug: number
     icon: number
+    imageUrl: number
     description: number
     sortOrder: number
     createdAt: number
@@ -15293,6 +15509,7 @@ export namespace Prisma {
     name?: true
     slug?: true
     icon?: true
+    imageUrl?: true
     description?: true
     sortOrder?: true
     createdAt?: true
@@ -15304,6 +15521,7 @@ export namespace Prisma {
     name?: true
     slug?: true
     icon?: true
+    imageUrl?: true
     description?: true
     sortOrder?: true
     createdAt?: true
@@ -15315,6 +15533,7 @@ export namespace Prisma {
     name?: true
     slug?: true
     icon?: true
+    imageUrl?: true
     description?: true
     sortOrder?: true
     createdAt?: true
@@ -15413,6 +15632,7 @@ export namespace Prisma {
     name: string
     slug: string
     icon: string | null
+    imageUrl: string | null
     description: string | null
     sortOrder: number
     createdAt: Date
@@ -15443,6 +15663,7 @@ export namespace Prisma {
     name?: boolean
     slug?: boolean
     icon?: boolean
+    imageUrl?: boolean
     description?: boolean
     sortOrder?: boolean
     createdAt?: boolean
@@ -15456,6 +15677,7 @@ export namespace Prisma {
     name?: boolean
     slug?: boolean
     icon?: boolean
+    imageUrl?: boolean
     description?: boolean
     sortOrder?: boolean
     createdAt?: boolean
@@ -15467,6 +15689,7 @@ export namespace Prisma {
     name?: boolean
     slug?: boolean
     icon?: boolean
+    imageUrl?: boolean
     description?: boolean
     sortOrder?: boolean
     createdAt?: boolean
@@ -15478,13 +15701,14 @@ export namespace Prisma {
     name?: boolean
     slug?: boolean
     icon?: boolean
+    imageUrl?: boolean
     description?: boolean
     sortOrder?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type CategoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "icon" | "description" | "sortOrder" | "createdAt" | "updatedAt", ExtArgs["result"]["category"]>
+  export type CategoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "icon" | "imageUrl" | "description" | "sortOrder" | "createdAt" | "updatedAt", ExtArgs["result"]["category"]>
   export type CategoryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     products?: boolean | Category$productsArgs<ExtArgs>
     _count?: boolean | CategoryCountOutputTypeDefaultArgs<ExtArgs>
@@ -15502,6 +15726,7 @@ export namespace Prisma {
       name: string
       slug: string
       icon: string | null
+      imageUrl: string | null
       description: string | null
       sortOrder: number
       createdAt: Date
@@ -15934,6 +16159,7 @@ export namespace Prisma {
     readonly name: FieldRef<"Category", 'String'>
     readonly slug: FieldRef<"Category", 'String'>
     readonly icon: FieldRef<"Category", 'String'>
+    readonly imageUrl: FieldRef<"Category", 'String'>
     readonly description: FieldRef<"Category", 'String'>
     readonly sortOrder: FieldRef<"Category", 'Int'>
     readonly createdAt: FieldRef<"Category", 'DateTime'>
@@ -32508,6 +32734,9 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | VendorApplication$userArgs<ExtArgs>
+    account?: boolean | VendorApplication$accountArgs<ExtArgs>
+    vendorInvites?: boolean | VendorApplication$vendorInvitesArgs<ExtArgs>
+    _count?: boolean | VendorApplicationCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["vendorApplication"]>
 
   export type VendorApplicationSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -32554,6 +32783,9 @@ export namespace Prisma {
   export type VendorApplicationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "businessName" | "contactName" | "email" | "phone" | "description" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["vendorApplication"]>
   export type VendorApplicationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | VendorApplication$userArgs<ExtArgs>
+    account?: boolean | VendorApplication$accountArgs<ExtArgs>
+    vendorInvites?: boolean | VendorApplication$vendorInvitesArgs<ExtArgs>
+    _count?: boolean | VendorApplicationCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type VendorApplicationIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | VendorApplication$userArgs<ExtArgs>
@@ -32566,6 +32798,8 @@ export namespace Prisma {
     name: "VendorApplication"
     objects: {
       user: Prisma.$UserPayload<ExtArgs> | null
+      account: Prisma.$VendorAccountPayload<ExtArgs> | null
+      vendorInvites: Prisma.$VendorInvitePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -32973,6 +33207,8 @@ export namespace Prisma {
   export interface Prisma__VendorApplicationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends VendorApplication$userArgs<ExtArgs> = {}>(args?: Subset<T, VendorApplication$userArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    account<T extends VendorApplication$accountArgs<ExtArgs> = {}>(args?: Subset<T, VendorApplication$accountArgs<ExtArgs>>): Prisma__VendorAccountClient<$Result.GetResult<Prisma.$VendorAccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    vendorInvites<T extends VendorApplication$vendorInvitesArgs<ExtArgs> = {}>(args?: Subset<T, VendorApplication$vendorInvitesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VendorInvitePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -33427,6 +33663,49 @@ export namespace Prisma {
   }
 
   /**
+   * VendorApplication.account
+   */
+  export type VendorApplication$accountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VendorAccount
+     */
+    select?: VendorAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VendorAccount
+     */
+    omit?: VendorAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VendorAccountInclude<ExtArgs> | null
+    where?: VendorAccountWhereInput
+  }
+
+  /**
+   * VendorApplication.vendorInvites
+   */
+  export type VendorApplication$vendorInvitesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VendorInvite
+     */
+    select?: VendorInviteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VendorInvite
+     */
+    omit?: VendorInviteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VendorInviteInclude<ExtArgs> | null
+    where?: VendorInviteWhereInput
+    orderBy?: VendorInviteOrderByWithRelationInput | VendorInviteOrderByWithRelationInput[]
+    cursor?: VendorInviteWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: VendorInviteScalarFieldEnum | VendorInviteScalarFieldEnum[]
+  }
+
+  /**
    * VendorApplication without action
    */
   export type VendorApplicationDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -33442,6 +33721,2200 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: VendorApplicationInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model VendorAccount
+   */
+
+  export type AggregateVendorAccount = {
+    _count: VendorAccountCountAggregateOutputType | null
+    _min: VendorAccountMinAggregateOutputType | null
+    _max: VendorAccountMaxAggregateOutputType | null
+  }
+
+  export type VendorAccountMinAggregateOutputType = {
+    id: string | null
+    email: string | null
+    passwordHash: string | null
+    name: string | null
+    applicationId: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type VendorAccountMaxAggregateOutputType = {
+    id: string | null
+    email: string | null
+    passwordHash: string | null
+    name: string | null
+    applicationId: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type VendorAccountCountAggregateOutputType = {
+    id: number
+    email: number
+    passwordHash: number
+    name: number
+    applicationId: number
+    isActive: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type VendorAccountMinAggregateInputType = {
+    id?: true
+    email?: true
+    passwordHash?: true
+    name?: true
+    applicationId?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type VendorAccountMaxAggregateInputType = {
+    id?: true
+    email?: true
+    passwordHash?: true
+    name?: true
+    applicationId?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type VendorAccountCountAggregateInputType = {
+    id?: true
+    email?: true
+    passwordHash?: true
+    name?: true
+    applicationId?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type VendorAccountAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which VendorAccount to aggregate.
+     */
+    where?: VendorAccountWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of VendorAccounts to fetch.
+     */
+    orderBy?: VendorAccountOrderByWithRelationInput | VendorAccountOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: VendorAccountWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` VendorAccounts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` VendorAccounts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned VendorAccounts
+    **/
+    _count?: true | VendorAccountCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: VendorAccountMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: VendorAccountMaxAggregateInputType
+  }
+
+  export type GetVendorAccountAggregateType<T extends VendorAccountAggregateArgs> = {
+        [P in keyof T & keyof AggregateVendorAccount]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateVendorAccount[P]>
+      : GetScalarType<T[P], AggregateVendorAccount[P]>
+  }
+
+
+
+
+  export type VendorAccountGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: VendorAccountWhereInput
+    orderBy?: VendorAccountOrderByWithAggregationInput | VendorAccountOrderByWithAggregationInput[]
+    by: VendorAccountScalarFieldEnum[] | VendorAccountScalarFieldEnum
+    having?: VendorAccountScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: VendorAccountCountAggregateInputType | true
+    _min?: VendorAccountMinAggregateInputType
+    _max?: VendorAccountMaxAggregateInputType
+  }
+
+  export type VendorAccountGroupByOutputType = {
+    id: string
+    email: string
+    passwordHash: string
+    name: string
+    applicationId: string
+    isActive: boolean
+    createdAt: Date
+    updatedAt: Date
+    _count: VendorAccountCountAggregateOutputType | null
+    _min: VendorAccountMinAggregateOutputType | null
+    _max: VendorAccountMaxAggregateOutputType | null
+  }
+
+  type GetVendorAccountGroupByPayload<T extends VendorAccountGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<VendorAccountGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof VendorAccountGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], VendorAccountGroupByOutputType[P]>
+            : GetScalarType<T[P], VendorAccountGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type VendorAccountSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    email?: boolean
+    passwordHash?: boolean
+    name?: boolean
+    applicationId?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    application?: boolean | VendorApplicationDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["vendorAccount"]>
+
+  export type VendorAccountSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    email?: boolean
+    passwordHash?: boolean
+    name?: boolean
+    applicationId?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    application?: boolean | VendorApplicationDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["vendorAccount"]>
+
+  export type VendorAccountSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    email?: boolean
+    passwordHash?: boolean
+    name?: boolean
+    applicationId?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    application?: boolean | VendorApplicationDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["vendorAccount"]>
+
+  export type VendorAccountSelectScalar = {
+    id?: boolean
+    email?: boolean
+    passwordHash?: boolean
+    name?: boolean
+    applicationId?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type VendorAccountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "passwordHash" | "name" | "applicationId" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["vendorAccount"]>
+  export type VendorAccountInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    application?: boolean | VendorApplicationDefaultArgs<ExtArgs>
+  }
+  export type VendorAccountIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    application?: boolean | VendorApplicationDefaultArgs<ExtArgs>
+  }
+  export type VendorAccountIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    application?: boolean | VendorApplicationDefaultArgs<ExtArgs>
+  }
+
+  export type $VendorAccountPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "VendorAccount"
+    objects: {
+      application: Prisma.$VendorApplicationPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      email: string
+      passwordHash: string
+      name: string
+      applicationId: string
+      isActive: boolean
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["vendorAccount"]>
+    composites: {}
+  }
+
+  type VendorAccountGetPayload<S extends boolean | null | undefined | VendorAccountDefaultArgs> = $Result.GetResult<Prisma.$VendorAccountPayload, S>
+
+  type VendorAccountCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<VendorAccountFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: VendorAccountCountAggregateInputType | true
+    }
+
+  export interface VendorAccountDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['VendorAccount'], meta: { name: 'VendorAccount' } }
+    /**
+     * Find zero or one VendorAccount that matches the filter.
+     * @param {VendorAccountFindUniqueArgs} args - Arguments to find a VendorAccount
+     * @example
+     * // Get one VendorAccount
+     * const vendorAccount = await prisma.vendorAccount.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends VendorAccountFindUniqueArgs>(args: SelectSubset<T, VendorAccountFindUniqueArgs<ExtArgs>>): Prisma__VendorAccountClient<$Result.GetResult<Prisma.$VendorAccountPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one VendorAccount that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {VendorAccountFindUniqueOrThrowArgs} args - Arguments to find a VendorAccount
+     * @example
+     * // Get one VendorAccount
+     * const vendorAccount = await prisma.vendorAccount.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends VendorAccountFindUniqueOrThrowArgs>(args: SelectSubset<T, VendorAccountFindUniqueOrThrowArgs<ExtArgs>>): Prisma__VendorAccountClient<$Result.GetResult<Prisma.$VendorAccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first VendorAccount that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VendorAccountFindFirstArgs} args - Arguments to find a VendorAccount
+     * @example
+     * // Get one VendorAccount
+     * const vendorAccount = await prisma.vendorAccount.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends VendorAccountFindFirstArgs>(args?: SelectSubset<T, VendorAccountFindFirstArgs<ExtArgs>>): Prisma__VendorAccountClient<$Result.GetResult<Prisma.$VendorAccountPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first VendorAccount that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VendorAccountFindFirstOrThrowArgs} args - Arguments to find a VendorAccount
+     * @example
+     * // Get one VendorAccount
+     * const vendorAccount = await prisma.vendorAccount.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends VendorAccountFindFirstOrThrowArgs>(args?: SelectSubset<T, VendorAccountFindFirstOrThrowArgs<ExtArgs>>): Prisma__VendorAccountClient<$Result.GetResult<Prisma.$VendorAccountPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more VendorAccounts that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VendorAccountFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all VendorAccounts
+     * const vendorAccounts = await prisma.vendorAccount.findMany()
+     * 
+     * // Get first 10 VendorAccounts
+     * const vendorAccounts = await prisma.vendorAccount.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const vendorAccountWithIdOnly = await prisma.vendorAccount.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends VendorAccountFindManyArgs>(args?: SelectSubset<T, VendorAccountFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VendorAccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a VendorAccount.
+     * @param {VendorAccountCreateArgs} args - Arguments to create a VendorAccount.
+     * @example
+     * // Create one VendorAccount
+     * const VendorAccount = await prisma.vendorAccount.create({
+     *   data: {
+     *     // ... data to create a VendorAccount
+     *   }
+     * })
+     * 
+     */
+    create<T extends VendorAccountCreateArgs>(args: SelectSubset<T, VendorAccountCreateArgs<ExtArgs>>): Prisma__VendorAccountClient<$Result.GetResult<Prisma.$VendorAccountPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many VendorAccounts.
+     * @param {VendorAccountCreateManyArgs} args - Arguments to create many VendorAccounts.
+     * @example
+     * // Create many VendorAccounts
+     * const vendorAccount = await prisma.vendorAccount.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends VendorAccountCreateManyArgs>(args?: SelectSubset<T, VendorAccountCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many VendorAccounts and returns the data saved in the database.
+     * @param {VendorAccountCreateManyAndReturnArgs} args - Arguments to create many VendorAccounts.
+     * @example
+     * // Create many VendorAccounts
+     * const vendorAccount = await prisma.vendorAccount.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many VendorAccounts and only return the `id`
+     * const vendorAccountWithIdOnly = await prisma.vendorAccount.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends VendorAccountCreateManyAndReturnArgs>(args?: SelectSubset<T, VendorAccountCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VendorAccountPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a VendorAccount.
+     * @param {VendorAccountDeleteArgs} args - Arguments to delete one VendorAccount.
+     * @example
+     * // Delete one VendorAccount
+     * const VendorAccount = await prisma.vendorAccount.delete({
+     *   where: {
+     *     // ... filter to delete one VendorAccount
+     *   }
+     * })
+     * 
+     */
+    delete<T extends VendorAccountDeleteArgs>(args: SelectSubset<T, VendorAccountDeleteArgs<ExtArgs>>): Prisma__VendorAccountClient<$Result.GetResult<Prisma.$VendorAccountPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one VendorAccount.
+     * @param {VendorAccountUpdateArgs} args - Arguments to update one VendorAccount.
+     * @example
+     * // Update one VendorAccount
+     * const vendorAccount = await prisma.vendorAccount.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends VendorAccountUpdateArgs>(args: SelectSubset<T, VendorAccountUpdateArgs<ExtArgs>>): Prisma__VendorAccountClient<$Result.GetResult<Prisma.$VendorAccountPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more VendorAccounts.
+     * @param {VendorAccountDeleteManyArgs} args - Arguments to filter VendorAccounts to delete.
+     * @example
+     * // Delete a few VendorAccounts
+     * const { count } = await prisma.vendorAccount.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends VendorAccountDeleteManyArgs>(args?: SelectSubset<T, VendorAccountDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more VendorAccounts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VendorAccountUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many VendorAccounts
+     * const vendorAccount = await prisma.vendorAccount.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends VendorAccountUpdateManyArgs>(args: SelectSubset<T, VendorAccountUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more VendorAccounts and returns the data updated in the database.
+     * @param {VendorAccountUpdateManyAndReturnArgs} args - Arguments to update many VendorAccounts.
+     * @example
+     * // Update many VendorAccounts
+     * const vendorAccount = await prisma.vendorAccount.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more VendorAccounts and only return the `id`
+     * const vendorAccountWithIdOnly = await prisma.vendorAccount.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends VendorAccountUpdateManyAndReturnArgs>(args: SelectSubset<T, VendorAccountUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VendorAccountPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one VendorAccount.
+     * @param {VendorAccountUpsertArgs} args - Arguments to update or create a VendorAccount.
+     * @example
+     * // Update or create a VendorAccount
+     * const vendorAccount = await prisma.vendorAccount.upsert({
+     *   create: {
+     *     // ... data to create a VendorAccount
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the VendorAccount we want to update
+     *   }
+     * })
+     */
+    upsert<T extends VendorAccountUpsertArgs>(args: SelectSubset<T, VendorAccountUpsertArgs<ExtArgs>>): Prisma__VendorAccountClient<$Result.GetResult<Prisma.$VendorAccountPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of VendorAccounts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VendorAccountCountArgs} args - Arguments to filter VendorAccounts to count.
+     * @example
+     * // Count the number of VendorAccounts
+     * const count = await prisma.vendorAccount.count({
+     *   where: {
+     *     // ... the filter for the VendorAccounts we want to count
+     *   }
+     * })
+    **/
+    count<T extends VendorAccountCountArgs>(
+      args?: Subset<T, VendorAccountCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], VendorAccountCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a VendorAccount.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VendorAccountAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends VendorAccountAggregateArgs>(args: Subset<T, VendorAccountAggregateArgs>): Prisma.PrismaPromise<GetVendorAccountAggregateType<T>>
+
+    /**
+     * Group by VendorAccount.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VendorAccountGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends VendorAccountGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: VendorAccountGroupByArgs['orderBy'] }
+        : { orderBy?: VendorAccountGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, VendorAccountGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetVendorAccountGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the VendorAccount model
+   */
+  readonly fields: VendorAccountFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for VendorAccount.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__VendorAccountClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    application<T extends VendorApplicationDefaultArgs<ExtArgs> = {}>(args?: Subset<T, VendorApplicationDefaultArgs<ExtArgs>>): Prisma__VendorApplicationClient<$Result.GetResult<Prisma.$VendorApplicationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the VendorAccount model
+   */
+  interface VendorAccountFieldRefs {
+    readonly id: FieldRef<"VendorAccount", 'String'>
+    readonly email: FieldRef<"VendorAccount", 'String'>
+    readonly passwordHash: FieldRef<"VendorAccount", 'String'>
+    readonly name: FieldRef<"VendorAccount", 'String'>
+    readonly applicationId: FieldRef<"VendorAccount", 'String'>
+    readonly isActive: FieldRef<"VendorAccount", 'Boolean'>
+    readonly createdAt: FieldRef<"VendorAccount", 'DateTime'>
+    readonly updatedAt: FieldRef<"VendorAccount", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * VendorAccount findUnique
+   */
+  export type VendorAccountFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VendorAccount
+     */
+    select?: VendorAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VendorAccount
+     */
+    omit?: VendorAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VendorAccountInclude<ExtArgs> | null
+    /**
+     * Filter, which VendorAccount to fetch.
+     */
+    where: VendorAccountWhereUniqueInput
+  }
+
+  /**
+   * VendorAccount findUniqueOrThrow
+   */
+  export type VendorAccountFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VendorAccount
+     */
+    select?: VendorAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VendorAccount
+     */
+    omit?: VendorAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VendorAccountInclude<ExtArgs> | null
+    /**
+     * Filter, which VendorAccount to fetch.
+     */
+    where: VendorAccountWhereUniqueInput
+  }
+
+  /**
+   * VendorAccount findFirst
+   */
+  export type VendorAccountFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VendorAccount
+     */
+    select?: VendorAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VendorAccount
+     */
+    omit?: VendorAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VendorAccountInclude<ExtArgs> | null
+    /**
+     * Filter, which VendorAccount to fetch.
+     */
+    where?: VendorAccountWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of VendorAccounts to fetch.
+     */
+    orderBy?: VendorAccountOrderByWithRelationInput | VendorAccountOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for VendorAccounts.
+     */
+    cursor?: VendorAccountWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` VendorAccounts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` VendorAccounts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of VendorAccounts.
+     */
+    distinct?: VendorAccountScalarFieldEnum | VendorAccountScalarFieldEnum[]
+  }
+
+  /**
+   * VendorAccount findFirstOrThrow
+   */
+  export type VendorAccountFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VendorAccount
+     */
+    select?: VendorAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VendorAccount
+     */
+    omit?: VendorAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VendorAccountInclude<ExtArgs> | null
+    /**
+     * Filter, which VendorAccount to fetch.
+     */
+    where?: VendorAccountWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of VendorAccounts to fetch.
+     */
+    orderBy?: VendorAccountOrderByWithRelationInput | VendorAccountOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for VendorAccounts.
+     */
+    cursor?: VendorAccountWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` VendorAccounts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` VendorAccounts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of VendorAccounts.
+     */
+    distinct?: VendorAccountScalarFieldEnum | VendorAccountScalarFieldEnum[]
+  }
+
+  /**
+   * VendorAccount findMany
+   */
+  export type VendorAccountFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VendorAccount
+     */
+    select?: VendorAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VendorAccount
+     */
+    omit?: VendorAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VendorAccountInclude<ExtArgs> | null
+    /**
+     * Filter, which VendorAccounts to fetch.
+     */
+    where?: VendorAccountWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of VendorAccounts to fetch.
+     */
+    orderBy?: VendorAccountOrderByWithRelationInput | VendorAccountOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing VendorAccounts.
+     */
+    cursor?: VendorAccountWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` VendorAccounts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` VendorAccounts.
+     */
+    skip?: number
+    distinct?: VendorAccountScalarFieldEnum | VendorAccountScalarFieldEnum[]
+  }
+
+  /**
+   * VendorAccount create
+   */
+  export type VendorAccountCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VendorAccount
+     */
+    select?: VendorAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VendorAccount
+     */
+    omit?: VendorAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VendorAccountInclude<ExtArgs> | null
+    /**
+     * The data needed to create a VendorAccount.
+     */
+    data: XOR<VendorAccountCreateInput, VendorAccountUncheckedCreateInput>
+  }
+
+  /**
+   * VendorAccount createMany
+   */
+  export type VendorAccountCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many VendorAccounts.
+     */
+    data: VendorAccountCreateManyInput | VendorAccountCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * VendorAccount createManyAndReturn
+   */
+  export type VendorAccountCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VendorAccount
+     */
+    select?: VendorAccountSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the VendorAccount
+     */
+    omit?: VendorAccountOmit<ExtArgs> | null
+    /**
+     * The data used to create many VendorAccounts.
+     */
+    data: VendorAccountCreateManyInput | VendorAccountCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VendorAccountIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * VendorAccount update
+   */
+  export type VendorAccountUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VendorAccount
+     */
+    select?: VendorAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VendorAccount
+     */
+    omit?: VendorAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VendorAccountInclude<ExtArgs> | null
+    /**
+     * The data needed to update a VendorAccount.
+     */
+    data: XOR<VendorAccountUpdateInput, VendorAccountUncheckedUpdateInput>
+    /**
+     * Choose, which VendorAccount to update.
+     */
+    where: VendorAccountWhereUniqueInput
+  }
+
+  /**
+   * VendorAccount updateMany
+   */
+  export type VendorAccountUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update VendorAccounts.
+     */
+    data: XOR<VendorAccountUpdateManyMutationInput, VendorAccountUncheckedUpdateManyInput>
+    /**
+     * Filter which VendorAccounts to update
+     */
+    where?: VendorAccountWhereInput
+    /**
+     * Limit how many VendorAccounts to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * VendorAccount updateManyAndReturn
+   */
+  export type VendorAccountUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VendorAccount
+     */
+    select?: VendorAccountSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the VendorAccount
+     */
+    omit?: VendorAccountOmit<ExtArgs> | null
+    /**
+     * The data used to update VendorAccounts.
+     */
+    data: XOR<VendorAccountUpdateManyMutationInput, VendorAccountUncheckedUpdateManyInput>
+    /**
+     * Filter which VendorAccounts to update
+     */
+    where?: VendorAccountWhereInput
+    /**
+     * Limit how many VendorAccounts to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VendorAccountIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * VendorAccount upsert
+   */
+  export type VendorAccountUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VendorAccount
+     */
+    select?: VendorAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VendorAccount
+     */
+    omit?: VendorAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VendorAccountInclude<ExtArgs> | null
+    /**
+     * The filter to search for the VendorAccount to update in case it exists.
+     */
+    where: VendorAccountWhereUniqueInput
+    /**
+     * In case the VendorAccount found by the `where` argument doesn't exist, create a new VendorAccount with this data.
+     */
+    create: XOR<VendorAccountCreateInput, VendorAccountUncheckedCreateInput>
+    /**
+     * In case the VendorAccount was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<VendorAccountUpdateInput, VendorAccountUncheckedUpdateInput>
+  }
+
+  /**
+   * VendorAccount delete
+   */
+  export type VendorAccountDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VendorAccount
+     */
+    select?: VendorAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VendorAccount
+     */
+    omit?: VendorAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VendorAccountInclude<ExtArgs> | null
+    /**
+     * Filter which VendorAccount to delete.
+     */
+    where: VendorAccountWhereUniqueInput
+  }
+
+  /**
+   * VendorAccount deleteMany
+   */
+  export type VendorAccountDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which VendorAccounts to delete
+     */
+    where?: VendorAccountWhereInput
+    /**
+     * Limit how many VendorAccounts to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * VendorAccount without action
+   */
+  export type VendorAccountDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VendorAccount
+     */
+    select?: VendorAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VendorAccount
+     */
+    omit?: VendorAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VendorAccountInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model VendorInvite
+   */
+
+  export type AggregateVendorInvite = {
+    _count: VendorInviteCountAggregateOutputType | null
+    _min: VendorInviteMinAggregateOutputType | null
+    _max: VendorInviteMaxAggregateOutputType | null
+  }
+
+  export type VendorInviteMinAggregateOutputType = {
+    id: string | null
+    email: string | null
+    applicationId: string | null
+    tokenHash: string | null
+    status: $Enums.AdminInviteStatus | null
+    expiresAt: Date | null
+    acceptedAt: Date | null
+    createdAt: Date | null
+  }
+
+  export type VendorInviteMaxAggregateOutputType = {
+    id: string | null
+    email: string | null
+    applicationId: string | null
+    tokenHash: string | null
+    status: $Enums.AdminInviteStatus | null
+    expiresAt: Date | null
+    acceptedAt: Date | null
+    createdAt: Date | null
+  }
+
+  export type VendorInviteCountAggregateOutputType = {
+    id: number
+    email: number
+    applicationId: number
+    tokenHash: number
+    status: number
+    expiresAt: number
+    acceptedAt: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type VendorInviteMinAggregateInputType = {
+    id?: true
+    email?: true
+    applicationId?: true
+    tokenHash?: true
+    status?: true
+    expiresAt?: true
+    acceptedAt?: true
+    createdAt?: true
+  }
+
+  export type VendorInviteMaxAggregateInputType = {
+    id?: true
+    email?: true
+    applicationId?: true
+    tokenHash?: true
+    status?: true
+    expiresAt?: true
+    acceptedAt?: true
+    createdAt?: true
+  }
+
+  export type VendorInviteCountAggregateInputType = {
+    id?: true
+    email?: true
+    applicationId?: true
+    tokenHash?: true
+    status?: true
+    expiresAt?: true
+    acceptedAt?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type VendorInviteAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which VendorInvite to aggregate.
+     */
+    where?: VendorInviteWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of VendorInvites to fetch.
+     */
+    orderBy?: VendorInviteOrderByWithRelationInput | VendorInviteOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: VendorInviteWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` VendorInvites from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` VendorInvites.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned VendorInvites
+    **/
+    _count?: true | VendorInviteCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: VendorInviteMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: VendorInviteMaxAggregateInputType
+  }
+
+  export type GetVendorInviteAggregateType<T extends VendorInviteAggregateArgs> = {
+        [P in keyof T & keyof AggregateVendorInvite]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateVendorInvite[P]>
+      : GetScalarType<T[P], AggregateVendorInvite[P]>
+  }
+
+
+
+
+  export type VendorInviteGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: VendorInviteWhereInput
+    orderBy?: VendorInviteOrderByWithAggregationInput | VendorInviteOrderByWithAggregationInput[]
+    by: VendorInviteScalarFieldEnum[] | VendorInviteScalarFieldEnum
+    having?: VendorInviteScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: VendorInviteCountAggregateInputType | true
+    _min?: VendorInviteMinAggregateInputType
+    _max?: VendorInviteMaxAggregateInputType
+  }
+
+  export type VendorInviteGroupByOutputType = {
+    id: string
+    email: string
+    applicationId: string
+    tokenHash: string
+    status: $Enums.AdminInviteStatus
+    expiresAt: Date
+    acceptedAt: Date | null
+    createdAt: Date
+    _count: VendorInviteCountAggregateOutputType | null
+    _min: VendorInviteMinAggregateOutputType | null
+    _max: VendorInviteMaxAggregateOutputType | null
+  }
+
+  type GetVendorInviteGroupByPayload<T extends VendorInviteGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<VendorInviteGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof VendorInviteGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], VendorInviteGroupByOutputType[P]>
+            : GetScalarType<T[P], VendorInviteGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type VendorInviteSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    email?: boolean
+    applicationId?: boolean
+    tokenHash?: boolean
+    status?: boolean
+    expiresAt?: boolean
+    acceptedAt?: boolean
+    createdAt?: boolean
+    application?: boolean | VendorApplicationDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["vendorInvite"]>
+
+  export type VendorInviteSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    email?: boolean
+    applicationId?: boolean
+    tokenHash?: boolean
+    status?: boolean
+    expiresAt?: boolean
+    acceptedAt?: boolean
+    createdAt?: boolean
+    application?: boolean | VendorApplicationDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["vendorInvite"]>
+
+  export type VendorInviteSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    email?: boolean
+    applicationId?: boolean
+    tokenHash?: boolean
+    status?: boolean
+    expiresAt?: boolean
+    acceptedAt?: boolean
+    createdAt?: boolean
+    application?: boolean | VendorApplicationDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["vendorInvite"]>
+
+  export type VendorInviteSelectScalar = {
+    id?: boolean
+    email?: boolean
+    applicationId?: boolean
+    tokenHash?: boolean
+    status?: boolean
+    expiresAt?: boolean
+    acceptedAt?: boolean
+    createdAt?: boolean
+  }
+
+  export type VendorInviteOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "applicationId" | "tokenHash" | "status" | "expiresAt" | "acceptedAt" | "createdAt", ExtArgs["result"]["vendorInvite"]>
+  export type VendorInviteInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    application?: boolean | VendorApplicationDefaultArgs<ExtArgs>
+  }
+  export type VendorInviteIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    application?: boolean | VendorApplicationDefaultArgs<ExtArgs>
+  }
+  export type VendorInviteIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    application?: boolean | VendorApplicationDefaultArgs<ExtArgs>
+  }
+
+  export type $VendorInvitePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "VendorInvite"
+    objects: {
+      application: Prisma.$VendorApplicationPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      email: string
+      applicationId: string
+      tokenHash: string
+      status: $Enums.AdminInviteStatus
+      expiresAt: Date
+      acceptedAt: Date | null
+      createdAt: Date
+    }, ExtArgs["result"]["vendorInvite"]>
+    composites: {}
+  }
+
+  type VendorInviteGetPayload<S extends boolean | null | undefined | VendorInviteDefaultArgs> = $Result.GetResult<Prisma.$VendorInvitePayload, S>
+
+  type VendorInviteCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<VendorInviteFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: VendorInviteCountAggregateInputType | true
+    }
+
+  export interface VendorInviteDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['VendorInvite'], meta: { name: 'VendorInvite' } }
+    /**
+     * Find zero or one VendorInvite that matches the filter.
+     * @param {VendorInviteFindUniqueArgs} args - Arguments to find a VendorInvite
+     * @example
+     * // Get one VendorInvite
+     * const vendorInvite = await prisma.vendorInvite.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends VendorInviteFindUniqueArgs>(args: SelectSubset<T, VendorInviteFindUniqueArgs<ExtArgs>>): Prisma__VendorInviteClient<$Result.GetResult<Prisma.$VendorInvitePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one VendorInvite that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {VendorInviteFindUniqueOrThrowArgs} args - Arguments to find a VendorInvite
+     * @example
+     * // Get one VendorInvite
+     * const vendorInvite = await prisma.vendorInvite.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends VendorInviteFindUniqueOrThrowArgs>(args: SelectSubset<T, VendorInviteFindUniqueOrThrowArgs<ExtArgs>>): Prisma__VendorInviteClient<$Result.GetResult<Prisma.$VendorInvitePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first VendorInvite that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VendorInviteFindFirstArgs} args - Arguments to find a VendorInvite
+     * @example
+     * // Get one VendorInvite
+     * const vendorInvite = await prisma.vendorInvite.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends VendorInviteFindFirstArgs>(args?: SelectSubset<T, VendorInviteFindFirstArgs<ExtArgs>>): Prisma__VendorInviteClient<$Result.GetResult<Prisma.$VendorInvitePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first VendorInvite that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VendorInviteFindFirstOrThrowArgs} args - Arguments to find a VendorInvite
+     * @example
+     * // Get one VendorInvite
+     * const vendorInvite = await prisma.vendorInvite.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends VendorInviteFindFirstOrThrowArgs>(args?: SelectSubset<T, VendorInviteFindFirstOrThrowArgs<ExtArgs>>): Prisma__VendorInviteClient<$Result.GetResult<Prisma.$VendorInvitePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more VendorInvites that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VendorInviteFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all VendorInvites
+     * const vendorInvites = await prisma.vendorInvite.findMany()
+     * 
+     * // Get first 10 VendorInvites
+     * const vendorInvites = await prisma.vendorInvite.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const vendorInviteWithIdOnly = await prisma.vendorInvite.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends VendorInviteFindManyArgs>(args?: SelectSubset<T, VendorInviteFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VendorInvitePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a VendorInvite.
+     * @param {VendorInviteCreateArgs} args - Arguments to create a VendorInvite.
+     * @example
+     * // Create one VendorInvite
+     * const VendorInvite = await prisma.vendorInvite.create({
+     *   data: {
+     *     // ... data to create a VendorInvite
+     *   }
+     * })
+     * 
+     */
+    create<T extends VendorInviteCreateArgs>(args: SelectSubset<T, VendorInviteCreateArgs<ExtArgs>>): Prisma__VendorInviteClient<$Result.GetResult<Prisma.$VendorInvitePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many VendorInvites.
+     * @param {VendorInviteCreateManyArgs} args - Arguments to create many VendorInvites.
+     * @example
+     * // Create many VendorInvites
+     * const vendorInvite = await prisma.vendorInvite.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends VendorInviteCreateManyArgs>(args?: SelectSubset<T, VendorInviteCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many VendorInvites and returns the data saved in the database.
+     * @param {VendorInviteCreateManyAndReturnArgs} args - Arguments to create many VendorInvites.
+     * @example
+     * // Create many VendorInvites
+     * const vendorInvite = await prisma.vendorInvite.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many VendorInvites and only return the `id`
+     * const vendorInviteWithIdOnly = await prisma.vendorInvite.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends VendorInviteCreateManyAndReturnArgs>(args?: SelectSubset<T, VendorInviteCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VendorInvitePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a VendorInvite.
+     * @param {VendorInviteDeleteArgs} args - Arguments to delete one VendorInvite.
+     * @example
+     * // Delete one VendorInvite
+     * const VendorInvite = await prisma.vendorInvite.delete({
+     *   where: {
+     *     // ... filter to delete one VendorInvite
+     *   }
+     * })
+     * 
+     */
+    delete<T extends VendorInviteDeleteArgs>(args: SelectSubset<T, VendorInviteDeleteArgs<ExtArgs>>): Prisma__VendorInviteClient<$Result.GetResult<Prisma.$VendorInvitePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one VendorInvite.
+     * @param {VendorInviteUpdateArgs} args - Arguments to update one VendorInvite.
+     * @example
+     * // Update one VendorInvite
+     * const vendorInvite = await prisma.vendorInvite.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends VendorInviteUpdateArgs>(args: SelectSubset<T, VendorInviteUpdateArgs<ExtArgs>>): Prisma__VendorInviteClient<$Result.GetResult<Prisma.$VendorInvitePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more VendorInvites.
+     * @param {VendorInviteDeleteManyArgs} args - Arguments to filter VendorInvites to delete.
+     * @example
+     * // Delete a few VendorInvites
+     * const { count } = await prisma.vendorInvite.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends VendorInviteDeleteManyArgs>(args?: SelectSubset<T, VendorInviteDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more VendorInvites.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VendorInviteUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many VendorInvites
+     * const vendorInvite = await prisma.vendorInvite.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends VendorInviteUpdateManyArgs>(args: SelectSubset<T, VendorInviteUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more VendorInvites and returns the data updated in the database.
+     * @param {VendorInviteUpdateManyAndReturnArgs} args - Arguments to update many VendorInvites.
+     * @example
+     * // Update many VendorInvites
+     * const vendorInvite = await prisma.vendorInvite.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more VendorInvites and only return the `id`
+     * const vendorInviteWithIdOnly = await prisma.vendorInvite.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends VendorInviteUpdateManyAndReturnArgs>(args: SelectSubset<T, VendorInviteUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VendorInvitePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one VendorInvite.
+     * @param {VendorInviteUpsertArgs} args - Arguments to update or create a VendorInvite.
+     * @example
+     * // Update or create a VendorInvite
+     * const vendorInvite = await prisma.vendorInvite.upsert({
+     *   create: {
+     *     // ... data to create a VendorInvite
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the VendorInvite we want to update
+     *   }
+     * })
+     */
+    upsert<T extends VendorInviteUpsertArgs>(args: SelectSubset<T, VendorInviteUpsertArgs<ExtArgs>>): Prisma__VendorInviteClient<$Result.GetResult<Prisma.$VendorInvitePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of VendorInvites.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VendorInviteCountArgs} args - Arguments to filter VendorInvites to count.
+     * @example
+     * // Count the number of VendorInvites
+     * const count = await prisma.vendorInvite.count({
+     *   where: {
+     *     // ... the filter for the VendorInvites we want to count
+     *   }
+     * })
+    **/
+    count<T extends VendorInviteCountArgs>(
+      args?: Subset<T, VendorInviteCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], VendorInviteCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a VendorInvite.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VendorInviteAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends VendorInviteAggregateArgs>(args: Subset<T, VendorInviteAggregateArgs>): Prisma.PrismaPromise<GetVendorInviteAggregateType<T>>
+
+    /**
+     * Group by VendorInvite.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VendorInviteGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends VendorInviteGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: VendorInviteGroupByArgs['orderBy'] }
+        : { orderBy?: VendorInviteGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, VendorInviteGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetVendorInviteGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the VendorInvite model
+   */
+  readonly fields: VendorInviteFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for VendorInvite.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__VendorInviteClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    application<T extends VendorApplicationDefaultArgs<ExtArgs> = {}>(args?: Subset<T, VendorApplicationDefaultArgs<ExtArgs>>): Prisma__VendorApplicationClient<$Result.GetResult<Prisma.$VendorApplicationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the VendorInvite model
+   */
+  interface VendorInviteFieldRefs {
+    readonly id: FieldRef<"VendorInvite", 'String'>
+    readonly email: FieldRef<"VendorInvite", 'String'>
+    readonly applicationId: FieldRef<"VendorInvite", 'String'>
+    readonly tokenHash: FieldRef<"VendorInvite", 'String'>
+    readonly status: FieldRef<"VendorInvite", 'AdminInviteStatus'>
+    readonly expiresAt: FieldRef<"VendorInvite", 'DateTime'>
+    readonly acceptedAt: FieldRef<"VendorInvite", 'DateTime'>
+    readonly createdAt: FieldRef<"VendorInvite", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * VendorInvite findUnique
+   */
+  export type VendorInviteFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VendorInvite
+     */
+    select?: VendorInviteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VendorInvite
+     */
+    omit?: VendorInviteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VendorInviteInclude<ExtArgs> | null
+    /**
+     * Filter, which VendorInvite to fetch.
+     */
+    where: VendorInviteWhereUniqueInput
+  }
+
+  /**
+   * VendorInvite findUniqueOrThrow
+   */
+  export type VendorInviteFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VendorInvite
+     */
+    select?: VendorInviteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VendorInvite
+     */
+    omit?: VendorInviteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VendorInviteInclude<ExtArgs> | null
+    /**
+     * Filter, which VendorInvite to fetch.
+     */
+    where: VendorInviteWhereUniqueInput
+  }
+
+  /**
+   * VendorInvite findFirst
+   */
+  export type VendorInviteFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VendorInvite
+     */
+    select?: VendorInviteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VendorInvite
+     */
+    omit?: VendorInviteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VendorInviteInclude<ExtArgs> | null
+    /**
+     * Filter, which VendorInvite to fetch.
+     */
+    where?: VendorInviteWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of VendorInvites to fetch.
+     */
+    orderBy?: VendorInviteOrderByWithRelationInput | VendorInviteOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for VendorInvites.
+     */
+    cursor?: VendorInviteWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` VendorInvites from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` VendorInvites.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of VendorInvites.
+     */
+    distinct?: VendorInviteScalarFieldEnum | VendorInviteScalarFieldEnum[]
+  }
+
+  /**
+   * VendorInvite findFirstOrThrow
+   */
+  export type VendorInviteFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VendorInvite
+     */
+    select?: VendorInviteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VendorInvite
+     */
+    omit?: VendorInviteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VendorInviteInclude<ExtArgs> | null
+    /**
+     * Filter, which VendorInvite to fetch.
+     */
+    where?: VendorInviteWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of VendorInvites to fetch.
+     */
+    orderBy?: VendorInviteOrderByWithRelationInput | VendorInviteOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for VendorInvites.
+     */
+    cursor?: VendorInviteWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` VendorInvites from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` VendorInvites.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of VendorInvites.
+     */
+    distinct?: VendorInviteScalarFieldEnum | VendorInviteScalarFieldEnum[]
+  }
+
+  /**
+   * VendorInvite findMany
+   */
+  export type VendorInviteFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VendorInvite
+     */
+    select?: VendorInviteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VendorInvite
+     */
+    omit?: VendorInviteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VendorInviteInclude<ExtArgs> | null
+    /**
+     * Filter, which VendorInvites to fetch.
+     */
+    where?: VendorInviteWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of VendorInvites to fetch.
+     */
+    orderBy?: VendorInviteOrderByWithRelationInput | VendorInviteOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing VendorInvites.
+     */
+    cursor?: VendorInviteWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` VendorInvites from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` VendorInvites.
+     */
+    skip?: number
+    distinct?: VendorInviteScalarFieldEnum | VendorInviteScalarFieldEnum[]
+  }
+
+  /**
+   * VendorInvite create
+   */
+  export type VendorInviteCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VendorInvite
+     */
+    select?: VendorInviteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VendorInvite
+     */
+    omit?: VendorInviteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VendorInviteInclude<ExtArgs> | null
+    /**
+     * The data needed to create a VendorInvite.
+     */
+    data: XOR<VendorInviteCreateInput, VendorInviteUncheckedCreateInput>
+  }
+
+  /**
+   * VendorInvite createMany
+   */
+  export type VendorInviteCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many VendorInvites.
+     */
+    data: VendorInviteCreateManyInput | VendorInviteCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * VendorInvite createManyAndReturn
+   */
+  export type VendorInviteCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VendorInvite
+     */
+    select?: VendorInviteSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the VendorInvite
+     */
+    omit?: VendorInviteOmit<ExtArgs> | null
+    /**
+     * The data used to create many VendorInvites.
+     */
+    data: VendorInviteCreateManyInput | VendorInviteCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VendorInviteIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * VendorInvite update
+   */
+  export type VendorInviteUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VendorInvite
+     */
+    select?: VendorInviteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VendorInvite
+     */
+    omit?: VendorInviteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VendorInviteInclude<ExtArgs> | null
+    /**
+     * The data needed to update a VendorInvite.
+     */
+    data: XOR<VendorInviteUpdateInput, VendorInviteUncheckedUpdateInput>
+    /**
+     * Choose, which VendorInvite to update.
+     */
+    where: VendorInviteWhereUniqueInput
+  }
+
+  /**
+   * VendorInvite updateMany
+   */
+  export type VendorInviteUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update VendorInvites.
+     */
+    data: XOR<VendorInviteUpdateManyMutationInput, VendorInviteUncheckedUpdateManyInput>
+    /**
+     * Filter which VendorInvites to update
+     */
+    where?: VendorInviteWhereInput
+    /**
+     * Limit how many VendorInvites to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * VendorInvite updateManyAndReturn
+   */
+  export type VendorInviteUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VendorInvite
+     */
+    select?: VendorInviteSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the VendorInvite
+     */
+    omit?: VendorInviteOmit<ExtArgs> | null
+    /**
+     * The data used to update VendorInvites.
+     */
+    data: XOR<VendorInviteUpdateManyMutationInput, VendorInviteUncheckedUpdateManyInput>
+    /**
+     * Filter which VendorInvites to update
+     */
+    where?: VendorInviteWhereInput
+    /**
+     * Limit how many VendorInvites to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VendorInviteIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * VendorInvite upsert
+   */
+  export type VendorInviteUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VendorInvite
+     */
+    select?: VendorInviteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VendorInvite
+     */
+    omit?: VendorInviteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VendorInviteInclude<ExtArgs> | null
+    /**
+     * The filter to search for the VendorInvite to update in case it exists.
+     */
+    where: VendorInviteWhereUniqueInput
+    /**
+     * In case the VendorInvite found by the `where` argument doesn't exist, create a new VendorInvite with this data.
+     */
+    create: XOR<VendorInviteCreateInput, VendorInviteUncheckedCreateInput>
+    /**
+     * In case the VendorInvite was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<VendorInviteUpdateInput, VendorInviteUncheckedUpdateInput>
+  }
+
+  /**
+   * VendorInvite delete
+   */
+  export type VendorInviteDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VendorInvite
+     */
+    select?: VendorInviteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VendorInvite
+     */
+    omit?: VendorInviteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VendorInviteInclude<ExtArgs> | null
+    /**
+     * Filter which VendorInvite to delete.
+     */
+    where: VendorInviteWhereUniqueInput
+  }
+
+  /**
+   * VendorInvite deleteMany
+   */
+  export type VendorInviteDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which VendorInvites to delete
+     */
+    where?: VendorInviteWhereInput
+    /**
+     * Limit how many VendorInvites to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * VendorInvite without action
+   */
+  export type VendorInviteDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VendorInvite
+     */
+    select?: VendorInviteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VendorInvite
+     */
+    omit?: VendorInviteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VendorInviteInclude<ExtArgs> | null
   }
 
 
@@ -35601,6 +38074,7 @@ export namespace Prisma {
     name: 'name',
     slug: 'slug',
     icon: 'icon',
+    imageUrl: 'imageUrl',
     description: 'description',
     sortOrder: 'sortOrder',
     createdAt: 'createdAt',
@@ -35840,6 +38314,34 @@ export namespace Prisma {
   };
 
   export type VendorApplicationScalarFieldEnum = (typeof VendorApplicationScalarFieldEnum)[keyof typeof VendorApplicationScalarFieldEnum]
+
+
+  export const VendorAccountScalarFieldEnum: {
+    id: 'id',
+    email: 'email',
+    passwordHash: 'passwordHash',
+    name: 'name',
+    applicationId: 'applicationId',
+    isActive: 'isActive',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type VendorAccountScalarFieldEnum = (typeof VendorAccountScalarFieldEnum)[keyof typeof VendorAccountScalarFieldEnum]
+
+
+  export const VendorInviteScalarFieldEnum: {
+    id: 'id',
+    email: 'email',
+    applicationId: 'applicationId',
+    tokenHash: 'tokenHash',
+    status: 'status',
+    expiresAt: 'expiresAt',
+    acceptedAt: 'acceptedAt',
+    createdAt: 'createdAt'
+  };
+
+  export type VendorInviteScalarFieldEnum = (typeof VendorInviteScalarFieldEnum)[keyof typeof VendorInviteScalarFieldEnum]
 
 
   export const PwaInstallScalarFieldEnum: {
@@ -36904,6 +39406,7 @@ export namespace Prisma {
     name?: StringFilter<"Category"> | string
     slug?: StringFilter<"Category"> | string
     icon?: StringNullableFilter<"Category"> | string | null
+    imageUrl?: StringNullableFilter<"Category"> | string | null
     description?: StringNullableFilter<"Category"> | string | null
     sortOrder?: IntFilter<"Category"> | number
     createdAt?: DateTimeFilter<"Category"> | Date | string
@@ -36916,6 +39419,7 @@ export namespace Prisma {
     name?: SortOrder
     slug?: SortOrder
     icon?: SortOrderInput | SortOrder
+    imageUrl?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
     sortOrder?: SortOrder
     createdAt?: SortOrder
@@ -36931,6 +39435,7 @@ export namespace Prisma {
     NOT?: CategoryWhereInput | CategoryWhereInput[]
     name?: StringFilter<"Category"> | string
     icon?: StringNullableFilter<"Category"> | string | null
+    imageUrl?: StringNullableFilter<"Category"> | string | null
     description?: StringNullableFilter<"Category"> | string | null
     sortOrder?: IntFilter<"Category"> | number
     createdAt?: DateTimeFilter<"Category"> | Date | string
@@ -36943,6 +39448,7 @@ export namespace Prisma {
     name?: SortOrder
     slug?: SortOrder
     icon?: SortOrderInput | SortOrder
+    imageUrl?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
     sortOrder?: SortOrder
     createdAt?: SortOrder
@@ -36962,6 +39468,7 @@ export namespace Prisma {
     name?: StringWithAggregatesFilter<"Category"> | string
     slug?: StringWithAggregatesFilter<"Category"> | string
     icon?: StringNullableWithAggregatesFilter<"Category"> | string | null
+    imageUrl?: StringNullableWithAggregatesFilter<"Category"> | string | null
     description?: StringNullableWithAggregatesFilter<"Category"> | string | null
     sortOrder?: IntWithAggregatesFilter<"Category"> | number
     createdAt?: DateTimeWithAggregatesFilter<"Category"> | Date | string
@@ -38095,6 +40602,8 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"VendorApplication"> | Date | string
     updatedAt?: DateTimeFilter<"VendorApplication"> | Date | string
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    account?: XOR<VendorAccountNullableScalarRelationFilter, VendorAccountWhereInput> | null
+    vendorInvites?: VendorInviteListRelationFilter
   }
 
   export type VendorApplicationOrderByWithRelationInput = {
@@ -38109,6 +40618,8 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
+    account?: VendorAccountOrderByWithRelationInput
+    vendorInvites?: VendorInviteOrderByRelationAggregateInput
   }
 
   export type VendorApplicationWhereUniqueInput = Prisma.AtLeast<{
@@ -38126,6 +40637,8 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"VendorApplication"> | Date | string
     updatedAt?: DateTimeFilter<"VendorApplication"> | Date | string
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    account?: XOR<VendorAccountNullableScalarRelationFilter, VendorAccountWhereInput> | null
+    vendorInvites?: VendorInviteListRelationFilter
   }, "id">
 
   export type VendorApplicationOrderByWithAggregationInput = {
@@ -38158,6 +40671,146 @@ export namespace Prisma {
     status?: EnumVendorApplicationStatusWithAggregatesFilter<"VendorApplication"> | $Enums.VendorApplicationStatus
     createdAt?: DateTimeWithAggregatesFilter<"VendorApplication"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"VendorApplication"> | Date | string
+  }
+
+  export type VendorAccountWhereInput = {
+    AND?: VendorAccountWhereInput | VendorAccountWhereInput[]
+    OR?: VendorAccountWhereInput[]
+    NOT?: VendorAccountWhereInput | VendorAccountWhereInput[]
+    id?: StringFilter<"VendorAccount"> | string
+    email?: StringFilter<"VendorAccount"> | string
+    passwordHash?: StringFilter<"VendorAccount"> | string
+    name?: StringFilter<"VendorAccount"> | string
+    applicationId?: StringFilter<"VendorAccount"> | string
+    isActive?: BoolFilter<"VendorAccount"> | boolean
+    createdAt?: DateTimeFilter<"VendorAccount"> | Date | string
+    updatedAt?: DateTimeFilter<"VendorAccount"> | Date | string
+    application?: XOR<VendorApplicationScalarRelationFilter, VendorApplicationWhereInput>
+  }
+
+  export type VendorAccountOrderByWithRelationInput = {
+    id?: SortOrder
+    email?: SortOrder
+    passwordHash?: SortOrder
+    name?: SortOrder
+    applicationId?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    application?: VendorApplicationOrderByWithRelationInput
+  }
+
+  export type VendorAccountWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    email?: string
+    applicationId?: string
+    AND?: VendorAccountWhereInput | VendorAccountWhereInput[]
+    OR?: VendorAccountWhereInput[]
+    NOT?: VendorAccountWhereInput | VendorAccountWhereInput[]
+    passwordHash?: StringFilter<"VendorAccount"> | string
+    name?: StringFilter<"VendorAccount"> | string
+    isActive?: BoolFilter<"VendorAccount"> | boolean
+    createdAt?: DateTimeFilter<"VendorAccount"> | Date | string
+    updatedAt?: DateTimeFilter<"VendorAccount"> | Date | string
+    application?: XOR<VendorApplicationScalarRelationFilter, VendorApplicationWhereInput>
+  }, "id" | "email" | "applicationId">
+
+  export type VendorAccountOrderByWithAggregationInput = {
+    id?: SortOrder
+    email?: SortOrder
+    passwordHash?: SortOrder
+    name?: SortOrder
+    applicationId?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: VendorAccountCountOrderByAggregateInput
+    _max?: VendorAccountMaxOrderByAggregateInput
+    _min?: VendorAccountMinOrderByAggregateInput
+  }
+
+  export type VendorAccountScalarWhereWithAggregatesInput = {
+    AND?: VendorAccountScalarWhereWithAggregatesInput | VendorAccountScalarWhereWithAggregatesInput[]
+    OR?: VendorAccountScalarWhereWithAggregatesInput[]
+    NOT?: VendorAccountScalarWhereWithAggregatesInput | VendorAccountScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"VendorAccount"> | string
+    email?: StringWithAggregatesFilter<"VendorAccount"> | string
+    passwordHash?: StringWithAggregatesFilter<"VendorAccount"> | string
+    name?: StringWithAggregatesFilter<"VendorAccount"> | string
+    applicationId?: StringWithAggregatesFilter<"VendorAccount"> | string
+    isActive?: BoolWithAggregatesFilter<"VendorAccount"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"VendorAccount"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"VendorAccount"> | Date | string
+  }
+
+  export type VendorInviteWhereInput = {
+    AND?: VendorInviteWhereInput | VendorInviteWhereInput[]
+    OR?: VendorInviteWhereInput[]
+    NOT?: VendorInviteWhereInput | VendorInviteWhereInput[]
+    id?: StringFilter<"VendorInvite"> | string
+    email?: StringFilter<"VendorInvite"> | string
+    applicationId?: StringFilter<"VendorInvite"> | string
+    tokenHash?: StringFilter<"VendorInvite"> | string
+    status?: EnumAdminInviteStatusFilter<"VendorInvite"> | $Enums.AdminInviteStatus
+    expiresAt?: DateTimeFilter<"VendorInvite"> | Date | string
+    acceptedAt?: DateTimeNullableFilter<"VendorInvite"> | Date | string | null
+    createdAt?: DateTimeFilter<"VendorInvite"> | Date | string
+    application?: XOR<VendorApplicationScalarRelationFilter, VendorApplicationWhereInput>
+  }
+
+  export type VendorInviteOrderByWithRelationInput = {
+    id?: SortOrder
+    email?: SortOrder
+    applicationId?: SortOrder
+    tokenHash?: SortOrder
+    status?: SortOrder
+    expiresAt?: SortOrder
+    acceptedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    application?: VendorApplicationOrderByWithRelationInput
+  }
+
+  export type VendorInviteWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    tokenHash?: string
+    AND?: VendorInviteWhereInput | VendorInviteWhereInput[]
+    OR?: VendorInviteWhereInput[]
+    NOT?: VendorInviteWhereInput | VendorInviteWhereInput[]
+    email?: StringFilter<"VendorInvite"> | string
+    applicationId?: StringFilter<"VendorInvite"> | string
+    status?: EnumAdminInviteStatusFilter<"VendorInvite"> | $Enums.AdminInviteStatus
+    expiresAt?: DateTimeFilter<"VendorInvite"> | Date | string
+    acceptedAt?: DateTimeNullableFilter<"VendorInvite"> | Date | string | null
+    createdAt?: DateTimeFilter<"VendorInvite"> | Date | string
+    application?: XOR<VendorApplicationScalarRelationFilter, VendorApplicationWhereInput>
+  }, "id" | "tokenHash">
+
+  export type VendorInviteOrderByWithAggregationInput = {
+    id?: SortOrder
+    email?: SortOrder
+    applicationId?: SortOrder
+    tokenHash?: SortOrder
+    status?: SortOrder
+    expiresAt?: SortOrder
+    acceptedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: VendorInviteCountOrderByAggregateInput
+    _max?: VendorInviteMaxOrderByAggregateInput
+    _min?: VendorInviteMinOrderByAggregateInput
+  }
+
+  export type VendorInviteScalarWhereWithAggregatesInput = {
+    AND?: VendorInviteScalarWhereWithAggregatesInput | VendorInviteScalarWhereWithAggregatesInput[]
+    OR?: VendorInviteScalarWhereWithAggregatesInput[]
+    NOT?: VendorInviteScalarWhereWithAggregatesInput | VendorInviteScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"VendorInvite"> | string
+    email?: StringWithAggregatesFilter<"VendorInvite"> | string
+    applicationId?: StringWithAggregatesFilter<"VendorInvite"> | string
+    tokenHash?: StringWithAggregatesFilter<"VendorInvite"> | string
+    status?: EnumAdminInviteStatusWithAggregatesFilter<"VendorInvite"> | $Enums.AdminInviteStatus
+    expiresAt?: DateTimeWithAggregatesFilter<"VendorInvite"> | Date | string
+    acceptedAt?: DateTimeNullableWithAggregatesFilter<"VendorInvite"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"VendorInvite"> | Date | string
   }
 
   export type PwaInstallWhereInput = {
@@ -39066,6 +41719,7 @@ export namespace Prisma {
     name: string
     slug: string
     icon?: string | null
+    imageUrl?: string | null
     description?: string | null
     sortOrder?: number
     createdAt?: Date | string
@@ -39078,6 +41732,7 @@ export namespace Prisma {
     name: string
     slug: string
     icon?: string | null
+    imageUrl?: string | null
     description?: string | null
     sortOrder?: number
     createdAt?: Date | string
@@ -39090,6 +41745,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     icon?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39102,6 +41758,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     icon?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39114,6 +41771,7 @@ export namespace Prisma {
     name: string
     slug: string
     icon?: string | null
+    imageUrl?: string | null
     description?: string | null
     sortOrder?: number
     createdAt?: Date | string
@@ -39125,6 +41783,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     icon?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39136,6 +41795,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     icon?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -40373,6 +43033,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     user?: UserCreateNestedOneWithoutVendorApplicationsInput
+    account?: VendorAccountCreateNestedOneWithoutApplicationInput
+    vendorInvites?: VendorInviteCreateNestedManyWithoutApplicationInput
   }
 
   export type VendorApplicationUncheckedCreateInput = {
@@ -40386,6 +43048,8 @@ export namespace Prisma {
     status?: $Enums.VendorApplicationStatus
     createdAt?: Date | string
     updatedAt?: Date | string
+    account?: VendorAccountUncheckedCreateNestedOneWithoutApplicationInput
+    vendorInvites?: VendorInviteUncheckedCreateNestedManyWithoutApplicationInput
   }
 
   export type VendorApplicationUpdateInput = {
@@ -40399,6 +43063,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutVendorApplicationsNestedInput
+    account?: VendorAccountUpdateOneWithoutApplicationNestedInput
+    vendorInvites?: VendorInviteUpdateManyWithoutApplicationNestedInput
   }
 
   export type VendorApplicationUncheckedUpdateInput = {
@@ -40412,6 +43078,8 @@ export namespace Prisma {
     status?: EnumVendorApplicationStatusFieldUpdateOperationsInput | $Enums.VendorApplicationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    account?: VendorAccountUncheckedUpdateOneWithoutApplicationNestedInput
+    vendorInvites?: VendorInviteUncheckedUpdateManyWithoutApplicationNestedInput
   }
 
   export type VendorApplicationCreateManyInput = {
@@ -40450,6 +43118,158 @@ export namespace Prisma {
     status?: EnumVendorApplicationStatusFieldUpdateOperationsInput | $Enums.VendorApplicationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VendorAccountCreateInput = {
+    id?: string
+    email: string
+    passwordHash: string
+    name: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    application: VendorApplicationCreateNestedOneWithoutAccountInput
+  }
+
+  export type VendorAccountUncheckedCreateInput = {
+    id?: string
+    email: string
+    passwordHash: string
+    name: string
+    applicationId: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type VendorAccountUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    application?: VendorApplicationUpdateOneRequiredWithoutAccountNestedInput
+  }
+
+  export type VendorAccountUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    applicationId?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VendorAccountCreateManyInput = {
+    id?: string
+    email: string
+    passwordHash: string
+    name: string
+    applicationId: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type VendorAccountUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VendorAccountUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    applicationId?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VendorInviteCreateInput = {
+    id?: string
+    email: string
+    tokenHash: string
+    status?: $Enums.AdminInviteStatus
+    expiresAt: Date | string
+    acceptedAt?: Date | string | null
+    createdAt?: Date | string
+    application: VendorApplicationCreateNestedOneWithoutVendorInvitesInput
+  }
+
+  export type VendorInviteUncheckedCreateInput = {
+    id?: string
+    email: string
+    applicationId: string
+    tokenHash: string
+    status?: $Enums.AdminInviteStatus
+    expiresAt: Date | string
+    acceptedAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type VendorInviteUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    tokenHash?: StringFieldUpdateOperationsInput | string
+    status?: EnumAdminInviteStatusFieldUpdateOperationsInput | $Enums.AdminInviteStatus
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    application?: VendorApplicationUpdateOneRequiredWithoutVendorInvitesNestedInput
+  }
+
+  export type VendorInviteUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    applicationId?: StringFieldUpdateOperationsInput | string
+    tokenHash?: StringFieldUpdateOperationsInput | string
+    status?: EnumAdminInviteStatusFieldUpdateOperationsInput | $Enums.AdminInviteStatus
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VendorInviteCreateManyInput = {
+    id?: string
+    email: string
+    applicationId: string
+    tokenHash: string
+    status?: $Enums.AdminInviteStatus
+    expiresAt: Date | string
+    acceptedAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type VendorInviteUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    tokenHash?: StringFieldUpdateOperationsInput | string
+    status?: EnumAdminInviteStatusFieldUpdateOperationsInput | $Enums.AdminInviteStatus
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VendorInviteUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    applicationId?: StringFieldUpdateOperationsInput | string
+    tokenHash?: StringFieldUpdateOperationsInput | string
+    status?: EnumAdminInviteStatusFieldUpdateOperationsInput | $Enums.AdminInviteStatus
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type PwaInstallCreateInput = {
@@ -41358,6 +44178,7 @@ export namespace Prisma {
     name?: SortOrder
     slug?: SortOrder
     icon?: SortOrder
+    imageUrl?: SortOrder
     description?: SortOrder
     sortOrder?: SortOrder
     createdAt?: SortOrder
@@ -41373,6 +44194,7 @@ export namespace Prisma {
     name?: SortOrder
     slug?: SortOrder
     icon?: SortOrder
+    imageUrl?: SortOrder
     description?: SortOrder
     sortOrder?: SortOrder
     createdAt?: SortOrder
@@ -41384,6 +44206,7 @@ export namespace Prisma {
     name?: SortOrder
     slug?: SortOrder
     icon?: SortOrder
+    imageUrl?: SortOrder
     description?: SortOrder
     sortOrder?: SortOrder
     createdAt?: SortOrder
@@ -42229,6 +45052,21 @@ export namespace Prisma {
     not?: NestedEnumVendorApplicationStatusFilter<$PrismaModel> | $Enums.VendorApplicationStatus
   }
 
+  export type VendorAccountNullableScalarRelationFilter = {
+    is?: VendorAccountWhereInput | null
+    isNot?: VendorAccountWhereInput | null
+  }
+
+  export type VendorInviteListRelationFilter = {
+    every?: VendorInviteWhereInput
+    some?: VendorInviteWhereInput
+    none?: VendorInviteWhereInput
+  }
+
+  export type VendorInviteOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type VendorApplicationCountOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
@@ -42276,6 +45114,77 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumVendorApplicationStatusFilter<$PrismaModel>
     _max?: NestedEnumVendorApplicationStatusFilter<$PrismaModel>
+  }
+
+  export type VendorApplicationScalarRelationFilter = {
+    is?: VendorApplicationWhereInput
+    isNot?: VendorApplicationWhereInput
+  }
+
+  export type VendorAccountCountOrderByAggregateInput = {
+    id?: SortOrder
+    email?: SortOrder
+    passwordHash?: SortOrder
+    name?: SortOrder
+    applicationId?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type VendorAccountMaxOrderByAggregateInput = {
+    id?: SortOrder
+    email?: SortOrder
+    passwordHash?: SortOrder
+    name?: SortOrder
+    applicationId?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type VendorAccountMinOrderByAggregateInput = {
+    id?: SortOrder
+    email?: SortOrder
+    passwordHash?: SortOrder
+    name?: SortOrder
+    applicationId?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type VendorInviteCountOrderByAggregateInput = {
+    id?: SortOrder
+    email?: SortOrder
+    applicationId?: SortOrder
+    tokenHash?: SortOrder
+    status?: SortOrder
+    expiresAt?: SortOrder
+    acceptedAt?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type VendorInviteMaxOrderByAggregateInput = {
+    id?: SortOrder
+    email?: SortOrder
+    applicationId?: SortOrder
+    tokenHash?: SortOrder
+    status?: SortOrder
+    expiresAt?: SortOrder
+    acceptedAt?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type VendorInviteMinOrderByAggregateInput = {
+    id?: SortOrder
+    email?: SortOrder
+    applicationId?: SortOrder
+    tokenHash?: SortOrder
+    status?: SortOrder
+    expiresAt?: SortOrder
+    acceptedAt?: SortOrder
+    createdAt?: SortOrder
   }
 
   export type PwaInstallCountOrderByAggregateInput = {
@@ -43732,6 +46641,32 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
+  export type VendorAccountCreateNestedOneWithoutApplicationInput = {
+    create?: XOR<VendorAccountCreateWithoutApplicationInput, VendorAccountUncheckedCreateWithoutApplicationInput>
+    connectOrCreate?: VendorAccountCreateOrConnectWithoutApplicationInput
+    connect?: VendorAccountWhereUniqueInput
+  }
+
+  export type VendorInviteCreateNestedManyWithoutApplicationInput = {
+    create?: XOR<VendorInviteCreateWithoutApplicationInput, VendorInviteUncheckedCreateWithoutApplicationInput> | VendorInviteCreateWithoutApplicationInput[] | VendorInviteUncheckedCreateWithoutApplicationInput[]
+    connectOrCreate?: VendorInviteCreateOrConnectWithoutApplicationInput | VendorInviteCreateOrConnectWithoutApplicationInput[]
+    createMany?: VendorInviteCreateManyApplicationInputEnvelope
+    connect?: VendorInviteWhereUniqueInput | VendorInviteWhereUniqueInput[]
+  }
+
+  export type VendorAccountUncheckedCreateNestedOneWithoutApplicationInput = {
+    create?: XOR<VendorAccountCreateWithoutApplicationInput, VendorAccountUncheckedCreateWithoutApplicationInput>
+    connectOrCreate?: VendorAccountCreateOrConnectWithoutApplicationInput
+    connect?: VendorAccountWhereUniqueInput
+  }
+
+  export type VendorInviteUncheckedCreateNestedManyWithoutApplicationInput = {
+    create?: XOR<VendorInviteCreateWithoutApplicationInput, VendorInviteUncheckedCreateWithoutApplicationInput> | VendorInviteCreateWithoutApplicationInput[] | VendorInviteUncheckedCreateWithoutApplicationInput[]
+    connectOrCreate?: VendorInviteCreateOrConnectWithoutApplicationInput | VendorInviteCreateOrConnectWithoutApplicationInput[]
+    createMany?: VendorInviteCreateManyApplicationInputEnvelope
+    connect?: VendorInviteWhereUniqueInput | VendorInviteWhereUniqueInput[]
+  }
+
   export type EnumVendorApplicationStatusFieldUpdateOperationsInput = {
     set?: $Enums.VendorApplicationStatus
   }
@@ -43744,6 +46679,82 @@ export namespace Prisma {
     delete?: UserWhereInput | boolean
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutVendorApplicationsInput, UserUpdateWithoutVendorApplicationsInput>, UserUncheckedUpdateWithoutVendorApplicationsInput>
+  }
+
+  export type VendorAccountUpdateOneWithoutApplicationNestedInput = {
+    create?: XOR<VendorAccountCreateWithoutApplicationInput, VendorAccountUncheckedCreateWithoutApplicationInput>
+    connectOrCreate?: VendorAccountCreateOrConnectWithoutApplicationInput
+    upsert?: VendorAccountUpsertWithoutApplicationInput
+    disconnect?: VendorAccountWhereInput | boolean
+    delete?: VendorAccountWhereInput | boolean
+    connect?: VendorAccountWhereUniqueInput
+    update?: XOR<XOR<VendorAccountUpdateToOneWithWhereWithoutApplicationInput, VendorAccountUpdateWithoutApplicationInput>, VendorAccountUncheckedUpdateWithoutApplicationInput>
+  }
+
+  export type VendorInviteUpdateManyWithoutApplicationNestedInput = {
+    create?: XOR<VendorInviteCreateWithoutApplicationInput, VendorInviteUncheckedCreateWithoutApplicationInput> | VendorInviteCreateWithoutApplicationInput[] | VendorInviteUncheckedCreateWithoutApplicationInput[]
+    connectOrCreate?: VendorInviteCreateOrConnectWithoutApplicationInput | VendorInviteCreateOrConnectWithoutApplicationInput[]
+    upsert?: VendorInviteUpsertWithWhereUniqueWithoutApplicationInput | VendorInviteUpsertWithWhereUniqueWithoutApplicationInput[]
+    createMany?: VendorInviteCreateManyApplicationInputEnvelope
+    set?: VendorInviteWhereUniqueInput | VendorInviteWhereUniqueInput[]
+    disconnect?: VendorInviteWhereUniqueInput | VendorInviteWhereUniqueInput[]
+    delete?: VendorInviteWhereUniqueInput | VendorInviteWhereUniqueInput[]
+    connect?: VendorInviteWhereUniqueInput | VendorInviteWhereUniqueInput[]
+    update?: VendorInviteUpdateWithWhereUniqueWithoutApplicationInput | VendorInviteUpdateWithWhereUniqueWithoutApplicationInput[]
+    updateMany?: VendorInviteUpdateManyWithWhereWithoutApplicationInput | VendorInviteUpdateManyWithWhereWithoutApplicationInput[]
+    deleteMany?: VendorInviteScalarWhereInput | VendorInviteScalarWhereInput[]
+  }
+
+  export type VendorAccountUncheckedUpdateOneWithoutApplicationNestedInput = {
+    create?: XOR<VendorAccountCreateWithoutApplicationInput, VendorAccountUncheckedCreateWithoutApplicationInput>
+    connectOrCreate?: VendorAccountCreateOrConnectWithoutApplicationInput
+    upsert?: VendorAccountUpsertWithoutApplicationInput
+    disconnect?: VendorAccountWhereInput | boolean
+    delete?: VendorAccountWhereInput | boolean
+    connect?: VendorAccountWhereUniqueInput
+    update?: XOR<XOR<VendorAccountUpdateToOneWithWhereWithoutApplicationInput, VendorAccountUpdateWithoutApplicationInput>, VendorAccountUncheckedUpdateWithoutApplicationInput>
+  }
+
+  export type VendorInviteUncheckedUpdateManyWithoutApplicationNestedInput = {
+    create?: XOR<VendorInviteCreateWithoutApplicationInput, VendorInviteUncheckedCreateWithoutApplicationInput> | VendorInviteCreateWithoutApplicationInput[] | VendorInviteUncheckedCreateWithoutApplicationInput[]
+    connectOrCreate?: VendorInviteCreateOrConnectWithoutApplicationInput | VendorInviteCreateOrConnectWithoutApplicationInput[]
+    upsert?: VendorInviteUpsertWithWhereUniqueWithoutApplicationInput | VendorInviteUpsertWithWhereUniqueWithoutApplicationInput[]
+    createMany?: VendorInviteCreateManyApplicationInputEnvelope
+    set?: VendorInviteWhereUniqueInput | VendorInviteWhereUniqueInput[]
+    disconnect?: VendorInviteWhereUniqueInput | VendorInviteWhereUniqueInput[]
+    delete?: VendorInviteWhereUniqueInput | VendorInviteWhereUniqueInput[]
+    connect?: VendorInviteWhereUniqueInput | VendorInviteWhereUniqueInput[]
+    update?: VendorInviteUpdateWithWhereUniqueWithoutApplicationInput | VendorInviteUpdateWithWhereUniqueWithoutApplicationInput[]
+    updateMany?: VendorInviteUpdateManyWithWhereWithoutApplicationInput | VendorInviteUpdateManyWithWhereWithoutApplicationInput[]
+    deleteMany?: VendorInviteScalarWhereInput | VendorInviteScalarWhereInput[]
+  }
+
+  export type VendorApplicationCreateNestedOneWithoutAccountInput = {
+    create?: XOR<VendorApplicationCreateWithoutAccountInput, VendorApplicationUncheckedCreateWithoutAccountInput>
+    connectOrCreate?: VendorApplicationCreateOrConnectWithoutAccountInput
+    connect?: VendorApplicationWhereUniqueInput
+  }
+
+  export type VendorApplicationUpdateOneRequiredWithoutAccountNestedInput = {
+    create?: XOR<VendorApplicationCreateWithoutAccountInput, VendorApplicationUncheckedCreateWithoutAccountInput>
+    connectOrCreate?: VendorApplicationCreateOrConnectWithoutAccountInput
+    upsert?: VendorApplicationUpsertWithoutAccountInput
+    connect?: VendorApplicationWhereUniqueInput
+    update?: XOR<XOR<VendorApplicationUpdateToOneWithWhereWithoutAccountInput, VendorApplicationUpdateWithoutAccountInput>, VendorApplicationUncheckedUpdateWithoutAccountInput>
+  }
+
+  export type VendorApplicationCreateNestedOneWithoutVendorInvitesInput = {
+    create?: XOR<VendorApplicationCreateWithoutVendorInvitesInput, VendorApplicationUncheckedCreateWithoutVendorInvitesInput>
+    connectOrCreate?: VendorApplicationCreateOrConnectWithoutVendorInvitesInput
+    connect?: VendorApplicationWhereUniqueInput
+  }
+
+  export type VendorApplicationUpdateOneRequiredWithoutVendorInvitesNestedInput = {
+    create?: XOR<VendorApplicationCreateWithoutVendorInvitesInput, VendorApplicationUncheckedCreateWithoutVendorInvitesInput>
+    connectOrCreate?: VendorApplicationCreateOrConnectWithoutVendorInvitesInput
+    upsert?: VendorApplicationUpsertWithoutVendorInvitesInput
+    connect?: VendorApplicationWhereUniqueInput
+    update?: XOR<XOR<VendorApplicationUpdateToOneWithWhereWithoutVendorInvitesInput, VendorApplicationUpdateWithoutVendorInvitesInput>, VendorApplicationUncheckedUpdateWithoutVendorInvitesInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -44673,6 +47684,8 @@ export namespace Prisma {
     status?: $Enums.VendorApplicationStatus
     createdAt?: Date | string
     updatedAt?: Date | string
+    account?: VendorAccountCreateNestedOneWithoutApplicationInput
+    vendorInvites?: VendorInviteCreateNestedManyWithoutApplicationInput
   }
 
   export type VendorApplicationUncheckedCreateWithoutUserInput = {
@@ -44685,6 +47698,8 @@ export namespace Prisma {
     status?: $Enums.VendorApplicationStatus
     createdAt?: Date | string
     updatedAt?: Date | string
+    account?: VendorAccountUncheckedCreateNestedOneWithoutApplicationInput
+    vendorInvites?: VendorInviteUncheckedCreateNestedManyWithoutApplicationInput
   }
 
   export type VendorApplicationCreateOrConnectWithoutUserInput = {
@@ -46381,6 +49396,7 @@ export namespace Prisma {
     name: string
     slug: string
     icon?: string | null
+    imageUrl?: string | null
     description?: string | null
     sortOrder?: number
     createdAt?: Date | string
@@ -46392,6 +49408,7 @@ export namespace Prisma {
     name: string
     slug: string
     icon?: string | null
+    imageUrl?: string | null
     description?: string | null
     sortOrder?: number
     createdAt?: Date | string
@@ -46532,6 +49549,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     icon?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -46543,6 +49561,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     icon?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -48266,6 +51285,61 @@ export namespace Prisma {
     create: XOR<UserCreateWithoutVendorApplicationsInput, UserUncheckedCreateWithoutVendorApplicationsInput>
   }
 
+  export type VendorAccountCreateWithoutApplicationInput = {
+    id?: string
+    email: string
+    passwordHash: string
+    name: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type VendorAccountUncheckedCreateWithoutApplicationInput = {
+    id?: string
+    email: string
+    passwordHash: string
+    name: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type VendorAccountCreateOrConnectWithoutApplicationInput = {
+    where: VendorAccountWhereUniqueInput
+    create: XOR<VendorAccountCreateWithoutApplicationInput, VendorAccountUncheckedCreateWithoutApplicationInput>
+  }
+
+  export type VendorInviteCreateWithoutApplicationInput = {
+    id?: string
+    email: string
+    tokenHash: string
+    status?: $Enums.AdminInviteStatus
+    expiresAt: Date | string
+    acceptedAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type VendorInviteUncheckedCreateWithoutApplicationInput = {
+    id?: string
+    email: string
+    tokenHash: string
+    status?: $Enums.AdminInviteStatus
+    expiresAt: Date | string
+    acceptedAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type VendorInviteCreateOrConnectWithoutApplicationInput = {
+    where: VendorInviteWhereUniqueInput
+    create: XOR<VendorInviteCreateWithoutApplicationInput, VendorInviteUncheckedCreateWithoutApplicationInput>
+  }
+
+  export type VendorInviteCreateManyApplicationInputEnvelope = {
+    data: VendorInviteCreateManyApplicationInput | VendorInviteCreateManyApplicationInput[]
+    skipDuplicates?: boolean
+  }
+
   export type UserUpsertWithoutVendorApplicationsInput = {
     update: XOR<UserUpdateWithoutVendorApplicationsInput, UserUncheckedUpdateWithoutVendorApplicationsInput>
     create: XOR<UserCreateWithoutVendorApplicationsInput, UserUncheckedCreateWithoutVendorApplicationsInput>
@@ -48337,6 +51411,211 @@ export namespace Prisma {
     sentMessages?: MessageUncheckedUpdateManyWithoutSenderUserNestedInput
     referralEvents?: ReferralUncheckedUpdateManyWithoutReferrerNestedInput
     referredEvents?: ReferralUncheckedUpdateManyWithoutReferredNestedInput
+  }
+
+  export type VendorAccountUpsertWithoutApplicationInput = {
+    update: XOR<VendorAccountUpdateWithoutApplicationInput, VendorAccountUncheckedUpdateWithoutApplicationInput>
+    create: XOR<VendorAccountCreateWithoutApplicationInput, VendorAccountUncheckedCreateWithoutApplicationInput>
+    where?: VendorAccountWhereInput
+  }
+
+  export type VendorAccountUpdateToOneWithWhereWithoutApplicationInput = {
+    where?: VendorAccountWhereInput
+    data: XOR<VendorAccountUpdateWithoutApplicationInput, VendorAccountUncheckedUpdateWithoutApplicationInput>
+  }
+
+  export type VendorAccountUpdateWithoutApplicationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VendorAccountUncheckedUpdateWithoutApplicationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VendorInviteUpsertWithWhereUniqueWithoutApplicationInput = {
+    where: VendorInviteWhereUniqueInput
+    update: XOR<VendorInviteUpdateWithoutApplicationInput, VendorInviteUncheckedUpdateWithoutApplicationInput>
+    create: XOR<VendorInviteCreateWithoutApplicationInput, VendorInviteUncheckedCreateWithoutApplicationInput>
+  }
+
+  export type VendorInviteUpdateWithWhereUniqueWithoutApplicationInput = {
+    where: VendorInviteWhereUniqueInput
+    data: XOR<VendorInviteUpdateWithoutApplicationInput, VendorInviteUncheckedUpdateWithoutApplicationInput>
+  }
+
+  export type VendorInviteUpdateManyWithWhereWithoutApplicationInput = {
+    where: VendorInviteScalarWhereInput
+    data: XOR<VendorInviteUpdateManyMutationInput, VendorInviteUncheckedUpdateManyWithoutApplicationInput>
+  }
+
+  export type VendorInviteScalarWhereInput = {
+    AND?: VendorInviteScalarWhereInput | VendorInviteScalarWhereInput[]
+    OR?: VendorInviteScalarWhereInput[]
+    NOT?: VendorInviteScalarWhereInput | VendorInviteScalarWhereInput[]
+    id?: StringFilter<"VendorInvite"> | string
+    email?: StringFilter<"VendorInvite"> | string
+    applicationId?: StringFilter<"VendorInvite"> | string
+    tokenHash?: StringFilter<"VendorInvite"> | string
+    status?: EnumAdminInviteStatusFilter<"VendorInvite"> | $Enums.AdminInviteStatus
+    expiresAt?: DateTimeFilter<"VendorInvite"> | Date | string
+    acceptedAt?: DateTimeNullableFilter<"VendorInvite"> | Date | string | null
+    createdAt?: DateTimeFilter<"VendorInvite"> | Date | string
+  }
+
+  export type VendorApplicationCreateWithoutAccountInput = {
+    id?: string
+    businessName: string
+    contactName?: string | null
+    email: string
+    phone?: string | null
+    description?: string | null
+    status?: $Enums.VendorApplicationStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user?: UserCreateNestedOneWithoutVendorApplicationsInput
+    vendorInvites?: VendorInviteCreateNestedManyWithoutApplicationInput
+  }
+
+  export type VendorApplicationUncheckedCreateWithoutAccountInput = {
+    id?: string
+    userId?: string | null
+    businessName: string
+    contactName?: string | null
+    email: string
+    phone?: string | null
+    description?: string | null
+    status?: $Enums.VendorApplicationStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    vendorInvites?: VendorInviteUncheckedCreateNestedManyWithoutApplicationInput
+  }
+
+  export type VendorApplicationCreateOrConnectWithoutAccountInput = {
+    where: VendorApplicationWhereUniqueInput
+    create: XOR<VendorApplicationCreateWithoutAccountInput, VendorApplicationUncheckedCreateWithoutAccountInput>
+  }
+
+  export type VendorApplicationUpsertWithoutAccountInput = {
+    update: XOR<VendorApplicationUpdateWithoutAccountInput, VendorApplicationUncheckedUpdateWithoutAccountInput>
+    create: XOR<VendorApplicationCreateWithoutAccountInput, VendorApplicationUncheckedCreateWithoutAccountInput>
+    where?: VendorApplicationWhereInput
+  }
+
+  export type VendorApplicationUpdateToOneWithWhereWithoutAccountInput = {
+    where?: VendorApplicationWhereInput
+    data: XOR<VendorApplicationUpdateWithoutAccountInput, VendorApplicationUncheckedUpdateWithoutAccountInput>
+  }
+
+  export type VendorApplicationUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    businessName?: StringFieldUpdateOperationsInput | string
+    contactName?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumVendorApplicationStatusFieldUpdateOperationsInput | $Enums.VendorApplicationStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneWithoutVendorApplicationsNestedInput
+    vendorInvites?: VendorInviteUpdateManyWithoutApplicationNestedInput
+  }
+
+  export type VendorApplicationUncheckedUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    businessName?: StringFieldUpdateOperationsInput | string
+    contactName?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumVendorApplicationStatusFieldUpdateOperationsInput | $Enums.VendorApplicationStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    vendorInvites?: VendorInviteUncheckedUpdateManyWithoutApplicationNestedInput
+  }
+
+  export type VendorApplicationCreateWithoutVendorInvitesInput = {
+    id?: string
+    businessName: string
+    contactName?: string | null
+    email: string
+    phone?: string | null
+    description?: string | null
+    status?: $Enums.VendorApplicationStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user?: UserCreateNestedOneWithoutVendorApplicationsInput
+    account?: VendorAccountCreateNestedOneWithoutApplicationInput
+  }
+
+  export type VendorApplicationUncheckedCreateWithoutVendorInvitesInput = {
+    id?: string
+    userId?: string | null
+    businessName: string
+    contactName?: string | null
+    email: string
+    phone?: string | null
+    description?: string | null
+    status?: $Enums.VendorApplicationStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    account?: VendorAccountUncheckedCreateNestedOneWithoutApplicationInput
+  }
+
+  export type VendorApplicationCreateOrConnectWithoutVendorInvitesInput = {
+    where: VendorApplicationWhereUniqueInput
+    create: XOR<VendorApplicationCreateWithoutVendorInvitesInput, VendorApplicationUncheckedCreateWithoutVendorInvitesInput>
+  }
+
+  export type VendorApplicationUpsertWithoutVendorInvitesInput = {
+    update: XOR<VendorApplicationUpdateWithoutVendorInvitesInput, VendorApplicationUncheckedUpdateWithoutVendorInvitesInput>
+    create: XOR<VendorApplicationCreateWithoutVendorInvitesInput, VendorApplicationUncheckedCreateWithoutVendorInvitesInput>
+    where?: VendorApplicationWhereInput
+  }
+
+  export type VendorApplicationUpdateToOneWithWhereWithoutVendorInvitesInput = {
+    where?: VendorApplicationWhereInput
+    data: XOR<VendorApplicationUpdateWithoutVendorInvitesInput, VendorApplicationUncheckedUpdateWithoutVendorInvitesInput>
+  }
+
+  export type VendorApplicationUpdateWithoutVendorInvitesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    businessName?: StringFieldUpdateOperationsInput | string
+    contactName?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumVendorApplicationStatusFieldUpdateOperationsInput | $Enums.VendorApplicationStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneWithoutVendorApplicationsNestedInput
+    account?: VendorAccountUpdateOneWithoutApplicationNestedInput
+  }
+
+  export type VendorApplicationUncheckedUpdateWithoutVendorInvitesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    businessName?: StringFieldUpdateOperationsInput | string
+    contactName?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumVendorApplicationStatusFieldUpdateOperationsInput | $Enums.VendorApplicationStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    account?: VendorAccountUncheckedUpdateOneWithoutApplicationNestedInput
   }
 
   export type UserCreateManyReferredByInput = {
@@ -48881,6 +52160,8 @@ export namespace Prisma {
     status?: EnumVendorApplicationStatusFieldUpdateOperationsInput | $Enums.VendorApplicationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    account?: VendorAccountUpdateOneWithoutApplicationNestedInput
+    vendorInvites?: VendorInviteUpdateManyWithoutApplicationNestedInput
   }
 
   export type VendorApplicationUncheckedUpdateWithoutUserInput = {
@@ -48893,6 +52174,8 @@ export namespace Prisma {
     status?: EnumVendorApplicationStatusFieldUpdateOperationsInput | $Enums.VendorApplicationStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    account?: VendorAccountUncheckedUpdateOneWithoutApplicationNestedInput
+    vendorInvites?: VendorInviteUncheckedUpdateManyWithoutApplicationNestedInput
   }
 
   export type VendorApplicationUncheckedUpdateManyWithoutUserInput = {
@@ -49333,6 +52616,46 @@ export namespace Prisma {
     unitPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     quantity?: IntFieldUpdateOperationsInput | number
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type VendorInviteCreateManyApplicationInput = {
+    id?: string
+    email: string
+    tokenHash: string
+    status?: $Enums.AdminInviteStatus
+    expiresAt: Date | string
+    acceptedAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type VendorInviteUpdateWithoutApplicationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    tokenHash?: StringFieldUpdateOperationsInput | string
+    status?: EnumAdminInviteStatusFieldUpdateOperationsInput | $Enums.AdminInviteStatus
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VendorInviteUncheckedUpdateWithoutApplicationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    tokenHash?: StringFieldUpdateOperationsInput | string
+    status?: EnumAdminInviteStatusFieldUpdateOperationsInput | $Enums.AdminInviteStatus
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VendorInviteUncheckedUpdateManyWithoutApplicationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    tokenHash?: StringFieldUpdateOperationsInput | string
+    status?: EnumAdminInviteStatusFieldUpdateOperationsInput | $Enums.AdminInviteStatus
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
 

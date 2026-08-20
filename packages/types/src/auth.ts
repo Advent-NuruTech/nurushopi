@@ -86,3 +86,9 @@ export interface AdminAccessTokenClaims {
   role: "SENIOR" | "SUB";
   type: "admin_access";
 }
+
+export interface VendorAccessTokenClaims {
+  sub: string; // vendorAccountId
+  email: string;
+  type: "vendor_access";
+}

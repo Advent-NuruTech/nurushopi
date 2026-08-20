@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { slugifyCategory } from "@/lib/categoryUtils"; // make sure this is imported
 import { catalogApi, ApiClientError } from "@/lib/api";
@@ -14,6 +15,7 @@ export default function CategoriesTab() {
     name: "",
     slug: "",
     icon: "",
+    imageUrl: "",
     description: "",
   });
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -21,13 +23,33 @@ export default function CategoriesTab() {
     name: "",
     slug: "",
     icon: "",
+    imageUrl: "",
     description: "",
   });
+  const [uploading, setUploading] = useState(false);
+
+  const uploadCategoryImage = async (file: File, editing = false) => {
+    if (!file.type.startsWith("image/")) return;
+    setUploading(true);
+    try {
+      const body = new FormData();
+      body.append("file", file);
+      const response = await fetch("/api/upload", { method: "POST", body });
+      const result = (await response.json()) as { url?: string; error?: string };
+      if (!response.ok || !result.url) throw new Error(result.error || "Image upload failed.");
+      if (editing) setEditForm((form) => ({ ...form, imageUrl: result.url! }));
+      else setCreateForm((form) => ({ ...form, imageUrl: result.url! }));
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Image upload failed.");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const load = () => {
     setLoading(true);
     catalogApi
-      .listCategories()
+      .admin.listCategories()
       .then((d) => setCategories(d.categories))
       .catch(() => setCategories([]))
       .finally(() => setLoading(false));
@@ -52,10 +74,11 @@ export default function CategoriesTab() {
         name: createForm.name.trim(),
         slug: createForm.slug.trim() || undefined,
         icon: createForm.icon.trim() || null,
+        imageUrl: createForm.imageUrl.trim() || null,
         description: createForm.description.trim() || null,
         sortOrder: 0,
       });
-      setCreateForm({ name: "", slug: "", icon: "", description: "" });
+      setCreateForm({ name: "", slug: "", icon: "", imageUrl: "", description: "" });
       load();
     } catch (err) {
       if (err instanceof ApiClientError) alert(err.message);
@@ -68,6 +91,7 @@ export default function CategoriesTab() {
       name: cat.name ?? "",
       slug: cat.slug ?? "",
       icon: cat.icon ?? "",
+      imageUrl: cat.imageUrl ?? "",
       description: cat.description ?? "",
     });
   };
@@ -79,6 +103,7 @@ export default function CategoriesTab() {
         name: editForm.name.trim(),
         slug: editForm.slug.trim() || undefined,
         icon: editForm.icon.trim() || null,
+        imageUrl: editForm.imageUrl.trim() || null,
         description: editForm.description.trim() || null,
       });
       setEditingId(null);
@@ -155,10 +180,21 @@ export default function CategoriesTab() {
 
           <button
             type="submit"
+            disabled={uploading}
             className="px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium"
           >
             Add Category
           </button>
+
+          <label className="sm:col-span-4 flex cursor-pointer items-center gap-3 rounded-lg border border-dashed border-slate-300 p-3 text-sm text-slate-600 dark:border-slate-600 dark:text-slate-300">
+            {createForm.imageUrl && (
+              <span className="relative h-14 w-14 overflow-hidden rounded-md bg-slate-100">
+                <Image src={createForm.imageUrl} alt="Category preview" fill className="object-contain" sizes="56px" />
+              </span>
+            )}
+            <span>{uploading ? "Uploading…" : "Upload category image (optional — latest product image is used if empty)"}</span>
+            <input type="file" accept="image/*" disabled={uploading} className="sr-only" onChange={(e) => e.target.files?.[0] && uploadCategoryImage(e.target.files[0])} />
+          </label>
 
           <textarea
             placeholder="Description (optional)"
@@ -190,6 +226,7 @@ export default function CategoriesTab() {
               <th className="px-4 py-3">Name</th>
               <th className="px-4 py-3">Slug</th>
               <th className="px-4 py-3">Icon</th>
+              <th className="px-4 py-3">Image</th>
               <th className="px-4 py-3">Actions</th>
             </tr>
           </thead>
@@ -216,6 +253,19 @@ export default function CategoriesTab() {
                   ) : (
                     <span className="font-medium text-slate-900 dark:text-white">
                       {c.name}
+                    </span>
+                  )}
+                </td>
+                <td className="px-4 py-3">
+                  {editingId === c.id ? (
+                    <label className="flex cursor-pointer items-center gap-2 text-sm text-sky-600">
+                      {editForm.imageUrl && <span className="relative h-12 w-12 overflow-hidden rounded bg-slate-100"><Image src={editForm.imageUrl} alt="" fill className="object-contain" sizes="48px" /></span>}
+                      {uploading ? "Uploading…" : "Change"}
+                      <input type="file" accept="image/*" disabled={uploading} className="sr-only" onChange={(e) => e.target.files?.[0] && uploadCategoryImage(e.target.files[0], true)} />
+                    </label>
+                  ) : (
+                    <span className="relative block h-12 w-12 overflow-hidden rounded bg-slate-100 dark:bg-slate-800">
+                      <Image src={c.imageUrl || "/assets/logo.png"} alt="" fill className="object-contain" sizes="48px" />
                     </span>
                   )}
                 </td>

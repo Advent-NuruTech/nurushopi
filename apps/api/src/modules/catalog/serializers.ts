@@ -18,6 +18,7 @@ const decToStr = (d: Prisma.Decimal | null | undefined): string | null =>
 
 export type CategoryWithCount = Category & {
   _count?: { products: number };
+  products?: Array<{ images: string[] }>;
 };
 
 export function toCategoryDTO(c: CategoryWithCount): CategoryDTO {
@@ -26,6 +27,7 @@ export function toCategoryDTO(c: CategoryWithCount): CategoryDTO {
     name: c.name,
     slug: c.slug,
     icon: c.icon,
+    imageUrl: c.imageUrl ?? c.products?.[0]?.images[0] ?? null,
     description: c.description,
     sortOrder: c.sortOrder,
     ...(c._count ? { productCount: c._count.products } : {}),

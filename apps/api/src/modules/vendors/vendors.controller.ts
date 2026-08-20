@@ -7,6 +7,7 @@ import {
 import { sendOk } from "../../lib/response.js";
 import { Errors } from "../../lib/errors.js";
 import * as vendors from "./vendors.service.js";
+import * as vendorAuth from "../vendor-auth/vendor-auth.service.js";
 
 function param(req: Request, name: string): string {
   const value = req.params[name];
@@ -46,4 +47,15 @@ export async function adminGet(req: Request, res: Response): Promise<void> {
 export async function moderate(req: Request, res: Response): Promise<void> {
   const input = vendorApplicationModerateSchema.parse(req.body);
   sendOk(res, { application: await vendors.moderate(param(req, "id"), input) });
+}
+
+/** Send a vendor invite for an approved application. */
+export async function inviteVendor(req: Request, res: Response): Promise<void> {
+  const id = param(req, "id");
+  const app = await vendors.adminGetById(id);
+  if (app.status !== "APPROVED") {
+    throw Errors.badRequest("Only approved applications can be invited.");
+  }
+  const invite = await vendorAuth.createInvite(app.email, app.id);
+  sendOk(res, { invite }, 201);
 }

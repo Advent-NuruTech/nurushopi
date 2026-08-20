@@ -19,3 +19,4 @@ vendorsAdminRouter.use(requireAdmin());
 vendorsAdminRouter.get("/", asyncHandler(ctrl.adminList));
 vendorsAdminRouter.get("/:id", asyncHandler(ctrl.adminGet));
 vendorsAdminRouter.patch("/:id", asyncHandler(ctrl.moderate));
+vendorsAdminRouter.post("/:id/invite", asyncHandler(ctrl.inviteVendor));

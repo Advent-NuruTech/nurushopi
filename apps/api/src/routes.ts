@@ -2,6 +2,7 @@ import { Router } from "express";
 import { sendOk } from "./lib/response.js";
 import { authRouter } from "./modules/auth/auth.routes.js";
 import { adminAuthRouter } from "./modules/admin/admin.routes.js";
+import { vendorAuthRouter } from "./modules/vendor-auth/vendor-auth.routes.js";
 import {
   catalogAdminRouter,
   catalogPublicRouter,
@@ -50,6 +51,7 @@ apiRouter.get("/", (_req, res) => {
 
 apiRouter.use("/auth", authRouter);
 apiRouter.use("/admin/auth", adminAuthRouter);
+apiRouter.use("/vendor/auth", vendorAuthRouter);
 apiRouter.use("/catalog", catalogPublicRouter);
 apiRouter.use("/admin/catalog", catalogAdminRouter);
 apiRouter.use("/wholesale", wholesalePublicRouter);

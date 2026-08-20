@@ -57,6 +57,7 @@ export const categoryCreateSchema = z.object({
   name: z.string().trim().min(1, "Name is required.").max(120),
   slug: slugSchema.optional(),
   icon: z.string().trim().max(120).optional().nullable(),
+  imageUrl: z.string().url("Image URL must be valid.").optional().nullable(),
   description: z.string().trim().max(500).optional().nullable(),
   sortOrder: z.coerce.number().int().default(0),
 });
@@ -70,6 +71,8 @@ export interface CategoryDTO {
   name: string;
   slug: string;
   icon: string | null;
+  /** Explicit category image, or the newest active product image when omitted. */
+  imageUrl: string | null;
   description: string | null;
   sortOrder: number;
   productCount?: number;

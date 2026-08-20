@@ -29,7 +29,8 @@ function idParam(req: Request): string {
 
 export async function listCategories(req: Request, res: Response): Promise<void> {
   const includeCounts = req.query.withCounts === "true";
-  sendOk(res, { categories: await categories.list(includeCounts) });
+  const onlyWithProducts = req.query.onlyWithProducts === "true";
+  sendOk(res, { categories: await categories.list(includeCounts, onlyWithProducts) });
 }
 
 export async function getCategory(req: Request, res: Response): Promise<void> {

@@ -8,6 +8,12 @@ const ADMIN_PUBLIC = [`${ADMIN_BASE_PATH}/login`, `${ADMIN_BASE_PATH}/signup`];
 // performs full signature verification on every request).
 const ADMIN_COOKIE = "nuru_admin_access";
 
+// Vendor session cookie issued by the Express API.
+const VENDOR_BASE_PATH = "/np-vendor-8f3k";
+const VENDOR_LEGACY_PATH = "/vendor";
+const VENDOR_PUBLIC = [`${VENDOR_BASE_PATH}/login`, `${VENDOR_BASE_PATH}/signup`];
+const VENDOR_COOKIE = "nuru_vendor_access";
+
 // User session cookie issued by the Express API (presence-gated here; the API
 // performs full signature verification on every request).
 const USER_ACCESS_COOKIE = "nuru_access";
@@ -60,6 +66,11 @@ function getRoleFromToken(token: string): "senior" | "sub" | null {
   return null;
 }
 
+function isVendorToken(token: string): boolean {
+  const payload = decodeJwtPayload(token);
+  return payload?.type === "vendor_access";
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
 
@@ -74,6 +85,36 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // ---- Vendor path handling ----
+  const isVendorPath = pathname === VENDOR_BASE_PATH || pathname.startsWith(`${VENDOR_BASE_PATH}/`);
+  if (isVendorPath) {
+    const vendorPathname = pathname.replace(VENDOR_BASE_PATH, VENDOR_LEGACY_PATH);
+    const rewriteUrl = request.nextUrl.clone();
+    rewriteUrl.pathname = vendorPathname;
+
+    // Public vendor pages (login, signup) — no auth required
+    if (VENDOR_PUBLIC.some((path) => pathname === path || pathname.startsWith(path + "?"))) {
+      return NextResponse.rewrite(rewriteUrl);
+    }
+
+    // Protected vendor pages — require vendor cookie
+    const vendorToken = request.cookies.get(VENDOR_COOKIE)?.value;
+    if (!vendorToken) {
+      const loginUrl = new URL(`${VENDOR_BASE_PATH}/login`, request.url);
+      loginUrl.searchParams.set("from", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    if (!isVendorToken(vendorToken)) {
+      const loginUrl = new URL(`${VENDOR_BASE_PATH}/login`, request.url);
+      loginUrl.searchParams.set("from", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    return NextResponse.rewrite(rewriteUrl);
+  }
+
+  // ---- Admin path handling (unchanged) ----
   const isLegacyAdmin = pathname === ADMIN_LEGACY_PATH || pathname.startsWith(`${ADMIN_LEGACY_PATH}/`);
   if (isLegacyAdmin) {
     const notFoundUrl = new URL("/not-found", request.url);

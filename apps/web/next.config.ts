@@ -111,6 +111,10 @@ const nextConfig: NextConfig = {
       source: "/np-manage-8f3k/:path*",
       headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
     },
+    {
+      source: "/np-vendor-8f3k/:path*",
+      headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+    },
   ],
 };
 

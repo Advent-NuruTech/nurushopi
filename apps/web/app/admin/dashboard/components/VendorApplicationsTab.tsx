@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { vendorsApi, ApiClientError } from "@/lib/api";
-import type { VendorApplicationDTO, VendorApplicationStatus } from "@nuru/types";
+import type { VendorApplicationDTO, VendorApplicationStatus, VendorInviteDTO } from "@nuru/types";
 
 const STATUS_OPTIONS: Array<{ value: "all" | VendorApplicationStatus; label: string }> = [
   { value: "all", label: "All" },
@@ -37,6 +37,8 @@ export default function VendorApplicationsTab() {
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [inviteResult, setInviteResult] = useState<{ appId: string; invite: VendorInviteDTO } | null>(null);
+  const [invitingId, setInvitingId] = useState<string | null>(null);
 
   const query = useMemo(
     () => ({
@@ -89,6 +91,18 @@ export default function VendorApplicationsTab() {
       if (err instanceof ApiClientError) alert(err.message);
     } finally {
       setUpdatingId(null);
+    }
+  };
+
+  const inviteVendor = async (applicationId: string) => {
+    setInvitingId(applicationId);
+    try {
+      const { invite } = await vendorsApi.admin.invite(applicationId);
+      setInviteResult({ appId: applicationId, invite });
+    } catch (err) {
+      if (err instanceof ApiClientError) alert(err.message);
+    } finally {
+      setInvitingId(null);
     }
   };
 
@@ -188,12 +202,49 @@ export default function VendorApplicationsTab() {
                       </button>
                     </>
                   )}
+
+                  {application.status === "APPROVED" && (
+                    <button
+                      type="button"
+                      disabled={invitingId === application.id}
+                      onClick={() => inviteVendor(application.id)}
+                      className="px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 disabled:opacity-60 text-white text-sm"
+                    >
+                      {invitingId === application.id ? "Sending…" : "Invite Vendor"}
+                    </button>
+                  )}
                 </div>
               </div>
 
               {expanded === application.id && (
                 <div className="mt-4 grid gap-3 sm:grid-cols-2 text-sm">
                   <Detail label="Description" value={application.description || "N/A"} />
+                </div>
+              )}
+
+              {inviteResult?.appId === application.id && (
+                <div className="mt-4 p-3 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800">
+                  <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
+                    Vendor invite created! Share this link:
+                  </p>
+                  <div className="mt-2 flex items-center gap-2">
+                    <input
+                      type="text"
+                      readOnly
+                      value={`${typeof window !== "undefined" ? window.location.origin : ""}/np-vendor-8f3k/signup?invite=${inviteResult.invite.token}&email=${encodeURIComponent(inviteResult.invite.email)}`}
+                      className="flex-1 text-xs px-2 py-1 rounded border border-emerald-300 dark:border-emerald-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const url = `${window.location.origin}/np-vendor-8f3k/signup?invite=${inviteResult.invite.token}&email=${encodeURIComponent(inviteResult.invite.email)}`;
+                        navigator.clipboard.writeText(url);
+                      }}
+                      className="px-2 py-1 rounded bg-emerald-600 hover:bg-emerald-700 text-white text-xs"
+                    >
+                      Copy
+                    </button>
+                  </div>
                 </div>
               )}
             </article>

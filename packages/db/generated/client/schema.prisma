@@ -284,6 +284,7 @@ model Category {
   name        String
   slug        String   @unique
   icon        String?
+  imageUrl    String?
   description String?
   sortOrder   Int      @default(0)
   createdAt   DateTime @default(now())
@@ -574,9 +575,41 @@ model VendorApplication {
   createdAt    DateTime                @default(now())
   updatedAt    DateTime                @updatedAt
 
+  account       VendorAccount?
+  vendorInvites VendorInvite[]
+
   @@index([userId])
   @@index([status])
   @@map("vendor_applications")
+}
+
+model VendorAccount {
+  id            String            @id @default(cuid())
+  email         String            @unique
+  passwordHash  String
+  name          String
+  applicationId String            @unique
+  application   VendorApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  isActive      Boolean           @default(true)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@map("vendor_accounts")
+}
+
+model VendorInvite {
+  id            String            @id @default(cuid())
+  email         String
+  applicationId String
+  application   VendorApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  tokenHash     String            @unique
+  status        AdminInviteStatus @default(PENDING)
+  expiresAt     DateTime
+  acceptedAt    DateTime?
+  createdAt     DateTime          @default(now())
+
+  @@index([email])
+  @@map("vendor_invites")
 }
 
 model PwaInstall {

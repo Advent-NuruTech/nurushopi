@@ -57,14 +57,13 @@ export default async function HomePage() {
   const heroProduct = featuredProducts[0] ?? newArrivals[0];
   const topCategories =
     categories.length > 0
-      ? categories.slice(0, 8)
+      ? categories.slice(0, 24)
       : [
-          { id: "beauty", name: "Beauty", slug: "beauty" },
-          { id: "wellness", name: "Wellness", slug: "wellness" },
-          { id: "fashion", name: "Fashion", slug: "fashion" },
-          { id: "home", name: "Home", slug: "home" },
-        
-          { id: "gifts", name: "Gifts", slug: "gifts" },
+          { id: "beauty", name: "Beauty", slug: "beauty", image: "/assets/logo.png" },
+          { id: "wellness", name: "Wellness", slug: "wellness", image: "/assets/logo.png" },
+          { id: "fashion", name: "Fashion", slug: "fashion", image: "/assets/logo.png" },
+          { id: "home", name: "Home", slug: "home", image: "/assets/logo.png" },
+          { id: "gifts", name: "Gifts", slug: "gifts", image: "/assets/logo.png" },
         ];
 
   return (
@@ -73,6 +72,36 @@ export default async function HomePage() {
       
       <SabbathExperience />
       <NewArrivals products={newArrivals} />
+
+      <section className="bg-white py-6 dark:bg-black" aria-labelledby="shop-categories">
+        <div className="mx-auto max-w-7xl px-2 sm:px-6">
+          <div className="mb-3">
+            <SectionHeader title="Shop by Category" href="/shop" />
+          </div>
+          <div className="grid grid-cols-4 gap-x-2 gap-y-5 sm:grid-cols-5 sm:gap-4 lg:grid-cols-8">
+            {topCategories.map((category, index) => (
+              <Link
+                key={category.id}
+                href={`/shop?category=${encodeURIComponent(category.slug)}`}
+                className={`group min-w-0 text-center ${index >= 12 ? "hidden sm:block" : ""} ${index >= 15 ? "sm:hidden lg:block" : ""}`}
+              >
+                <div className="relative mx-auto aspect-square w-full overflow-hidden rounded-xl bg-slate-50 shadow-sm ring-1 ring-slate-200 transition group-hover:-translate-y-0.5 group-hover:shadow-md dark:bg-slate-900 dark:ring-slate-700">
+                  <Image
+                    src={category.image}
+                    alt=""
+                    fill
+                    className="object-contain p-2 transition-transform duration-300 group-hover:scale-105"
+                    sizes="(max-width: 639px) 25vw, (max-width: 1023px) 20vw, 12.5vw"
+                  />
+                </div>
+                <h2 id={index === 0 ? "shop-categories" : undefined} className="mt-2 truncate text-xs font-medium text-slate-800 sm:text-sm dark:text-slate-200">
+                  {category.name}
+                </h2>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {mostViewed.length > 0 && (
         <FeaturedSection products={mostViewed} categories={categoryOptions} title="Most Viewed Today" />

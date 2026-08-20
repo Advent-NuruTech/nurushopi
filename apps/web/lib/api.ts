@@ -43,6 +43,10 @@ import type {
   VendorApplicationDTO,
   VendorApplicationModerateInput,
   VendorApplicationQuery,
+  VendorInviteDTO,
+  VendorLoginInput,
+  VendorSignupInput,
+  VendorUserDTO,
   HeroCreateInput,
   HeroUpdateInput,
   NotificationDTO,
@@ -239,6 +243,18 @@ export const adminAuthApi = {
     api.del<{ success: boolean }>(`/admin/auth/admins/${encodeURIComponent(id)}`),
 };
 
+// ---- Vendor authentication ----
+type VendorUserResponse = { vendor: VendorUserDTO };
+
+export const vendorAuthApi = {
+  me: () => api.get<VendorUserResponse>("/vendor/auth/me"),
+  login: (input: VendorLoginInput) =>
+    api.post<VendorUserResponse>("/vendor/auth/login", input),
+  signup: (input: VendorSignupInput) =>
+    api.post<VendorUserResponse>("/vendor/auth/signup", input),
+  logout: () => api.post<{ success: boolean }>("/vendor/auth/logout"),
+};
+
 // ---- Catalog endpoints ----
 
 export const catalogApi = {
@@ -254,7 +270,9 @@ export const catalogApi = {
       sessionId,
     }),
   listCategories: (withCounts = false) =>
-    api.get<{ categories: CategoryDTO[] }>(`/catalog/categories${withCounts ? "?withCounts=true" : ""}`),
+    api.get<{ categories: CategoryDTO[] }>(
+      `/catalog/categories?onlyWithProducts=true${withCounts ? "&withCounts=true" : ""}`,
+    ),
   getCategory: (idOrSlug: string) =>
     api.get<{ category: CategoryDTO }>(`/catalog/categories/${encodeURIComponent(idOrSlug)}`),
   listBanners: () => api.get<{ banners: BannerDTO[] }>("/catalog/banners"),
@@ -262,6 +280,10 @@ export const catalogApi = {
 
   // Admin writes (require an admin session cookie)
   admin: {
+    listCategories: (withCounts = false) =>
+      api.get<{ categories: CategoryDTO[] }>(
+        `/admin/catalog/categories${withCounts ? "?withCounts=true" : ""}`,
+      ),
     listProducts: (query: ProductQuery = {}) =>
       api.get<Paginated<ProductDTO>>(`/admin/catalog/products${qs(query)}`),
     createProduct: (input: ProductCreateInput) =>
@@ -481,6 +503,8 @@ export const vendorsApi = {
       api.get<{ application: VendorApplicationDTO }>(`/admin/vendors/${id}`),
     moderate: (id: string, input: VendorApplicationModerateInput) =>
       api.patch<{ application: VendorApplicationDTO }>(`/admin/vendors/${id}`, input),
+    invite: (id: string) =>
+      api.post<{ invite: VendorInviteDTO }>(`/admin/vendors/${encodeURIComponent(id)}/invite`),
   },
 };
 

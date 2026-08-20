@@ -59,7 +59,7 @@ export default function UploadProductPage() {
   /* ---------- Load categories ---------- */
   useEffect(() => {
     catalogApi
-      .listCategories()
+      .admin.listCategories()
       .then((d) => setCategories(d.categories))
       .catch(() => setCategories([]));
   }, []);

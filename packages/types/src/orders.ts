@@ -57,6 +57,8 @@ export const checkoutSchema = z
     contactEmail: emailSchema.optional().nullable(),
     address: z.string().trim().min(1, "Delivery address is required.").max(500),
     note: z.string().trim().max(1000).optional().nullable(),
+    /** Stable guest id used only for server-side promotion/frequency limits. */
+    anonymousId: z.string().trim().min(8).max(191).optional().nullable(),
     // Opt-in to spending wallet credit on this order. The amount applied is
     // decided server-side (min of live balance and subtotal) — never trusted
     // from the client — and only takes effect for an authenticated user.

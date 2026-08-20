@@ -71,6 +71,11 @@ import type {
   WholesaleItemCreateInput,
   WholesaleItemDTO,
   WholesaleItemUpdateInput,
+  CollectionCreateInput,
+  CollectionUpdateInput,
+  HomepageSectionCreateInput,
+  HomepageSectionUpdateInput,
+  MerchandisingCollectionDTO,
 } from "@nuru/types";
 
 /** Public wholesale list filters accepted by the API (all optional on the client). */
@@ -605,4 +610,33 @@ export const sabbathApi = {
 
 export const dashboardApi = {
   stats: () => api.get<{ stats: DashboardStatsDTO }>("/admin/dashboard"),
+};
+
+export interface AdminHomepageSection {
+  id: string;
+  collectionId: string;
+  position: number;
+  status: "DRAFT" | "SCHEDULED" | "ACTIVE" | "PAUSED" | "ARCHIVED";
+  device: string;
+  startAt: string | null;
+  endAt: string | null;
+  configuration: unknown;
+  collection: MerchandisingCollectionDTO;
+}
+
+export const merchandisingApi = {
+  admin: {
+    collections: () => api.get<{ collections: MerchandisingCollectionDTO[] }>("/admin/merchandising/collections"),
+    createCollection: (input: CollectionCreateInput) =>
+      api.post<{ collection: MerchandisingCollectionDTO }>("/admin/merchandising/collections", input),
+    updateCollection: (id: string, input: CollectionUpdateInput) =>
+      api.patch<{ collection: MerchandisingCollectionDTO }>(`/admin/merchandising/collections/${encodeURIComponent(id)}`, input),
+    sections: () => api.get<{ sections: AdminHomepageSection[] }>("/admin/merchandising/homepage-sections"),
+    createSection: (input: HomepageSectionCreateInput) =>
+      api.post<{ section: AdminHomepageSection }>("/admin/merchandising/homepage-sections", input),
+    updateSection: (id: string, input: HomepageSectionUpdateInput) =>
+      api.patch<{ section: AdminHomepageSection }>(`/admin/merchandising/homepage-sections/${encodeURIComponent(id)}`, input),
+    analytics: (id: string, days = 30) =>
+      api.get<{ analytics: Record<string, number | string | null> }>(`/admin/merchandising/collections/${encodeURIComponent(id)}/analytics?days=${days}`),
+  },
 };

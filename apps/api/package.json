@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "worker:merchandising": "tsx src/workers/merchandising.ts"
   },
   "dependencies": {
     "@nuru/auth": "workspace:*",

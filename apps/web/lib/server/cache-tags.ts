@@ -13,6 +13,7 @@ export const CacheTags = {
   banners: "banners",
   hero: "hero",
   wholesale: "wholesale",
+  homepage: "homepage",
 
   /** Entity-level tags (purge a single detail page). */
   product: (idOrSlug: string) => `product:${idOrSlug}`,
@@ -27,6 +28,7 @@ export const REVALIDATABLE_TAGS = [
   CacheTags.banners,
   CacheTags.hero,
   CacheTags.wholesale,
+  CacheTags.homepage,
 ] as const;
 
 export type RevalidatableTag = (typeof REVALIDATABLE_TAGS)[number];

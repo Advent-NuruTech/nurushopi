@@ -10,6 +10,7 @@ function model() {
     aggregate: vi.fn(),
     groupBy: vi.fn(),
     create: vi.fn(),
+    createMany: vi.fn(),
     update: vi.fn(),
     updateMany: vi.fn(),
     upsert: vi.fn(),
@@ -51,6 +52,9 @@ export class Decimal {
   }
   mul(other: DecimalLike): Decimal {
     return new Decimal(this.n * Decimal.num(other));
+  }
+  div(other: DecimalLike): Decimal {
+    return new Decimal(this.n / Decimal.num(other));
   }
   lessThan(other: DecimalLike): boolean {
     return this.n < Decimal.num(other);
@@ -109,11 +113,33 @@ export function makeDbMock() {
     contact: model(),
     vendorApplication: model(),
     admin: model(),
+    adminLog: model(),
     adminInvite: model(),
     loginAttempt: model(),
     legacyPasswordImport: model(),
     pwaInstall: model(),
     sabbathMessage: model(),
+    merchandisingCollection: model(),
+    collectionMembership: model(),
+    collectionOverride: model(),
+    homepageSection: model(),
+    promotion: model(),
+    promotionProduct: model(),
+    promotionRedemption: model(),
+    bundle: model(),
+    bundleItem: model(),
+    spotlightPlacement: model(),
+    commerceEvent: model(),
+    productMetricHourly: model(),
+    productMetricDaily: model(),
+    collectionMetricDaily: model(),
+    productRanking: model(),
+    userProductAffinity: model(),
+    notificationPreference: model(),
+    retentionTrigger: model(),
+    retentionSubscription: model(),
+    experiment: model(),
+    experimentAssignment: model(),
     // Supports both the array form (Promise.all) and the interactive callback
     // form (`$transaction(async (tx) => …)`), passing the mock itself as `tx`.
     $transaction: vi.fn((arg: unknown) =>
@@ -122,7 +148,14 @@ export function makeDbMock() {
         : Promise.all(arg as Promise<unknown>[]),
     ),
   };
-  return { prisma, Prisma: { PrismaClientKnownRequestError, Decimal } };
+  return {
+    prisma,
+    Prisma: {
+      PrismaClientKnownRequestError,
+      Decimal,
+      TransactionIsolationLevel: { Serializable: "Serializable" },
+    },
+  };
 }
 
 export type DbMock = ReturnType<typeof makeDbMock>;

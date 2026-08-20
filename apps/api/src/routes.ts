@@ -42,6 +42,10 @@ import {
   sabbathAdminRouter,
   sabbathPublicRouter,
 } from "./modules/sabbath/sabbath.routes.js";
+import {
+  merchandisingAdminRouter,
+  merchandisingPublicRouter,
+} from "./modules/merchandising/merchandising.routes.js";
 
 export const apiRouter: Router = Router();
 
@@ -76,3 +80,5 @@ apiRouter.use("/admin/pwa-installs", pwaAdminRouter);
 apiRouter.use("/sabbath-messages", sabbathPublicRouter);
 apiRouter.use("/admin/sabbath-messages", sabbathAdminRouter);
 apiRouter.use("/admin/users", usersAdminRouter);
+apiRouter.use("/", merchandisingPublicRouter);
+apiRouter.use("/admin/merchandising", merchandisingAdminRouter);

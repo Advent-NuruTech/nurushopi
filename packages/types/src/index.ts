@@ -12,3 +12,4 @@ export * from "./vendors.js";
 export * from "./pwa.js";
 export * from "./sabbath.js";
 export * from "./users.js";
+export * from "./merchandising.js";

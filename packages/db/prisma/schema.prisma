@@ -93,6 +93,63 @@ enum VendorApplicationStatus {
   REJECTED
 }
 
+enum MerchandisingStatus {
+  DRAFT
+  SCHEDULED
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum MembershipSource {
+  AUTOMATIC
+  MANUAL
+  ALGORITHM
+  PROMOTION
+  RECOMMENDATION
+  SPONSORED
+}
+
+enum CollectionOverrideType {
+  PIN
+  EXCLUDE
+  BOOST
+  LOWER
+}
+
+enum PromotionDiscountType {
+  FIXED_PRICE
+  PERCENTAGE
+  FIXED_AMOUNT
+}
+
+enum PromotionFundingType {
+  SELLER
+  PLATFORM
+  SHARED
+}
+
+enum BundleDiscountType {
+  FIXED_PRICE
+  PERCENTAGE
+  FIXED_AMOUNT
+}
+
+enum RetentionTriggerStatus {
+  PENDING
+  CLAIMED
+  SENT
+  SKIPPED
+  FAILED
+}
+
+enum ExperimentStatus {
+  DRAFT
+  RUNNING
+  PAUSED
+  COMPLETED
+}
+
 // ============================================================
 // Identity & Auth
 // ============================================================
@@ -118,20 +175,27 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  oauthAccounts          OAuthAccount[]
-  refreshTokens          RefreshToken[]
+  oauthAccounts           OAuthAccount[]
+  refreshTokens           RefreshToken[]
   emailVerificationTokens EmailVerificationToken[]
-  passwordResetTokens    PasswordResetToken[]
-  legacyPassword         LegacyPasswordImport?
-  orders                 Order[]
-  reviews                Review[]
-  productViews           ProductView[]
-  walletTransactions     WalletTransaction[]
-  walletRedemptions      WalletRedemption[]
-  sentMessages           Message[]               @relation("UserMessages")
-  vendorApplications     VendorApplication[]
-  referralEvents         Referral[]              @relation("ReferralReferrer")
-  referredEvents         Referral[]              @relation("ReferralReferred")
+  passwordResetTokens     PasswordResetToken[]
+  legacyPassword          LegacyPasswordImport?
+  orders                  Order[]
+  reviews                 Review[]
+  productViews            ProductView[]
+  walletTransactions      WalletTransaction[]
+  walletRedemptions       WalletRedemption[]
+  sentMessages            Message[]                @relation("UserMessages")
+  vendorApplications      VendorApplication[]
+  referralEvents          Referral[]               @relation("ReferralReferrer")
+  referredEvents          Referral[]               @relation("ReferralReferred")
+  commerceEvents          CommerceEvent[]
+  productAffinities       UserProductAffinity[]
+  notificationPreferences NotificationPreference[]
+  retentionTriggers       RetentionTrigger[]
+  experimentAssignments   ExperimentAssignment[]
+  promotionRedemptions    PromotionRedemption[]
+  retentionSubscriptions  RetentionSubscription[]
 
   @@index([referredById])
   @@map("users")
@@ -236,9 +300,14 @@ model Admin {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
-  logs           AdminLog[]
-  createdProducts Product[]      @relation("ProductCreatedBy")
-  invitesSent    AdminInvite[]   @relation("InviteCreatedBy")
+  logs                     AdminLog[]
+  createdProducts          Product[]                 @relation("ProductCreatedBy")
+  invitesSent              AdminInvite[]             @relation("InviteCreatedBy")
+  merchandisingCollections MerchandisingCollection[] @relation("CollectionCreatedBy")
+  collectionOverrides      CollectionOverride[]      @relation("OverrideCreatedBy")
+  promotions               Promotion[]               @relation("PromotionCreatedBy")
+  bundles                  Bundle[]                  @relation("BundleCreatedBy")
+  spotlightPlacements      SpotlightPlacement[]      @relation("SpotlightCreatedBy")
 
   @@map("admins")
 }
@@ -318,9 +387,21 @@ model Product {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  orderItems OrderItem[]
-  reviews    Review[]
-  views      ProductView[]
+  orderItems             OrderItem[]
+  reviews                Review[]
+  views                  ProductView[]
+  collectionMemberships  CollectionMembership[]
+  collectionOverrides    CollectionOverride[]
+  promotionProducts      PromotionProduct[]
+  bundleItems            BundleItem[]
+  commerceEvents         CommerceEvent[]
+  hourlyMetrics          ProductMetricHourly[]
+  dailyMetrics           ProductMetricDaily[]
+  rankings               ProductRanking[]
+  userAffinities         UserProductAffinity[]
+  retentionTriggers      RetentionTrigger[]
+  promotionRedemptions   PromotionRedemption[]
+  retentionSubscriptions RetentionSubscription[]
 
   @@index([categoryId])
   @@index([createdById])
@@ -345,9 +426,13 @@ model HeroAnnouncement {
   id           String    @id @default(cuid())
   message      String
   linkUrl      String?
-  /** Optional CSS gradient token rendered behind the marquee slide. */
+  /**
+   * Optional CSS gradient token rendered behind the marquee slide.
+   */
   gradient     String?
-  /** Sort position in the marquee; lower shows first. */
+  /**
+   * Sort position in the marquee; lower shows first.
+   */
   displayOrder Int       @default(0) @map("display_order")
   isActive     Boolean   @default(true)
   startsAt     DateTime?
@@ -387,9 +472,9 @@ model Order {
   status        OrderStatus   @default(PENDING)
   paymentStatus PaymentStatus @default(UNPAID)
 
-  subtotal     Decimal @db.Decimal(12, 2)
+  subtotal      Decimal @db.Decimal(12, 2)
   walletApplied Decimal @default(0) @db.Decimal(12, 2)
-  total        Decimal @db.Decimal(12, 2)
+  total         Decimal @db.Decimal(12, 2)
 
   // Snapshot of contact / delivery details
   contactName  String?
@@ -401,7 +486,8 @@ model Order {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  items OrderItem[]
+  items                OrderItem[]
+  promotionRedemptions PromotionRedemption[]
 
   @@index([userId])
   @@index([status])
@@ -409,14 +495,14 @@ model Order {
 }
 
 model OrderItem {
-  id          String  @id @default(cuid())
+  id          String   @id @default(cuid())
   orderId     String
-  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   productId   String?
   product     Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
   // Snapshot fields so history survives product edits/deletes
   productName String
-  unitPrice   Decimal @db.Decimal(12, 2)
+  unitPrice   Decimal  @db.Decimal(12, 2)
   quantity    Int
   imageUrl    String?
 
@@ -559,17 +645,17 @@ model Contact {
 }
 
 model VendorApplication {
-  id          String                  @id @default(cuid())
-  userId      String?
-  user        User?                   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  id           String                  @id @default(cuid())
+  userId       String?
+  user         User?                   @relation(fields: [userId], references: [id], onDelete: SetNull)
   businessName String
-  contactName String?
-  email       String
-  phone       String?
-  description String?
-  status      VendorApplicationStatus @default(PENDING)
-  createdAt   DateTime                @default(now())
-  updatedAt   DateTime                @updatedAt
+  contactName  String?
+  email        String
+  phone        String?
+  description  String?
+  status       VendorApplicationStatus @default(PENDING)
+  createdAt    DateTime                @default(now())
+  updatedAt    DateTime                @updatedAt
 
   account       VendorAccount?
   vendorInvites VendorInvite[]
@@ -630,4 +716,495 @@ model SabbathMessage {
 
   @@index([sabbathDate, createdAt])
   @@map("sabbath_messages")
+}
+
+// ============================================================
+// Merchandising, promotions, discovery, retention & experiments
+// ============================================================
+
+/// Stable merchandising identity. `key` is deliberately not exposed by any
+/// update input; presentation, rules and scheduling may change independently.
+model MerchandisingCollection {
+  id                String              @id @default(cuid())
+  key               String              @unique
+  displayName       String
+  shortName         String?
+  description       String?
+  collectionType    String              @default("generic")
+  selectionStrategy String              @default("hybrid")
+  status            MerchandisingStatus @default(DRAFT)
+  priority          Int                 @default(0)
+  placement         String?
+  startAt           DateTime?
+  endAt             DateTime?
+  maxProducts       Int                 @default(24)
+  sortStrategy      String              @default("rank")
+  eligibilityRules  Json?
+  configuration     Json?
+  imageUrl          String?
+  icon              String?
+  badgeText         String?
+  ctaText           String?
+  ctaUrl            String?
+  isPersonalized    Boolean             @default(false)
+  isSponsored       Boolean             @default(false)
+  cacheVersion      Int                 @default(1)
+  createdById       String?
+  createdBy         Admin?              @relation("CollectionCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  memberships      CollectionMembership[]
+  overrides        CollectionOverride[]
+  homepageSections HomepageSection[]
+  rankings         ProductRanking[]
+  commerceEvents   CommerceEvent[]
+  dailyMetrics     CollectionMetricDaily[]
+  promotions       Promotion[]
+
+  @@index([status, startAt, endAt])
+  @@index([priority, id])
+  @@map("merchandising_collections")
+}
+
+model CollectionMembership {
+  id           String                  @id @default(cuid())
+  collectionId String
+  collection   MerchandisingCollection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  productId    String
+  product      Product                 @relation(fields: [productId], references: [id], onDelete: Cascade)
+  source       MembershipSource        @default(AUTOMATIC)
+  score        Float                   @default(0)
+  rank         Int?
+  startsAt     DateTime?
+  expiresAt    DateTime?
+  metadata     Json?
+  createdAt    DateTime                @default(now())
+  updatedAt    DateTime                @updatedAt
+
+  @@unique([collectionId, productId])
+  @@index([collectionId, rank, productId])
+  @@index([collectionId, score, productId])
+  @@index([productId])
+  @@index([expiresAt])
+  @@map("collection_memberships")
+}
+
+model CollectionOverride {
+  id           String                  @id @default(cuid())
+  collectionId String
+  collection   MerchandisingCollection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  productId    String
+  product      Product                 @relation(fields: [productId], references: [id], onDelete: Cascade)
+  type         CollectionOverrideType
+  value        Float                   @default(0)
+  reason       String?
+  startsAt     DateTime?
+  expiresAt    DateTime?
+  createdById  String?
+  createdBy    Admin?                  @relation("OverrideCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt    DateTime                @default(now())
+
+  @@index([collectionId, type, startsAt, expiresAt])
+  @@index([productId])
+  @@map("collection_overrides")
+}
+
+model HomepageSection {
+  id            String                  @id @default(cuid())
+  collectionId  String
+  collection    MerchandisingCollection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  position      Int
+  status        MerchandisingStatus     @default(DRAFT)
+  audience      Json?
+  device        String                  @default("all")
+  startAt       DateTime?
+  endAt         DateTime?
+  configuration Json?
+  experimentKey String?
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+
+  @@index([status, device, position])
+  @@index([startAt, endAt])
+  @@map("homepage_sections")
+}
+
+model Promotion {
+  id               String                   @id @default(cuid())
+  key              String                   @unique
+  name             String
+  status           MerchandisingStatus      @default(DRAFT)
+  discountType     PromotionDiscountType
+  discountValue    Decimal                  @db.Decimal(12, 2)
+  fundingType      PromotionFundingType     @default(PLATFORM)
+  sellerFundingPct Decimal?                 @db.Decimal(5, 2)
+  collectionId     String?
+  collection       MerchandisingCollection? @relation(fields: [collectionId], references: [id], onDelete: SetNull)
+  startsAt         DateTime
+  endsAt           DateTime
+  inventoryLimit   Int?
+  purchasedCount   Int                      @default(0)
+  perCustomerLimit Int?
+  configuration    Json?
+  createdById      String?
+  createdBy        Admin?                   @relation("PromotionCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+
+  products    PromotionProduct[]
+  redemptions PromotionRedemption[]
+
+  @@index([status, startsAt, endsAt])
+  @@index([collectionId])
+  @@map("promotions")
+}
+
+model PromotionProduct {
+  id               String    @id @default(cuid())
+  promotionId      String
+  promotion        Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  productId        String
+  product          Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  promotionalPrice Decimal?  @db.Decimal(12, 2)
+  inventoryLimit   Int?
+  purchasedCount   Int       @default(0)
+  perCustomerLimit Int?
+  metadata         Json?
+  createdAt        DateTime  @default(now())
+
+  redemptions PromotionRedemption[]
+
+  @@unique([promotionId, productId])
+  @@index([productId, promotionId])
+  @@map("promotion_products")
+}
+
+model PromotionRedemption {
+  id                 String           @id @default(cuid())
+  promotionId        String
+  promotion          Promotion        @relation(fields: [promotionId], references: [id], onDelete: Restrict)
+  promotionProductId String
+  promotionProduct   PromotionProduct @relation(fields: [promotionProductId], references: [id], onDelete: Restrict)
+  productId          String
+  product            Product          @relation(fields: [productId], references: [id], onDelete: Restrict)
+  orderId            String
+  order              Order            @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  userId             String?
+  user               User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+  anonymousId        String?
+  quantity           Int
+  unitDiscount       Decimal          @db.Decimal(12, 2)
+  createdAt          DateTime         @default(now())
+
+  @@index([promotionId, userId])
+  @@index([promotionId, anonymousId])
+  @@index([orderId])
+  @@map("promotion_redemptions")
+}
+
+model Bundle {
+  id               String              @id @default(cuid())
+  key              String              @unique
+  displayName      String
+  description      String?
+  status           MerchandisingStatus @default(DRAFT)
+  discountType     BundleDiscountType
+  discountValue    Decimal             @db.Decimal(12, 2)
+  startsAt         DateTime?
+  endsAt           DateTime?
+  maxPurchases     Int?
+  purchasedCount   Int                 @default(0)
+  allowCrossSeller Boolean             @default(false)
+  configuration    Json?
+  createdById      String?
+  createdBy        Admin?              @relation("BundleCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  items BundleItem[]
+
+  @@index([status, startsAt, endsAt])
+  @@map("bundles")
+}
+
+model BundleItem {
+  id        String  @id @default(cuid())
+  bundleId  String
+  bundle    Bundle  @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  quantity  Int     @default(1)
+  required  Boolean @default(true)
+  sortOrder Int     @default(0)
+  metadata  Json?
+
+  @@unique([bundleId, productId])
+  @@index([productId])
+  @@map("bundle_items")
+}
+
+model SpotlightPlacement {
+  id          String   @id @default(cuid())
+  targetType  String
+  targetId    String
+  placement   String
+  priority    Int      @default(0)
+  audience    Json?
+  region      String?
+  reason      String?
+  creative    Json?
+  ctaText     String?
+  ctaUrl      String?
+  startsAt    DateTime
+  endsAt      DateTime
+  createdById String?
+  createdBy   Admin?   @relation("SpotlightCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([placement, startsAt, endsAt, priority])
+  @@index([targetType, targetId])
+  @@map("spotlight_placements")
+}
+
+/// Append-only ingestion table. At high volume this table is range-partitioned
+/// by `occurredAt`; the Prisma model stays portable for today's deployment.
+model CommerceEvent {
+  id               String                   @id @default(cuid())
+  eventId          String                   @unique
+  eventType        String
+  userId           String?
+  user             User?                    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  anonymousId      String?
+  sessionId        String?
+  productId        String?
+  product          Product?                 @relation(fields: [productId], references: [id], onDelete: SetNull)
+  sellerId         String?
+  collectionId     String?
+  collection       MerchandisingCollection? @relation(fields: [collectionId], references: [id], onDelete: SetNull)
+  searchQueryId    String?
+  recommendationId String?
+  experimentKey    String?
+  variantKey       String?
+  position         Int?
+  source           String?
+  device           String?
+  ipHash           String?
+  userAgentHash    String?
+  trusted          Boolean                  @default(true)
+  abuseScore       Float                    @default(0)
+  occurredAt       DateTime
+  receivedAt       DateTime                 @default(now())
+  metadata         Json?
+
+  @@index([eventType, occurredAt])
+  @@index([productId, eventType, occurredAt])
+  @@index([collectionId, eventType, occurredAt])
+  @@index([userId, occurredAt])
+  @@index([sessionId, occurredAt])
+  @@map("commerce_events")
+}
+
+model ProductMetricHourly {
+  id               String   @id @default(cuid())
+  productId        String
+  product          Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  bucketStart      DateTime
+  impressions      Int      @default(0)
+  uniqueViewers    Int      @default(0)
+  views            Int      @default(0)
+  wishlistAdds     Int      @default(0)
+  cartAdds         Int      @default(0)
+  purchases        Int      @default(0)
+  unitsSold        Int      @default(0)
+  revenue          Decimal  @default(0) @db.Decimal(14, 2)
+  cancellations    Int      @default(0)
+  returns          Int      @default(0)
+  reviewActivity   Int      @default(0)
+  suspiciousEvents Int      @default(0)
+  updatedAt        DateTime @updatedAt
+
+  @@unique([productId, bucketStart])
+  @@index([bucketStart, productId])
+  @@map("product_metrics_hourly")
+}
+
+model ProductMetricDaily {
+  id             String   @id @default(cuid())
+  productId      String
+  product        Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  bucketDate     DateTime @db.Date
+  impressions    Int      @default(0)
+  uniqueViewers  Int      @default(0)
+  views          Int      @default(0)
+  wishlistAdds   Int      @default(0)
+  cartAdds       Int      @default(0)
+  purchases      Int      @default(0)
+  unitsSold      Int      @default(0)
+  revenue        Decimal  @default(0) @db.Decimal(14, 2)
+  cancellations  Int      @default(0)
+  returns        Int      @default(0)
+  reviewActivity Int      @default(0)
+  updatedAt      DateTime @updatedAt
+
+  @@unique([productId, bucketDate])
+  @@index([bucketDate, productId])
+  @@map("product_metrics_daily")
+}
+
+model CollectionMetricDaily {
+  id            String                  @id @default(cuid())
+  collectionId  String
+  collection    MerchandisingCollection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  bucketDate    DateTime                @db.Date
+  impressions   Int                     @default(0)
+  uniqueViewers Int                     @default(0)
+  clicks        Int                     @default(0)
+  productViews  Int                     @default(0)
+  cartAdds      Int                     @default(0)
+  purchases     Int                     @default(0)
+  orders        Int                     @default(0)
+  revenue       Decimal                 @default(0) @db.Decimal(14, 2)
+  updatedAt     DateTime                @updatedAt
+
+  @@unique([collectionId, bucketDate])
+  @@index([bucketDate, collectionId])
+  @@map("collection_metrics_daily")
+}
+
+model ProductRanking {
+  id           String                  @id @default(cuid())
+  collectionId String
+  collection   MerchandisingCollection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  productId    String
+  product      Product                 @relation(fields: [productId], references: [id], onDelete: Cascade)
+  algorithm    String
+  segmentKey   String                  @default("global")
+  snapshotAt   DateTime
+  score        Float
+  rank         Int
+  reasons      Json?
+  expiresAt    DateTime?
+  createdAt    DateTime                @default(now())
+
+  @@unique([collectionId, algorithm, segmentKey, snapshotAt, productId])
+  @@index([collectionId, segmentKey, snapshotAt, rank, productId])
+  @@index([expiresAt])
+  @@map("product_rankings")
+}
+
+model UserProductAffinity {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  score      Float
+  reasons    Json?
+  computedAt DateTime
+  expiresAt  DateTime?
+
+  @@unique([userId, productId])
+  @@index([userId, score, productId])
+  @@map("user_product_affinities")
+}
+
+model NotificationPreference {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  channel     String
+  topic       String
+  enabled     Boolean   @default(false)
+  consentedAt DateTime?
+  quietHours  Json?
+  maxPerDay   Int       @default(2)
+  maxPerWeek  Int       @default(5)
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([userId, channel, topic])
+  @@index([userId, enabled])
+  @@map("notification_preferences")
+}
+
+model RetentionSubscription {
+  id               String    @id @default(cuid())
+  userId           String
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId        String
+  product          Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  subscriptionType String
+  active           Boolean   @default(true)
+  lastNotifiedAt   DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@unique([userId, productId, subscriptionType])
+  @@index([productId, subscriptionType, active])
+  @@map("retention_subscriptions")
+}
+
+/// Durable outbox for useful, consent-aware retention messaging.
+model RetentionTrigger {
+  id               String                 @id @default(cuid())
+  deduplicationKey String                 @unique
+  userId           String
+  user             User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId        String?
+  product          Product?               @relation(fields: [productId], references: [id], onDelete: SetNull)
+  triggerType      String
+  channel          String
+  status           RetentionTriggerStatus @default(PENDING)
+  priority         Int                    @default(0)
+  scheduledAt      DateTime
+  claimedAt        DateTime?
+  sentAt           DateTime?
+  expiresAt        DateTime?
+  attemptCount     Int                    @default(0)
+  payload          Json?
+  lastError        String?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+
+  @@index([status, scheduledAt, priority])
+  @@index([userId, triggerType, createdAt])
+  @@map("retention_triggers")
+}
+
+model Experiment {
+  id               String           @id @default(cuid())
+  key              String           @unique
+  name             String
+  status           ExperimentStatus @default(DRAFT)
+  variants         Json
+  allocation       Int              @default(10000)
+  primaryMetric    String
+  guardrailMetrics Json?
+  startsAt         DateTime?
+  endsAt           DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  assignments ExperimentAssignment[]
+
+  @@index([status, startsAt, endsAt])
+  @@map("experiments")
+}
+
+model ExperimentAssignment {
+  id           String     @id @default(cuid())
+  experimentId String
+  experiment   Experiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+  userId       String?
+  user         User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  anonymousId  String?
+  variantKey   String
+  bucket       Int
+  assignedAt   DateTime   @default(now())
+
+  @@unique([experimentId, userId])
+  @@unique([experimentId, anonymousId])
+  @@index([experimentId, variantKey])
+  @@map("experiment_assignments")
 }

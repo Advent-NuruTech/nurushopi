@@ -1,3 +1,4 @@
+import { createHash, randomUUID } from "node:crypto";
 import { prisma, Prisma } from "@nuru/db";
 import type {
   CheckoutInput,
@@ -10,8 +11,23 @@ import type {
 import { Errors } from "../../lib/errors.js";
 import { creditWallet, debitWallet, rewardReferralOnFirstOrder } from "../wallet/ledger.js";
 import { toOrderDTO, type OrderWithItems } from "./serializers.js";
+import { loadEffectivePrices } from "../merchandising/pricing.service.js";
 
 const withItems = { include: { items: true } } as const;
+
+async function serializableTransaction<T>(work: (tx: Prisma.TransactionClient) => Promise<T>): Promise<T> {
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      return await prisma.$transaction(work, {
+        isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      });
+    } catch (error) {
+      const retryable = error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034";
+      if (!retryable || attempt === 3) throw error;
+    }
+  }
+  throw Errors.internal("Checkout transaction could not be completed.");
+}
 
 function buildWhere(query: OrderQuery, scopeUserId?: string): Prisma.OrderWhereInput {
   const where: Prisma.OrderWhereInput = {};
@@ -118,10 +134,14 @@ export async function checkout(input: CheckoutInput, userId?: string): Promise<O
     );
   }
   const productIds = [...quantityByProduct.keys()];
+  const guestActor = input.anonymousId ?? `guest:${createHash("sha256").update(input.contactPhone.trim()).digest("hex")}`;
 
-  const order = await prisma.$transaction(async (tx) => {
+  const order = await serializableTransaction(async (tx) => {
     const products = await tx.product.findMany({ where: { id: { in: productIds } } });
     const byId = new Map(products.map((p) => [p.id, p]));
+    // Promotions are resolved from their own time-bound layer. Product base/
+    // selling prices are never mutated when a campaign starts or expires.
+    const effectivePrices = await loadEffectivePrices(tx, products);
 
     let subtotal = new Prisma.Decimal(0);
     const orderItems: Prisma.OrderItemCreateWithoutOrderInput[] = [];
@@ -138,8 +158,8 @@ export async function checkout(input: CheckoutInput, userId?: string): Promise<O
         );
       }
 
-      // Charge the selling price when set, otherwise the list price.
-      const unitPrice = new Prisma.Decimal((product.sellingPrice ?? product.price).toString());
+      const effective = effectivePrices.get(product.id);
+      const unitPrice = effective?.effectivePrice ?? new Prisma.Decimal((product.sellingPrice ?? product.price).toString());
       subtotal = subtotal.add(unitPrice.mul(quantity));
 
       orderItems.push({
@@ -203,6 +223,81 @@ export async function checkout(input: CheckoutInput, userId?: string): Promise<O
       },
       include: { items: true },
     });
+    await tx.commerceEvent.createMany({
+      data: [...quantityByProduct].map(([productId, quantity]) => ({
+        eventId: randomUUID(),
+        eventType: "purchase_completed",
+        userId: userId ?? null,
+        anonymousId: userId ? null : guestActor,
+        productId,
+        trusted: true,
+        occurredAt: new Date(),
+        source: "checkout",
+        metadata: {
+          orderId: created.id,
+          quantity,
+          revenue: (effectivePrices.get(productId)?.effectivePrice ?? new Prisma.Decimal(0)).mul(quantity).toString(),
+        },
+      })),
+    });
+
+    // Reserve campaign inventory in the same transaction as stock/order. The
+    // conditional counters make promotion limits safe during traffic spikes.
+    for (const [productId, quantity] of quantityByProduct) {
+      const effective = effectivePrices.get(productId);
+      if (!effective?.promotionId || !effective.promotionProductId) continue;
+      const campaign = await tx.promotion.findUnique({ where: { id: effective.promotionId } });
+      const promotionProduct = await tx.promotionProduct.findUnique({ where: { id: effective.promotionProductId } });
+      if (!campaign || !promotionProduct) throw Errors.conflict("A promotion changed during checkout. Please retry.");
+
+      const actorWhere = userId
+        ? { userId }
+        : { anonymousId: guestActor };
+      const redeemed = await tx.promotionRedemption.aggregate({
+        where: { promotionId: campaign.id, ...actorWhere },
+        _sum: { quantity: true },
+      });
+      const customerLimit = promotionProduct.perCustomerLimit ?? campaign.perCustomerLimit;
+      if (customerLimit != null && (redeemed._sum.quantity ?? 0) + quantity > customerLimit) {
+        throw Errors.conflict("Promotion purchase limit reached for this customer.");
+      }
+
+      const campaignReserved = await tx.promotion.updateMany({
+        where: {
+          id: campaign.id,
+          ...(campaign.inventoryLimit != null
+            ? { purchasedCount: { lte: campaign.inventoryLimit - quantity } }
+            : {}),
+        },
+        data: { purchasedCount: { increment: quantity } },
+      });
+      const productReserved = await tx.promotionProduct.updateMany({
+        where: {
+          id: promotionProduct.id,
+          ...(promotionProduct.inventoryLimit != null
+            ? { purchasedCount: { lte: promotionProduct.inventoryLimit - quantity } }
+            : {}),
+        },
+        data: { purchasedCount: { increment: quantity } },
+      });
+      if (!campaignReserved.count || !productReserved.count) {
+        throw Errors.conflict("This promotion has just sold out.");
+      }
+      const product = byId.get(productId)!;
+      const base = new Prisma.Decimal((product.sellingPrice ?? product.price).toString());
+      await tx.promotionRedemption.create({
+        data: {
+          promotionId: campaign.id,
+          promotionProductId: promotionProduct.id,
+          productId,
+          orderId: created.id,
+          userId: userId ?? null,
+          anonymousId: userId ? null : guestActor,
+          quantity,
+          unitDiscount: base.sub(effective.effectivePrice),
+        },
+      });
+    }
 
     // Deduct the applied credit from the wallet ledger, atomically with the order.
     if (userId && walletApplied.greaterThan(0)) {
@@ -245,6 +340,18 @@ export async function updateStatus(id: string, status: OrderStatus): Promise<Ord
           data: { stock: { increment: item.quantity } },
         });
       }
+      await tx.commerceEvent.createMany({
+        data: current.items.flatMap((item) => item.productId ? [{
+          eventId: randomUUID(),
+          eventType: "order_cancelled",
+          userId: current.userId,
+          productId: item.productId,
+          trusted: true,
+          occurredAt: new Date(),
+          source: "order_status",
+          metadata: { orderId: current.id, quantity: item.quantity },
+        }] : []),
+      });
     }
 
     // Return any wallet credit spent on the order when it is voided (cancelled or

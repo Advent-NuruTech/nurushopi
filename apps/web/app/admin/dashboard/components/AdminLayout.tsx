@@ -20,6 +20,7 @@ import {
   Users,
   Wallet,
   Warehouse,
+  Sparkles,
   X,
   ChevronLeft,
   ChevronRight,
@@ -52,6 +53,7 @@ const TAB_ICONS = {
   Palette,
   CalendarDays,
   Smartphone,
+  Sparkles,
 } as const;
 
 function getInitials(name: string): string {

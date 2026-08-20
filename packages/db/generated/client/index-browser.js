@@ -463,6 +463,343 @@ exports.Prisma.SabbathMessageScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.MerchandisingCollectionScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  displayName: 'displayName',
+  shortName: 'shortName',
+  description: 'description',
+  collectionType: 'collectionType',
+  selectionStrategy: 'selectionStrategy',
+  status: 'status',
+  priority: 'priority',
+  placement: 'placement',
+  startAt: 'startAt',
+  endAt: 'endAt',
+  maxProducts: 'maxProducts',
+  sortStrategy: 'sortStrategy',
+  eligibilityRules: 'eligibilityRules',
+  configuration: 'configuration',
+  imageUrl: 'imageUrl',
+  icon: 'icon',
+  badgeText: 'badgeText',
+  ctaText: 'ctaText',
+  ctaUrl: 'ctaUrl',
+  isPersonalized: 'isPersonalized',
+  isSponsored: 'isSponsored',
+  cacheVersion: 'cacheVersion',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CollectionMembershipScalarFieldEnum = {
+  id: 'id',
+  collectionId: 'collectionId',
+  productId: 'productId',
+  source: 'source',
+  score: 'score',
+  rank: 'rank',
+  startsAt: 'startsAt',
+  expiresAt: 'expiresAt',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CollectionOverrideScalarFieldEnum = {
+  id: 'id',
+  collectionId: 'collectionId',
+  productId: 'productId',
+  type: 'type',
+  value: 'value',
+  reason: 'reason',
+  startsAt: 'startsAt',
+  expiresAt: 'expiresAt',
+  createdById: 'createdById',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.HomepageSectionScalarFieldEnum = {
+  id: 'id',
+  collectionId: 'collectionId',
+  position: 'position',
+  status: 'status',
+  audience: 'audience',
+  device: 'device',
+  startAt: 'startAt',
+  endAt: 'endAt',
+  configuration: 'configuration',
+  experimentKey: 'experimentKey',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.PromotionScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  name: 'name',
+  status: 'status',
+  discountType: 'discountType',
+  discountValue: 'discountValue',
+  fundingType: 'fundingType',
+  sellerFundingPct: 'sellerFundingPct',
+  collectionId: 'collectionId',
+  startsAt: 'startsAt',
+  endsAt: 'endsAt',
+  inventoryLimit: 'inventoryLimit',
+  purchasedCount: 'purchasedCount',
+  perCustomerLimit: 'perCustomerLimit',
+  configuration: 'configuration',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.PromotionProductScalarFieldEnum = {
+  id: 'id',
+  promotionId: 'promotionId',
+  productId: 'productId',
+  promotionalPrice: 'promotionalPrice',
+  inventoryLimit: 'inventoryLimit',
+  purchasedCount: 'purchasedCount',
+  perCustomerLimit: 'perCustomerLimit',
+  metadata: 'metadata',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.PromotionRedemptionScalarFieldEnum = {
+  id: 'id',
+  promotionId: 'promotionId',
+  promotionProductId: 'promotionProductId',
+  productId: 'productId',
+  orderId: 'orderId',
+  userId: 'userId',
+  anonymousId: 'anonymousId',
+  quantity: 'quantity',
+  unitDiscount: 'unitDiscount',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.BundleScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  displayName: 'displayName',
+  description: 'description',
+  status: 'status',
+  discountType: 'discountType',
+  discountValue: 'discountValue',
+  startsAt: 'startsAt',
+  endsAt: 'endsAt',
+  maxPurchases: 'maxPurchases',
+  purchasedCount: 'purchasedCount',
+  allowCrossSeller: 'allowCrossSeller',
+  configuration: 'configuration',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.BundleItemScalarFieldEnum = {
+  id: 'id',
+  bundleId: 'bundleId',
+  productId: 'productId',
+  quantity: 'quantity',
+  required: 'required',
+  sortOrder: 'sortOrder',
+  metadata: 'metadata'
+};
+
+exports.Prisma.SpotlightPlacementScalarFieldEnum = {
+  id: 'id',
+  targetType: 'targetType',
+  targetId: 'targetId',
+  placement: 'placement',
+  priority: 'priority',
+  audience: 'audience',
+  region: 'region',
+  reason: 'reason',
+  creative: 'creative',
+  ctaText: 'ctaText',
+  ctaUrl: 'ctaUrl',
+  startsAt: 'startsAt',
+  endsAt: 'endsAt',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CommerceEventScalarFieldEnum = {
+  id: 'id',
+  eventId: 'eventId',
+  eventType: 'eventType',
+  userId: 'userId',
+  anonymousId: 'anonymousId',
+  sessionId: 'sessionId',
+  productId: 'productId',
+  sellerId: 'sellerId',
+  collectionId: 'collectionId',
+  searchQueryId: 'searchQueryId',
+  recommendationId: 'recommendationId',
+  experimentKey: 'experimentKey',
+  variantKey: 'variantKey',
+  position: 'position',
+  source: 'source',
+  device: 'device',
+  ipHash: 'ipHash',
+  userAgentHash: 'userAgentHash',
+  trusted: 'trusted',
+  abuseScore: 'abuseScore',
+  occurredAt: 'occurredAt',
+  receivedAt: 'receivedAt',
+  metadata: 'metadata'
+};
+
+exports.Prisma.ProductMetricHourlyScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  bucketStart: 'bucketStart',
+  impressions: 'impressions',
+  uniqueViewers: 'uniqueViewers',
+  views: 'views',
+  wishlistAdds: 'wishlistAdds',
+  cartAdds: 'cartAdds',
+  purchases: 'purchases',
+  unitsSold: 'unitsSold',
+  revenue: 'revenue',
+  cancellations: 'cancellations',
+  returns: 'returns',
+  reviewActivity: 'reviewActivity',
+  suspiciousEvents: 'suspiciousEvents',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ProductMetricDailyScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  bucketDate: 'bucketDate',
+  impressions: 'impressions',
+  uniqueViewers: 'uniqueViewers',
+  views: 'views',
+  wishlistAdds: 'wishlistAdds',
+  cartAdds: 'cartAdds',
+  purchases: 'purchases',
+  unitsSold: 'unitsSold',
+  revenue: 'revenue',
+  cancellations: 'cancellations',
+  returns: 'returns',
+  reviewActivity: 'reviewActivity',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CollectionMetricDailyScalarFieldEnum = {
+  id: 'id',
+  collectionId: 'collectionId',
+  bucketDate: 'bucketDate',
+  impressions: 'impressions',
+  uniqueViewers: 'uniqueViewers',
+  clicks: 'clicks',
+  productViews: 'productViews',
+  cartAdds: 'cartAdds',
+  purchases: 'purchases',
+  orders: 'orders',
+  revenue: 'revenue',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ProductRankingScalarFieldEnum = {
+  id: 'id',
+  collectionId: 'collectionId',
+  productId: 'productId',
+  algorithm: 'algorithm',
+  segmentKey: 'segmentKey',
+  snapshotAt: 'snapshotAt',
+  score: 'score',
+  rank: 'rank',
+  reasons: 'reasons',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.UserProductAffinityScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  productId: 'productId',
+  score: 'score',
+  reasons: 'reasons',
+  computedAt: 'computedAt',
+  expiresAt: 'expiresAt'
+};
+
+exports.Prisma.NotificationPreferenceScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  channel: 'channel',
+  topic: 'topic',
+  enabled: 'enabled',
+  consentedAt: 'consentedAt',
+  quietHours: 'quietHours',
+  maxPerDay: 'maxPerDay',
+  maxPerWeek: 'maxPerWeek',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.RetentionSubscriptionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  productId: 'productId',
+  subscriptionType: 'subscriptionType',
+  active: 'active',
+  lastNotifiedAt: 'lastNotifiedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.RetentionTriggerScalarFieldEnum = {
+  id: 'id',
+  deduplicationKey: 'deduplicationKey',
+  userId: 'userId',
+  productId: 'productId',
+  triggerType: 'triggerType',
+  channel: 'channel',
+  status: 'status',
+  priority: 'priority',
+  scheduledAt: 'scheduledAt',
+  claimedAt: 'claimedAt',
+  sentAt: 'sentAt',
+  expiresAt: 'expiresAt',
+  attemptCount: 'attemptCount',
+  payload: 'payload',
+  lastError: 'lastError',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ExperimentScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  name: 'name',
+  status: 'status',
+  variants: 'variants',
+  allocation: 'allocation',
+  primaryMetric: 'primaryMetric',
+  guardrailMetrics: 'guardrailMetrics',
+  startsAt: 'startsAt',
+  endsAt: 'endsAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ExperimentAssignmentScalarFieldEnum = {
+  id: 'id',
+  experimentId: 'experimentId',
+  userId: 'userId',
+  anonymousId: 'anonymousId',
+  variantKey: 'variantKey',
+  bucket: 'bucket',
+  assignedAt: 'assignedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -470,6 +807,10 @@ exports.Prisma.SortOrder = {
 
 exports.Prisma.NullableJsonNullValueInput = {
   DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull
+};
+
+exports.Prisma.JsonNullValueInput = {
   JsonNull: Prisma.JsonNull
 };
 
@@ -564,6 +905,63 @@ exports.VendorApplicationStatus = exports.$Enums.VendorApplicationStatus = {
   REJECTED: 'REJECTED'
 };
 
+exports.MerchandisingStatus = exports.$Enums.MerchandisingStatus = {
+  DRAFT: 'DRAFT',
+  SCHEDULED: 'SCHEDULED',
+  ACTIVE: 'ACTIVE',
+  PAUSED: 'PAUSED',
+  ARCHIVED: 'ARCHIVED'
+};
+
+exports.MembershipSource = exports.$Enums.MembershipSource = {
+  AUTOMATIC: 'AUTOMATIC',
+  MANUAL: 'MANUAL',
+  ALGORITHM: 'ALGORITHM',
+  PROMOTION: 'PROMOTION',
+  RECOMMENDATION: 'RECOMMENDATION',
+  SPONSORED: 'SPONSORED'
+};
+
+exports.CollectionOverrideType = exports.$Enums.CollectionOverrideType = {
+  PIN: 'PIN',
+  EXCLUDE: 'EXCLUDE',
+  BOOST: 'BOOST',
+  LOWER: 'LOWER'
+};
+
+exports.PromotionDiscountType = exports.$Enums.PromotionDiscountType = {
+  FIXED_PRICE: 'FIXED_PRICE',
+  PERCENTAGE: 'PERCENTAGE',
+  FIXED_AMOUNT: 'FIXED_AMOUNT'
+};
+
+exports.PromotionFundingType = exports.$Enums.PromotionFundingType = {
+  SELLER: 'SELLER',
+  PLATFORM: 'PLATFORM',
+  SHARED: 'SHARED'
+};
+
+exports.BundleDiscountType = exports.$Enums.BundleDiscountType = {
+  FIXED_PRICE: 'FIXED_PRICE',
+  PERCENTAGE: 'PERCENTAGE',
+  FIXED_AMOUNT: 'FIXED_AMOUNT'
+};
+
+exports.RetentionTriggerStatus = exports.$Enums.RetentionTriggerStatus = {
+  PENDING: 'PENDING',
+  CLAIMED: 'CLAIMED',
+  SENT: 'SENT',
+  SKIPPED: 'SKIPPED',
+  FAILED: 'FAILED'
+};
+
+exports.ExperimentStatus = exports.$Enums.ExperimentStatus = {
+  DRAFT: 'DRAFT',
+  RUNNING: 'RUNNING',
+  PAUSED: 'PAUSED',
+  COMPLETED: 'COMPLETED'
+};
+
 exports.Prisma.ModelName = {
   User: 'User',
   OAuthAccount: 'OAuthAccount',
@@ -594,7 +992,28 @@ exports.Prisma.ModelName = {
   VendorAccount: 'VendorAccount',
   VendorInvite: 'VendorInvite',
   PwaInstall: 'PwaInstall',
-  SabbathMessage: 'SabbathMessage'
+  SabbathMessage: 'SabbathMessage',
+  MerchandisingCollection: 'MerchandisingCollection',
+  CollectionMembership: 'CollectionMembership',
+  CollectionOverride: 'CollectionOverride',
+  HomepageSection: 'HomepageSection',
+  Promotion: 'Promotion',
+  PromotionProduct: 'PromotionProduct',
+  PromotionRedemption: 'PromotionRedemption',
+  Bundle: 'Bundle',
+  BundleItem: 'BundleItem',
+  SpotlightPlacement: 'SpotlightPlacement',
+  CommerceEvent: 'CommerceEvent',
+  ProductMetricHourly: 'ProductMetricHourly',
+  ProductMetricDaily: 'ProductMetricDaily',
+  CollectionMetricDaily: 'CollectionMetricDaily',
+  ProductRanking: 'ProductRanking',
+  UserProductAffinity: 'UserProductAffinity',
+  NotificationPreference: 'NotificationPreference',
+  RetentionSubscription: 'RetentionSubscription',
+  RetentionTrigger: 'RetentionTrigger',
+  Experiment: 'Experiment',
+  ExperimentAssignment: 'ExperimentAssignment'
 };
 
 /**

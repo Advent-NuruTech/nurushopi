@@ -16,7 +16,8 @@ export type TabId =
   | "users"
   | "reviews"
   | "redemptions"
-  | "wholesale";
+  | "wholesale"
+  | "merchandising";
 
 export interface Admin {
   adminId: string;
@@ -32,6 +33,7 @@ export const TABS_SENIOR: { id: TabId; label: string; icon: string }[] = [
   { id: "categories", label: "Categories", icon: "Tags" },
   { id: "hero", label: "Hero Colors", icon: "Palette" },
   { id: "products", label: "Products", icon: "Package" },
+  { id: "merchandising", label: "Merchandising", icon: "Sparkles" },
   { id: "orders", label: "Orders", icon: "ShoppingCart" },
   { id: "vendorApplications", label: "Vendor Applications", icon: "ClipboardList" },
   { id: "wholesale", label: "Wholesale", icon: "Warehouse" },

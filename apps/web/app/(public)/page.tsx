@@ -1,11 +1,11 @@
 // ./app/(public)/page.tsx
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, BadgeCheck, CreditCard, Headphones, PackageSearch, Truck } from "lucide-react";
 import HeroSection from "@/components/ui/HeroSection";
 import FeaturedSection from "@/components/ui/FeaturedSection";
 import FeaturedHero from "@/components/ui/FeaturedHero";
 import NewArrivals from "@/components/ui/NewArrivals";
+import HomepageSections from "@/components/merchandising/HomepageSections";
 import Bannerss from "@/components/ui/Bannerss";
 import SabbathExperience from "@/components/ui/SabbathExperience";
 import SectionHeader from "@/components/ui/SectionHeader";
@@ -17,6 +17,7 @@ import {
   listBanners,
 } from "@/lib/data/catalog";
 import { listWholesaleItems } from "@/lib/data/wholesale";
+import { getHomepageMerchandising } from "@/lib/data/merchandising";
 import type { ProductCardVM } from "@/lib/view/catalog";
 
 // Storefront is served from the Data Cache (ISR). The data-layer functions set
@@ -40,21 +41,19 @@ function toFeaturedProduct(p: ProductCardVM) {
 }
 
 export default async function HomePage() {
-  const [productsResult, categories, newArrivals, banners, wholesaleResult, mostViewedResult] =
+  const [productsResult, categories, newArrivals, banners, wholesaleResult, homepage] =
     await Promise.all([
       listProducts({ pageSize: 60, sort: "newest" }),
       listCategories(),
       listNewArrivals(12),
       listBanners(),
       listWholesaleItems({ pageSize: 12, sort: "newest" }),
-      listProducts({ pageSize: 12, sort: "most_viewed_today", inStock: true }),
+      getHomepageMerchandising(),
     ]);
 
   const featuredProducts = productsResult.items.map(toFeaturedProduct);
-  const mostViewed = mostViewedResult.items.map(toFeaturedProduct);
   const categoryOptions = categories.map((c) => ({ name: c.name, slug: c.slug }));
   const wholesaleProducts = wholesaleResult.items;
-  const heroProduct = featuredProducts[0] ?? newArrivals[0];
   const topCategories =
     categories.length > 0
       ? categories.slice(0, 24)
@@ -71,7 +70,7 @@ export default async function HomePage() {
       <HeroSection />
       
       <SabbathExperience />
-      <NewArrivals products={newArrivals} />
+      <HomepageSections homepage={homepage} />
 
       <section className="bg-white py-6 dark:bg-black" aria-labelledby="shop-categories">
         <div className="mx-auto max-w-7xl px-2 sm:px-6">
@@ -102,10 +101,6 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-
-      {mostViewed.length > 0 && (
-        <FeaturedSection products={mostViewed} categories={categoryOptions} title="Most Viewed Today" />
-      )}
 
       <FeaturedHero products={featuredProducts} categories={categoryOptions} />
 
@@ -161,7 +156,8 @@ export default async function HomePage() {
 
       <Bannerss banners={banners} />
 
-      <FeaturedSection products={featuredProducts} categories={categoryOptions} />
+      {homepage.sections.length === 0 && <NewArrivals products={newArrivals} />}
+      {homepage.sections.length === 0 && <FeaturedSection products={featuredProducts} categories={categoryOptions} />}
     </main>
   );
 }

@@ -10,6 +10,7 @@ import { Errors } from "../../lib/errors.js";
 import { deleteCloudinaryImages } from "../../lib/cloudinary.js";
 import { uniqueSlug } from "./slug.js";
 import { toProductDTO, type ProductWithCategory } from "./serializers.js";
+import { scheduleProductEvent } from "../merchandising/retention.service.js";
 
 const categorySelect = { select: { id: true, name: true, slug: true } } as const;
 
@@ -201,9 +202,10 @@ export async function update(id: string, input: ProductUpdateInput) {
     slug = await uniqueSlug(base, (s) => slugTaken(s, id));
   }
 
-  const row = await prisma.product.update({
-    where: { id },
-    data: {
+  const row = await prisma.$transaction(async (tx) => {
+    const updated = await tx.product.update({
+      where: { id },
+      data: {
       ...(input.name !== undefined ? { name: input.name } : {}),
       ...(slug !== current.slug ? { slug } : {}),
       ...(input.description !== undefined ? { description: input.description } : {}),
@@ -216,8 +218,18 @@ export async function update(id: string, input: ProductUpdateInput) {
       ...(input.isActive !== undefined ? { isActive: input.isActive } : {}),
       ...(input.isFeatured !== undefined ? { isFeatured: input.isFeatured } : {}),
       ...(input.categoryId !== undefined ? { categoryId: input.categoryId } : {}),
-    },
-    include: { category: categorySelect },
+      },
+      include: { category: categorySelect },
+    });
+    if (current.stock <= 0 && updated.stock > 0) {
+      await scheduleProductEvent(tx, id, "back_in_stock", { stock: updated.stock });
+    }
+    const oldPrice = Number(current.sellingPrice ?? current.price);
+    const nextPrice = Number(updated.sellingPrice ?? updated.price);
+    if (nextPrice < oldPrice && (oldPrice - nextPrice) / oldPrice >= 0.05) {
+      await scheduleProductEvent(tx, id, "price_drop", { oldPrice, newPrice: nextPrice });
+    }
+    return updated;
   });
   if (input.images !== undefined) {
     const next = new Set(input.images);

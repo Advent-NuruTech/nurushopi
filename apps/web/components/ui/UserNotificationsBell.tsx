@@ -17,6 +17,13 @@ function getNotificationRoute(item: NotificationDTO): string {
   }
   if (item.type === "message") return "/profile?tab=messages";
   if (item.type === "order_update") return "/profile?tab=orders";
+  if (item.type === "retention:wishlist") return "/profile?tab=wishlist";
+  if (
+    (item.type === "retention:back_in_stock" || item.type === "retention:price_drop") &&
+    item.relatedId
+  ) {
+    return `/products/${encodeURIComponent(item.relatedId)}`;
+  }
   return "/profile";
 }
 
@@ -61,9 +68,7 @@ export default function UserNotificationsBell() {
   const unread = useMemo(() => notifications.filter((n) => !n.read), [notifications]);
 
   const markRead = useCallback(async (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
     try {
       await notificationsApi.markRead(id);
     } catch {
@@ -120,7 +125,9 @@ export default function UserNotificationsBell() {
           </div>
           <div className="max-h-80 overflow-y-auto">
             {notifications.length === 0 ? (
-              <p className="p-4 text-sm text-slate-500 dark:text-slate-400">No notifications yet.</p>
+              <p className="p-4 text-sm text-slate-500 dark:text-slate-400">
+                No notifications yet.
+              </p>
             ) : (
               notifications.map((item) => (
                 <button

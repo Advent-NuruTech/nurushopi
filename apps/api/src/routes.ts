@@ -3,27 +3,15 @@ import { sendOk } from "./lib/response.js";
 import { authRouter } from "./modules/auth/auth.routes.js";
 import { adminAuthRouter } from "./modules/admin/admin.routes.js";
 import { vendorAuthRouter } from "./modules/vendor-auth/vendor-auth.routes.js";
-import {
-  catalogAdminRouter,
-  catalogPublicRouter,
-} from "./modules/catalog/catalog.routes.js";
+import { catalogAdminRouter, catalogPublicRouter } from "./modules/catalog/catalog.routes.js";
 import {
   wholesaleAdminRouter,
   wholesalePublicRouter,
 } from "./modules/wholesale/wholesale.routes.js";
-import {
-  ordersAdminRouter,
-  ordersCustomerRouter,
-} from "./modules/orders/orders.routes.js";
-import {
-  walletAdminRouter,
-  walletCustomerRouter,
-} from "./modules/wallet/wallet.routes.js";
+import { ordersAdminRouter, ordersCustomerRouter } from "./modules/orders/orders.routes.js";
+import { walletAdminRouter, walletCustomerRouter } from "./modules/wallet/wallet.routes.js";
 import { dashboardAdminRouter } from "./modules/dashboard/dashboard.routes.js";
-import {
-  reviewsAdminRouter,
-  reviewsPublicRouter,
-} from "./modules/reviews/reviews.routes.js";
+import { reviewsAdminRouter, reviewsPublicRouter } from "./modules/reviews/reviews.routes.js";
 import {
   contactPublicRouter,
   contactsAdminRouter,
@@ -32,20 +20,15 @@ import {
   notificationsAdminRouter,
   notificationsCustomerRouter,
 } from "./modules/notifications/notifications.routes.js";
-import {
-  vendorsAdminRouter,
-  vendorsPublicRouter,
-} from "./modules/vendors/vendors.routes.js";
+import { vendorsAdminRouter, vendorsPublicRouter } from "./modules/vendors/vendors.routes.js";
 import { pwaAdminRouter, pwaPublicRouter } from "./modules/pwa/pwa.routes.js";
 import { usersAdminRouter } from "./modules/users/users.routes.js";
-import {
-  sabbathAdminRouter,
-  sabbathPublicRouter,
-} from "./modules/sabbath/sabbath.routes.js";
+import { sabbathAdminRouter, sabbathPublicRouter } from "./modules/sabbath/sabbath.routes.js";
 import {
   merchandisingAdminRouter,
   merchandisingPublicRouter,
 } from "./modules/merchandising/merchandising.routes.js";
+import { wishlistRouter } from "./modules/wishlist/wishlist.routes.js";
 
 export const apiRouter: Router = Router();
 
@@ -68,6 +51,7 @@ apiRouter.use("/admin/dashboard", dashboardAdminRouter);
 apiRouter.use("/reviews", reviewsPublicRouter);
 apiRouter.use("/admin/reviews", reviewsAdminRouter);
 apiRouter.use("/notifications", notificationsCustomerRouter);
+apiRouter.use("/wishlist", wishlistRouter);
 apiRouter.use("/messages", messagesCustomerRouter);
 apiRouter.use("/contact", contactPublicRouter);
 apiRouter.use("/admin/notifications", notificationsAdminRouter);

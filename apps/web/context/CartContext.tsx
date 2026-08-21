@@ -4,10 +4,14 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 
 export interface CartItem {
   id: string;
+  slug?: string;
   name: string;
+  brandName?: string | null;
+  storeName?: string | null;
   price: number;
   quantity: number;
   image: string;
+  maxQuantity?: number;
   category?: string;
   mode?: "wholesale" | "retail";
 }
@@ -40,10 +44,22 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       const existing = prev.find((p) => p.id === item.id);
       if (existing) {
         return prev.map((p) =>
-          p.id === item.id ? { ...p, quantity: p.quantity + item.quantity } : p
+          p.id === item.id
+            ? {
+                ...p,
+                ...item,
+                quantity: Math.min(
+                  p.quantity + item.quantity,
+                  item.maxQuantity ?? Number.MAX_SAFE_INTEGER,
+                ),
+              }
+            : p,
         );
       }
-      return [...prev, item];
+      return [
+        ...prev,
+        { ...item, quantity: Math.min(item.quantity, item.maxQuantity ?? item.quantity) },
+      ];
     });
   };
 
@@ -55,7 +71,17 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 
   const updateQuantity = (id: string, quantity: number) => {
     setCart((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, quantity } : item))
+      prev.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              quantity: Math.max(
+                1,
+                Math.min(quantity, item.maxQuantity ?? Number.MAX_SAFE_INTEGER),
+              ),
+            }
+          : item,
+      ),
     );
   };
 

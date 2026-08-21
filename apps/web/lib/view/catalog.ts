@@ -13,6 +13,11 @@ import type { BannerDTO, ProductDTO, WholesaleItemDTO } from "@nuru/types";
 
 const FALLBACK_IMAGE = "/assets/logo.png";
 const NEW_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+const EMPTY_RATING: ProductDTO["ratingSummary"] = {
+  average: 0,
+  count: 0,
+  distribution: { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0 },
+};
 
 /** Parse a decimal-string money field to a finite number (0 on failure). */
 function money(value: string | null | undefined): number {
@@ -28,6 +33,9 @@ function firstImage(images: string[] | undefined): string {
 export interface ProductCardVM {
   id: string;
   slug: string;
+  sku: string | null;
+  brandName: string | null;
+  storeName: string | null;
   /**
    * Canonical detail link (slug when present, else id). Typed as the branded
    * `Route` so `<Link>` consumers don't need to cast — the one cast lives in the
@@ -44,6 +52,10 @@ export interface ProductCardVM {
   sellingPrice: number;
   originalPrice?: number;
   inStock: boolean;
+  stock: number;
+  lowStockThreshold: number;
+  stockStatus: ProductDTO["stockStatus"];
+  ratingSummary: ProductDTO["ratingSummary"];
   shortDescription: string | null;
   createdAtMs: number;
   isNew: boolean;
@@ -62,6 +74,9 @@ export function toProductCardVM(p: ProductDTO): ProductCardVM {
   return {
     id: p.id,
     slug: handle,
+    sku: p.sku ?? null,
+    brandName: p.brandName ?? null,
+    storeName: p.storeName ?? null,
     href: `/products/${handle}` as Route,
     name: p.name,
     image: firstImage(p.images),
@@ -72,6 +87,11 @@ export function toProductCardVM(p: ProductDTO): ProductCardVM {
     sellingPrice: selling,
     originalPrice: original && original > 0 ? original : undefined,
     inStock: p.inStock,
+    stock: p.stock,
+    lowStockThreshold: p.lowStockThreshold ?? 5,
+    stockStatus:
+      p.stockStatus ?? (p.stock <= 0 ? "OUT_OF_STOCK" : p.stock <= 5 ? "LOW_STOCK" : "IN_STOCK"),
+    ratingSummary: p.ratingSummary ?? EMPTY_RATING,
     shortDescription: p.shortDescription,
     createdAtMs,
     isNew: createdAtMs > 0 && Date.now() - createdAtMs <= NEW_WINDOW_MS,

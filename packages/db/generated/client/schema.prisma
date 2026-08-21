@@ -52,6 +52,12 @@ enum ReviewStatus {
   REJECTED
 }
 
+enum WishlistStatus {
+  ACTIVE
+  PURCHASED
+  REMOVED
+}
+
 enum WalletTxType {
   CREDIT
   DEBIT
@@ -196,6 +202,7 @@ model User {
   experimentAssignments   ExperimentAssignment[]
   promotionRedemptions    PromotionRedemption[]
   retentionSubscriptions  RetentionSubscription[]
+  wishlistItems           WishlistItem[]
 
   @@index([referredById])
   @@map("users")
@@ -365,18 +372,28 @@ model Category {
 }
 
 model Product {
-  id               String   @id @default(cuid())
-  name             String
-  slug             String?  @unique
-  description      String?
-  shortDescription String?
-  price            Decimal  @db.Decimal(12, 2)
-  originalPrice    Decimal? @db.Decimal(12, 2)
-  sellingPrice     Decimal? @db.Decimal(12, 2)
-  images           String[] // Cloudinary URLs (up to 3)
-  stock            Int      @default(0)
-  isActive         Boolean  @default(true)
-  isFeatured       Boolean  @default(false)
+  id                String   @id @default(cuid())
+  name              String
+  slug              String?  @unique
+  sku               String?  @unique
+  brandName         String?
+  storeName         String?
+  description       String?
+  shortDescription  String?
+  price             Decimal  @db.Decimal(12, 2)
+  originalPrice     Decimal? @db.Decimal(12, 2)
+  sellingPrice      Decimal? @db.Decimal(12, 2)
+  images            String[] // Cloudinary URLs (up to 3)
+  stock             Int      @default(0)
+  lowStockThreshold Int      @default(5)
+  isActive          Boolean  @default(true)
+  isFeatured        Boolean  @default(false)
+
+  // Approved-review projection. The review module refreshes these fields in
+  // the same transaction as moderation so catalog cards never need N+1 queries.
+  ratingAverage      Decimal @default(0) @db.Decimal(3, 2)
+  ratingCount        Int     @default(0)
+  ratingDistribution Json?
 
   categoryId String?
   category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
@@ -402,6 +419,7 @@ model Product {
   retentionTriggers      RetentionTrigger[]
   promotionRedemptions   PromotionRedemption[]
   retentionSubscriptions RetentionSubscription[]
+  wishlistItems          WishlistItem[]
 
   @@index([categoryId])
   @@index([createdById])
@@ -526,6 +544,34 @@ model Review {
   @@index([productId, status])
   @@index([userId])
   @@map("reviews")
+}
+
+/// Durable purchase intent. Rows are retained when removed or purchased so
+/// customer intent and reminder outcomes remain measurable without resurrecting
+/// old reminders. reminderVersion invalidates stale outbox entries after edits.
+model WishlistItem {
+  id                     String         @id @default(cuid())
+  userId                 String
+  user                   User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId              String
+  product                Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  status                 WishlistStatus @default(ACTIVE)
+  plannedPurchaseAt      DateTime?
+  remindersEnabled       Boolean        @default(false)
+  reminderTimezone       String?
+  reminderVersion        Int            @default(1)
+  preReminderSentAt      DateTime?
+  followupReminderSentAt DateTime?
+  purchasedAt            DateTime?
+  removedAt              DateTime?
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
+
+  @@unique([userId, productId])
+  @@index([userId, status, updatedAt])
+  @@index([productId, status])
+  @@index([status, plannedPurchaseAt])
+  @@map("wishlist_items")
 }
 
 model ProductView {

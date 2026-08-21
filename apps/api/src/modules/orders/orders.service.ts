@@ -15,14 +15,17 @@ import { loadEffectivePrices } from "../merchandising/pricing.service.js";
 
 const withItems = { include: { items: true } } as const;
 
-async function serializableTransaction<T>(work: (tx: Prisma.TransactionClient) => Promise<T>): Promise<T> {
+async function serializableTransaction<T>(
+  work: (tx: Prisma.TransactionClient) => Promise<T>,
+): Promise<T> {
   for (let attempt = 1; attempt <= 3; attempt += 1) {
     try {
       return await prisma.$transaction(work, {
         isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
       });
     } catch (error) {
-      const retryable = error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034";
+      const retryable =
+        error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034";
       if (!retryable || attempt === 3) throw error;
     }
   }
@@ -65,10 +68,7 @@ function buildOrderBy(sort: OrderQuery["sort"]): Prisma.OrderOrderByWithRelation
   }
 }
 
-async function listOrders(
-  query: OrderQuery,
-  scopeUserId?: string,
-): Promise<Paginated<OrderDTO>> {
+async function listOrders(query: OrderQuery, scopeUserId?: string): Promise<Paginated<OrderDTO>> {
   const where = buildWhere(query, scopeUserId);
   const skip = (query.page - 1) * query.pageSize;
 
@@ -134,7 +134,9 @@ export async function checkout(input: CheckoutInput, userId?: string): Promise<O
     );
   }
   const productIds = [...quantityByProduct.keys()];
-  const guestActor = input.anonymousId ?? `guest:${createHash("sha256").update(input.contactPhone.trim()).digest("hex")}`;
+  const guestActor =
+    input.anonymousId ??
+    `guest:${createHash("sha256").update(input.contactPhone.trim()).digest("hex")}`;
 
   const order = await serializableTransaction(async (tx) => {
     const products = await tx.product.findMany({ where: { id: { in: productIds } } });
@@ -153,13 +155,13 @@ export async function checkout(input: CheckoutInput, userId?: string): Promise<O
         throw Errors.badRequest(`"${product.name}" is no longer available.`);
       }
       if (product.stock < quantity) {
-        throw Errors.conflict(
-          `Only ${product.stock} of "${product.name}" left in stock.`,
-        );
+        throw Errors.conflict(`Only ${product.stock} of "${product.name}" left in stock.`);
       }
 
       const effective = effectivePrices.get(product.id);
-      const unitPrice = effective?.effectivePrice ?? new Prisma.Decimal((product.sellingPrice ?? product.price).toString());
+      const unitPrice =
+        effective?.effectivePrice ??
+        new Prisma.Decimal((product.sellingPrice ?? product.price).toString());
       subtotal = subtotal.add(unitPrice.mul(quantity));
 
       orderItems.push({
@@ -236,10 +238,32 @@ export async function checkout(input: CheckoutInput, userId?: string): Promise<O
         metadata: {
           orderId: created.id,
           quantity,
-          revenue: (effectivePrices.get(productId)?.effectivePrice ?? new Prisma.Decimal(0)).mul(quantity).toString(),
+          revenue: (effectivePrices.get(productId)?.effectivePrice ?? new Prisma.Decimal(0))
+            .mul(quantity)
+            .toString(),
         },
       })),
     });
+    if (userId) {
+      await tx.wishlistItem.updateMany({
+        where: { userId, productId: { in: productIds }, status: "ACTIVE" },
+        data: {
+          status: "PURCHASED",
+          purchasedAt: new Date(),
+          remindersEnabled: false,
+          reminderVersion: { increment: 1 },
+        },
+      });
+      await tx.retentionTrigger.updateMany({
+        where: {
+          userId,
+          productId: { in: productIds },
+          triggerType: "wishlist",
+          status: "PENDING",
+        },
+        data: { status: "SKIPPED", lastError: "Product purchased" },
+      });
+    }
 
     // Reserve campaign inventory in the same transaction as stock/order. The
     // conditional counters make promotion limits safe during traffic spikes.
@@ -247,12 +271,13 @@ export async function checkout(input: CheckoutInput, userId?: string): Promise<O
       const effective = effectivePrices.get(productId);
       if (!effective?.promotionId || !effective.promotionProductId) continue;
       const campaign = await tx.promotion.findUnique({ where: { id: effective.promotionId } });
-      const promotionProduct = await tx.promotionProduct.findUnique({ where: { id: effective.promotionProductId } });
-      if (!campaign || !promotionProduct) throw Errors.conflict("A promotion changed during checkout. Please retry.");
+      const promotionProduct = await tx.promotionProduct.findUnique({
+        where: { id: effective.promotionProductId },
+      });
+      if (!campaign || !promotionProduct)
+        throw Errors.conflict("A promotion changed during checkout. Please retry.");
 
-      const actorWhere = userId
-        ? { userId }
-        : { anonymousId: guestActor };
+      const actorWhere = userId ? { userId } : { anonymousId: guestActor };
       const redeemed = await tx.promotionRedemption.aggregate({
         where: { promotionId: campaign.id, ...actorWhere },
         _sum: { quantity: true },
@@ -341,16 +366,22 @@ export async function updateStatus(id: string, status: OrderStatus): Promise<Ord
         });
       }
       await tx.commerceEvent.createMany({
-        data: current.items.flatMap((item) => item.productId ? [{
-          eventId: randomUUID(),
-          eventType: "order_cancelled",
-          userId: current.userId,
-          productId: item.productId,
-          trusted: true,
-          occurredAt: new Date(),
-          source: "order_status",
-          metadata: { orderId: current.id, quantity: item.quantity },
-        }] : []),
+        data: current.items.flatMap((item) =>
+          item.productId
+            ? [
+                {
+                  eventId: randomUUID(),
+                  eventType: "order_cancelled",
+                  userId: current.userId,
+                  productId: item.productId,
+                  trusted: true,
+                  occurredAt: new Date(),
+                  source: "order_status",
+                  metadata: { orderId: current.id, quantity: item.quantity },
+                },
+              ]
+            : [],
+        ),
       });
     }
 
@@ -396,10 +427,7 @@ export async function cancelOwnOrder(userId: string, orderNumber: string): Promi
   return updateStatus(order.id, "CANCELLED");
 }
 
-export async function updatePayment(
-  id: string,
-  paymentStatus: PaymentStatus,
-): Promise<OrderDTO> {
+export async function updatePayment(id: string, paymentStatus: PaymentStatus): Promise<OrderDTO> {
   const current = await prisma.order.findUnique({ where: { id }, select: { id: true } });
   if (!current) throw Errors.notFound("Order not found.");
 

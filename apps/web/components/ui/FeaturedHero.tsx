@@ -12,10 +12,16 @@ import { formatCategoryLabel } from "@/lib/categoryUtils";
 import { formatPrice } from "@/lib/formatPrice";
 import { getDiscountPercent, getOriginalPrice, getSellingPrice } from "@/lib/pricing";
 import { useSabbathStatus } from "@/lib/useSabbathStatus";
+import RatingStars from "@/components/ui/RatingStars";
+import type { ReviewSummaryDTO } from "@nuru/types";
 
 interface Product {
   id: string;
+  slug?: string;
   name: string;
+  brandName?: string | null;
+  storeName?: string | null;
+  ratingSummary?: ReviewSummaryDTO;
   image: string;
   category: string;
   price: number;
@@ -24,6 +30,9 @@ interface Product {
   shortDescription?: string;
   description?: string;
   createdAt?: number | string | null;
+  inStock?: boolean;
+  stock?: number;
+  stockStatus?: "IN_STOCK" | "LOW_STOCK" | "OUT_OF_STOCK";
 }
 
 interface Category {
@@ -56,10 +65,8 @@ export default function FeaturedSection({ products, categories = [] }: FeaturedS
 
   const derivedCategories: Category[] = Array.from(
     new Set(
-      products
-        .map((p) => p.category?.toLowerCase().trim())
-        .filter((c): c is string => Boolean(c))
-    )
+      products.map((p) => p.category?.toLowerCase().trim()).filter((c): c is string => Boolean(c)),
+    ),
   ).map((slug) => ({ slug, name: formatCategoryLabel(slug) }));
 
   const categoryList = categories.length ? categories : derivedCategories;
@@ -85,14 +92,18 @@ export default function FeaturedSection({ products, categories = [] }: FeaturedS
   }, [currentCategory, featuredByCategory.length]);
 
   const handleAddToCart = (product: Product) => {
-    if (sabbathClosed) return;
+    if (sabbathClosed || product.inStock === false) return;
     const sellingPrice = getSellingPrice(product);
     addToCart({
       id: product.id,
+      slug: product.slug,
       name: product.name,
+      brandName: product.brandName,
+      storeName: product.storeName,
       price: sellingPrice,
       quantity: 1,
       image: product.image,
+      maxQuantity: product.stock,
     });
   };
 
@@ -239,7 +250,12 @@ export default function FeaturedSection({ products, categories = [] }: FeaturedS
                         NEW
                       </div>
                     )}
-                    <Link href={`/products/${item.id}`} className="flex-grow block">
+                    {item.stockStatus === "LOW_STOCK" && (
+                      <div className="absolute inset-x-2 top-11 z-10 rounded-full bg-amber-500 px-2 py-1 text-center text-xs font-semibold text-white">
+                        Only {item.stock} left
+                      </div>
+                    )}
+                    <Link href={`/products/${item.slug ?? item.id}`} className="flex-grow block">
                       <div className="relative w-full h-40 sm:h-44 bg-gray-100 dark:bg-gray-800 rounded-t-xl overflow-hidden">
                         <Image
                           src={item.image || "/assets/logo.png"}
@@ -255,6 +271,19 @@ export default function FeaturedSection({ products, categories = [] }: FeaturedS
                         <h4 className="font-semibold text-gray-800 dark:text-gray-100 text-sm line-clamp-1">
                           {item.name}
                         </h4>
+                        {(item.brandName || item.storeName) && (
+                          <p className="mt-1 truncate text-[11px] font-medium text-slate-500">
+                            {item.brandName || item.storeName}
+                          </p>
+                        )}
+                        {item.ratingSummary && (
+                          <RatingStars
+                            summary={item.ratingSummary}
+                            size={13}
+                            showValue={false}
+                            className="mt-1 justify-center [&_span]:text-[11px]"
+                          />
+                        )}
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
                           {item.shortDescription ||
                             "A premium item designed to uplift your body, mind, and spirit."}
@@ -275,8 +304,14 @@ export default function FeaturedSection({ products, categories = [] }: FeaturedS
                       </div>
                       <Button
                         size="sm"
-                        disabled={sabbathClosed}
-                        title={sabbathClosed ? "Shopping is paused for Sabbath" : "Add to cart"}
+                        disabled={sabbathClosed || item.inStock === false}
+                        title={
+                          item.inStock === false
+                            ? "Out of stock"
+                            : sabbathClosed
+                              ? "Shopping is paused for Sabbath"
+                              : "Add to cart"
+                        }
                         className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 disabled:bg-slate-300 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg disabled:cursor-not-allowed"
                         onClick={(e: ReactMouseEvent<HTMLButtonElement>) => {
                           e.preventDefault();

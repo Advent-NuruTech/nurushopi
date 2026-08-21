@@ -7,6 +7,7 @@ import { formatPrice } from "@/lib/formatPrice";
 import { getDiscountPercent, getOriginalPrice, getSellingPrice } from "@/lib/pricing";
 import type { ProductCardVM } from "@/lib/view/catalog";
 import SectionHeader from "@/components/ui/SectionHeader";
+import RatingStars from "@/components/ui/RatingStars";
 
 export default function NewArrivals({ products }: { products: ProductCardVM[] }) {
   if (products.length === 0) return null;
@@ -63,6 +64,17 @@ export default function NewArrivals({ products }: { products: ProductCardVM[] })
                     <h3 className="text-[11px] sm:text-xs font-semibold line-clamp-2 leading-tight text-slate-800 dark:text-slate-100">
                       {product.name}
                     </h3>
+                    {(product.brandName || product.storeName) && (
+                      <p className="mt-1 truncate text-[10px] text-slate-500">
+                        {product.brandName || product.storeName}
+                      </p>
+                    )}
+                    <RatingStars
+                      summary={product.ratingSummary}
+                      size={11}
+                      showValue={false}
+                      className="mt-1 [&_span]:text-[10px]"
+                    />
                     <div className="mt-1">
                       {discountPercent && originalPrice && (
                         <p className="text-[10px] text-slate-400 line-through leading-none">

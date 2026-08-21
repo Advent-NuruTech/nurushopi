@@ -10,12 +10,7 @@ import Bannerss from "@/components/ui/Bannerss";
 import SabbathExperience from "@/components/ui/SabbathExperience";
 import SectionHeader from "@/components/ui/SectionHeader";
 import { formatPrice } from "@/lib/formatPrice";
-import {
-  listProducts,
-  listCategories,
-  listNewArrivals,
-  listBanners,
-} from "@/lib/data/catalog";
+import { listProducts, listCategories, listNewArrivals, listBanners } from "@/lib/data/catalog";
 import { listWholesaleItems } from "@/lib/data/wholesale";
 import { getHomepageMerchandising } from "@/lib/data/merchandising";
 import type { ProductCardVM } from "@/lib/view/catalog";
@@ -28,7 +23,11 @@ import type { ProductCardVM } from "@/lib/view/catalog";
 function toFeaturedProduct(p: ProductCardVM) {
   return {
     id: p.id,
+    slug: p.slug,
     name: p.name,
+    brandName: p.brandName,
+    storeName: p.storeName,
+    ratingSummary: p.ratingSummary,
     image: p.image,
     category: p.categorySlug ?? "",
     price: p.price,
@@ -36,6 +35,8 @@ function toFeaturedProduct(p: ProductCardVM) {
     sellingPrice: p.sellingPrice,
     shortDescription: p.shortDescription ?? undefined,
     inStock: p.inStock,
+    stock: p.stock,
+    stockStatus: p.stockStatus,
     createdAt: p.createdAtMs,
   };
 }
@@ -68,7 +69,7 @@ export default async function HomePage() {
   return (
     <main className="bg-slate-50 dark:bg-black">
       <HeroSection />
-      
+
       <SabbathExperience />
       <HomepageSections homepage={homepage} />
 
@@ -93,7 +94,10 @@ export default async function HomePage() {
                     sizes="(max-width: 639px) 25vw, (max-width: 1023px) 20vw, 12.5vw"
                   />
                 </div>
-                <h2 id={index === 0 ? "shop-categories" : undefined} className="mt-2 truncate text-xs font-medium text-slate-800 sm:text-sm dark:text-slate-200">
+                <h2
+                  id={index === 0 ? "shop-categories" : undefined}
+                  className="mt-2 truncate text-xs font-medium text-slate-800 sm:text-sm dark:text-slate-200"
+                >
                   {category.name}
                 </h2>
               </Link>
@@ -157,7 +161,9 @@ export default async function HomePage() {
       <Bannerss banners={banners} />
 
       {homepage.sections.length === 0 && <NewArrivals products={newArrivals} />}
-      {homepage.sections.length === 0 && <FeaturedSection products={featuredProducts} categories={categoryOptions} />}
+      {homepage.sections.length === 0 && (
+        <FeaturedSection products={featuredProducts} categories={categoryOptions} />
+      )}
     </main>
   );
 }

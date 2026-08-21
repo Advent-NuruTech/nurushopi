@@ -40,6 +40,9 @@ function buildWhere(query: ProductQuery, enforceActive: boolean): Prisma.Product
   if (query.search) {
     where.OR = [
       { name: { contains: query.search, mode: "insensitive" } },
+      { sku: { contains: query.search, mode: "insensitive" } },
+      { brandName: { contains: query.search, mode: "insensitive" } },
+      { storeName: { contains: query.search, mode: "insensitive" } },
       { description: { contains: query.search, mode: "insensitive" } },
       { shortDescription: { contains: query.search, mode: "insensitive" } },
     ];
@@ -173,6 +176,9 @@ export async function create(input: ProductCreateInput, createdById?: string) {
     data: {
       name: input.name,
       slug,
+      sku: input.sku ?? null,
+      brandName: input.brandName ?? null,
+      storeName: input.storeName ?? null,
       description: input.description ?? null,
       shortDescription: input.shortDescription ?? null,
       price: input.price,
@@ -180,6 +186,7 @@ export async function create(input: ProductCreateInput, createdById?: string) {
       sellingPrice: input.sellingPrice ?? null,
       images: input.images ?? [],
       stock: input.stock ?? 0,
+      lowStockThreshold: input.lowStockThreshold ?? 5,
       isActive: input.isActive ?? true,
       isFeatured: input.isFeatured ?? false,
       categoryId: input.categoryId ?? null,
@@ -206,18 +213,26 @@ export async function update(id: string, input: ProductUpdateInput) {
     const updated = await tx.product.update({
       where: { id },
       data: {
-      ...(input.name !== undefined ? { name: input.name } : {}),
-      ...(slug !== current.slug ? { slug } : {}),
-      ...(input.description !== undefined ? { description: input.description } : {}),
-      ...(input.shortDescription !== undefined ? { shortDescription: input.shortDescription } : {}),
-      ...(input.price !== undefined ? { price: input.price } : {}),
-      ...(input.originalPrice !== undefined ? { originalPrice: input.originalPrice } : {}),
-      ...(input.sellingPrice !== undefined ? { sellingPrice: input.sellingPrice } : {}),
-      ...(input.images !== undefined ? { images: input.images } : {}),
-      ...(input.stock !== undefined ? { stock: input.stock } : {}),
-      ...(input.isActive !== undefined ? { isActive: input.isActive } : {}),
-      ...(input.isFeatured !== undefined ? { isFeatured: input.isFeatured } : {}),
-      ...(input.categoryId !== undefined ? { categoryId: input.categoryId } : {}),
+        ...(input.name !== undefined ? { name: input.name } : {}),
+        ...(slug !== current.slug ? { slug } : {}),
+        ...(input.sku !== undefined ? { sku: input.sku } : {}),
+        ...(input.brandName !== undefined ? { brandName: input.brandName } : {}),
+        ...(input.storeName !== undefined ? { storeName: input.storeName } : {}),
+        ...(input.description !== undefined ? { description: input.description } : {}),
+        ...(input.shortDescription !== undefined
+          ? { shortDescription: input.shortDescription }
+          : {}),
+        ...(input.price !== undefined ? { price: input.price } : {}),
+        ...(input.originalPrice !== undefined ? { originalPrice: input.originalPrice } : {}),
+        ...(input.sellingPrice !== undefined ? { sellingPrice: input.sellingPrice } : {}),
+        ...(input.images !== undefined ? { images: input.images } : {}),
+        ...(input.stock !== undefined ? { stock: input.stock } : {}),
+        ...(input.lowStockThreshold !== undefined
+          ? { lowStockThreshold: input.lowStockThreshold }
+          : {}),
+        ...(input.isActive !== undefined ? { isActive: input.isActive } : {}),
+        ...(input.isFeatured !== undefined ? { isFeatured: input.isFeatured } : {}),
+        ...(input.categoryId !== undefined ? { categoryId: input.categoryId } : {}),
       },
       include: { category: categorySelect },
     });
@@ -299,7 +314,9 @@ export async function recommendations(input: {
     if (current) {
       exclude.add(current.id);
       if (current.categoryId) categoryIds.add(current.categoryId);
-      for (const term of keywords(`${current.name} ${current.shortDescription ?? ""} ${current.description ?? ""}`)) {
+      for (const term of keywords(
+        `${current.name} ${current.shortDescription ?? ""} ${current.description ?? ""}`,
+      )) {
         terms.add(term);
       }
     }
@@ -325,7 +342,9 @@ export async function recommendations(input: {
     for (const view of recent) {
       exclude.add(view.product.id);
       if (view.product.categoryId) categoryIds.add(view.product.categoryId);
-      for (const term of keywords(`${view.product.name} ${view.product.shortDescription ?? ""} ${view.product.description ?? ""}`)) {
+      for (const term of keywords(
+        `${view.product.name} ${view.product.shortDescription ?? ""} ${view.product.description ?? ""}`,
+      )) {
         terms.add(term);
       }
     }
@@ -369,7 +388,10 @@ export async function recommendations(input: {
   return [...rows, ...more].map((r) => toProductDTO(r as ProductWithCategory));
 }
 
-export async function notifyAdminsOutOfStock(productId: string, productName: string): Promise<void> {
+export async function notifyAdminsOutOfStock(
+  productId: string,
+  productName: string,
+): Promise<void> {
   await prisma.notification.create({
     data: {
       recipientType: "ADMIN",

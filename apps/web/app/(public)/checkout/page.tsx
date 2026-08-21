@@ -36,9 +36,23 @@ type RelatedProduct = {
 
 // -------------------- Common Countries --------------------
 const commonCountries = [
-  "Kenya", "Uganda", "Tanzania", "Rwanda", "Ethiopia", "South Africa",
-  "Nigeria", "Ghana", "United States", "United Kingdom", "Canada",
-  "Australia", "Germany", "France", "India", "China", "Japan"
+  "Kenya",
+  "Uganda",
+  "Tanzania",
+  "Rwanda",
+  "Ethiopia",
+  "South Africa",
+  "Nigeria",
+  "Ghana",
+  "United States",
+  "United Kingdom",
+  "Canada",
+  "Australia",
+  "Germany",
+  "France",
+  "India",
+  "China",
+  "Japan",
 ];
 
 function toRelated(p: ProductDTO): RelatedProduct {
@@ -107,9 +121,7 @@ function CheckoutContent() {
     if (!user) {
       setShowForm(false);
       if (step === "details") {
-        router.replace(
-          `/auth/login?redirectTo=${encodeURIComponent("/checkout?step=details")}`
-        );
+        router.replace(`/auth/login?redirectTo=${encodeURIComponent("/checkout?step=details")}`);
       }
       return;
     }
@@ -142,9 +154,7 @@ function CheckoutContent() {
   }, []);
 
   // -------------------- Handlers --------------------
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
@@ -167,13 +177,11 @@ function CheckoutContent() {
   };
 
   const filteredCountries = commonCountries.filter((country) =>
-    country.toLowerCase().includes(formData.country.toLowerCase())
+    country.toLowerCase().includes(formData.country.toLowerCase()),
   );
 
   const redirectToAuth = useCallback(() => {
-    router.push(
-      `/auth/login?redirectTo=${encodeURIComponent("/checkout?step=details")}`
-    );
+    router.push(`/auth/login?redirectTo=${encodeURIComponent("/checkout?step=details")}`);
   }, [router]);
 
   // -------------------- Submit Order --------------------
@@ -182,7 +190,7 @@ function CheckoutContent() {
 
     if (sabbathClosed) {
       setErrorMessage(
-        "Shopping is paused in honor of the Sabbath. Please return after sunset on Saturday in your local time."
+        "Shopping is paused in honor of the Sabbath. Please return after sunset on Saturday in your local time.",
       );
       return;
     }
@@ -237,7 +245,7 @@ function CheckoutContent() {
       const productList = cart
         .map(
           (item, idx) =>
-            `${idx + 1}. ${item.name} (x${item.quantity}) — KSh ${(item.price * item.quantity).toFixed(2)} [ID: ${item.id}]`
+            `${idx + 1}. ${item.name} (x${item.quantity}) — KSh ${(item.price * item.quantity).toFixed(2)} [ID: ${item.id}]`,
         )
         .join("%0A");
 
@@ -252,9 +260,7 @@ function CheckoutContent() {
     } catch (err) {
       console.error(err);
       setErrorMessage(
-        err instanceof ApiClientError
-          ? err.message
-          : "Something went wrong. Please try again."
+        err instanceof ApiClientError ? err.message : "Something went wrong. Please try again.",
       );
     } finally {
       setIsSubmitting(false);
@@ -275,14 +281,11 @@ function CheckoutContent() {
   if (success) {
     return (
       <div className="max-w-2xl mx-auto text-center py-20 px-4">
-        <h2 className="text-2xl font-semibold text-green-700">
-          ✅ Order placed successfully!
-        </h2>
+        <h2 className="text-2xl font-semibold text-green-700">✅ Order placed successfully!</h2>
         {orderNumber && (
           <p className="text-gray-700 dark:text-gray-300 mt-3">
-            Your order number is{" "}
-            <span className="font-mono font-semibold">{orderNumber}</span>. Keep it
-            to track your order.
+            Your order number is <span className="font-mono font-semibold">{orderNumber}</span>.
+            Keep it to track your order.
           </p>
         )}
         <p className="text-gray-600 mt-3">
@@ -310,7 +313,6 @@ function CheckoutContent() {
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-gray-950 pt-24 pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-blue-700 dark:text-blue-400">
@@ -332,17 +334,17 @@ function CheckoutContent() {
           </Link>
         </div>
 
-       {/* Error Message */}
-      {errorMessage && (
-        <div className="text-center mt-4 text-red-600 font-medium">{errorMessage}</div>
-      )}
+        {/* Error Message */}
+        {errorMessage && (
+          <div className="text-center mt-4 text-red-600 font-medium">{errorMessage}</div>
+        )}
 
-      {sabbathClosed && (
-        <div className="max-w-4xl mx-auto mt-6 rounded-lg border border-amber-200 bg-amber-50 text-amber-800 px-4 py-3 text-sm">
-          We honor the Sabbath from Friday sunset to Saturday sunset in your local time. Checkout and purchasing are
-          temporarily disabled until {sabbathEndsAt.toLocaleString()}.
-        </div>
-      )}
+        {sabbathClosed && (
+          <div className="max-w-4xl mx-auto mt-6 rounded-lg border border-amber-200 bg-amber-50 text-amber-800 px-4 py-3 text-sm">
+            We honor the Sabbath from Friday sunset to Saturday sunset in your local time. Checkout
+            and purchasing are temporarily disabled until {sabbathEndsAt.toLocaleString()}.
+          </div>
+        )}
         {cart.length === 0 ? (
           <div className="rounded-lg border border-slate-200 bg-white p-10 text-center shadow-sm dark:border-slate-800 dark:bg-gray-900">
             <ShoppingBag className="mx-auto mb-4 text-slate-400" size={48} />
@@ -360,57 +362,58 @@ function CheckoutContent() {
           </div>
         ) : (
           <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
- {/* Cart Items */}
+            {/* Cart Items */}
             <div className="space-y-4">
               {cart.map((item) => (
                 <div
                   key={item.id}
                   className="grid gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md dark:border-slate-800 dark:bg-gray-900 sm:grid-cols-[96px_1fr_auto]"
                 >
-                    <div className="relative h-24 w-24 overflow-hidden rounded-md bg-slate-50 dark:bg-slate-800">
-                      <Image
-                        src={item.image || "/assets/logo.png"}
-                        alt={item.name}
-                        fill
-                        className="object-contain p-2"
-                      />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="line-clamp-2 font-semibold text-gray-900 dark:text-gray-100">
-                        {item.name}
+                  <div className="relative h-24 w-24 overflow-hidden rounded-md bg-slate-50 dark:bg-slate-800">
+                    <Image
+                      src={item.image || "/assets/logo.png"}
+                      alt={item.name}
+                      fill
+                      className="object-contain p-2"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="line-clamp-2 font-semibold text-gray-900 dark:text-gray-100">
+                      {item.name}
+                    </p>
+                    <p className="text-gray-500 text-sm">KSh {item.price.toFixed(2)}</p>
+                    {(item.brandName || item.storeName) && (
+                      <p className="mt-1 text-xs text-slate-500">
+                        {item.brandName || item.storeName}
                       </p>
-                      <p className="text-gray-500 text-sm">
-                        KSh {item.price.toFixed(2)}
-                      </p>
-                      <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
-                        <span className="break-all text-gray-500 dark:text-gray-400">
-                          Product ID: <code className="font-mono">{item.id}</code>
-                        </span>
-                        <Link
-                          href={`/products/${item.id}`}
-                          className="rounded-full border border-blue-200 px-2 py-0.5 text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-900/30"
-                        >
-                          View details
-                        </Link>
-                      </div>
-                      <div className="flex items-center gap-2 mt-2">
-                        <button
-                          onClick={() => decreaseQuantity(item.id, item.quantity)}
-                          className="grid h-8 w-8 place-items-center rounded-md bg-gray-100 text-blue-700 hover:bg-blue-100 dark:bg-gray-800"
-                          aria-label="Decrease quantity"
-                        >
-                          <Minus size={14} />
-                        </button>
-                        <span className="w-10 text-center">{item.quantity}</span>
-                        <button
-                          onClick={() => increaseQuantity(item.id, item.quantity)}
-                          className="grid h-8 w-8 place-items-center rounded-md bg-gray-100 text-blue-700 hover:bg-blue-100 dark:bg-gray-800"
-                          aria-label="Increase quantity"
-                        >
-                          <Plus size={14} />
-                        </button>
-                      </div>
+                    )}
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
+                      <Link
+                        href={`/products/${item.slug ?? item.id}`}
+                        className="rounded-full border border-blue-200 px-2 py-0.5 text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-900/30"
+                      >
+                        View details
+                      </Link>
                     </div>
+                    <div className="flex items-center gap-2 mt-2">
+                      <button
+                        onClick={() => decreaseQuantity(item.id, item.quantity)}
+                        className="grid h-8 w-8 place-items-center rounded-md bg-gray-100 text-blue-700 hover:bg-blue-100 dark:bg-gray-800"
+                        aria-label="Decrease quantity"
+                      >
+                        <Minus size={14} />
+                      </button>
+                      <span className="w-10 text-center">{item.quantity}</span>
+                      <button
+                        onClick={() => increaseQuantity(item.id, item.quantity)}
+                        disabled={item.maxQuantity != null && item.quantity >= item.maxQuantity}
+                        className="grid h-8 w-8 place-items-center rounded-md bg-gray-100 text-blue-700 hover:bg-blue-100 dark:bg-gray-800"
+                        aria-label="Increase quantity"
+                      >
+                        <Plus size={14} />
+                      </button>
+                    </div>
+                  </div>
                   <div className="flex items-center justify-between gap-3 sm:flex-col sm:items-end">
                     <p className="font-bold text-blue-700">
                       KSh {(item.price * item.quantity).toFixed(2)}
@@ -453,7 +456,7 @@ function CheckoutContent() {
                   if (total <= 0) return;
                   if (sabbathClosed) {
                     setErrorMessage(
-                      "Shopping is paused in honor of the Sabbath. Please return after sunset on Saturday in your local time."
+                      "Shopping is paused in honor of the Sabbath. Please return after sunset on Saturday in your local time.",
                     );
                     return;
                   }
@@ -498,12 +501,7 @@ function CheckoutContent() {
                 className="border rounded-lg shadow-sm hover:shadow-md transition bg-white dark:bg-gray-800"
               >
                 <div className="relative w-full h-40">
-                  <Image
-                    src={product.image}
-                    alt={product.name}
-                    fill
-                    className="object-cover"
-                  />
+                  <Image src={product.image} alt={product.name} fill className="object-cover" />
                 </div>
                 <div className="p-3">
                   <h3 className="font-medium text-sm">{product.name}</h3>
@@ -517,15 +515,11 @@ function CheckoutContent() {
         </section>
       )}
 
-
-
       {/* Order Form Modal */}
       {showForm && user && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md shadow-lg max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-semibold mb-4 text-blue-700">
-              Complete Your Order
-            </h2>
+            <h2 className="text-xl font-semibold mb-4 text-blue-700">Complete Your Order</h2>
 
             <div className="space-y-3">
               <input
@@ -555,9 +549,7 @@ function CheckoutContent() {
                 readOnly={Boolean(user.email)}
                 className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               />
-              {user.email && (
-                <p className="text-xs text-gray-500">Signed in as {user.email}</p>
-              )}
+              {user.email && <p className="text-xs text-gray-500">Signed in as {user.email}</p>}
 
               {/* Country with suggestions */}
               <div className="relative">

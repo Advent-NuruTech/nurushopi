@@ -76,6 +76,9 @@ import type {
   HomepageSectionCreateInput,
   HomepageSectionUpdateInput,
   MerchandisingCollectionDTO,
+  WishlistItemDTO,
+  WishlistQuery,
+  WishlistUpsertInput,
 } from "@nuru/types";
 
 /** Public wholesale list filters accepted by the API (all optional on the client). */
@@ -212,8 +215,7 @@ type AuthUserResponse = { user: AuthUser };
 
 export const authApi = {
   me: () => api.get<AuthUserResponse>("/auth/me"),
-  updateProfile: (input: ProfileUpdateInput) =>
-    api.patch<AuthUserResponse>("/auth/me", input),
+  updateProfile: (input: ProfileUpdateInput) => api.patch<AuthUserResponse>("/auth/me", input),
   login: (email: string, password: string) =>
     api.post<AuthUserResponse>("/auth/login", { email, password }),
   signup: (input: { email: string; password: string; name?: string; referralCode?: string }) =>
@@ -224,8 +226,7 @@ export const authApi = {
     api.post<{ success: boolean }>("/auth/forgot-password", { email }),
   resetPassword: (token: string, password: string) =>
     api.post<{ success: boolean }>("/auth/reset-password", { token, password }),
-  verifyEmail: (token: string) =>
-    api.post<{ success: boolean }>("/auth/verify-email", { token }),
+  verifyEmail: (token: string) => api.post<{ success: boolean }>("/auth/verify-email", { token }),
   googleUrl: () => apiUrl("/auth/google"),
 };
 
@@ -234,10 +235,8 @@ type AdminUserResponse = { admin: AdminUserDTO };
 
 export const adminAuthApi = {
   me: () => api.get<AdminUserResponse>("/admin/auth/me"),
-  login: (input: AdminLoginInput) =>
-    api.post<AdminUserResponse>("/admin/auth/login", input),
-  signup: (input: AdminSignupInput) =>
-    api.post<AdminUserResponse>("/admin/auth/signup", input),
+  login: (input: AdminLoginInput) => api.post<AdminUserResponse>("/admin/auth/login", input),
+  signup: (input: AdminSignupInput) => api.post<AdminUserResponse>("/admin/auth/signup", input),
   logout: () => api.post<{ success: boolean }>("/admin/auth/logout"),
   invite: (input: AdminInviteInput) =>
     api.post<{ invite: AdminInviteDTO }>("/admin/auth/invite", input),
@@ -253,10 +252,8 @@ type VendorUserResponse = { vendor: VendorUserDTO };
 
 export const vendorAuthApi = {
   me: () => api.get<VendorUserResponse>("/vendor/auth/me"),
-  login: (input: VendorLoginInput) =>
-    api.post<VendorUserResponse>("/vendor/auth/login", input),
-  signup: (input: VendorSignupInput) =>
-    api.post<VendorUserResponse>("/vendor/auth/signup", input),
+  login: (input: VendorLoginInput) => api.post<VendorUserResponse>("/vendor/auth/login", input),
+  signup: (input: VendorSignupInput) => api.post<VendorUserResponse>("/vendor/auth/signup", input),
   logout: () => api.post<{ success: boolean }>("/vendor/auth/logout"),
 };
 
@@ -295,8 +292,7 @@ export const catalogApi = {
       api.post<{ product: ProductDTO }>("/admin/catalog/products", input),
     updateProduct: (id: string, input: ProductUpdateInput) =>
       api.put<{ product: ProductDTO }>(`/admin/catalog/products/${id}`, input),
-    deleteProduct: (id: string) =>
-      api.del<{ success: boolean }>(`/admin/catalog/products/${id}`),
+    deleteProduct: (id: string) => api.del<{ success: boolean }>(`/admin/catalog/products/${id}`),
 
     createCategory: (input: CategoryCreateInput) =>
       api.post<{ category: CategoryDTO }>("/admin/catalog/categories", input),
@@ -310,16 +306,14 @@ export const catalogApi = {
       api.post<{ banner: BannerDTO }>("/admin/catalog/banners", input),
     updateBanner: (id: string, input: BannerUpdateInput) =>
       api.put<{ banner: BannerDTO }>(`/admin/catalog/banners/${id}`, input),
-    deleteBanner: (id: string) =>
-      api.del<{ success: boolean }>(`/admin/catalog/banners/${id}`),
+    deleteBanner: (id: string) => api.del<{ success: boolean }>(`/admin/catalog/banners/${id}`),
 
     listHero: () => api.get<{ announcements: HeroAnnouncementDTO[] }>("/admin/catalog/hero"),
     createHero: (input: HeroCreateInput) =>
       api.post<{ announcement: HeroAnnouncementDTO }>("/admin/catalog/hero", input),
     updateHero: (id: string, input: HeroUpdateInput) =>
       api.put<{ announcement: HeroAnnouncementDTO }>(`/admin/catalog/hero/${id}`, input),
-    deleteHero: (id: string) =>
-      api.del<{ success: boolean }>(`/admin/catalog/hero/${id}`),
+    deleteHero: (id: string) => api.del<{ success: boolean }>(`/admin/catalog/hero/${id}`),
   },
 };
 
@@ -336,14 +330,12 @@ export const wholesaleApi = {
   admin: {
     listItems: (query: WholesaleQuery = {}) =>
       api.get<Paginated<WholesaleItemDTO>>(`/admin/wholesale/items${qs(query)}`),
-    getItem: (id: string) =>
-      api.get<{ item: WholesaleItemDTO }>(`/admin/wholesale/items/${id}`),
+    getItem: (id: string) => api.get<{ item: WholesaleItemDTO }>(`/admin/wholesale/items/${id}`),
     createItem: (input: WholesaleItemCreateInput) =>
       api.post<{ item: WholesaleItemDTO }>("/admin/wholesale/items", input),
     updateItem: (id: string, input: WholesaleItemUpdateInput) =>
       api.put<{ item: WholesaleItemDTO }>(`/admin/wholesale/items/${id}`, input),
-    deleteItem: (id: string) =>
-      api.del<{ success: boolean }>(`/admin/wholesale/items/${id}`),
+    deleteItem: (id: string) => api.del<{ success: boolean }>(`/admin/wholesale/items/${id}`),
   },
 };
 
@@ -352,22 +344,19 @@ export const wholesaleApi = {
 export const orderApi = {
   // Checkout works for guests and signed-in users (the cookie session, if any,
   // links the order to the user).
-  checkout: (input: CheckoutInput) =>
-    api.post<{ order: OrderDTO }>("/orders/checkout", input),
+  checkout: (input: CheckoutInput) => api.post<{ order: OrderDTO }>("/orders/checkout", input),
   // Track a single order by its (unguessable) order number.
   track: (orderNumber: string) =>
     api.get<{ order: OrderDTO }>(`/orders/${encodeURIComponent(orderNumber)}`),
   // The signed-in user's own order history.
-  myOrders: (query: OrderQuery = {}) =>
-    api.get<Paginated<OrderDTO>>(`/orders/mine${qs(query)}`),
+  myOrders: (query: OrderQuery = {}) => api.get<Paginated<OrderDTO>>(`/orders/mine${qs(query)}`),
   // Customer self-cancel (own order, pre-shipment, within 24h — enforced server-side).
   cancel: (orderNumber: string) =>
     api.patch<{ order: OrderDTO }>(`/orders/${encodeURIComponent(orderNumber)}/cancel`),
 
   // Admin order management (require an admin session cookie)
   admin: {
-    list: (query: OrderQuery = {}) =>
-      api.get<Paginated<OrderDTO>>(`/admin/orders${qs(query)}`),
+    list: (query: OrderQuery = {}) => api.get<Paginated<OrderDTO>>(`/admin/orders${qs(query)}`),
     get: (id: string) => api.get<{ order: OrderDTO }>(`/admin/orders/${id}`),
     updateStatus: (id: string, status: OrderStatus) =>
       api.patch<{ order: OrderDTO }>(`/admin/orders/${id}/status`, { status }),
@@ -408,8 +397,7 @@ export const walletApi = {
 
 export const contactApi = {
   // Unauthenticated "get in touch" form → POST /contact.
-  submit: (input: ContactCreateInput) =>
-    api.post<{ contact: ContactDTO }>("/contact", input),
+  submit: (input: ContactCreateInput) => api.post<{ contact: ContactDTO }>("/contact", input),
 
   // Admin contact inbox (require an admin session cookie)
   admin: {
@@ -423,7 +411,9 @@ export const contactApi = {
 // ---- Product reviews ----
 
 /** Public/customer per-product review listing filters (all optional). */
-type ProductReviewFilter = Partial<Pick<ProductReviewQuery, "page" | "pageSize" | "rating" | "sort">>;
+type ProductReviewFilter = Partial<
+  Pick<ProductReviewQuery, "page" | "pageSize" | "rating" | "sort">
+>;
 /** Admin review listing filters (all optional). */
 type ReviewFilter = Partial<
   Pick<ReviewQuery, "page" | "pageSize" | "status" | "productId" | "userId" | "rating" | "sort">
@@ -432,9 +422,7 @@ type ReviewFilter = Partial<
 export const reviewsApi = {
   // Public reads (APPROVED reviews only, server-enforced)
   listForProduct: (productId: string, query: ProductReviewFilter = {}) =>
-    api.get<Paginated<ReviewDTO>>(
-      `/reviews/product/${encodeURIComponent(productId)}${qs(query)}`,
-    ),
+    api.get<Paginated<ReviewDTO>>(`/reviews/product/${encodeURIComponent(productId)}${qs(query)}`),
   summaryForProduct: (productId: string) =>
     api.get<{ summary: ReviewSummaryDTO }>(
       `/reviews/product/${encodeURIComponent(productId)}/summary`,
@@ -443,21 +431,17 @@ export const reviewsApi = {
   // Customer (require a user session cookie)
   mine: (query: ProductReviewFilter = {}) =>
     api.get<Paginated<ReviewDTO>>(`/reviews/mine${qs(query)}`),
-  create: (input: ReviewCreateInput) =>
-    api.post<{ review: ReviewDTO }>("/reviews", input),
+  create: (input: ReviewCreateInput) => api.post<{ review: ReviewDTO }>("/reviews", input),
   update: (id: string, input: ReviewUpdateInput) =>
     api.put<{ review: ReviewDTO }>(`/reviews/${encodeURIComponent(id)}`, input),
-  remove: (id: string) =>
-    api.del<{ success: boolean }>(`/reviews/${encodeURIComponent(id)}`),
+  remove: (id: string) => api.del<{ success: boolean }>(`/reviews/${encodeURIComponent(id)}`),
 
   // Admin moderation (require an admin session cookie)
   admin: {
-    list: (query: ReviewFilter = {}) =>
-      api.get<Paginated<ReviewDTO>>(`/admin/reviews${qs(query)}`),
+    list: (query: ReviewFilter = {}) => api.get<Paginated<ReviewDTO>>(`/admin/reviews${qs(query)}`),
     moderate: (id: string, input: ReviewModerateInput) =>
       api.patch<{ review: ReviewDTO }>(`/admin/reviews/${id}`, input),
-    remove: (id: string) =>
-      api.del<{ success: boolean }>(`/admin/reviews/${id}`),
+    remove: (id: string) => api.del<{ success: boolean }>(`/admin/reviews/${id}`),
   },
 };
 
@@ -467,8 +451,7 @@ export const messagesApi = {
   // Customer support thread (require a user session cookie). The thread is
   // keyed by the user's id server-side, so no id is needed here.
   list: () => api.get<{ messages: MessageDTO[] }>("/messages"),
-  send: (input: MessageCreateInput) =>
-    api.post<{ message: MessageDTO }>("/messages", input),
+  send: (input: MessageCreateInput) => api.post<{ message: MessageDTO }>("/messages", input),
 
   // Admin support inbox (require an admin session cookie)
   admin: {
@@ -504,8 +487,7 @@ export const vendorsApi = {
   admin: {
     list: (query: VendorFilter = {}) =>
       api.get<Paginated<VendorApplicationDTO>>(`/admin/vendors${qs(query)}`),
-    get: (id: string) =>
-      api.get<{ application: VendorApplicationDTO }>(`/admin/vendors/${id}`),
+    get: (id: string) => api.get<{ application: VendorApplicationDTO }>(`/admin/vendors/${id}`),
     moderate: (id: string, input: VendorApplicationModerateInput) =>
       api.patch<{ application: VendorApplicationDTO }>(`/admin/vendors/${id}`, input),
     invite: (id: string) =>
@@ -541,6 +523,17 @@ export const notificationsApi = {
   },
 };
 
+// ---- Wishlist and purchase-intent reminders ----
+export const wishlistApi = {
+  list: (query: Partial<WishlistQuery> = {}) =>
+    api.get<Paginated<WishlistItemDTO>>(`/wishlist${qs(query)}`),
+  getForProduct: (productId: string) =>
+    api.get<{ item: WishlistItemDTO | null }>(`/wishlist/${encodeURIComponent(productId)}`),
+  save: (input: WishlistUpsertInput) => api.post<{ item: WishlistItemDTO }>("/wishlist", input),
+  remove: (productId: string) =>
+    api.del<{ success: boolean }>(`/wishlist/${encodeURIComponent(productId)}`),
+};
+
 // ---- Admin customer management ----
 
 /** Admin customer-list filters (all optional). */
@@ -551,8 +544,7 @@ export const usersApi = {
     list: (query: AdminUserFilter = {}) =>
       api.get<{ users: AdminUserSummaryDTO[] }>(`/admin/users${qs(query)}`),
     get: (id: string) => api.get<AdminUserBundleDTO>(`/admin/users/${encodeURIComponent(id)}`),
-    remove: (id: string) =>
-      api.del<{ success: boolean }>(`/admin/users/${encodeURIComponent(id)}`),
+    remove: (id: string) => api.del<{ success: boolean }>(`/admin/users/${encodeURIComponent(id)}`),
   },
 };
 
@@ -587,8 +579,7 @@ export const sabbathApi = {
     api.get<SabbathMessageListDTO>(`/sabbath-messages${qs(query)}`),
 
   // Public: distinct archive months (newest first) with message counts.
-  months: () =>
-    api.get<{ months: SabbathMonthsDTO }>("/sabbath-messages/months"),
+  months: () => api.get<{ months: SabbathMonthsDTO }>("/sabbath-messages/months"),
 
   // Admin authoring (read: any admin; write: senior admin — enforced server-side)
   admin: {
@@ -626,17 +617,30 @@ export interface AdminHomepageSection {
 
 export const merchandisingApi = {
   admin: {
-    collections: () => api.get<{ collections: MerchandisingCollectionDTO[] }>("/admin/merchandising/collections"),
+    collections: () =>
+      api.get<{ collections: MerchandisingCollectionDTO[] }>("/admin/merchandising/collections"),
     createCollection: (input: CollectionCreateInput) =>
-      api.post<{ collection: MerchandisingCollectionDTO }>("/admin/merchandising/collections", input),
+      api.post<{ collection: MerchandisingCollectionDTO }>(
+        "/admin/merchandising/collections",
+        input,
+      ),
     updateCollection: (id: string, input: CollectionUpdateInput) =>
-      api.patch<{ collection: MerchandisingCollectionDTO }>(`/admin/merchandising/collections/${encodeURIComponent(id)}`, input),
-    sections: () => api.get<{ sections: AdminHomepageSection[] }>("/admin/merchandising/homepage-sections"),
+      api.patch<{ collection: MerchandisingCollectionDTO }>(
+        `/admin/merchandising/collections/${encodeURIComponent(id)}`,
+        input,
+      ),
+    sections: () =>
+      api.get<{ sections: AdminHomepageSection[] }>("/admin/merchandising/homepage-sections"),
     createSection: (input: HomepageSectionCreateInput) =>
       api.post<{ section: AdminHomepageSection }>("/admin/merchandising/homepage-sections", input),
     updateSection: (id: string, input: HomepageSectionUpdateInput) =>
-      api.patch<{ section: AdminHomepageSection }>(`/admin/merchandising/homepage-sections/${encodeURIComponent(id)}`, input),
+      api.patch<{ section: AdminHomepageSection }>(
+        `/admin/merchandising/homepage-sections/${encodeURIComponent(id)}`,
+        input,
+      ),
     analytics: (id: string, days = 30) =>
-      api.get<{ analytics: Record<string, number | string | null> }>(`/admin/merchandising/collections/${encodeURIComponent(id)}/analytics?days=${days}`),
+      api.get<{ analytics: Record<string, number | string | null> }>(
+        `/admin/merchandising/collections/${encodeURIComponent(id)}/analytics?days=${days}`,
+      ),
   },
 };

@@ -15,6 +15,7 @@ import {
   Store,
   ShoppingBag,
   Star,
+  Heart,
   Menu,
   X,
 } from "lucide-react";
@@ -24,6 +25,7 @@ import ManageOrders from "./components/ManageOrders";
 import UpdateProfile from "./components/UpdateProfile";
 import InviteSection from "./components/InviteSection";
 import MessageToast from "./components/MessageToast";
+import WishlistTab from "./components/WishlistTab";
 import OrderDetailsModal from "./components/OrderDetailsModal";
 import ConfirmSaveModal from "./components/ConfirmSaveModal";
 import AuthRequired from "./components/AuthRequired";
@@ -126,7 +128,16 @@ function ProfilePageContent() {
       return;
     }
     if (
-      ["overview", "orders", "messages", "reviews", "wallet", "profile", "invite"].includes(tab)
+      [
+        "overview",
+        "orders",
+        "messages",
+        "reviews",
+        "wishlist",
+        "wallet",
+        "profile",
+        "invite",
+      ].includes(tab)
     ) {
       setActiveTab(tab);
     }
@@ -167,13 +178,14 @@ function ProfilePageContent() {
       { id: "orders", label: "Orders", icon: Package },
       { id: "messages", label: "Messages", icon: MessageSquare },
       { id: "reviews", label: "Reviews", icon: Star },
+      { id: "wishlist", label: "Wishlist", icon: Heart },
       //{ id: "reorder", label: "Quick Reorder", icon: ShoppingBag },
       { id: "wallet", label: "Wallet", icon: ShoppingBag },
       { id: "profile", label: "Profile", icon: Settings },
       { id: "invite", label: "Invite", icon: Gift },
       { id: "shop", label: "Shop", icon: Store },
     ],
-    []
+    [],
   );
 
   const handleTabChange = (tabId: string) => {
@@ -216,9 +228,7 @@ function ProfilePageContent() {
             <Menu className="w-5 h-5" />
           </button>
           <button
-            onClick={() =>
-              setActiveTab(unreadMessages > 0 ? "messages" : "orders")
-            }
+            onClick={() => setActiveTab(unreadMessages > 0 ? "messages" : "orders")}
             className="relative"
             type="button"
           >
@@ -246,10 +256,10 @@ function ProfilePageContent() {
               t.id === "messages"
                 ? unreadMessages
                 : t.id === "orders"
-                ? pendingOrders
-                : t.id === "reviews"
-                ? unreadReviewPrompts
-                : 0;
+                  ? pendingOrders
+                  : t.id === "reviews"
+                    ? unreadReviewPrompts
+                    : 0;
             return (
               <button
                 key={t.id}
@@ -319,10 +329,10 @@ function ProfilePageContent() {
                   t.id === "messages"
                     ? unreadMessages
                     : t.id === "orders"
-                    ? pendingOrders
-                    : t.id === "reviews"
-                    ? unreadReviewPrompts
-                    : 0;
+                      ? pendingOrders
+                      : t.id === "reviews"
+                        ? unreadReviewPrompts
+                        : 0;
                 return (
                   <button
                     key={t.id}
@@ -361,12 +371,7 @@ function ProfilePageContent() {
 
       <div className="max-w-6xl mx-auto px-4 md:px-8 py-6">
         <AnimatePresence>
-          {message && (
-            <MessageToast
-              message={message}
-              onDismiss={() => setMessage(null)}
-            />
-          )}
+          {message && <MessageToast message={message} onDismiss={() => setMessage(null)} />}
         </AnimatePresence>
 
         <div className="flex items-start gap-6">
@@ -403,6 +408,7 @@ function ProfilePageContent() {
                 highlightOrderId={searchParams.get("orderId")}
               />
             )}
+            {activeTab === "wishlist" && uid && <WishlistTab />}
 
             {activeTab === "messages" && uid && (
               <MessagesPanel
@@ -415,12 +421,11 @@ function ProfilePageContent() {
 
             {activeTab === "wallet" && uid && <WalletTab />}
 
-     {/*
+            {/*
 {activeTab === "reorder" && (
   <QuickReorder orders={filteredOrders} />
 )}
 */}
-
 
             {activeTab === "profile" && (
               <UpdateProfile
@@ -436,11 +441,7 @@ function ProfilePageContent() {
             )}
 
             {activeTab === "invite" && (
-              <InviteSection
-                uid={uid}
-                inviteCount={inviteCount}
-                onError={setMessage}
-              />
+              <InviteSection uid={uid} inviteCount={inviteCount} onError={setMessage} />
             )}
           </div>
         </div>
@@ -468,7 +469,7 @@ function ProfilePageContent() {
             onOrderUpdated={(orderId, status) => {
               updateOrderStatus(orderId, status);
               setSelectedOrder((prev) =>
-                prev && prev.id === orderId ? { ...prev, status } : prev
+                prev && prev.id === orderId ? { ...prev, status } : prev,
               );
             }}
           />

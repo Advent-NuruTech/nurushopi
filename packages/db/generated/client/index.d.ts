@@ -104,6 +104,13 @@ export type OrderItem = $Result.DefaultSelection<Prisma.$OrderItemPayload>
  */
 export type Review = $Result.DefaultSelection<Prisma.$ReviewPayload>
 /**
+ * Model WishlistItem
+ * Durable purchase intent. Rows are retained when removed or purchased so
+ * customer intent and reminder outcomes remain measurable without resurrecting
+ * old reminders. reminderVersion invalidates stale outbox entries after edits.
+ */
+export type WishlistItem = $Result.DefaultSelection<Prisma.$WishlistItemPayload>
+/**
  * Model ProductView
  * 
  */
@@ -325,6 +332,15 @@ export const ReviewStatus: {
 export type ReviewStatus = (typeof ReviewStatus)[keyof typeof ReviewStatus]
 
 
+export const WishlistStatus: {
+  ACTIVE: 'ACTIVE',
+  PURCHASED: 'PURCHASED',
+  REMOVED: 'REMOVED'
+};
+
+export type WishlistStatus = (typeof WishlistStatus)[keyof typeof WishlistStatus]
+
+
 export const WalletTxType: {
   CREDIT: 'CREDIT',
   DEBIT: 'DEBIT'
@@ -488,6 +504,10 @@ export const PaymentStatus: typeof $Enums.PaymentStatus
 export type ReviewStatus = $Enums.ReviewStatus
 
 export const ReviewStatus: typeof $Enums.ReviewStatus
+
+export type WishlistStatus = $Enums.WishlistStatus
+
+export const WishlistStatus: typeof $Enums.WishlistStatus
 
 export type WalletTxType = $Enums.WalletTxType
 
@@ -846,6 +866,16 @@ export class PrismaClient<
     * ```
     */
   get review(): Prisma.ReviewDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.wishlistItem`: Exposes CRUD operations for the **WishlistItem** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more WishlistItems
+    * const wishlistItems = await prisma.wishlistItem.findMany()
+    * ```
+    */
+  get wishlistItem(): Prisma.WishlistItemDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.productView`: Exposes CRUD operations for the **ProductView** model.
@@ -1635,6 +1665,7 @@ export namespace Prisma {
     Order: 'Order',
     OrderItem: 'OrderItem',
     Review: 'Review',
+    WishlistItem: 'WishlistItem',
     ProductView: 'ProductView',
     WalletTransaction: 'WalletTransaction',
     WalletRedemption: 'WalletRedemption',
@@ -1686,7 +1717,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "oAuthAccount" | "refreshToken" | "emailVerificationToken" | "passwordResetToken" | "legacyPasswordImport" | "loginAttempt" | "admin" | "adminInvite" | "adminLog" | "category" | "product" | "banner" | "heroAnnouncement" | "wholesaleItem" | "order" | "orderItem" | "review" | "productView" | "walletTransaction" | "walletRedemption" | "referral" | "notification" | "message" | "contact" | "vendorApplication" | "vendorAccount" | "vendorInvite" | "pwaInstall" | "sabbathMessage" | "merchandisingCollection" | "collectionMembership" | "collectionOverride" | "homepageSection" | "promotion" | "promotionProduct" | "promotionRedemption" | "bundle" | "bundleItem" | "spotlightPlacement" | "commerceEvent" | "productMetricHourly" | "productMetricDaily" | "collectionMetricDaily" | "productRanking" | "userProductAffinity" | "notificationPreference" | "retentionSubscription" | "retentionTrigger" | "experiment" | "experimentAssignment"
+      modelProps: "user" | "oAuthAccount" | "refreshToken" | "emailVerificationToken" | "passwordResetToken" | "legacyPasswordImport" | "loginAttempt" | "admin" | "adminInvite" | "adminLog" | "category" | "product" | "banner" | "heroAnnouncement" | "wholesaleItem" | "order" | "orderItem" | "review" | "wishlistItem" | "productView" | "walletTransaction" | "walletRedemption" | "referral" | "notification" | "message" | "contact" | "vendorApplication" | "vendorAccount" | "vendorInvite" | "pwaInstall" | "sabbathMessage" | "merchandisingCollection" | "collectionMembership" | "collectionOverride" | "homepageSection" | "promotion" | "promotionProduct" | "promotionRedemption" | "bundle" | "bundleItem" | "spotlightPlacement" | "commerceEvent" | "productMetricHourly" | "productMetricDaily" | "collectionMetricDaily" | "productRanking" | "userProductAffinity" | "notificationPreference" | "retentionSubscription" | "retentionTrigger" | "experiment" | "experimentAssignment"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -3019,6 +3050,80 @@ export namespace Prisma {
           count: {
             args: Prisma.ReviewCountArgs<ExtArgs>
             result: $Utils.Optional<ReviewCountAggregateOutputType> | number
+          }
+        }
+      }
+      WishlistItem: {
+        payload: Prisma.$WishlistItemPayload<ExtArgs>
+        fields: Prisma.WishlistItemFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.WishlistItemFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WishlistItemPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.WishlistItemFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WishlistItemPayload>
+          }
+          findFirst: {
+            args: Prisma.WishlistItemFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WishlistItemPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.WishlistItemFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WishlistItemPayload>
+          }
+          findMany: {
+            args: Prisma.WishlistItemFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WishlistItemPayload>[]
+          }
+          create: {
+            args: Prisma.WishlistItemCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WishlistItemPayload>
+          }
+          createMany: {
+            args: Prisma.WishlistItemCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.WishlistItemCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WishlistItemPayload>[]
+          }
+          delete: {
+            args: Prisma.WishlistItemDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WishlistItemPayload>
+          }
+          update: {
+            args: Prisma.WishlistItemUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WishlistItemPayload>
+          }
+          deleteMany: {
+            args: Prisma.WishlistItemDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.WishlistItemUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.WishlistItemUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WishlistItemPayload>[]
+          }
+          upsert: {
+            args: Prisma.WishlistItemUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WishlistItemPayload>
+          }
+          aggregate: {
+            args: Prisma.WishlistItemAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateWishlistItem>
+          }
+          groupBy: {
+            args: Prisma.WishlistItemGroupByArgs<ExtArgs>
+            result: $Utils.Optional<WishlistItemGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.WishlistItemCountArgs<ExtArgs>
+            result: $Utils.Optional<WishlistItemCountAggregateOutputType> | number
           }
         }
       }
@@ -5578,6 +5683,7 @@ export namespace Prisma {
     order?: OrderOmit
     orderItem?: OrderItemOmit
     review?: ReviewOmit
+    wishlistItem?: WishlistItemOmit
     productView?: ProductViewOmit
     walletTransaction?: WalletTransactionOmit
     walletRedemption?: WalletRedemptionOmit
@@ -5712,6 +5818,7 @@ export namespace Prisma {
     experimentAssignments: number
     promotionRedemptions: number
     retentionSubscriptions: number
+    wishlistItems: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5736,6 +5843,7 @@ export namespace Prisma {
     experimentAssignments?: boolean | UserCountOutputTypeCountExperimentAssignmentsArgs
     promotionRedemptions?: boolean | UserCountOutputTypeCountPromotionRedemptionsArgs
     retentionSubscriptions?: boolean | UserCountOutputTypeCountRetentionSubscriptionsArgs
+    wishlistItems?: boolean | UserCountOutputTypeCountWishlistItemsArgs
   }
 
   // Custom InputTypes
@@ -5896,6 +6004,13 @@ export namespace Prisma {
     where?: RetentionSubscriptionWhereInput
   }
 
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountWishlistItemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: WishlistItemWhereInput
+  }
+
 
   /**
    * Count Type AdminCountOutputType
@@ -6042,6 +6157,7 @@ export namespace Prisma {
     retentionTriggers: number
     promotionRedemptions: number
     retentionSubscriptions: number
+    wishlistItems: number
   }
 
   export type ProductCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6060,6 +6176,7 @@ export namespace Prisma {
     retentionTriggers?: boolean | ProductCountOutputTypeCountRetentionTriggersArgs
     promotionRedemptions?: boolean | ProductCountOutputTypeCountPromotionRedemptionsArgs
     retentionSubscriptions?: boolean | ProductCountOutputTypeCountRetentionSubscriptionsArgs
+    wishlistItems?: boolean | ProductCountOutputTypeCountWishlistItemsArgs
   }
 
   // Custom InputTypes
@@ -6176,6 +6293,13 @@ export namespace Prisma {
    */
   export type ProductCountOutputTypeCountRetentionSubscriptionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: RetentionSubscriptionWhereInput
+  }
+
+  /**
+   * ProductCountOutputType without action
+   */
+  export type ProductCountOutputTypeCountWishlistItemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: WishlistItemWhereInput
   }
 
 
@@ -6765,6 +6889,7 @@ export namespace Prisma {
     experimentAssignments?: boolean | User$experimentAssignmentsArgs<ExtArgs>
     promotionRedemptions?: boolean | User$promotionRedemptionsArgs<ExtArgs>
     retentionSubscriptions?: boolean | User$retentionSubscriptionsArgs<ExtArgs>
+    wishlistItems?: boolean | User$wishlistItemsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -6846,6 +6971,7 @@ export namespace Prisma {
     experimentAssignments?: boolean | User$experimentAssignmentsArgs<ExtArgs>
     promotionRedemptions?: boolean | User$promotionRedemptionsArgs<ExtArgs>
     retentionSubscriptions?: boolean | User$retentionSubscriptionsArgs<ExtArgs>
+    wishlistItems?: boolean | User$wishlistItemsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6881,6 +7007,7 @@ export namespace Prisma {
       experimentAssignments: Prisma.$ExperimentAssignmentPayload<ExtArgs>[]
       promotionRedemptions: Prisma.$PromotionRedemptionPayload<ExtArgs>[]
       retentionSubscriptions: Prisma.$RetentionSubscriptionPayload<ExtArgs>[]
+      wishlistItems: Prisma.$WishlistItemPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -7314,6 +7441,7 @@ export namespace Prisma {
     experimentAssignments<T extends User$experimentAssignmentsArgs<ExtArgs> = {}>(args?: Subset<T, User$experimentAssignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExperimentAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     promotionRedemptions<T extends User$promotionRedemptionsArgs<ExtArgs> = {}>(args?: Subset<T, User$promotionRedemptionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PromotionRedemptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     retentionSubscriptions<T extends User$retentionSubscriptionsArgs<ExtArgs> = {}>(args?: Subset<T, User$retentionSubscriptionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RetentionSubscriptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    wishlistItems<T extends User$wishlistItemsArgs<ExtArgs> = {}>(args?: Subset<T, User$wishlistItemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WishlistItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -8292,6 +8420,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: RetentionSubscriptionScalarFieldEnum | RetentionSubscriptionScalarFieldEnum[]
+  }
+
+  /**
+   * User.wishlistItems
+   */
+  export type User$wishlistItemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WishlistItem
+     */
+    select?: WishlistItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WishlistItem
+     */
+    omit?: WishlistItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WishlistItemInclude<ExtArgs> | null
+    where?: WishlistItemWhereInput
+    orderBy?: WishlistItemOrderByWithRelationInput | WishlistItemOrderByWithRelationInput[]
+    cursor?: WishlistItemWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: WishlistItemScalarFieldEnum | WishlistItemScalarFieldEnum[]
   }
 
   /**
@@ -19416,6 +19568,9 @@ export namespace Prisma {
     originalPrice: Decimal | null
     sellingPrice: Decimal | null
     stock: number | null
+    lowStockThreshold: number | null
+    ratingAverage: Decimal | null
+    ratingCount: number | null
   }
 
   export type ProductSumAggregateOutputType = {
@@ -19423,20 +19578,29 @@ export namespace Prisma {
     originalPrice: Decimal | null
     sellingPrice: Decimal | null
     stock: number | null
+    lowStockThreshold: number | null
+    ratingAverage: Decimal | null
+    ratingCount: number | null
   }
 
   export type ProductMinAggregateOutputType = {
     id: string | null
     name: string | null
     slug: string | null
+    sku: string | null
+    brandName: string | null
+    storeName: string | null
     description: string | null
     shortDescription: string | null
     price: Decimal | null
     originalPrice: Decimal | null
     sellingPrice: Decimal | null
     stock: number | null
+    lowStockThreshold: number | null
     isActive: boolean | null
     isFeatured: boolean | null
+    ratingAverage: Decimal | null
+    ratingCount: number | null
     categoryId: string | null
     createdById: string | null
     createdAt: Date | null
@@ -19447,14 +19611,20 @@ export namespace Prisma {
     id: string | null
     name: string | null
     slug: string | null
+    sku: string | null
+    brandName: string | null
+    storeName: string | null
     description: string | null
     shortDescription: string | null
     price: Decimal | null
     originalPrice: Decimal | null
     sellingPrice: Decimal | null
     stock: number | null
+    lowStockThreshold: number | null
     isActive: boolean | null
     isFeatured: boolean | null
+    ratingAverage: Decimal | null
+    ratingCount: number | null
     categoryId: string | null
     createdById: string | null
     createdAt: Date | null
@@ -19465,6 +19635,9 @@ export namespace Prisma {
     id: number
     name: number
     slug: number
+    sku: number
+    brandName: number
+    storeName: number
     description: number
     shortDescription: number
     price: number
@@ -19472,8 +19645,12 @@ export namespace Prisma {
     sellingPrice: number
     images: number
     stock: number
+    lowStockThreshold: number
     isActive: number
     isFeatured: number
+    ratingAverage: number
+    ratingCount: number
+    ratingDistribution: number
     categoryId: number
     createdById: number
     createdAt: number
@@ -19487,6 +19664,9 @@ export namespace Prisma {
     originalPrice?: true
     sellingPrice?: true
     stock?: true
+    lowStockThreshold?: true
+    ratingAverage?: true
+    ratingCount?: true
   }
 
   export type ProductSumAggregateInputType = {
@@ -19494,20 +19674,29 @@ export namespace Prisma {
     originalPrice?: true
     sellingPrice?: true
     stock?: true
+    lowStockThreshold?: true
+    ratingAverage?: true
+    ratingCount?: true
   }
 
   export type ProductMinAggregateInputType = {
     id?: true
     name?: true
     slug?: true
+    sku?: true
+    brandName?: true
+    storeName?: true
     description?: true
     shortDescription?: true
     price?: true
     originalPrice?: true
     sellingPrice?: true
     stock?: true
+    lowStockThreshold?: true
     isActive?: true
     isFeatured?: true
+    ratingAverage?: true
+    ratingCount?: true
     categoryId?: true
     createdById?: true
     createdAt?: true
@@ -19518,14 +19707,20 @@ export namespace Prisma {
     id?: true
     name?: true
     slug?: true
+    sku?: true
+    brandName?: true
+    storeName?: true
     description?: true
     shortDescription?: true
     price?: true
     originalPrice?: true
     sellingPrice?: true
     stock?: true
+    lowStockThreshold?: true
     isActive?: true
     isFeatured?: true
+    ratingAverage?: true
+    ratingCount?: true
     categoryId?: true
     createdById?: true
     createdAt?: true
@@ -19536,6 +19731,9 @@ export namespace Prisma {
     id?: true
     name?: true
     slug?: true
+    sku?: true
+    brandName?: true
+    storeName?: true
     description?: true
     shortDescription?: true
     price?: true
@@ -19543,8 +19741,12 @@ export namespace Prisma {
     sellingPrice?: true
     images?: true
     stock?: true
+    lowStockThreshold?: true
     isActive?: true
     isFeatured?: true
+    ratingAverage?: true
+    ratingCount?: true
+    ratingDistribution?: true
     categoryId?: true
     createdById?: true
     createdAt?: true
@@ -19642,6 +19844,9 @@ export namespace Prisma {
     id: string
     name: string
     slug: string | null
+    sku: string | null
+    brandName: string | null
+    storeName: string | null
     description: string | null
     shortDescription: string | null
     price: Decimal
@@ -19649,8 +19854,12 @@ export namespace Prisma {
     sellingPrice: Decimal | null
     images: string[]
     stock: number
+    lowStockThreshold: number
     isActive: boolean
     isFeatured: boolean
+    ratingAverage: Decimal
+    ratingCount: number
+    ratingDistribution: JsonValue | null
     categoryId: string | null
     createdById: string | null
     createdAt: Date
@@ -19680,6 +19889,9 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     slug?: boolean
+    sku?: boolean
+    brandName?: boolean
+    storeName?: boolean
     description?: boolean
     shortDescription?: boolean
     price?: boolean
@@ -19687,8 +19899,12 @@ export namespace Prisma {
     sellingPrice?: boolean
     images?: boolean
     stock?: boolean
+    lowStockThreshold?: boolean
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: boolean
+    ratingCount?: boolean
+    ratingDistribution?: boolean
     categoryId?: boolean
     createdById?: boolean
     createdAt?: boolean
@@ -19710,6 +19926,7 @@ export namespace Prisma {
     retentionTriggers?: boolean | Product$retentionTriggersArgs<ExtArgs>
     promotionRedemptions?: boolean | Product$promotionRedemptionsArgs<ExtArgs>
     retentionSubscriptions?: boolean | Product$retentionSubscriptionsArgs<ExtArgs>
+    wishlistItems?: boolean | Product$wishlistItemsArgs<ExtArgs>
     _count?: boolean | ProductCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["product"]>
 
@@ -19717,6 +19934,9 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     slug?: boolean
+    sku?: boolean
+    brandName?: boolean
+    storeName?: boolean
     description?: boolean
     shortDescription?: boolean
     price?: boolean
@@ -19724,8 +19944,12 @@ export namespace Prisma {
     sellingPrice?: boolean
     images?: boolean
     stock?: boolean
+    lowStockThreshold?: boolean
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: boolean
+    ratingCount?: boolean
+    ratingDistribution?: boolean
     categoryId?: boolean
     createdById?: boolean
     createdAt?: boolean
@@ -19738,6 +19962,9 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     slug?: boolean
+    sku?: boolean
+    brandName?: boolean
+    storeName?: boolean
     description?: boolean
     shortDescription?: boolean
     price?: boolean
@@ -19745,8 +19972,12 @@ export namespace Prisma {
     sellingPrice?: boolean
     images?: boolean
     stock?: boolean
+    lowStockThreshold?: boolean
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: boolean
+    ratingCount?: boolean
+    ratingDistribution?: boolean
     categoryId?: boolean
     createdById?: boolean
     createdAt?: boolean
@@ -19759,6 +19990,9 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     slug?: boolean
+    sku?: boolean
+    brandName?: boolean
+    storeName?: boolean
     description?: boolean
     shortDescription?: boolean
     price?: boolean
@@ -19766,15 +20000,19 @@ export namespace Prisma {
     sellingPrice?: boolean
     images?: boolean
     stock?: boolean
+    lowStockThreshold?: boolean
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: boolean
+    ratingCount?: boolean
+    ratingDistribution?: boolean
     categoryId?: boolean
     createdById?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "description" | "shortDescription" | "price" | "originalPrice" | "sellingPrice" | "images" | "stock" | "isActive" | "isFeatured" | "categoryId" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["product"]>
+  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "sku" | "brandName" | "storeName" | "description" | "shortDescription" | "price" | "originalPrice" | "sellingPrice" | "images" | "stock" | "lowStockThreshold" | "isActive" | "isFeatured" | "ratingAverage" | "ratingCount" | "ratingDistribution" | "categoryId" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["product"]>
   export type ProductInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     category?: boolean | Product$categoryArgs<ExtArgs>
     createdBy?: boolean | Product$createdByArgs<ExtArgs>
@@ -19793,6 +20031,7 @@ export namespace Prisma {
     retentionTriggers?: boolean | Product$retentionTriggersArgs<ExtArgs>
     promotionRedemptions?: boolean | Product$promotionRedemptionsArgs<ExtArgs>
     retentionSubscriptions?: boolean | Product$retentionSubscriptionsArgs<ExtArgs>
+    wishlistItems?: boolean | Product$wishlistItemsArgs<ExtArgs>
     _count?: boolean | ProductCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ProductIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -19824,11 +20063,15 @@ export namespace Prisma {
       retentionTriggers: Prisma.$RetentionTriggerPayload<ExtArgs>[]
       promotionRedemptions: Prisma.$PromotionRedemptionPayload<ExtArgs>[]
       retentionSubscriptions: Prisma.$RetentionSubscriptionPayload<ExtArgs>[]
+      wishlistItems: Prisma.$WishlistItemPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       name: string
       slug: string | null
+      sku: string | null
+      brandName: string | null
+      storeName: string | null
       description: string | null
       shortDescription: string | null
       price: Prisma.Decimal
@@ -19836,8 +20079,12 @@ export namespace Prisma {
       sellingPrice: Prisma.Decimal | null
       images: string[]
       stock: number
+      lowStockThreshold: number
       isActive: boolean
       isFeatured: boolean
+      ratingAverage: Prisma.Decimal
+      ratingCount: number
+      ratingDistribution: Prisma.JsonValue | null
       categoryId: string | null
       createdById: string | null
       createdAt: Date
@@ -20253,6 +20500,7 @@ export namespace Prisma {
     retentionTriggers<T extends Product$retentionTriggersArgs<ExtArgs> = {}>(args?: Subset<T, Product$retentionTriggersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RetentionTriggerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     promotionRedemptions<T extends Product$promotionRedemptionsArgs<ExtArgs> = {}>(args?: Subset<T, Product$promotionRedemptionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PromotionRedemptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     retentionSubscriptions<T extends Product$retentionSubscriptionsArgs<ExtArgs> = {}>(args?: Subset<T, Product$retentionSubscriptionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RetentionSubscriptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    wishlistItems<T extends Product$wishlistItemsArgs<ExtArgs> = {}>(args?: Subset<T, Product$wishlistItemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WishlistItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -20285,6 +20533,9 @@ export namespace Prisma {
     readonly id: FieldRef<"Product", 'String'>
     readonly name: FieldRef<"Product", 'String'>
     readonly slug: FieldRef<"Product", 'String'>
+    readonly sku: FieldRef<"Product", 'String'>
+    readonly brandName: FieldRef<"Product", 'String'>
+    readonly storeName: FieldRef<"Product", 'String'>
     readonly description: FieldRef<"Product", 'String'>
     readonly shortDescription: FieldRef<"Product", 'String'>
     readonly price: FieldRef<"Product", 'Decimal'>
@@ -20292,8 +20543,12 @@ export namespace Prisma {
     readonly sellingPrice: FieldRef<"Product", 'Decimal'>
     readonly images: FieldRef<"Product", 'String[]'>
     readonly stock: FieldRef<"Product", 'Int'>
+    readonly lowStockThreshold: FieldRef<"Product", 'Int'>
     readonly isActive: FieldRef<"Product", 'Boolean'>
     readonly isFeatured: FieldRef<"Product", 'Boolean'>
+    readonly ratingAverage: FieldRef<"Product", 'Decimal'>
+    readonly ratingCount: FieldRef<"Product", 'Int'>
+    readonly ratingDistribution: FieldRef<"Product", 'Json'>
     readonly categoryId: FieldRef<"Product", 'String'>
     readonly createdById: FieldRef<"Product", 'String'>
     readonly createdAt: FieldRef<"Product", 'DateTime'>
@@ -21089,6 +21344,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: RetentionSubscriptionScalarFieldEnum | RetentionSubscriptionScalarFieldEnum[]
+  }
+
+  /**
+   * Product.wishlistItems
+   */
+  export type Product$wishlistItemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WishlistItem
+     */
+    select?: WishlistItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WishlistItem
+     */
+    omit?: WishlistItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WishlistItemInclude<ExtArgs> | null
+    where?: WishlistItemWhereInput
+    orderBy?: WishlistItemOrderByWithRelationInput | WishlistItemOrderByWithRelationInput[]
+    cursor?: WishlistItemWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: WishlistItemScalarFieldEnum | WishlistItemScalarFieldEnum[]
   }
 
   /**
@@ -27996,6 +28275,1223 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: ReviewInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model WishlistItem
+   */
+
+  export type AggregateWishlistItem = {
+    _count: WishlistItemCountAggregateOutputType | null
+    _avg: WishlistItemAvgAggregateOutputType | null
+    _sum: WishlistItemSumAggregateOutputType | null
+    _min: WishlistItemMinAggregateOutputType | null
+    _max: WishlistItemMaxAggregateOutputType | null
+  }
+
+  export type WishlistItemAvgAggregateOutputType = {
+    reminderVersion: number | null
+  }
+
+  export type WishlistItemSumAggregateOutputType = {
+    reminderVersion: number | null
+  }
+
+  export type WishlistItemMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    productId: string | null
+    status: $Enums.WishlistStatus | null
+    plannedPurchaseAt: Date | null
+    remindersEnabled: boolean | null
+    reminderTimezone: string | null
+    reminderVersion: number | null
+    preReminderSentAt: Date | null
+    followupReminderSentAt: Date | null
+    purchasedAt: Date | null
+    removedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type WishlistItemMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    productId: string | null
+    status: $Enums.WishlistStatus | null
+    plannedPurchaseAt: Date | null
+    remindersEnabled: boolean | null
+    reminderTimezone: string | null
+    reminderVersion: number | null
+    preReminderSentAt: Date | null
+    followupReminderSentAt: Date | null
+    purchasedAt: Date | null
+    removedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type WishlistItemCountAggregateOutputType = {
+    id: number
+    userId: number
+    productId: number
+    status: number
+    plannedPurchaseAt: number
+    remindersEnabled: number
+    reminderTimezone: number
+    reminderVersion: number
+    preReminderSentAt: number
+    followupReminderSentAt: number
+    purchasedAt: number
+    removedAt: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type WishlistItemAvgAggregateInputType = {
+    reminderVersion?: true
+  }
+
+  export type WishlistItemSumAggregateInputType = {
+    reminderVersion?: true
+  }
+
+  export type WishlistItemMinAggregateInputType = {
+    id?: true
+    userId?: true
+    productId?: true
+    status?: true
+    plannedPurchaseAt?: true
+    remindersEnabled?: true
+    reminderTimezone?: true
+    reminderVersion?: true
+    preReminderSentAt?: true
+    followupReminderSentAt?: true
+    purchasedAt?: true
+    removedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type WishlistItemMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    productId?: true
+    status?: true
+    plannedPurchaseAt?: true
+    remindersEnabled?: true
+    reminderTimezone?: true
+    reminderVersion?: true
+    preReminderSentAt?: true
+    followupReminderSentAt?: true
+    purchasedAt?: true
+    removedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type WishlistItemCountAggregateInputType = {
+    id?: true
+    userId?: true
+    productId?: true
+    status?: true
+    plannedPurchaseAt?: true
+    remindersEnabled?: true
+    reminderTimezone?: true
+    reminderVersion?: true
+    preReminderSentAt?: true
+    followupReminderSentAt?: true
+    purchasedAt?: true
+    removedAt?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type WishlistItemAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which WishlistItem to aggregate.
+     */
+    where?: WishlistItemWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of WishlistItems to fetch.
+     */
+    orderBy?: WishlistItemOrderByWithRelationInput | WishlistItemOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: WishlistItemWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` WishlistItems from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` WishlistItems.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned WishlistItems
+    **/
+    _count?: true | WishlistItemCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: WishlistItemAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: WishlistItemSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: WishlistItemMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: WishlistItemMaxAggregateInputType
+  }
+
+  export type GetWishlistItemAggregateType<T extends WishlistItemAggregateArgs> = {
+        [P in keyof T & keyof AggregateWishlistItem]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateWishlistItem[P]>
+      : GetScalarType<T[P], AggregateWishlistItem[P]>
+  }
+
+
+
+
+  export type WishlistItemGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: WishlistItemWhereInput
+    orderBy?: WishlistItemOrderByWithAggregationInput | WishlistItemOrderByWithAggregationInput[]
+    by: WishlistItemScalarFieldEnum[] | WishlistItemScalarFieldEnum
+    having?: WishlistItemScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: WishlistItemCountAggregateInputType | true
+    _avg?: WishlistItemAvgAggregateInputType
+    _sum?: WishlistItemSumAggregateInputType
+    _min?: WishlistItemMinAggregateInputType
+    _max?: WishlistItemMaxAggregateInputType
+  }
+
+  export type WishlistItemGroupByOutputType = {
+    id: string
+    userId: string
+    productId: string
+    status: $Enums.WishlistStatus
+    plannedPurchaseAt: Date | null
+    remindersEnabled: boolean
+    reminderTimezone: string | null
+    reminderVersion: number
+    preReminderSentAt: Date | null
+    followupReminderSentAt: Date | null
+    purchasedAt: Date | null
+    removedAt: Date | null
+    createdAt: Date
+    updatedAt: Date
+    _count: WishlistItemCountAggregateOutputType | null
+    _avg: WishlistItemAvgAggregateOutputType | null
+    _sum: WishlistItemSumAggregateOutputType | null
+    _min: WishlistItemMinAggregateOutputType | null
+    _max: WishlistItemMaxAggregateOutputType | null
+  }
+
+  type GetWishlistItemGroupByPayload<T extends WishlistItemGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<WishlistItemGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof WishlistItemGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], WishlistItemGroupByOutputType[P]>
+            : GetScalarType<T[P], WishlistItemGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type WishlistItemSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    productId?: boolean
+    status?: boolean
+    plannedPurchaseAt?: boolean
+    remindersEnabled?: boolean
+    reminderTimezone?: boolean
+    reminderVersion?: boolean
+    preReminderSentAt?: boolean
+    followupReminderSentAt?: boolean
+    purchasedAt?: boolean
+    removedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    product?: boolean | ProductDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["wishlistItem"]>
+
+  export type WishlistItemSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    productId?: boolean
+    status?: boolean
+    plannedPurchaseAt?: boolean
+    remindersEnabled?: boolean
+    reminderTimezone?: boolean
+    reminderVersion?: boolean
+    preReminderSentAt?: boolean
+    followupReminderSentAt?: boolean
+    purchasedAt?: boolean
+    removedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    product?: boolean | ProductDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["wishlistItem"]>
+
+  export type WishlistItemSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    productId?: boolean
+    status?: boolean
+    plannedPurchaseAt?: boolean
+    remindersEnabled?: boolean
+    reminderTimezone?: boolean
+    reminderVersion?: boolean
+    preReminderSentAt?: boolean
+    followupReminderSentAt?: boolean
+    purchasedAt?: boolean
+    removedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    product?: boolean | ProductDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["wishlistItem"]>
+
+  export type WishlistItemSelectScalar = {
+    id?: boolean
+    userId?: boolean
+    productId?: boolean
+    status?: boolean
+    plannedPurchaseAt?: boolean
+    remindersEnabled?: boolean
+    reminderTimezone?: boolean
+    reminderVersion?: boolean
+    preReminderSentAt?: boolean
+    followupReminderSentAt?: boolean
+    purchasedAt?: boolean
+    removedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type WishlistItemOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "productId" | "status" | "plannedPurchaseAt" | "remindersEnabled" | "reminderTimezone" | "reminderVersion" | "preReminderSentAt" | "followupReminderSentAt" | "purchasedAt" | "removedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["wishlistItem"]>
+  export type WishlistItemInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    product?: boolean | ProductDefaultArgs<ExtArgs>
+  }
+  export type WishlistItemIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    product?: boolean | ProductDefaultArgs<ExtArgs>
+  }
+  export type WishlistItemIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    product?: boolean | ProductDefaultArgs<ExtArgs>
+  }
+
+  export type $WishlistItemPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "WishlistItem"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+      product: Prisma.$ProductPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      productId: string
+      status: $Enums.WishlistStatus
+      plannedPurchaseAt: Date | null
+      remindersEnabled: boolean
+      reminderTimezone: string | null
+      reminderVersion: number
+      preReminderSentAt: Date | null
+      followupReminderSentAt: Date | null
+      purchasedAt: Date | null
+      removedAt: Date | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["wishlistItem"]>
+    composites: {}
+  }
+
+  type WishlistItemGetPayload<S extends boolean | null | undefined | WishlistItemDefaultArgs> = $Result.GetResult<Prisma.$WishlistItemPayload, S>
+
+  type WishlistItemCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<WishlistItemFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: WishlistItemCountAggregateInputType | true
+    }
+
+  export interface WishlistItemDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['WishlistItem'], meta: { name: 'WishlistItem' } }
+    /**
+     * Find zero or one WishlistItem that matches the filter.
+     * @param {WishlistItemFindUniqueArgs} args - Arguments to find a WishlistItem
+     * @example
+     * // Get one WishlistItem
+     * const wishlistItem = await prisma.wishlistItem.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends WishlistItemFindUniqueArgs>(args: SelectSubset<T, WishlistItemFindUniqueArgs<ExtArgs>>): Prisma__WishlistItemClient<$Result.GetResult<Prisma.$WishlistItemPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one WishlistItem that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {WishlistItemFindUniqueOrThrowArgs} args - Arguments to find a WishlistItem
+     * @example
+     * // Get one WishlistItem
+     * const wishlistItem = await prisma.wishlistItem.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends WishlistItemFindUniqueOrThrowArgs>(args: SelectSubset<T, WishlistItemFindUniqueOrThrowArgs<ExtArgs>>): Prisma__WishlistItemClient<$Result.GetResult<Prisma.$WishlistItemPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first WishlistItem that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WishlistItemFindFirstArgs} args - Arguments to find a WishlistItem
+     * @example
+     * // Get one WishlistItem
+     * const wishlistItem = await prisma.wishlistItem.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends WishlistItemFindFirstArgs>(args?: SelectSubset<T, WishlistItemFindFirstArgs<ExtArgs>>): Prisma__WishlistItemClient<$Result.GetResult<Prisma.$WishlistItemPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first WishlistItem that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WishlistItemFindFirstOrThrowArgs} args - Arguments to find a WishlistItem
+     * @example
+     * // Get one WishlistItem
+     * const wishlistItem = await prisma.wishlistItem.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends WishlistItemFindFirstOrThrowArgs>(args?: SelectSubset<T, WishlistItemFindFirstOrThrowArgs<ExtArgs>>): Prisma__WishlistItemClient<$Result.GetResult<Prisma.$WishlistItemPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more WishlistItems that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WishlistItemFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all WishlistItems
+     * const wishlistItems = await prisma.wishlistItem.findMany()
+     * 
+     * // Get first 10 WishlistItems
+     * const wishlistItems = await prisma.wishlistItem.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const wishlistItemWithIdOnly = await prisma.wishlistItem.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends WishlistItemFindManyArgs>(args?: SelectSubset<T, WishlistItemFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WishlistItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a WishlistItem.
+     * @param {WishlistItemCreateArgs} args - Arguments to create a WishlistItem.
+     * @example
+     * // Create one WishlistItem
+     * const WishlistItem = await prisma.wishlistItem.create({
+     *   data: {
+     *     // ... data to create a WishlistItem
+     *   }
+     * })
+     * 
+     */
+    create<T extends WishlistItemCreateArgs>(args: SelectSubset<T, WishlistItemCreateArgs<ExtArgs>>): Prisma__WishlistItemClient<$Result.GetResult<Prisma.$WishlistItemPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many WishlistItems.
+     * @param {WishlistItemCreateManyArgs} args - Arguments to create many WishlistItems.
+     * @example
+     * // Create many WishlistItems
+     * const wishlistItem = await prisma.wishlistItem.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends WishlistItemCreateManyArgs>(args?: SelectSubset<T, WishlistItemCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many WishlistItems and returns the data saved in the database.
+     * @param {WishlistItemCreateManyAndReturnArgs} args - Arguments to create many WishlistItems.
+     * @example
+     * // Create many WishlistItems
+     * const wishlistItem = await prisma.wishlistItem.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many WishlistItems and only return the `id`
+     * const wishlistItemWithIdOnly = await prisma.wishlistItem.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends WishlistItemCreateManyAndReturnArgs>(args?: SelectSubset<T, WishlistItemCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WishlistItemPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a WishlistItem.
+     * @param {WishlistItemDeleteArgs} args - Arguments to delete one WishlistItem.
+     * @example
+     * // Delete one WishlistItem
+     * const WishlistItem = await prisma.wishlistItem.delete({
+     *   where: {
+     *     // ... filter to delete one WishlistItem
+     *   }
+     * })
+     * 
+     */
+    delete<T extends WishlistItemDeleteArgs>(args: SelectSubset<T, WishlistItemDeleteArgs<ExtArgs>>): Prisma__WishlistItemClient<$Result.GetResult<Prisma.$WishlistItemPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one WishlistItem.
+     * @param {WishlistItemUpdateArgs} args - Arguments to update one WishlistItem.
+     * @example
+     * // Update one WishlistItem
+     * const wishlistItem = await prisma.wishlistItem.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends WishlistItemUpdateArgs>(args: SelectSubset<T, WishlistItemUpdateArgs<ExtArgs>>): Prisma__WishlistItemClient<$Result.GetResult<Prisma.$WishlistItemPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more WishlistItems.
+     * @param {WishlistItemDeleteManyArgs} args - Arguments to filter WishlistItems to delete.
+     * @example
+     * // Delete a few WishlistItems
+     * const { count } = await prisma.wishlistItem.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends WishlistItemDeleteManyArgs>(args?: SelectSubset<T, WishlistItemDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more WishlistItems.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WishlistItemUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many WishlistItems
+     * const wishlistItem = await prisma.wishlistItem.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends WishlistItemUpdateManyArgs>(args: SelectSubset<T, WishlistItemUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more WishlistItems and returns the data updated in the database.
+     * @param {WishlistItemUpdateManyAndReturnArgs} args - Arguments to update many WishlistItems.
+     * @example
+     * // Update many WishlistItems
+     * const wishlistItem = await prisma.wishlistItem.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more WishlistItems and only return the `id`
+     * const wishlistItemWithIdOnly = await prisma.wishlistItem.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends WishlistItemUpdateManyAndReturnArgs>(args: SelectSubset<T, WishlistItemUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WishlistItemPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one WishlistItem.
+     * @param {WishlistItemUpsertArgs} args - Arguments to update or create a WishlistItem.
+     * @example
+     * // Update or create a WishlistItem
+     * const wishlistItem = await prisma.wishlistItem.upsert({
+     *   create: {
+     *     // ... data to create a WishlistItem
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the WishlistItem we want to update
+     *   }
+     * })
+     */
+    upsert<T extends WishlistItemUpsertArgs>(args: SelectSubset<T, WishlistItemUpsertArgs<ExtArgs>>): Prisma__WishlistItemClient<$Result.GetResult<Prisma.$WishlistItemPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of WishlistItems.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WishlistItemCountArgs} args - Arguments to filter WishlistItems to count.
+     * @example
+     * // Count the number of WishlistItems
+     * const count = await prisma.wishlistItem.count({
+     *   where: {
+     *     // ... the filter for the WishlistItems we want to count
+     *   }
+     * })
+    **/
+    count<T extends WishlistItemCountArgs>(
+      args?: Subset<T, WishlistItemCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], WishlistItemCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a WishlistItem.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WishlistItemAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends WishlistItemAggregateArgs>(args: Subset<T, WishlistItemAggregateArgs>): Prisma.PrismaPromise<GetWishlistItemAggregateType<T>>
+
+    /**
+     * Group by WishlistItem.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WishlistItemGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends WishlistItemGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: WishlistItemGroupByArgs['orderBy'] }
+        : { orderBy?: WishlistItemGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, WishlistItemGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetWishlistItemGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the WishlistItem model
+   */
+  readonly fields: WishlistItemFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for WishlistItem.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__WishlistItemClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    product<T extends ProductDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ProductDefaultArgs<ExtArgs>>): Prisma__ProductClient<$Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the WishlistItem model
+   */
+  interface WishlistItemFieldRefs {
+    readonly id: FieldRef<"WishlistItem", 'String'>
+    readonly userId: FieldRef<"WishlistItem", 'String'>
+    readonly productId: FieldRef<"WishlistItem", 'String'>
+    readonly status: FieldRef<"WishlistItem", 'WishlistStatus'>
+    readonly plannedPurchaseAt: FieldRef<"WishlistItem", 'DateTime'>
+    readonly remindersEnabled: FieldRef<"WishlistItem", 'Boolean'>
+    readonly reminderTimezone: FieldRef<"WishlistItem", 'String'>
+    readonly reminderVersion: FieldRef<"WishlistItem", 'Int'>
+    readonly preReminderSentAt: FieldRef<"WishlistItem", 'DateTime'>
+    readonly followupReminderSentAt: FieldRef<"WishlistItem", 'DateTime'>
+    readonly purchasedAt: FieldRef<"WishlistItem", 'DateTime'>
+    readonly removedAt: FieldRef<"WishlistItem", 'DateTime'>
+    readonly createdAt: FieldRef<"WishlistItem", 'DateTime'>
+    readonly updatedAt: FieldRef<"WishlistItem", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * WishlistItem findUnique
+   */
+  export type WishlistItemFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WishlistItem
+     */
+    select?: WishlistItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WishlistItem
+     */
+    omit?: WishlistItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WishlistItemInclude<ExtArgs> | null
+    /**
+     * Filter, which WishlistItem to fetch.
+     */
+    where: WishlistItemWhereUniqueInput
+  }
+
+  /**
+   * WishlistItem findUniqueOrThrow
+   */
+  export type WishlistItemFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WishlistItem
+     */
+    select?: WishlistItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WishlistItem
+     */
+    omit?: WishlistItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WishlistItemInclude<ExtArgs> | null
+    /**
+     * Filter, which WishlistItem to fetch.
+     */
+    where: WishlistItemWhereUniqueInput
+  }
+
+  /**
+   * WishlistItem findFirst
+   */
+  export type WishlistItemFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WishlistItem
+     */
+    select?: WishlistItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WishlistItem
+     */
+    omit?: WishlistItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WishlistItemInclude<ExtArgs> | null
+    /**
+     * Filter, which WishlistItem to fetch.
+     */
+    where?: WishlistItemWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of WishlistItems to fetch.
+     */
+    orderBy?: WishlistItemOrderByWithRelationInput | WishlistItemOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for WishlistItems.
+     */
+    cursor?: WishlistItemWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` WishlistItems from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` WishlistItems.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of WishlistItems.
+     */
+    distinct?: WishlistItemScalarFieldEnum | WishlistItemScalarFieldEnum[]
+  }
+
+  /**
+   * WishlistItem findFirstOrThrow
+   */
+  export type WishlistItemFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WishlistItem
+     */
+    select?: WishlistItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WishlistItem
+     */
+    omit?: WishlistItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WishlistItemInclude<ExtArgs> | null
+    /**
+     * Filter, which WishlistItem to fetch.
+     */
+    where?: WishlistItemWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of WishlistItems to fetch.
+     */
+    orderBy?: WishlistItemOrderByWithRelationInput | WishlistItemOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for WishlistItems.
+     */
+    cursor?: WishlistItemWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` WishlistItems from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` WishlistItems.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of WishlistItems.
+     */
+    distinct?: WishlistItemScalarFieldEnum | WishlistItemScalarFieldEnum[]
+  }
+
+  /**
+   * WishlistItem findMany
+   */
+  export type WishlistItemFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WishlistItem
+     */
+    select?: WishlistItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WishlistItem
+     */
+    omit?: WishlistItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WishlistItemInclude<ExtArgs> | null
+    /**
+     * Filter, which WishlistItems to fetch.
+     */
+    where?: WishlistItemWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of WishlistItems to fetch.
+     */
+    orderBy?: WishlistItemOrderByWithRelationInput | WishlistItemOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing WishlistItems.
+     */
+    cursor?: WishlistItemWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` WishlistItems from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` WishlistItems.
+     */
+    skip?: number
+    distinct?: WishlistItemScalarFieldEnum | WishlistItemScalarFieldEnum[]
+  }
+
+  /**
+   * WishlistItem create
+   */
+  export type WishlistItemCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WishlistItem
+     */
+    select?: WishlistItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WishlistItem
+     */
+    omit?: WishlistItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WishlistItemInclude<ExtArgs> | null
+    /**
+     * The data needed to create a WishlistItem.
+     */
+    data: XOR<WishlistItemCreateInput, WishlistItemUncheckedCreateInput>
+  }
+
+  /**
+   * WishlistItem createMany
+   */
+  export type WishlistItemCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many WishlistItems.
+     */
+    data: WishlistItemCreateManyInput | WishlistItemCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * WishlistItem createManyAndReturn
+   */
+  export type WishlistItemCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WishlistItem
+     */
+    select?: WishlistItemSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the WishlistItem
+     */
+    omit?: WishlistItemOmit<ExtArgs> | null
+    /**
+     * The data used to create many WishlistItems.
+     */
+    data: WishlistItemCreateManyInput | WishlistItemCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WishlistItemIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * WishlistItem update
+   */
+  export type WishlistItemUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WishlistItem
+     */
+    select?: WishlistItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WishlistItem
+     */
+    omit?: WishlistItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WishlistItemInclude<ExtArgs> | null
+    /**
+     * The data needed to update a WishlistItem.
+     */
+    data: XOR<WishlistItemUpdateInput, WishlistItemUncheckedUpdateInput>
+    /**
+     * Choose, which WishlistItem to update.
+     */
+    where: WishlistItemWhereUniqueInput
+  }
+
+  /**
+   * WishlistItem updateMany
+   */
+  export type WishlistItemUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update WishlistItems.
+     */
+    data: XOR<WishlistItemUpdateManyMutationInput, WishlistItemUncheckedUpdateManyInput>
+    /**
+     * Filter which WishlistItems to update
+     */
+    where?: WishlistItemWhereInput
+    /**
+     * Limit how many WishlistItems to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * WishlistItem updateManyAndReturn
+   */
+  export type WishlistItemUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WishlistItem
+     */
+    select?: WishlistItemSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the WishlistItem
+     */
+    omit?: WishlistItemOmit<ExtArgs> | null
+    /**
+     * The data used to update WishlistItems.
+     */
+    data: XOR<WishlistItemUpdateManyMutationInput, WishlistItemUncheckedUpdateManyInput>
+    /**
+     * Filter which WishlistItems to update
+     */
+    where?: WishlistItemWhereInput
+    /**
+     * Limit how many WishlistItems to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WishlistItemIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * WishlistItem upsert
+   */
+  export type WishlistItemUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WishlistItem
+     */
+    select?: WishlistItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WishlistItem
+     */
+    omit?: WishlistItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WishlistItemInclude<ExtArgs> | null
+    /**
+     * The filter to search for the WishlistItem to update in case it exists.
+     */
+    where: WishlistItemWhereUniqueInput
+    /**
+     * In case the WishlistItem found by the `where` argument doesn't exist, create a new WishlistItem with this data.
+     */
+    create: XOR<WishlistItemCreateInput, WishlistItemUncheckedCreateInput>
+    /**
+     * In case the WishlistItem was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<WishlistItemUpdateInput, WishlistItemUncheckedUpdateInput>
+  }
+
+  /**
+   * WishlistItem delete
+   */
+  export type WishlistItemDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WishlistItem
+     */
+    select?: WishlistItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WishlistItem
+     */
+    omit?: WishlistItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WishlistItemInclude<ExtArgs> | null
+    /**
+     * Filter which WishlistItem to delete.
+     */
+    where: WishlistItemWhereUniqueInput
+  }
+
+  /**
+   * WishlistItem deleteMany
+   */
+  export type WishlistItemDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which WishlistItems to delete
+     */
+    where?: WishlistItemWhereInput
+    /**
+     * Limit how many WishlistItems to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * WishlistItem without action
+   */
+  export type WishlistItemDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WishlistItem
+     */
+    select?: WishlistItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WishlistItem
+     */
+    omit?: WishlistItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WishlistItemInclude<ExtArgs> | null
   }
 
 
@@ -67158,6 +68654,9 @@ export namespace Prisma {
     id: 'id',
     name: 'name',
     slug: 'slug',
+    sku: 'sku',
+    brandName: 'brandName',
+    storeName: 'storeName',
     description: 'description',
     shortDescription: 'shortDescription',
     price: 'price',
@@ -67165,8 +68664,12 @@ export namespace Prisma {
     sellingPrice: 'sellingPrice',
     images: 'images',
     stock: 'stock',
+    lowStockThreshold: 'lowStockThreshold',
     isActive: 'isActive',
     isFeatured: 'isFeatured',
+    ratingAverage: 'ratingAverage',
+    ratingCount: 'ratingCount',
+    ratingDistribution: 'ratingDistribution',
     categoryId: 'categoryId',
     createdById: 'createdById',
     createdAt: 'createdAt',
@@ -67270,6 +68773,26 @@ export namespace Prisma {
   };
 
   export type ReviewScalarFieldEnum = (typeof ReviewScalarFieldEnum)[keyof typeof ReviewScalarFieldEnum]
+
+
+  export const WishlistItemScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    productId: 'productId',
+    status: 'status',
+    plannedPurchaseAt: 'plannedPurchaseAt',
+    remindersEnabled: 'remindersEnabled',
+    reminderTimezone: 'reminderTimezone',
+    reminderVersion: 'reminderVersion',
+    preReminderSentAt: 'preReminderSentAt',
+    followupReminderSentAt: 'followupReminderSentAt',
+    purchasedAt: 'purchasedAt',
+    removedAt: 'removedAt',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type WishlistItemScalarFieldEnum = (typeof WishlistItemScalarFieldEnum)[keyof typeof WishlistItemScalarFieldEnum]
 
 
   export const ProductViewScalarFieldEnum: {
@@ -68038,6 +69561,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'WishlistStatus'
+   */
+  export type EnumWishlistStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'WishlistStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'WishlistStatus[]'
+   */
+  export type ListEnumWishlistStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'WishlistStatus[]'>
+    
+
+
+  /**
    * Reference to a field of type 'WalletTxType'
    */
   export type EnumWalletTxTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'WalletTxType'>
@@ -68305,6 +69842,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentListRelationFilter
     promotionRedemptions?: PromotionRedemptionListRelationFilter
     retentionSubscriptions?: RetentionSubscriptionListRelationFilter
+    wishlistItems?: WishlistItemListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -68345,6 +69883,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentOrderByRelationAggregateInput
     promotionRedemptions?: PromotionRedemptionOrderByRelationAggregateInput
     retentionSubscriptions?: RetentionSubscriptionOrderByRelationAggregateInput
+    wishlistItems?: WishlistItemOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -68388,6 +69927,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentListRelationFilter
     promotionRedemptions?: PromotionRedemptionListRelationFilter
     retentionSubscriptions?: RetentionSubscriptionListRelationFilter
+    wishlistItems?: WishlistItemListRelationFilter
   }, "id" | "email" | "referralCode">
 
   export type UserOrderByWithAggregationInput = {
@@ -69107,6 +70647,9 @@ export namespace Prisma {
     id?: StringFilter<"Product"> | string
     name?: StringFilter<"Product"> | string
     slug?: StringNullableFilter<"Product"> | string | null
+    sku?: StringNullableFilter<"Product"> | string | null
+    brandName?: StringNullableFilter<"Product"> | string | null
+    storeName?: StringNullableFilter<"Product"> | string | null
     description?: StringNullableFilter<"Product"> | string | null
     shortDescription?: StringNullableFilter<"Product"> | string | null
     price?: DecimalFilter<"Product"> | Decimal | DecimalJsLike | number | string
@@ -69114,8 +70657,12 @@ export namespace Prisma {
     sellingPrice?: DecimalNullableFilter<"Product"> | Decimal | DecimalJsLike | number | string | null
     images?: StringNullableListFilter<"Product">
     stock?: IntFilter<"Product"> | number
+    lowStockThreshold?: IntFilter<"Product"> | number
     isActive?: BoolFilter<"Product"> | boolean
     isFeatured?: BoolFilter<"Product"> | boolean
+    ratingAverage?: DecimalFilter<"Product"> | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFilter<"Product"> | number
+    ratingDistribution?: JsonNullableFilter<"Product">
     categoryId?: StringNullableFilter<"Product"> | string | null
     createdById?: StringNullableFilter<"Product"> | string | null
     createdAt?: DateTimeFilter<"Product"> | Date | string
@@ -69137,12 +70684,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerListRelationFilter
     promotionRedemptions?: PromotionRedemptionListRelationFilter
     retentionSubscriptions?: RetentionSubscriptionListRelationFilter
+    wishlistItems?: WishlistItemListRelationFilter
   }
 
   export type ProductOrderByWithRelationInput = {
     id?: SortOrder
     name?: SortOrder
     slug?: SortOrderInput | SortOrder
+    sku?: SortOrderInput | SortOrder
+    brandName?: SortOrderInput | SortOrder
+    storeName?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
     shortDescription?: SortOrderInput | SortOrder
     price?: SortOrder
@@ -69150,8 +70701,12 @@ export namespace Prisma {
     sellingPrice?: SortOrderInput | SortOrder
     images?: SortOrder
     stock?: SortOrder
+    lowStockThreshold?: SortOrder
     isActive?: SortOrder
     isFeatured?: SortOrder
+    ratingAverage?: SortOrder
+    ratingCount?: SortOrder
+    ratingDistribution?: SortOrderInput | SortOrder
     categoryId?: SortOrderInput | SortOrder
     createdById?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -69173,15 +70728,19 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerOrderByRelationAggregateInput
     promotionRedemptions?: PromotionRedemptionOrderByRelationAggregateInput
     retentionSubscriptions?: RetentionSubscriptionOrderByRelationAggregateInput
+    wishlistItems?: WishlistItemOrderByRelationAggregateInput
   }
 
   export type ProductWhereUniqueInput = Prisma.AtLeast<{
     id?: string
     slug?: string
+    sku?: string
     AND?: ProductWhereInput | ProductWhereInput[]
     OR?: ProductWhereInput[]
     NOT?: ProductWhereInput | ProductWhereInput[]
     name?: StringFilter<"Product"> | string
+    brandName?: StringNullableFilter<"Product"> | string | null
+    storeName?: StringNullableFilter<"Product"> | string | null
     description?: StringNullableFilter<"Product"> | string | null
     shortDescription?: StringNullableFilter<"Product"> | string | null
     price?: DecimalFilter<"Product"> | Decimal | DecimalJsLike | number | string
@@ -69189,8 +70748,12 @@ export namespace Prisma {
     sellingPrice?: DecimalNullableFilter<"Product"> | Decimal | DecimalJsLike | number | string | null
     images?: StringNullableListFilter<"Product">
     stock?: IntFilter<"Product"> | number
+    lowStockThreshold?: IntFilter<"Product"> | number
     isActive?: BoolFilter<"Product"> | boolean
     isFeatured?: BoolFilter<"Product"> | boolean
+    ratingAverage?: DecimalFilter<"Product"> | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFilter<"Product"> | number
+    ratingDistribution?: JsonNullableFilter<"Product">
     categoryId?: StringNullableFilter<"Product"> | string | null
     createdById?: StringNullableFilter<"Product"> | string | null
     createdAt?: DateTimeFilter<"Product"> | Date | string
@@ -69212,12 +70775,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerListRelationFilter
     promotionRedemptions?: PromotionRedemptionListRelationFilter
     retentionSubscriptions?: RetentionSubscriptionListRelationFilter
-  }, "id" | "slug">
+    wishlistItems?: WishlistItemListRelationFilter
+  }, "id" | "slug" | "sku">
 
   export type ProductOrderByWithAggregationInput = {
     id?: SortOrder
     name?: SortOrder
     slug?: SortOrderInput | SortOrder
+    sku?: SortOrderInput | SortOrder
+    brandName?: SortOrderInput | SortOrder
+    storeName?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
     shortDescription?: SortOrderInput | SortOrder
     price?: SortOrder
@@ -69225,8 +70792,12 @@ export namespace Prisma {
     sellingPrice?: SortOrderInput | SortOrder
     images?: SortOrder
     stock?: SortOrder
+    lowStockThreshold?: SortOrder
     isActive?: SortOrder
     isFeatured?: SortOrder
+    ratingAverage?: SortOrder
+    ratingCount?: SortOrder
+    ratingDistribution?: SortOrderInput | SortOrder
     categoryId?: SortOrderInput | SortOrder
     createdById?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -69245,6 +70816,9 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"Product"> | string
     name?: StringWithAggregatesFilter<"Product"> | string
     slug?: StringNullableWithAggregatesFilter<"Product"> | string | null
+    sku?: StringNullableWithAggregatesFilter<"Product"> | string | null
+    brandName?: StringNullableWithAggregatesFilter<"Product"> | string | null
+    storeName?: StringNullableWithAggregatesFilter<"Product"> | string | null
     description?: StringNullableWithAggregatesFilter<"Product"> | string | null
     shortDescription?: StringNullableWithAggregatesFilter<"Product"> | string | null
     price?: DecimalWithAggregatesFilter<"Product"> | Decimal | DecimalJsLike | number | string
@@ -69252,8 +70826,12 @@ export namespace Prisma {
     sellingPrice?: DecimalNullableWithAggregatesFilter<"Product"> | Decimal | DecimalJsLike | number | string | null
     images?: StringNullableListFilter<"Product">
     stock?: IntWithAggregatesFilter<"Product"> | number
+    lowStockThreshold?: IntWithAggregatesFilter<"Product"> | number
     isActive?: BoolWithAggregatesFilter<"Product"> | boolean
     isFeatured?: BoolWithAggregatesFilter<"Product"> | boolean
+    ratingAverage?: DecimalWithAggregatesFilter<"Product"> | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntWithAggregatesFilter<"Product"> | number
+    ratingDistribution?: JsonNullableWithAggregatesFilter<"Product">
     categoryId?: StringNullableWithAggregatesFilter<"Product"> | string | null
     createdById?: StringNullableWithAggregatesFilter<"Product"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Product"> | Date | string
@@ -69753,6 +71331,112 @@ export namespace Prisma {
     status?: EnumReviewStatusWithAggregatesFilter<"Review"> | $Enums.ReviewStatus
     createdAt?: DateTimeWithAggregatesFilter<"Review"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Review"> | Date | string
+  }
+
+  export type WishlistItemWhereInput = {
+    AND?: WishlistItemWhereInput | WishlistItemWhereInput[]
+    OR?: WishlistItemWhereInput[]
+    NOT?: WishlistItemWhereInput | WishlistItemWhereInput[]
+    id?: StringFilter<"WishlistItem"> | string
+    userId?: StringFilter<"WishlistItem"> | string
+    productId?: StringFilter<"WishlistItem"> | string
+    status?: EnumWishlistStatusFilter<"WishlistItem"> | $Enums.WishlistStatus
+    plannedPurchaseAt?: DateTimeNullableFilter<"WishlistItem"> | Date | string | null
+    remindersEnabled?: BoolFilter<"WishlistItem"> | boolean
+    reminderTimezone?: StringNullableFilter<"WishlistItem"> | string | null
+    reminderVersion?: IntFilter<"WishlistItem"> | number
+    preReminderSentAt?: DateTimeNullableFilter<"WishlistItem"> | Date | string | null
+    followupReminderSentAt?: DateTimeNullableFilter<"WishlistItem"> | Date | string | null
+    purchasedAt?: DateTimeNullableFilter<"WishlistItem"> | Date | string | null
+    removedAt?: DateTimeNullableFilter<"WishlistItem"> | Date | string | null
+    createdAt?: DateTimeFilter<"WishlistItem"> | Date | string
+    updatedAt?: DateTimeFilter<"WishlistItem"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    product?: XOR<ProductScalarRelationFilter, ProductWhereInput>
+  }
+
+  export type WishlistItemOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    productId?: SortOrder
+    status?: SortOrder
+    plannedPurchaseAt?: SortOrderInput | SortOrder
+    remindersEnabled?: SortOrder
+    reminderTimezone?: SortOrderInput | SortOrder
+    reminderVersion?: SortOrder
+    preReminderSentAt?: SortOrderInput | SortOrder
+    followupReminderSentAt?: SortOrderInput | SortOrder
+    purchasedAt?: SortOrderInput | SortOrder
+    removedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+    product?: ProductOrderByWithRelationInput
+  }
+
+  export type WishlistItemWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    userId_productId?: WishlistItemUserIdProductIdCompoundUniqueInput
+    AND?: WishlistItemWhereInput | WishlistItemWhereInput[]
+    OR?: WishlistItemWhereInput[]
+    NOT?: WishlistItemWhereInput | WishlistItemWhereInput[]
+    userId?: StringFilter<"WishlistItem"> | string
+    productId?: StringFilter<"WishlistItem"> | string
+    status?: EnumWishlistStatusFilter<"WishlistItem"> | $Enums.WishlistStatus
+    plannedPurchaseAt?: DateTimeNullableFilter<"WishlistItem"> | Date | string | null
+    remindersEnabled?: BoolFilter<"WishlistItem"> | boolean
+    reminderTimezone?: StringNullableFilter<"WishlistItem"> | string | null
+    reminderVersion?: IntFilter<"WishlistItem"> | number
+    preReminderSentAt?: DateTimeNullableFilter<"WishlistItem"> | Date | string | null
+    followupReminderSentAt?: DateTimeNullableFilter<"WishlistItem"> | Date | string | null
+    purchasedAt?: DateTimeNullableFilter<"WishlistItem"> | Date | string | null
+    removedAt?: DateTimeNullableFilter<"WishlistItem"> | Date | string | null
+    createdAt?: DateTimeFilter<"WishlistItem"> | Date | string
+    updatedAt?: DateTimeFilter<"WishlistItem"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    product?: XOR<ProductScalarRelationFilter, ProductWhereInput>
+  }, "id" | "userId_productId">
+
+  export type WishlistItemOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    productId?: SortOrder
+    status?: SortOrder
+    plannedPurchaseAt?: SortOrderInput | SortOrder
+    remindersEnabled?: SortOrder
+    reminderTimezone?: SortOrderInput | SortOrder
+    reminderVersion?: SortOrder
+    preReminderSentAt?: SortOrderInput | SortOrder
+    followupReminderSentAt?: SortOrderInput | SortOrder
+    purchasedAt?: SortOrderInput | SortOrder
+    removedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: WishlistItemCountOrderByAggregateInput
+    _avg?: WishlistItemAvgOrderByAggregateInput
+    _max?: WishlistItemMaxOrderByAggregateInput
+    _min?: WishlistItemMinOrderByAggregateInput
+    _sum?: WishlistItemSumOrderByAggregateInput
+  }
+
+  export type WishlistItemScalarWhereWithAggregatesInput = {
+    AND?: WishlistItemScalarWhereWithAggregatesInput | WishlistItemScalarWhereWithAggregatesInput[]
+    OR?: WishlistItemScalarWhereWithAggregatesInput[]
+    NOT?: WishlistItemScalarWhereWithAggregatesInput | WishlistItemScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"WishlistItem"> | string
+    userId?: StringWithAggregatesFilter<"WishlistItem"> | string
+    productId?: StringWithAggregatesFilter<"WishlistItem"> | string
+    status?: EnumWishlistStatusWithAggregatesFilter<"WishlistItem"> | $Enums.WishlistStatus
+    plannedPurchaseAt?: DateTimeNullableWithAggregatesFilter<"WishlistItem"> | Date | string | null
+    remindersEnabled?: BoolWithAggregatesFilter<"WishlistItem"> | boolean
+    reminderTimezone?: StringNullableWithAggregatesFilter<"WishlistItem"> | string | null
+    reminderVersion?: IntWithAggregatesFilter<"WishlistItem"> | number
+    preReminderSentAt?: DateTimeNullableWithAggregatesFilter<"WishlistItem"> | Date | string | null
+    followupReminderSentAt?: DateTimeNullableWithAggregatesFilter<"WishlistItem"> | Date | string | null
+    purchasedAt?: DateTimeNullableWithAggregatesFilter<"WishlistItem"> | Date | string | null
+    removedAt?: DateTimeNullableWithAggregatesFilter<"WishlistItem"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"WishlistItem"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"WishlistItem"> | Date | string
   }
 
   export type ProductViewWhereInput = {
@@ -72759,6 +74443,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -72798,6 +74483,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserUpdateInput = {
@@ -72837,6 +74523,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -72876,6 +74563,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -73654,6 +75342,9 @@ export namespace Prisma {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -73661,8 +75352,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
@@ -73682,12 +75377,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutProductInput
   }
 
   export type ProductUncheckedCreateInput = {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -73695,8 +75394,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
     createdAt?: Date | string
@@ -73716,12 +75419,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type ProductUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -73729,8 +75436,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
@@ -73750,12 +75461,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUpdateManyWithoutProductNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutProductNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutProductNestedInput
   }
 
   export type ProductUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -73763,8 +75478,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -73784,12 +75503,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedUpdateManyWithoutProductNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutProductNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutProductNestedInput
   }
 
   export type ProductCreateManyInput = {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -73797,8 +75520,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
     createdAt?: Date | string
@@ -73809,6 +75536,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -73816,8 +75546,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -73826,6 +75560,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -73833,8 +75570,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -74386,6 +76127,123 @@ export namespace Prisma {
     rating?: IntFieldUpdateOperationsInput | number
     comment?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumReviewStatusFieldUpdateOperationsInput | $Enums.ReviewStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WishlistItemCreateInput = {
+    id?: string
+    status?: $Enums.WishlistStatus
+    plannedPurchaseAt?: Date | string | null
+    remindersEnabled?: boolean
+    reminderTimezone?: string | null
+    reminderVersion?: number
+    preReminderSentAt?: Date | string | null
+    followupReminderSentAt?: Date | string | null
+    purchasedAt?: Date | string | null
+    removedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutWishlistItemsInput
+    product: ProductCreateNestedOneWithoutWishlistItemsInput
+  }
+
+  export type WishlistItemUncheckedCreateInput = {
+    id?: string
+    userId: string
+    productId: string
+    status?: $Enums.WishlistStatus
+    plannedPurchaseAt?: Date | string | null
+    remindersEnabled?: boolean
+    reminderTimezone?: string | null
+    reminderVersion?: number
+    preReminderSentAt?: Date | string | null
+    followupReminderSentAt?: Date | string | null
+    purchasedAt?: Date | string | null
+    removedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type WishlistItemUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: EnumWishlistStatusFieldUpdateOperationsInput | $Enums.WishlistStatus
+    plannedPurchaseAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    remindersEnabled?: BoolFieldUpdateOperationsInput | boolean
+    reminderTimezone?: NullableStringFieldUpdateOperationsInput | string | null
+    reminderVersion?: IntFieldUpdateOperationsInput | number
+    preReminderSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    followupReminderSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    purchasedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutWishlistItemsNestedInput
+    product?: ProductUpdateOneRequiredWithoutWishlistItemsNestedInput
+  }
+
+  export type WishlistItemUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    productId?: StringFieldUpdateOperationsInput | string
+    status?: EnumWishlistStatusFieldUpdateOperationsInput | $Enums.WishlistStatus
+    plannedPurchaseAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    remindersEnabled?: BoolFieldUpdateOperationsInput | boolean
+    reminderTimezone?: NullableStringFieldUpdateOperationsInput | string | null
+    reminderVersion?: IntFieldUpdateOperationsInput | number
+    preReminderSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    followupReminderSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    purchasedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WishlistItemCreateManyInput = {
+    id?: string
+    userId: string
+    productId: string
+    status?: $Enums.WishlistStatus
+    plannedPurchaseAt?: Date | string | null
+    remindersEnabled?: boolean
+    reminderTimezone?: string | null
+    reminderVersion?: number
+    preReminderSentAt?: Date | string | null
+    followupReminderSentAt?: Date | string | null
+    purchasedAt?: Date | string | null
+    removedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type WishlistItemUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: EnumWishlistStatusFieldUpdateOperationsInput | $Enums.WishlistStatus
+    plannedPurchaseAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    remindersEnabled?: BoolFieldUpdateOperationsInput | boolean
+    reminderTimezone?: NullableStringFieldUpdateOperationsInput | string | null
+    reminderVersion?: IntFieldUpdateOperationsInput | number
+    preReminderSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    followupReminderSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    purchasedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WishlistItemUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    productId?: StringFieldUpdateOperationsInput | string
+    status?: EnumWishlistStatusFieldUpdateOperationsInput | $Enums.WishlistStatus
+    plannedPurchaseAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    remindersEnabled?: BoolFieldUpdateOperationsInput | boolean
+    reminderTimezone?: NullableStringFieldUpdateOperationsInput | string | null
+    reminderVersion?: IntFieldUpdateOperationsInput | number
+    preReminderSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    followupReminderSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    purchasedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -77859,6 +79717,12 @@ export namespace Prisma {
     none?: RetentionSubscriptionWhereInput
   }
 
+  export type WishlistItemListRelationFilter = {
+    every?: WishlistItemWhereInput
+    some?: WishlistItemWhereInput
+    none?: WishlistItemWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -77941,6 +79805,10 @@ export namespace Prisma {
   }
 
   export type RetentionSubscriptionOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type WishlistItemOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -78705,6 +80573,9 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     slug?: SortOrder
+    sku?: SortOrder
+    brandName?: SortOrder
+    storeName?: SortOrder
     description?: SortOrder
     shortDescription?: SortOrder
     price?: SortOrder
@@ -78712,8 +80583,12 @@ export namespace Prisma {
     sellingPrice?: SortOrder
     images?: SortOrder
     stock?: SortOrder
+    lowStockThreshold?: SortOrder
     isActive?: SortOrder
     isFeatured?: SortOrder
+    ratingAverage?: SortOrder
+    ratingCount?: SortOrder
+    ratingDistribution?: SortOrder
     categoryId?: SortOrder
     createdById?: SortOrder
     createdAt?: SortOrder
@@ -78725,20 +80600,29 @@ export namespace Prisma {
     originalPrice?: SortOrder
     sellingPrice?: SortOrder
     stock?: SortOrder
+    lowStockThreshold?: SortOrder
+    ratingAverage?: SortOrder
+    ratingCount?: SortOrder
   }
 
   export type ProductMaxOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
     slug?: SortOrder
+    sku?: SortOrder
+    brandName?: SortOrder
+    storeName?: SortOrder
     description?: SortOrder
     shortDescription?: SortOrder
     price?: SortOrder
     originalPrice?: SortOrder
     sellingPrice?: SortOrder
     stock?: SortOrder
+    lowStockThreshold?: SortOrder
     isActive?: SortOrder
     isFeatured?: SortOrder
+    ratingAverage?: SortOrder
+    ratingCount?: SortOrder
     categoryId?: SortOrder
     createdById?: SortOrder
     createdAt?: SortOrder
@@ -78749,14 +80633,20 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     slug?: SortOrder
+    sku?: SortOrder
+    brandName?: SortOrder
+    storeName?: SortOrder
     description?: SortOrder
     shortDescription?: SortOrder
     price?: SortOrder
     originalPrice?: SortOrder
     sellingPrice?: SortOrder
     stock?: SortOrder
+    lowStockThreshold?: SortOrder
     isActive?: SortOrder
     isFeatured?: SortOrder
+    ratingAverage?: SortOrder
+    ratingCount?: SortOrder
     categoryId?: SortOrder
     createdById?: SortOrder
     createdAt?: SortOrder
@@ -78768,6 +80658,9 @@ export namespace Prisma {
     originalPrice?: SortOrder
     sellingPrice?: SortOrder
     stock?: SortOrder
+    lowStockThreshold?: SortOrder
+    ratingAverage?: SortOrder
+    ratingCount?: SortOrder
   }
 
   export type DecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -79140,6 +81033,87 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumReviewStatusFilter<$PrismaModel>
     _max?: NestedEnumReviewStatusFilter<$PrismaModel>
+  }
+
+  export type EnumWishlistStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.WishlistStatus | EnumWishlistStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.WishlistStatus[] | ListEnumWishlistStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.WishlistStatus[] | ListEnumWishlistStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumWishlistStatusFilter<$PrismaModel> | $Enums.WishlistStatus
+  }
+
+  export type WishlistItemUserIdProductIdCompoundUniqueInput = {
+    userId: string
+    productId: string
+  }
+
+  export type WishlistItemCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    productId?: SortOrder
+    status?: SortOrder
+    plannedPurchaseAt?: SortOrder
+    remindersEnabled?: SortOrder
+    reminderTimezone?: SortOrder
+    reminderVersion?: SortOrder
+    preReminderSentAt?: SortOrder
+    followupReminderSentAt?: SortOrder
+    purchasedAt?: SortOrder
+    removedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type WishlistItemAvgOrderByAggregateInput = {
+    reminderVersion?: SortOrder
+  }
+
+  export type WishlistItemMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    productId?: SortOrder
+    status?: SortOrder
+    plannedPurchaseAt?: SortOrder
+    remindersEnabled?: SortOrder
+    reminderTimezone?: SortOrder
+    reminderVersion?: SortOrder
+    preReminderSentAt?: SortOrder
+    followupReminderSentAt?: SortOrder
+    purchasedAt?: SortOrder
+    removedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type WishlistItemMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    productId?: SortOrder
+    status?: SortOrder
+    plannedPurchaseAt?: SortOrder
+    remindersEnabled?: SortOrder
+    reminderTimezone?: SortOrder
+    reminderVersion?: SortOrder
+    preReminderSentAt?: SortOrder
+    followupReminderSentAt?: SortOrder
+    purchasedAt?: SortOrder
+    removedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type WishlistItemSumOrderByAggregateInput = {
+    reminderVersion?: SortOrder
+  }
+
+  export type EnumWishlistStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.WishlistStatus | EnumWishlistStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.WishlistStatus[] | ListEnumWishlistStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.WishlistStatus[] | ListEnumWishlistStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumWishlistStatusWithAggregatesFilter<$PrismaModel> | $Enums.WishlistStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumWishlistStatusFilter<$PrismaModel>
+    _max?: NestedEnumWishlistStatusFilter<$PrismaModel>
   }
 
   export type ProductViewCountOrderByAggregateInput = {
@@ -81428,6 +83402,13 @@ export namespace Prisma {
     connect?: RetentionSubscriptionWhereUniqueInput | RetentionSubscriptionWhereUniqueInput[]
   }
 
+  export type WishlistItemCreateNestedManyWithoutUserInput = {
+    create?: XOR<WishlistItemCreateWithoutUserInput, WishlistItemUncheckedCreateWithoutUserInput> | WishlistItemCreateWithoutUserInput[] | WishlistItemUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: WishlistItemCreateOrConnectWithoutUserInput | WishlistItemCreateOrConnectWithoutUserInput[]
+    createMany?: WishlistItemCreateManyUserInputEnvelope
+    connect?: WishlistItemWhereUniqueInput | WishlistItemWhereUniqueInput[]
+  }
+
   export type UserUncheckedCreateNestedManyWithoutReferredByInput = {
     create?: XOR<UserCreateWithoutReferredByInput, UserUncheckedCreateWithoutReferredByInput> | UserCreateWithoutReferredByInput[] | UserUncheckedCreateWithoutReferredByInput[]
     connectOrCreate?: UserCreateOrConnectWithoutReferredByInput | UserCreateOrConnectWithoutReferredByInput[]
@@ -81579,6 +83560,13 @@ export namespace Prisma {
     connectOrCreate?: RetentionSubscriptionCreateOrConnectWithoutUserInput | RetentionSubscriptionCreateOrConnectWithoutUserInput[]
     createMany?: RetentionSubscriptionCreateManyUserInputEnvelope
     connect?: RetentionSubscriptionWhereUniqueInput | RetentionSubscriptionWhereUniqueInput[]
+  }
+
+  export type WishlistItemUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<WishlistItemCreateWithoutUserInput, WishlistItemUncheckedCreateWithoutUserInput> | WishlistItemCreateWithoutUserInput[] | WishlistItemUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: WishlistItemCreateOrConnectWithoutUserInput | WishlistItemCreateOrConnectWithoutUserInput[]
+    createMany?: WishlistItemCreateManyUserInputEnvelope
+    connect?: WishlistItemWhereUniqueInput | WishlistItemWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -81923,6 +83911,20 @@ export namespace Prisma {
     deleteMany?: RetentionSubscriptionScalarWhereInput | RetentionSubscriptionScalarWhereInput[]
   }
 
+  export type WishlistItemUpdateManyWithoutUserNestedInput = {
+    create?: XOR<WishlistItemCreateWithoutUserInput, WishlistItemUncheckedCreateWithoutUserInput> | WishlistItemCreateWithoutUserInput[] | WishlistItemUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: WishlistItemCreateOrConnectWithoutUserInput | WishlistItemCreateOrConnectWithoutUserInput[]
+    upsert?: WishlistItemUpsertWithWhereUniqueWithoutUserInput | WishlistItemUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: WishlistItemCreateManyUserInputEnvelope
+    set?: WishlistItemWhereUniqueInput | WishlistItemWhereUniqueInput[]
+    disconnect?: WishlistItemWhereUniqueInput | WishlistItemWhereUniqueInput[]
+    delete?: WishlistItemWhereUniqueInput | WishlistItemWhereUniqueInput[]
+    connect?: WishlistItemWhereUniqueInput | WishlistItemWhereUniqueInput[]
+    update?: WishlistItemUpdateWithWhereUniqueWithoutUserInput | WishlistItemUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: WishlistItemUpdateManyWithWhereWithoutUserInput | WishlistItemUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: WishlistItemScalarWhereInput | WishlistItemScalarWhereInput[]
+  }
+
   export type UserUncheckedUpdateManyWithoutReferredByNestedInput = {
     create?: XOR<UserCreateWithoutReferredByInput, UserUncheckedCreateWithoutReferredByInput> | UserCreateWithoutReferredByInput[] | UserUncheckedCreateWithoutReferredByInput[]
     connectOrCreate?: UserCreateOrConnectWithoutReferredByInput | UserCreateOrConnectWithoutReferredByInput[]
@@ -82225,6 +84227,20 @@ export namespace Prisma {
     update?: RetentionSubscriptionUpdateWithWhereUniqueWithoutUserInput | RetentionSubscriptionUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: RetentionSubscriptionUpdateManyWithWhereWithoutUserInput | RetentionSubscriptionUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: RetentionSubscriptionScalarWhereInput | RetentionSubscriptionScalarWhereInput[]
+  }
+
+  export type WishlistItemUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<WishlistItemCreateWithoutUserInput, WishlistItemUncheckedCreateWithoutUserInput> | WishlistItemCreateWithoutUserInput[] | WishlistItemUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: WishlistItemCreateOrConnectWithoutUserInput | WishlistItemCreateOrConnectWithoutUserInput[]
+    upsert?: WishlistItemUpsertWithWhereUniqueWithoutUserInput | WishlistItemUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: WishlistItemCreateManyUserInputEnvelope
+    set?: WishlistItemWhereUniqueInput | WishlistItemWhereUniqueInput[]
+    disconnect?: WishlistItemWhereUniqueInput | WishlistItemWhereUniqueInput[]
+    delete?: WishlistItemWhereUniqueInput | WishlistItemWhereUniqueInput[]
+    connect?: WishlistItemWhereUniqueInput | WishlistItemWhereUniqueInput[]
+    update?: WishlistItemUpdateWithWhereUniqueWithoutUserInput | WishlistItemUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: WishlistItemUpdateManyWithWhereWithoutUserInput | WishlistItemUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: WishlistItemScalarWhereInput | WishlistItemScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutOauthAccountsInput = {
@@ -82844,6 +84860,13 @@ export namespace Prisma {
     connect?: RetentionSubscriptionWhereUniqueInput | RetentionSubscriptionWhereUniqueInput[]
   }
 
+  export type WishlistItemCreateNestedManyWithoutProductInput = {
+    create?: XOR<WishlistItemCreateWithoutProductInput, WishlistItemUncheckedCreateWithoutProductInput> | WishlistItemCreateWithoutProductInput[] | WishlistItemUncheckedCreateWithoutProductInput[]
+    connectOrCreate?: WishlistItemCreateOrConnectWithoutProductInput | WishlistItemCreateOrConnectWithoutProductInput[]
+    createMany?: WishlistItemCreateManyProductInputEnvelope
+    connect?: WishlistItemWhereUniqueInput | WishlistItemWhereUniqueInput[]
+  }
+
   export type OrderItemUncheckedCreateNestedManyWithoutProductInput = {
     create?: XOR<OrderItemCreateWithoutProductInput, OrderItemUncheckedCreateWithoutProductInput> | OrderItemCreateWithoutProductInput[] | OrderItemUncheckedCreateWithoutProductInput[]
     connectOrCreate?: OrderItemCreateOrConnectWithoutProductInput | OrderItemCreateOrConnectWithoutProductInput[]
@@ -82947,6 +84970,13 @@ export namespace Prisma {
     connectOrCreate?: RetentionSubscriptionCreateOrConnectWithoutProductInput | RetentionSubscriptionCreateOrConnectWithoutProductInput[]
     createMany?: RetentionSubscriptionCreateManyProductInputEnvelope
     connect?: RetentionSubscriptionWhereUniqueInput | RetentionSubscriptionWhereUniqueInput[]
+  }
+
+  export type WishlistItemUncheckedCreateNestedManyWithoutProductInput = {
+    create?: XOR<WishlistItemCreateWithoutProductInput, WishlistItemUncheckedCreateWithoutProductInput> | WishlistItemCreateWithoutProductInput[] | WishlistItemUncheckedCreateWithoutProductInput[]
+    connectOrCreate?: WishlistItemCreateOrConnectWithoutProductInput | WishlistItemCreateOrConnectWithoutProductInput[]
+    createMany?: WishlistItemCreateManyProductInputEnvelope
+    connect?: WishlistItemWhereUniqueInput | WishlistItemWhereUniqueInput[]
   }
 
   export type NullableDecimalFieldUpdateOperationsInput = {
@@ -83192,6 +85222,20 @@ export namespace Prisma {
     deleteMany?: RetentionSubscriptionScalarWhereInput | RetentionSubscriptionScalarWhereInput[]
   }
 
+  export type WishlistItemUpdateManyWithoutProductNestedInput = {
+    create?: XOR<WishlistItemCreateWithoutProductInput, WishlistItemUncheckedCreateWithoutProductInput> | WishlistItemCreateWithoutProductInput[] | WishlistItemUncheckedCreateWithoutProductInput[]
+    connectOrCreate?: WishlistItemCreateOrConnectWithoutProductInput | WishlistItemCreateOrConnectWithoutProductInput[]
+    upsert?: WishlistItemUpsertWithWhereUniqueWithoutProductInput | WishlistItemUpsertWithWhereUniqueWithoutProductInput[]
+    createMany?: WishlistItemCreateManyProductInputEnvelope
+    set?: WishlistItemWhereUniqueInput | WishlistItemWhereUniqueInput[]
+    disconnect?: WishlistItemWhereUniqueInput | WishlistItemWhereUniqueInput[]
+    delete?: WishlistItemWhereUniqueInput | WishlistItemWhereUniqueInput[]
+    connect?: WishlistItemWhereUniqueInput | WishlistItemWhereUniqueInput[]
+    update?: WishlistItemUpdateWithWhereUniqueWithoutProductInput | WishlistItemUpdateWithWhereUniqueWithoutProductInput[]
+    updateMany?: WishlistItemUpdateManyWithWhereWithoutProductInput | WishlistItemUpdateManyWithWhereWithoutProductInput[]
+    deleteMany?: WishlistItemScalarWhereInput | WishlistItemScalarWhereInput[]
+  }
+
   export type OrderItemUncheckedUpdateManyWithoutProductNestedInput = {
     create?: XOR<OrderItemCreateWithoutProductInput, OrderItemUncheckedCreateWithoutProductInput> | OrderItemCreateWithoutProductInput[] | OrderItemUncheckedCreateWithoutProductInput[]
     connectOrCreate?: OrderItemCreateOrConnectWithoutProductInput | OrderItemCreateOrConnectWithoutProductInput[]
@@ -83402,6 +85446,20 @@ export namespace Prisma {
     deleteMany?: RetentionSubscriptionScalarWhereInput | RetentionSubscriptionScalarWhereInput[]
   }
 
+  export type WishlistItemUncheckedUpdateManyWithoutProductNestedInput = {
+    create?: XOR<WishlistItemCreateWithoutProductInput, WishlistItemUncheckedCreateWithoutProductInput> | WishlistItemCreateWithoutProductInput[] | WishlistItemUncheckedCreateWithoutProductInput[]
+    connectOrCreate?: WishlistItemCreateOrConnectWithoutProductInput | WishlistItemCreateOrConnectWithoutProductInput[]
+    upsert?: WishlistItemUpsertWithWhereUniqueWithoutProductInput | WishlistItemUpsertWithWhereUniqueWithoutProductInput[]
+    createMany?: WishlistItemCreateManyProductInputEnvelope
+    set?: WishlistItemWhereUniqueInput | WishlistItemWhereUniqueInput[]
+    disconnect?: WishlistItemWhereUniqueInput | WishlistItemWhereUniqueInput[]
+    delete?: WishlistItemWhereUniqueInput | WishlistItemWhereUniqueInput[]
+    connect?: WishlistItemWhereUniqueInput | WishlistItemWhereUniqueInput[]
+    update?: WishlistItemUpdateWithWhereUniqueWithoutProductInput | WishlistItemUpdateWithWhereUniqueWithoutProductInput[]
+    updateMany?: WishlistItemUpdateManyWithWhereWithoutProductInput | WishlistItemUpdateManyWithWhereWithoutProductInput[]
+    deleteMany?: WishlistItemScalarWhereInput | WishlistItemScalarWhereInput[]
+  }
+
   export type WholesaleItemCreateimagesInput = {
     set: string[]
   }
@@ -83579,6 +85637,38 @@ export namespace Prisma {
     upsert?: ProductUpsertWithoutReviewsInput
     connect?: ProductWhereUniqueInput
     update?: XOR<XOR<ProductUpdateToOneWithWhereWithoutReviewsInput, ProductUpdateWithoutReviewsInput>, ProductUncheckedUpdateWithoutReviewsInput>
+  }
+
+  export type UserCreateNestedOneWithoutWishlistItemsInput = {
+    create?: XOR<UserCreateWithoutWishlistItemsInput, UserUncheckedCreateWithoutWishlistItemsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutWishlistItemsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type ProductCreateNestedOneWithoutWishlistItemsInput = {
+    create?: XOR<ProductCreateWithoutWishlistItemsInput, ProductUncheckedCreateWithoutWishlistItemsInput>
+    connectOrCreate?: ProductCreateOrConnectWithoutWishlistItemsInput
+    connect?: ProductWhereUniqueInput
+  }
+
+  export type EnumWishlistStatusFieldUpdateOperationsInput = {
+    set?: $Enums.WishlistStatus
+  }
+
+  export type UserUpdateOneRequiredWithoutWishlistItemsNestedInput = {
+    create?: XOR<UserCreateWithoutWishlistItemsInput, UserUncheckedCreateWithoutWishlistItemsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutWishlistItemsInput
+    upsert?: UserUpsertWithoutWishlistItemsInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutWishlistItemsInput, UserUpdateWithoutWishlistItemsInput>, UserUncheckedUpdateWithoutWishlistItemsInput>
+  }
+
+  export type ProductUpdateOneRequiredWithoutWishlistItemsNestedInput = {
+    create?: XOR<ProductCreateWithoutWishlistItemsInput, ProductUncheckedCreateWithoutWishlistItemsInput>
+    connectOrCreate?: ProductCreateOrConnectWithoutWishlistItemsInput
+    upsert?: ProductUpsertWithoutWishlistItemsInput
+    connect?: ProductWhereUniqueInput
+    update?: XOR<XOR<ProductUpdateToOneWithWhereWithoutWishlistItemsInput, ProductUpdateWithoutWishlistItemsInput>, ProductUncheckedUpdateWithoutWishlistItemsInput>
   }
 
   export type ProductCreateNestedOneWithoutViewsInput = {
@@ -85268,6 +87358,23 @@ export namespace Prisma {
     _max?: NestedEnumReviewStatusFilter<$PrismaModel>
   }
 
+  export type NestedEnumWishlistStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.WishlistStatus | EnumWishlistStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.WishlistStatus[] | ListEnumWishlistStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.WishlistStatus[] | ListEnumWishlistStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumWishlistStatusFilter<$PrismaModel> | $Enums.WishlistStatus
+  }
+
+  export type NestedEnumWishlistStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.WishlistStatus | EnumWishlistStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.WishlistStatus[] | ListEnumWishlistStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.WishlistStatus[] | ListEnumWishlistStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumWishlistStatusWithAggregatesFilter<$PrismaModel> | $Enums.WishlistStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumWishlistStatusFilter<$PrismaModel>
+    _max?: NestedEnumWishlistStatusFilter<$PrismaModel>
+  }
+
   export type NestedEnumWalletTxTypeFilter<$PrismaModel = never> = {
     equals?: $Enums.WalletTxType | EnumWalletTxTypeFieldRefInput<$PrismaModel>
     in?: $Enums.WalletTxType[] | ListEnumWalletTxTypeFieldRefInput<$PrismaModel>
@@ -85625,6 +87732,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutReferralsInput = {
@@ -85663,6 +87771,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutReferralsInput = {
@@ -85706,6 +87815,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutReferredByInput = {
@@ -85744,6 +87854,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutReferredByInput = {
@@ -86433,6 +88544,48 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type WishlistItemCreateWithoutUserInput = {
+    id?: string
+    status?: $Enums.WishlistStatus
+    plannedPurchaseAt?: Date | string | null
+    remindersEnabled?: boolean
+    reminderTimezone?: string | null
+    reminderVersion?: number
+    preReminderSentAt?: Date | string | null
+    followupReminderSentAt?: Date | string | null
+    purchasedAt?: Date | string | null
+    removedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    product: ProductCreateNestedOneWithoutWishlistItemsInput
+  }
+
+  export type WishlistItemUncheckedCreateWithoutUserInput = {
+    id?: string
+    productId: string
+    status?: $Enums.WishlistStatus
+    plannedPurchaseAt?: Date | string | null
+    remindersEnabled?: boolean
+    reminderTimezone?: string | null
+    reminderVersion?: number
+    preReminderSentAt?: Date | string | null
+    followupReminderSentAt?: Date | string | null
+    purchasedAt?: Date | string | null
+    removedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type WishlistItemCreateOrConnectWithoutUserInput = {
+    where: WishlistItemWhereUniqueInput
+    create: XOR<WishlistItemCreateWithoutUserInput, WishlistItemUncheckedCreateWithoutUserInput>
+  }
+
+  export type WishlistItemCreateManyUserInputEnvelope = {
+    data: WishlistItemCreateManyUserInput | WishlistItemCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
   export type UserUpsertWithoutReferralsInput = {
     update: XOR<UserUpdateWithoutReferralsInput, UserUncheckedUpdateWithoutReferralsInput>
     create: XOR<UserCreateWithoutReferralsInput, UserUncheckedCreateWithoutReferralsInput>
@@ -86480,6 +88633,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutReferralsInput = {
@@ -86518,6 +88672,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUpsertWithWhereUniqueWithoutReferredByInput = {
@@ -87193,6 +89348,42 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"RetentionSubscription"> | Date | string
   }
 
+  export type WishlistItemUpsertWithWhereUniqueWithoutUserInput = {
+    where: WishlistItemWhereUniqueInput
+    update: XOR<WishlistItemUpdateWithoutUserInput, WishlistItemUncheckedUpdateWithoutUserInput>
+    create: XOR<WishlistItemCreateWithoutUserInput, WishlistItemUncheckedCreateWithoutUserInput>
+  }
+
+  export type WishlistItemUpdateWithWhereUniqueWithoutUserInput = {
+    where: WishlistItemWhereUniqueInput
+    data: XOR<WishlistItemUpdateWithoutUserInput, WishlistItemUncheckedUpdateWithoutUserInput>
+  }
+
+  export type WishlistItemUpdateManyWithWhereWithoutUserInput = {
+    where: WishlistItemScalarWhereInput
+    data: XOR<WishlistItemUpdateManyMutationInput, WishlistItemUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type WishlistItemScalarWhereInput = {
+    AND?: WishlistItemScalarWhereInput | WishlistItemScalarWhereInput[]
+    OR?: WishlistItemScalarWhereInput[]
+    NOT?: WishlistItemScalarWhereInput | WishlistItemScalarWhereInput[]
+    id?: StringFilter<"WishlistItem"> | string
+    userId?: StringFilter<"WishlistItem"> | string
+    productId?: StringFilter<"WishlistItem"> | string
+    status?: EnumWishlistStatusFilter<"WishlistItem"> | $Enums.WishlistStatus
+    plannedPurchaseAt?: DateTimeNullableFilter<"WishlistItem"> | Date | string | null
+    remindersEnabled?: BoolFilter<"WishlistItem"> | boolean
+    reminderTimezone?: StringNullableFilter<"WishlistItem"> | string | null
+    reminderVersion?: IntFilter<"WishlistItem"> | number
+    preReminderSentAt?: DateTimeNullableFilter<"WishlistItem"> | Date | string | null
+    followupReminderSentAt?: DateTimeNullableFilter<"WishlistItem"> | Date | string | null
+    purchasedAt?: DateTimeNullableFilter<"WishlistItem"> | Date | string | null
+    removedAt?: DateTimeNullableFilter<"WishlistItem"> | Date | string | null
+    createdAt?: DateTimeFilter<"WishlistItem"> | Date | string
+    updatedAt?: DateTimeFilter<"WishlistItem"> | Date | string
+  }
+
   export type UserCreateWithoutOauthAccountsInput = {
     id?: string
     email: string
@@ -87229,6 +89420,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutOauthAccountsInput = {
@@ -87267,6 +89459,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutOauthAccountsInput = {
@@ -87321,6 +89514,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutOauthAccountsInput = {
@@ -87359,6 +89553,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutRefreshTokensInput = {
@@ -87397,6 +89592,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutRefreshTokensInput = {
@@ -87435,6 +89631,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutRefreshTokensInput = {
@@ -87489,6 +89686,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutRefreshTokensInput = {
@@ -87527,6 +89725,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutEmailVerificationTokensInput = {
@@ -87565,6 +89764,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutEmailVerificationTokensInput = {
@@ -87603,6 +89803,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutEmailVerificationTokensInput = {
@@ -87657,6 +89858,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutEmailVerificationTokensInput = {
@@ -87695,6 +89897,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutPasswordResetTokensInput = {
@@ -87733,6 +89936,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
@@ -87771,6 +89975,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutPasswordResetTokensInput = {
@@ -87825,6 +90030,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
@@ -87863,6 +90069,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutLegacyPasswordInput = {
@@ -87901,6 +90108,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutLegacyPasswordInput = {
@@ -87939,6 +90147,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutLegacyPasswordInput = {
@@ -87993,6 +90202,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutLegacyPasswordInput = {
@@ -88031,6 +90241,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type AdminLogCreateWithoutAdminInput = {
@@ -88067,6 +90278,9 @@ export namespace Prisma {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -88074,8 +90288,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
@@ -88094,12 +90312,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutProductInput
   }
 
   export type ProductUncheckedCreateWithoutCreatedByInput = {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -88107,8 +90329,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -88127,6 +90353,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type ProductCreateOrConnectWithoutCreatedByInput = {
@@ -88488,6 +90715,9 @@ export namespace Prisma {
     id?: StringFilter<"Product"> | string
     name?: StringFilter<"Product"> | string
     slug?: StringNullableFilter<"Product"> | string | null
+    sku?: StringNullableFilter<"Product"> | string | null
+    brandName?: StringNullableFilter<"Product"> | string | null
+    storeName?: StringNullableFilter<"Product"> | string | null
     description?: StringNullableFilter<"Product"> | string | null
     shortDescription?: StringNullableFilter<"Product"> | string | null
     price?: DecimalFilter<"Product"> | Decimal | DecimalJsLike | number | string
@@ -88495,8 +90725,12 @@ export namespace Prisma {
     sellingPrice?: DecimalNullableFilter<"Product"> | Decimal | DecimalJsLike | number | string | null
     images?: StringNullableListFilter<"Product">
     stock?: IntFilter<"Product"> | number
+    lowStockThreshold?: IntFilter<"Product"> | number
     isActive?: BoolFilter<"Product"> | boolean
     isFeatured?: BoolFilter<"Product"> | boolean
+    ratingAverage?: DecimalFilter<"Product"> | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFilter<"Product"> | number
+    ratingDistribution?: JsonNullableFilter<"Product">
     categoryId?: StringNullableFilter<"Product"> | string | null
     createdById?: StringNullableFilter<"Product"> | string | null
     createdAt?: DateTimeFilter<"Product"> | Date | string
@@ -88911,6 +91145,9 @@ export namespace Prisma {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -88918,8 +91155,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: AdminCreateNestedOneWithoutCreatedProductsInput
@@ -88938,12 +91179,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutProductInput
   }
 
   export type ProductUncheckedCreateWithoutCategoryInput = {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -88951,8 +91196,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdById?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -88971,6 +91220,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type ProductCreateOrConnectWithoutCategoryInput = {
@@ -89609,6 +91859,48 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type WishlistItemCreateWithoutProductInput = {
+    id?: string
+    status?: $Enums.WishlistStatus
+    plannedPurchaseAt?: Date | string | null
+    remindersEnabled?: boolean
+    reminderTimezone?: string | null
+    reminderVersion?: number
+    preReminderSentAt?: Date | string | null
+    followupReminderSentAt?: Date | string | null
+    purchasedAt?: Date | string | null
+    removedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutWishlistItemsInput
+  }
+
+  export type WishlistItemUncheckedCreateWithoutProductInput = {
+    id?: string
+    userId: string
+    status?: $Enums.WishlistStatus
+    plannedPurchaseAt?: Date | string | null
+    remindersEnabled?: boolean
+    reminderTimezone?: string | null
+    reminderVersion?: number
+    preReminderSentAt?: Date | string | null
+    followupReminderSentAt?: Date | string | null
+    purchasedAt?: Date | string | null
+    removedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type WishlistItemCreateOrConnectWithoutProductInput = {
+    where: WishlistItemWhereUniqueInput
+    create: XOR<WishlistItemCreateWithoutProductInput, WishlistItemUncheckedCreateWithoutProductInput>
+  }
+
+  export type WishlistItemCreateManyProductInputEnvelope = {
+    data: WishlistItemCreateManyProductInput | WishlistItemCreateManyProductInput[]
+    skipDuplicates?: boolean
+  }
+
   export type CategoryUpsertWithoutProductsInput = {
     update: XOR<CategoryUpdateWithoutProductsInput, CategoryUncheckedUpdateWithoutProductsInput>
     create: XOR<CategoryCreateWithoutProductsInput, CategoryUncheckedCreateWithoutProductsInput>
@@ -90049,6 +92341,22 @@ export namespace Prisma {
     data: XOR<RetentionSubscriptionUpdateManyMutationInput, RetentionSubscriptionUncheckedUpdateManyWithoutProductInput>
   }
 
+  export type WishlistItemUpsertWithWhereUniqueWithoutProductInput = {
+    where: WishlistItemWhereUniqueInput
+    update: XOR<WishlistItemUpdateWithoutProductInput, WishlistItemUncheckedUpdateWithoutProductInput>
+    create: XOR<WishlistItemCreateWithoutProductInput, WishlistItemUncheckedCreateWithoutProductInput>
+  }
+
+  export type WishlistItemUpdateWithWhereUniqueWithoutProductInput = {
+    where: WishlistItemWhereUniqueInput
+    data: XOR<WishlistItemUpdateWithoutProductInput, WishlistItemUncheckedUpdateWithoutProductInput>
+  }
+
+  export type WishlistItemUpdateManyWithWhereWithoutProductInput = {
+    where: WishlistItemScalarWhereInput
+    data: XOR<WishlistItemUpdateManyMutationInput, WishlistItemUncheckedUpdateManyWithoutProductInput>
+  }
+
   export type UserCreateWithoutOrdersInput = {
     id?: string
     email: string
@@ -90085,6 +92393,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutOrdersInput = {
@@ -90123,6 +92432,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutOrdersInput = {
@@ -90239,6 +92549,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutOrdersInput = {
@@ -90277,6 +92588,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type OrderItemUpsertWithWhereUniqueWithoutOrderInput = {
@@ -90358,6 +92670,9 @@ export namespace Prisma {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -90365,8 +92680,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
@@ -90385,12 +92704,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutProductInput
   }
 
   export type ProductUncheckedCreateWithoutOrderItemsInput = {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -90398,8 +92721,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
     createdAt?: Date | string
@@ -90418,6 +92745,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type ProductCreateOrConnectWithoutOrderItemsInput = {
@@ -90489,6 +92817,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -90496,8 +92827,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
@@ -90516,12 +92851,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUpdateManyWithoutProductNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutProductNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutProductNestedInput
   }
 
   export type ProductUncheckedUpdateWithoutOrderItemsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -90529,8 +92868,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -90549,6 +92892,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedUpdateManyWithoutProductNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutProductNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutProductNestedInput
   }
 
   export type UserCreateWithoutReviewsInput = {
@@ -90587,6 +92931,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutReviewsInput = {
@@ -90625,6 +92970,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutReviewsInput = {
@@ -90636,6 +92982,9 @@ export namespace Prisma {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -90643,8 +92992,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
@@ -90663,12 +93016,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutProductInput
   }
 
   export type ProductUncheckedCreateWithoutReviewsInput = {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -90676,8 +93033,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
     createdAt?: Date | string
@@ -90696,6 +93057,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type ProductCreateOrConnectWithoutReviewsInput = {
@@ -90750,6 +93112,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutReviewsInput = {
@@ -90788,6 +93151,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type ProductUpsertWithoutReviewsInput = {
@@ -90805,6 +93169,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -90812,8 +93179,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
@@ -90832,12 +93203,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUpdateManyWithoutProductNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutProductNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutProductNestedInput
   }
 
   export type ProductUncheckedUpdateWithoutReviewsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -90845,13 +93220,370 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
+    views?: ProductViewUncheckedUpdateManyWithoutProductNestedInput
+    collectionMemberships?: CollectionMembershipUncheckedUpdateManyWithoutProductNestedInput
+    collectionOverrides?: CollectionOverrideUncheckedUpdateManyWithoutProductNestedInput
+    promotionProducts?: PromotionProductUncheckedUpdateManyWithoutProductNestedInput
+    bundleItems?: BundleItemUncheckedUpdateManyWithoutProductNestedInput
+    commerceEvents?: CommerceEventUncheckedUpdateManyWithoutProductNestedInput
+    hourlyMetrics?: ProductMetricHourlyUncheckedUpdateManyWithoutProductNestedInput
+    dailyMetrics?: ProductMetricDailyUncheckedUpdateManyWithoutProductNestedInput
+    rankings?: ProductRankingUncheckedUpdateManyWithoutProductNestedInput
+    userAffinities?: UserProductAffinityUncheckedUpdateManyWithoutProductNestedInput
+    retentionTriggers?: RetentionTriggerUncheckedUpdateManyWithoutProductNestedInput
+    promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutProductNestedInput
+    retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutProductNestedInput
+  }
+
+  export type UserCreateWithoutWishlistItemsInput = {
+    id?: string
+    email: string
+    passwordHash?: string | null
+    name?: string | null
+    phone?: string | null
+    address?: string | null
+    avatarUrl?: string | null
+    emailVerified?: Date | string | null
+    isActive?: boolean
+    walletBalance?: Decimal | DecimalJsLike | number | string
+    referralCode?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    referredBy?: UserCreateNestedOneWithoutReferralsInput
+    referrals?: UserCreateNestedManyWithoutReferredByInput
+    oauthAccounts?: OAuthAccountCreateNestedManyWithoutUserInput
+    refreshTokens?: RefreshTokenCreateNestedManyWithoutUserInput
+    emailVerificationTokens?: EmailVerificationTokenCreateNestedManyWithoutUserInput
+    passwordResetTokens?: PasswordResetTokenCreateNestedManyWithoutUserInput
+    legacyPassword?: LegacyPasswordImportCreateNestedOneWithoutUserInput
+    orders?: OrderCreateNestedManyWithoutUserInput
+    reviews?: ReviewCreateNestedManyWithoutUserInput
+    productViews?: ProductViewCreateNestedManyWithoutUserInput
+    walletTransactions?: WalletTransactionCreateNestedManyWithoutUserInput
+    walletRedemptions?: WalletRedemptionCreateNestedManyWithoutUserInput
+    sentMessages?: MessageCreateNestedManyWithoutSenderUserInput
+    vendorApplications?: VendorApplicationCreateNestedManyWithoutUserInput
+    referralEvents?: ReferralCreateNestedManyWithoutReferrerInput
+    referredEvents?: ReferralCreateNestedManyWithoutReferredInput
+    commerceEvents?: CommerceEventCreateNestedManyWithoutUserInput
+    productAffinities?: UserProductAffinityCreateNestedManyWithoutUserInput
+    notificationPreferences?: NotificationPreferenceCreateNestedManyWithoutUserInput
+    retentionTriggers?: RetentionTriggerCreateNestedManyWithoutUserInput
+    experimentAssignments?: ExperimentAssignmentCreateNestedManyWithoutUserInput
+    promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutUserInput
+    retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutWishlistItemsInput = {
+    id?: string
+    email: string
+    passwordHash?: string | null
+    name?: string | null
+    phone?: string | null
+    address?: string | null
+    avatarUrl?: string | null
+    emailVerified?: Date | string | null
+    isActive?: boolean
+    walletBalance?: Decimal | DecimalJsLike | number | string
+    referralCode?: string | null
+    referredById?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    referrals?: UserUncheckedCreateNestedManyWithoutReferredByInput
+    oauthAccounts?: OAuthAccountUncheckedCreateNestedManyWithoutUserInput
+    refreshTokens?: RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+    emailVerificationTokens?: EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+    passwordResetTokens?: PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+    legacyPassword?: LegacyPasswordImportUncheckedCreateNestedOneWithoutUserInput
+    orders?: OrderUncheckedCreateNestedManyWithoutUserInput
+    reviews?: ReviewUncheckedCreateNestedManyWithoutUserInput
+    productViews?: ProductViewUncheckedCreateNestedManyWithoutUserInput
+    walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutUserInput
+    walletRedemptions?: WalletRedemptionUncheckedCreateNestedManyWithoutUserInput
+    sentMessages?: MessageUncheckedCreateNestedManyWithoutSenderUserInput
+    vendorApplications?: VendorApplicationUncheckedCreateNestedManyWithoutUserInput
+    referralEvents?: ReferralUncheckedCreateNestedManyWithoutReferrerInput
+    referredEvents?: ReferralUncheckedCreateNestedManyWithoutReferredInput
+    commerceEvents?: CommerceEventUncheckedCreateNestedManyWithoutUserInput
+    productAffinities?: UserProductAffinityUncheckedCreateNestedManyWithoutUserInput
+    notificationPreferences?: NotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
+    retentionTriggers?: RetentionTriggerUncheckedCreateNestedManyWithoutUserInput
+    experimentAssignments?: ExperimentAssignmentUncheckedCreateNestedManyWithoutUserInput
+    promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
+    retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutWishlistItemsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutWishlistItemsInput, UserUncheckedCreateWithoutWishlistItemsInput>
+  }
+
+  export type ProductCreateWithoutWishlistItemsInput = {
+    id?: string
+    name: string
+    slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
+    description?: string | null
+    shortDescription?: string | null
+    price: Decimal | DecimalJsLike | number | string
+    originalPrice?: Decimal | DecimalJsLike | number | string | null
+    sellingPrice?: Decimal | DecimalJsLike | number | string | null
+    images?: ProductCreateimagesInput | string[]
+    stock?: number
+    lowStockThreshold?: number
+    isActive?: boolean
+    isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    category?: CategoryCreateNestedOneWithoutProductsInput
+    createdBy?: AdminCreateNestedOneWithoutCreatedProductsInput
+    orderItems?: OrderItemCreateNestedManyWithoutProductInput
+    reviews?: ReviewCreateNestedManyWithoutProductInput
+    views?: ProductViewCreateNestedManyWithoutProductInput
+    collectionMemberships?: CollectionMembershipCreateNestedManyWithoutProductInput
+    collectionOverrides?: CollectionOverrideCreateNestedManyWithoutProductInput
+    promotionProducts?: PromotionProductCreateNestedManyWithoutProductInput
+    bundleItems?: BundleItemCreateNestedManyWithoutProductInput
+    commerceEvents?: CommerceEventCreateNestedManyWithoutProductInput
+    hourlyMetrics?: ProductMetricHourlyCreateNestedManyWithoutProductInput
+    dailyMetrics?: ProductMetricDailyCreateNestedManyWithoutProductInput
+    rankings?: ProductRankingCreateNestedManyWithoutProductInput
+    userAffinities?: UserProductAffinityCreateNestedManyWithoutProductInput
+    retentionTriggers?: RetentionTriggerCreateNestedManyWithoutProductInput
+    promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutProductInput
+    retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutProductInput
+  }
+
+  export type ProductUncheckedCreateWithoutWishlistItemsInput = {
+    id?: string
+    name: string
+    slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
+    description?: string | null
+    shortDescription?: string | null
+    price: Decimal | DecimalJsLike | number | string
+    originalPrice?: Decimal | DecimalJsLike | number | string | null
+    sellingPrice?: Decimal | DecimalJsLike | number | string | null
+    images?: ProductCreateimagesInput | string[]
+    stock?: number
+    lowStockThreshold?: number
+    isActive?: boolean
+    isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
+    categoryId?: string | null
+    createdById?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
+    reviews?: ReviewUncheckedCreateNestedManyWithoutProductInput
+    views?: ProductViewUncheckedCreateNestedManyWithoutProductInput
+    collectionMemberships?: CollectionMembershipUncheckedCreateNestedManyWithoutProductInput
+    collectionOverrides?: CollectionOverrideUncheckedCreateNestedManyWithoutProductInput
+    promotionProducts?: PromotionProductUncheckedCreateNestedManyWithoutProductInput
+    bundleItems?: BundleItemUncheckedCreateNestedManyWithoutProductInput
+    commerceEvents?: CommerceEventUncheckedCreateNestedManyWithoutProductInput
+    hourlyMetrics?: ProductMetricHourlyUncheckedCreateNestedManyWithoutProductInput
+    dailyMetrics?: ProductMetricDailyUncheckedCreateNestedManyWithoutProductInput
+    rankings?: ProductRankingUncheckedCreateNestedManyWithoutProductInput
+    userAffinities?: UserProductAffinityUncheckedCreateNestedManyWithoutProductInput
+    retentionTriggers?: RetentionTriggerUncheckedCreateNestedManyWithoutProductInput
+    promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutProductInput
+    retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutProductInput
+  }
+
+  export type ProductCreateOrConnectWithoutWishlistItemsInput = {
+    where: ProductWhereUniqueInput
+    create: XOR<ProductCreateWithoutWishlistItemsInput, ProductUncheckedCreateWithoutWishlistItemsInput>
+  }
+
+  export type UserUpsertWithoutWishlistItemsInput = {
+    update: XOR<UserUpdateWithoutWishlistItemsInput, UserUncheckedUpdateWithoutWishlistItemsInput>
+    create: XOR<UserCreateWithoutWishlistItemsInput, UserUncheckedCreateWithoutWishlistItemsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutWishlistItemsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutWishlistItemsInput, UserUncheckedUpdateWithoutWishlistItemsInput>
+  }
+
+  export type UserUpdateWithoutWishlistItemsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    walletBalance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referredBy?: UserUpdateOneWithoutReferralsNestedInput
+    referrals?: UserUpdateManyWithoutReferredByNestedInput
+    oauthAccounts?: OAuthAccountUpdateManyWithoutUserNestedInput
+    refreshTokens?: RefreshTokenUpdateManyWithoutUserNestedInput
+    emailVerificationTokens?: EmailVerificationTokenUpdateManyWithoutUserNestedInput
+    passwordResetTokens?: PasswordResetTokenUpdateManyWithoutUserNestedInput
+    legacyPassword?: LegacyPasswordImportUpdateOneWithoutUserNestedInput
+    orders?: OrderUpdateManyWithoutUserNestedInput
+    reviews?: ReviewUpdateManyWithoutUserNestedInput
+    productViews?: ProductViewUpdateManyWithoutUserNestedInput
+    walletTransactions?: WalletTransactionUpdateManyWithoutUserNestedInput
+    walletRedemptions?: WalletRedemptionUpdateManyWithoutUserNestedInput
+    sentMessages?: MessageUpdateManyWithoutSenderUserNestedInput
+    vendorApplications?: VendorApplicationUpdateManyWithoutUserNestedInput
+    referralEvents?: ReferralUpdateManyWithoutReferrerNestedInput
+    referredEvents?: ReferralUpdateManyWithoutReferredNestedInput
+    commerceEvents?: CommerceEventUpdateManyWithoutUserNestedInput
+    productAffinities?: UserProductAffinityUpdateManyWithoutUserNestedInput
+    notificationPreferences?: NotificationPreferenceUpdateManyWithoutUserNestedInput
+    retentionTriggers?: RetentionTriggerUpdateManyWithoutUserNestedInput
+    experimentAssignments?: ExperimentAssignmentUpdateManyWithoutUserNestedInput
+    promotionRedemptions?: PromotionRedemptionUpdateManyWithoutUserNestedInput
+    retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutWishlistItemsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    walletBalance?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    referralCode?: NullableStringFieldUpdateOperationsInput | string | null
+    referredById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    referrals?: UserUncheckedUpdateManyWithoutReferredByNestedInput
+    oauthAccounts?: OAuthAccountUncheckedUpdateManyWithoutUserNestedInput
+    refreshTokens?: RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+    emailVerificationTokens?: EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+    passwordResetTokens?: PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+    legacyPassword?: LegacyPasswordImportUncheckedUpdateOneWithoutUserNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutUserNestedInput
+    reviews?: ReviewUncheckedUpdateManyWithoutUserNestedInput
+    productViews?: ProductViewUncheckedUpdateManyWithoutUserNestedInput
+    walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutUserNestedInput
+    walletRedemptions?: WalletRedemptionUncheckedUpdateManyWithoutUserNestedInput
+    sentMessages?: MessageUncheckedUpdateManyWithoutSenderUserNestedInput
+    vendorApplications?: VendorApplicationUncheckedUpdateManyWithoutUserNestedInput
+    referralEvents?: ReferralUncheckedUpdateManyWithoutReferrerNestedInput
+    referredEvents?: ReferralUncheckedUpdateManyWithoutReferredNestedInput
+    commerceEvents?: CommerceEventUncheckedUpdateManyWithoutUserNestedInput
+    productAffinities?: UserProductAffinityUncheckedUpdateManyWithoutUserNestedInput
+    notificationPreferences?: NotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
+    retentionTriggers?: RetentionTriggerUncheckedUpdateManyWithoutUserNestedInput
+    experimentAssignments?: ExperimentAssignmentUncheckedUpdateManyWithoutUserNestedInput
+    promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
+    retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type ProductUpsertWithoutWishlistItemsInput = {
+    update: XOR<ProductUpdateWithoutWishlistItemsInput, ProductUncheckedUpdateWithoutWishlistItemsInput>
+    create: XOR<ProductCreateWithoutWishlistItemsInput, ProductUncheckedCreateWithoutWishlistItemsInput>
+    where?: ProductWhereInput
+  }
+
+  export type ProductUpdateToOneWithWhereWithoutWishlistItemsInput = {
+    where?: ProductWhereInput
+    data: XOR<ProductUpdateWithoutWishlistItemsInput, ProductUncheckedUpdateWithoutWishlistItemsInput>
+  }
+
+  export type ProductUpdateWithoutWishlistItemsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    images?: ProductUpdateimagesInput | string[]
+    stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    category?: CategoryUpdateOneWithoutProductsNestedInput
+    createdBy?: AdminUpdateOneWithoutCreatedProductsNestedInput
+    orderItems?: OrderItemUpdateManyWithoutProductNestedInput
+    reviews?: ReviewUpdateManyWithoutProductNestedInput
+    views?: ProductViewUpdateManyWithoutProductNestedInput
+    collectionMemberships?: CollectionMembershipUpdateManyWithoutProductNestedInput
+    collectionOverrides?: CollectionOverrideUpdateManyWithoutProductNestedInput
+    promotionProducts?: PromotionProductUpdateManyWithoutProductNestedInput
+    bundleItems?: BundleItemUpdateManyWithoutProductNestedInput
+    commerceEvents?: CommerceEventUpdateManyWithoutProductNestedInput
+    hourlyMetrics?: ProductMetricHourlyUpdateManyWithoutProductNestedInput
+    dailyMetrics?: ProductMetricDailyUpdateManyWithoutProductNestedInput
+    rankings?: ProductRankingUpdateManyWithoutProductNestedInput
+    userAffinities?: UserProductAffinityUpdateManyWithoutProductNestedInput
+    retentionTriggers?: RetentionTriggerUpdateManyWithoutProductNestedInput
+    promotionRedemptions?: PromotionRedemptionUpdateManyWithoutProductNestedInput
+    retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutProductNestedInput
+  }
+
+  export type ProductUncheckedUpdateWithoutWishlistItemsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    images?: ProductUpdateimagesInput | string[]
+    stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
+    categoryId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
+    reviews?: ReviewUncheckedUpdateManyWithoutProductNestedInput
     views?: ProductViewUncheckedUpdateManyWithoutProductNestedInput
     collectionMemberships?: CollectionMembershipUncheckedUpdateManyWithoutProductNestedInput
     collectionOverrides?: CollectionOverrideUncheckedUpdateManyWithoutProductNestedInput
@@ -90871,6 +93603,9 @@ export namespace Prisma {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -90878,8 +93613,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
@@ -90898,12 +93637,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutProductInput
   }
 
   export type ProductUncheckedCreateWithoutViewsInput = {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -90911,8 +93654,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
     createdAt?: Date | string
@@ -90931,6 +93678,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type ProductCreateOrConnectWithoutViewsInput = {
@@ -90974,6 +93722,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutProductViewsInput = {
@@ -91012,6 +93761,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutProductViewsInput = {
@@ -91034,6 +93784,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -91041,8 +93794,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
@@ -91061,12 +93818,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUpdateManyWithoutProductNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutProductNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutProductNestedInput
   }
 
   export type ProductUncheckedUpdateWithoutViewsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -91074,8 +93835,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -91094,6 +93859,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedUpdateManyWithoutProductNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutProductNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutProductNestedInput
   }
 
   export type UserUpsertWithoutProductViewsInput = {
@@ -91143,6 +93909,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutProductViewsInput = {
@@ -91181,6 +93948,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutWalletTransactionsInput = {
@@ -91219,6 +93987,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutWalletTransactionsInput = {
@@ -91257,6 +94026,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutWalletTransactionsInput = {
@@ -91311,6 +94081,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutWalletTransactionsInput = {
@@ -91349,6 +94120,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutWalletRedemptionsInput = {
@@ -91387,6 +94159,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutWalletRedemptionsInput = {
@@ -91425,6 +94198,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutWalletRedemptionsInput = {
@@ -91479,6 +94253,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutWalletRedemptionsInput = {
@@ -91517,6 +94292,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutReferralEventsInput = {
@@ -91555,6 +94331,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutReferralEventsInput = {
@@ -91593,6 +94370,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutReferralEventsInput = {
@@ -91636,6 +94414,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutReferredEventsInput = {
@@ -91674,6 +94453,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutReferredEventsInput = {
@@ -91728,6 +94508,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutReferralEventsInput = {
@@ -91766,6 +94547,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUpsertWithoutReferredEventsInput = {
@@ -91815,6 +94597,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutReferredEventsInput = {
@@ -91853,6 +94636,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutSentMessagesInput = {
@@ -91891,6 +94675,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutSentMessagesInput = {
@@ -91929,6 +94714,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutSentMessagesInput = {
@@ -91983,6 +94769,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSentMessagesInput = {
@@ -92021,6 +94808,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutVendorApplicationsInput = {
@@ -92059,6 +94847,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutVendorApplicationsInput = {
@@ -92097,6 +94886,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutVendorApplicationsInput = {
@@ -92206,6 +94996,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutVendorApplicationsInput = {
@@ -92244,6 +95035,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type VendorAccountUpsertWithoutApplicationInput = {
@@ -93064,6 +95856,9 @@ export namespace Prisma {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -93071,8 +95866,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
@@ -93091,12 +95890,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutProductInput
   }
 
   export type ProductUncheckedCreateWithoutCollectionMembershipsInput = {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -93104,8 +95907,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
     createdAt?: Date | string
@@ -93124,6 +95931,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type ProductCreateOrConnectWithoutCollectionMembershipsInput = {
@@ -93229,6 +96037,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -93236,8 +96047,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
@@ -93256,12 +96071,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUpdateManyWithoutProductNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutProductNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutProductNestedInput
   }
 
   export type ProductUncheckedUpdateWithoutCollectionMembershipsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -93269,8 +96088,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -93289,6 +96112,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedUpdateManyWithoutProductNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutProductNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutProductNestedInput
   }
 
   export type MerchandisingCollectionCreateWithoutOverridesInput = {
@@ -93372,6 +96196,9 @@ export namespace Prisma {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -93379,8 +96206,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
@@ -93399,12 +96230,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutProductInput
   }
 
   export type ProductUncheckedCreateWithoutCollectionOverridesInput = {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -93412,8 +96247,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
     createdAt?: Date | string
@@ -93432,6 +96271,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type ProductCreateOrConnectWithoutCollectionOverridesInput = {
@@ -93578,6 +96418,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -93585,8 +96428,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
@@ -93605,12 +96452,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUpdateManyWithoutProductNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutProductNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutProductNestedInput
   }
 
   export type ProductUncheckedUpdateWithoutCollectionOverridesInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -93618,8 +96469,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -93638,6 +96493,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedUpdateManyWithoutProductNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutProductNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutProductNestedInput
   }
 
   export type AdminUpsertWithoutCollectionOverridesInput = {
@@ -94248,6 +97104,9 @@ export namespace Prisma {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -94255,8 +97114,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
@@ -94275,12 +97138,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutProductInput
   }
 
   export type ProductUncheckedCreateWithoutPromotionProductsInput = {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -94288,8 +97155,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
     createdAt?: Date | string
@@ -94308,6 +97179,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type ProductCreateOrConnectWithoutPromotionProductsInput = {
@@ -94419,6 +97291,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -94426,8 +97301,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
@@ -94446,12 +97325,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUpdateManyWithoutProductNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutProductNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutProductNestedInput
   }
 
   export type ProductUncheckedUpdateWithoutPromotionProductsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -94459,8 +97342,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -94479,6 +97366,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedUpdateManyWithoutProductNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutProductNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutProductNestedInput
   }
 
   export type PromotionRedemptionUpsertWithWhereUniqueWithoutPromotionProductInput = {
@@ -94579,6 +97467,9 @@ export namespace Prisma {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -94586,8 +97477,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
@@ -94606,12 +97501,16 @@ export namespace Prisma {
     userAffinities?: UserProductAffinityCreateNestedManyWithoutProductInput
     retentionTriggers?: RetentionTriggerCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutProductInput
   }
 
   export type ProductUncheckedCreateWithoutPromotionRedemptionsInput = {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -94619,8 +97518,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
     createdAt?: Date | string
@@ -94639,6 +97542,7 @@ export namespace Prisma {
     userAffinities?: UserProductAffinityUncheckedCreateNestedManyWithoutProductInput
     retentionTriggers?: RetentionTriggerUncheckedCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type ProductCreateOrConnectWithoutPromotionRedemptionsInput = {
@@ -94725,6 +97629,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerCreateNestedManyWithoutUserInput
     experimentAssignments?: ExperimentAssignmentCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutPromotionRedemptionsInput = {
@@ -94763,6 +97668,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedCreateNestedManyWithoutUserInput
     experimentAssignments?: ExperimentAssignmentUncheckedCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutPromotionRedemptionsInput = {
@@ -94875,6 +97781,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -94882,8 +97791,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
@@ -94902,12 +97815,16 @@ export namespace Prisma {
     userAffinities?: UserProductAffinityUpdateManyWithoutProductNestedInput
     retentionTriggers?: RetentionTriggerUpdateManyWithoutProductNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutProductNestedInput
   }
 
   export type ProductUncheckedUpdateWithoutPromotionRedemptionsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -94915,8 +97832,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -94935,6 +97856,7 @@ export namespace Prisma {
     userAffinities?: UserProductAffinityUncheckedUpdateManyWithoutProductNestedInput
     retentionTriggers?: RetentionTriggerUncheckedUpdateManyWithoutProductNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutProductNestedInput
   }
 
   export type OrderUpsertWithoutPromotionRedemptionsInput = {
@@ -95033,6 +97955,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUpdateManyWithoutUserNestedInput
     experimentAssignments?: ExperimentAssignmentUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPromotionRedemptionsInput = {
@@ -95071,6 +97994,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedUpdateManyWithoutUserNestedInput
     experimentAssignments?: ExperimentAssignmentUncheckedUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type AdminCreateWithoutBundlesInput = {
@@ -95252,6 +98176,9 @@ export namespace Prisma {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -95259,8 +98186,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
@@ -95279,12 +98210,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutProductInput
   }
 
   export type ProductUncheckedCreateWithoutBundleItemsInput = {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -95292,8 +98227,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
     createdAt?: Date | string
@@ -95312,6 +98251,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type ProductCreateOrConnectWithoutBundleItemsInput = {
@@ -95383,6 +98323,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -95390,8 +98333,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
@@ -95410,12 +98357,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUpdateManyWithoutProductNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutProductNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutProductNestedInput
   }
 
   export type ProductUncheckedUpdateWithoutBundleItemsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -95423,8 +98374,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -95443,6 +98398,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedUpdateManyWithoutProductNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutProductNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutProductNestedInput
   }
 
   export type AdminCreateWithoutSpotlightPlacementsInput = {
@@ -95569,6 +98525,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutCommerceEventsInput = {
@@ -95607,6 +98564,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutCommerceEventsInput = {
@@ -95618,6 +98576,9 @@ export namespace Prisma {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -95625,8 +98586,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
@@ -95645,12 +98610,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutProductInput
   }
 
   export type ProductUncheckedCreateWithoutCommerceEventsInput = {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -95658,8 +98627,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
     createdAt?: Date | string
@@ -95678,6 +98651,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type ProductCreateOrConnectWithoutCommerceEventsInput = {
@@ -95809,6 +98783,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCommerceEventsInput = {
@@ -95847,6 +98822,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type ProductUpsertWithoutCommerceEventsInput = {
@@ -95864,6 +98840,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -95871,8 +98850,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
@@ -95891,12 +98874,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUpdateManyWithoutProductNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutProductNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutProductNestedInput
   }
 
   export type ProductUncheckedUpdateWithoutCommerceEventsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -95904,8 +98891,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -95924,6 +98915,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedUpdateManyWithoutProductNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutProductNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutProductNestedInput
   }
 
   export type MerchandisingCollectionUpsertWithoutCommerceEventsInput = {
@@ -96013,6 +99005,9 @@ export namespace Prisma {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -96020,8 +99015,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
@@ -96040,12 +99039,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutProductInput
   }
 
   export type ProductUncheckedCreateWithoutHourlyMetricsInput = {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -96053,8 +99056,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
     createdAt?: Date | string
@@ -96073,6 +99080,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type ProductCreateOrConnectWithoutHourlyMetricsInput = {
@@ -96095,6 +99103,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -96102,8 +99113,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
@@ -96122,12 +99137,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUpdateManyWithoutProductNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutProductNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutProductNestedInput
   }
 
   export type ProductUncheckedUpdateWithoutHourlyMetricsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -96135,8 +99154,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -96155,12 +99178,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedUpdateManyWithoutProductNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutProductNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutProductNestedInput
   }
 
   export type ProductCreateWithoutDailyMetricsInput = {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -96168,8 +99195,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
@@ -96188,12 +99219,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutProductInput
   }
 
   export type ProductUncheckedCreateWithoutDailyMetricsInput = {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -96201,8 +99236,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
     createdAt?: Date | string
@@ -96221,6 +99260,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type ProductCreateOrConnectWithoutDailyMetricsInput = {
@@ -96243,6 +99283,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -96250,8 +99293,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
@@ -96270,12 +99317,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUpdateManyWithoutProductNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutProductNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutProductNestedInput
   }
 
   export type ProductUncheckedUpdateWithoutDailyMetricsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -96283,8 +99334,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -96303,6 +99358,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedUpdateManyWithoutProductNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutProductNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutProductNestedInput
   }
 
   export type MerchandisingCollectionCreateWithoutDailyMetricsInput = {
@@ -96546,6 +99602,9 @@ export namespace Prisma {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -96553,8 +99612,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
@@ -96573,12 +99636,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutProductInput
   }
 
   export type ProductUncheckedCreateWithoutRankingsInput = {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -96586,8 +99653,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
     createdAt?: Date | string
@@ -96606,6 +99677,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type ProductCreateOrConnectWithoutRankingsInput = {
@@ -96711,6 +99783,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -96718,8 +99793,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
@@ -96738,12 +99817,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUpdateManyWithoutProductNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutProductNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutProductNestedInput
   }
 
   export type ProductUncheckedUpdateWithoutRankingsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -96751,8 +99834,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -96771,6 +99858,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedUpdateManyWithoutProductNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutProductNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutProductNestedInput
   }
 
   export type UserCreateWithoutProductAffinitiesInput = {
@@ -96809,6 +99897,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutProductAffinitiesInput = {
@@ -96847,6 +99936,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutProductAffinitiesInput = {
@@ -96858,6 +99948,9 @@ export namespace Prisma {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -96865,8 +99958,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
@@ -96885,12 +99982,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutProductInput
   }
 
   export type ProductUncheckedCreateWithoutUserAffinitiesInput = {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -96898,8 +99999,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
     createdAt?: Date | string
@@ -96918,6 +100023,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type ProductCreateOrConnectWithoutUserAffinitiesInput = {
@@ -96972,6 +100078,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutProductAffinitiesInput = {
@@ -97010,6 +100117,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type ProductUpsertWithoutUserAffinitiesInput = {
@@ -97027,6 +100135,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -97034,8 +100145,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
@@ -97054,12 +100169,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUpdateManyWithoutProductNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutProductNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutProductNestedInput
   }
 
   export type ProductUncheckedUpdateWithoutUserAffinitiesInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -97067,8 +100186,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -97087,6 +100210,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedUpdateManyWithoutProductNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutProductNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutProductNestedInput
   }
 
   export type UserCreateWithoutNotificationPreferencesInput = {
@@ -97125,6 +100249,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutNotificationPreferencesInput = {
@@ -97163,6 +100288,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutNotificationPreferencesInput = {
@@ -97217,6 +100343,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutNotificationPreferencesInput = {
@@ -97255,6 +100382,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutRetentionSubscriptionsInput = {
@@ -97293,6 +100421,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerCreateNestedManyWithoutUserInput
     experimentAssignments?: ExperimentAssignmentCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutRetentionSubscriptionsInput = {
@@ -97331,6 +100460,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedCreateNestedManyWithoutUserInput
     experimentAssignments?: ExperimentAssignmentUncheckedCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutRetentionSubscriptionsInput = {
@@ -97342,6 +100472,9 @@ export namespace Prisma {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -97349,8 +100482,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
@@ -97369,12 +100506,16 @@ export namespace Prisma {
     userAffinities?: UserProductAffinityCreateNestedManyWithoutProductInput
     retentionTriggers?: RetentionTriggerCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutProductInput
   }
 
   export type ProductUncheckedCreateWithoutRetentionSubscriptionsInput = {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -97382,8 +100523,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
     createdAt?: Date | string
@@ -97402,6 +100547,7 @@ export namespace Prisma {
     userAffinities?: UserProductAffinityUncheckedCreateNestedManyWithoutProductInput
     retentionTriggers?: RetentionTriggerUncheckedCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type ProductCreateOrConnectWithoutRetentionSubscriptionsInput = {
@@ -97456,6 +100602,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUpdateManyWithoutUserNestedInput
     experimentAssignments?: ExperimentAssignmentUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutRetentionSubscriptionsInput = {
@@ -97494,6 +100641,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedUpdateManyWithoutUserNestedInput
     experimentAssignments?: ExperimentAssignmentUncheckedUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type ProductUpsertWithoutRetentionSubscriptionsInput = {
@@ -97511,6 +100659,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -97518,8 +100669,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
@@ -97538,12 +100693,16 @@ export namespace Prisma {
     userAffinities?: UserProductAffinityUpdateManyWithoutProductNestedInput
     retentionTriggers?: RetentionTriggerUpdateManyWithoutProductNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutProductNestedInput
   }
 
   export type ProductUncheckedUpdateWithoutRetentionSubscriptionsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -97551,8 +100710,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -97571,6 +100734,7 @@ export namespace Prisma {
     userAffinities?: UserProductAffinityUncheckedUpdateManyWithoutProductNestedInput
     retentionTriggers?: RetentionTriggerUncheckedUpdateManyWithoutProductNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutProductNestedInput
   }
 
   export type UserCreateWithoutRetentionTriggersInput = {
@@ -97609,6 +100773,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutRetentionTriggersInput = {
@@ -97647,6 +100812,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutRetentionTriggersInput = {
@@ -97658,6 +100824,9 @@ export namespace Prisma {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -97665,8 +100834,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
@@ -97685,12 +100858,16 @@ export namespace Prisma {
     userAffinities?: UserProductAffinityCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutProductInput
   }
 
   export type ProductUncheckedCreateWithoutRetentionTriggersInput = {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -97698,8 +100875,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
     createdAt?: Date | string
@@ -97718,6 +100899,7 @@ export namespace Prisma {
     userAffinities?: UserProductAffinityUncheckedCreateNestedManyWithoutProductInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutProductInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type ProductCreateOrConnectWithoutRetentionTriggersInput = {
@@ -97772,6 +100954,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutRetentionTriggersInput = {
@@ -97810,6 +100993,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type ProductUpsertWithoutRetentionTriggersInput = {
@@ -97827,6 +101011,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -97834,8 +101021,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
@@ -97854,12 +101045,16 @@ export namespace Prisma {
     userAffinities?: UserProductAffinityUpdateManyWithoutProductNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutProductNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutProductNestedInput
   }
 
   export type ProductUncheckedUpdateWithoutRetentionTriggersInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -97867,8 +101062,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -97887,6 +101086,7 @@ export namespace Prisma {
     userAffinities?: UserProductAffinityUncheckedUpdateManyWithoutProductNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutProductNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutProductNestedInput
   }
 
   export type ExperimentAssignmentCreateWithoutExperimentInput = {
@@ -98004,6 +101204,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutExperimentAssignmentsInput = {
@@ -98042,6 +101243,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedCreateNestedManyWithoutUserInput
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutUserInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutUserInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutExperimentAssignmentsInput = {
@@ -98137,6 +101339,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutExperimentAssignmentsInput = {
@@ -98175,6 +101378,7 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateManyReferredByInput = {
@@ -98419,6 +101623,22 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type WishlistItemCreateManyUserInput = {
+    id?: string
+    productId: string
+    status?: $Enums.WishlistStatus
+    plannedPurchaseAt?: Date | string | null
+    remindersEnabled?: boolean
+    reminderTimezone?: string | null
+    reminderVersion?: number
+    preReminderSentAt?: Date | string | null
+    followupReminderSentAt?: Date | string | null
+    purchasedAt?: Date | string | null
+    removedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type UserUpdateWithoutReferredByInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
@@ -98455,6 +101675,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutReferredByInput = {
@@ -98493,6 +101714,7 @@ export namespace Prisma {
     experimentAssignments?: ExperimentAssignmentUncheckedUpdateManyWithoutUserNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutUserNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateManyWithoutReferredByInput = {
@@ -99197,6 +102419,54 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type WishlistItemUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: EnumWishlistStatusFieldUpdateOperationsInput | $Enums.WishlistStatus
+    plannedPurchaseAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    remindersEnabled?: BoolFieldUpdateOperationsInput | boolean
+    reminderTimezone?: NullableStringFieldUpdateOperationsInput | string | null
+    reminderVersion?: IntFieldUpdateOperationsInput | number
+    preReminderSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    followupReminderSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    purchasedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    product?: ProductUpdateOneRequiredWithoutWishlistItemsNestedInput
+  }
+
+  export type WishlistItemUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    productId?: StringFieldUpdateOperationsInput | string
+    status?: EnumWishlistStatusFieldUpdateOperationsInput | $Enums.WishlistStatus
+    plannedPurchaseAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    remindersEnabled?: BoolFieldUpdateOperationsInput | boolean
+    reminderTimezone?: NullableStringFieldUpdateOperationsInput | string | null
+    reminderVersion?: IntFieldUpdateOperationsInput | number
+    preReminderSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    followupReminderSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    purchasedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WishlistItemUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    productId?: StringFieldUpdateOperationsInput | string
+    status?: EnumWishlistStatusFieldUpdateOperationsInput | $Enums.WishlistStatus
+    plannedPurchaseAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    remindersEnabled?: BoolFieldUpdateOperationsInput | boolean
+    reminderTimezone?: NullableStringFieldUpdateOperationsInput | string | null
+    reminderVersion?: IntFieldUpdateOperationsInput | number
+    preReminderSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    followupReminderSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    purchasedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type AdminLogCreateManyAdminInput = {
     id?: string
     action: string
@@ -99211,6 +102481,9 @@ export namespace Prisma {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -99218,8 +102491,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -99367,6 +102644,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -99374,8 +102654,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
@@ -99394,12 +102678,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUpdateManyWithoutProductNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutProductNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutProductNestedInput
   }
 
   export type ProductUncheckedUpdateWithoutCreatedByInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -99407,8 +102695,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -99427,12 +102719,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedUpdateManyWithoutProductNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutProductNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutProductNestedInput
   }
 
   export type ProductUncheckedUpdateManyWithoutCreatedByInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -99440,8 +102736,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -99795,6 +103095,9 @@ export namespace Prisma {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
     description?: string | null
     shortDescription?: string | null
     price: Decimal | DecimalJsLike | number | string
@@ -99802,8 +103105,12 @@ export namespace Prisma {
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
     stock?: number
+    lowStockThreshold?: number
     isActive?: boolean
     isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdById?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -99813,6 +103120,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -99820,8 +103130,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: AdminUpdateOneWithoutCreatedProductsNestedInput
@@ -99840,12 +103154,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUpdateManyWithoutProductNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutProductNestedInput
     retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutProductNestedInput
   }
 
   export type ProductUncheckedUpdateWithoutCategoryInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -99853,8 +103171,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -99873,12 +103195,16 @@ export namespace Prisma {
     retentionTriggers?: RetentionTriggerUncheckedUpdateManyWithoutProductNestedInput
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutProductNestedInput
     retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutProductNestedInput
   }
 
   export type ProductUncheckedUpdateManyWithoutCategoryInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -99886,8 +103212,12 @@ export namespace Prisma {
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
     stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -100083,6 +103413,22 @@ export namespace Prisma {
     subscriptionType: string
     active?: boolean
     lastNotifiedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type WishlistItemCreateManyProductInput = {
+    id?: string
+    userId: string
+    status?: $Enums.WishlistStatus
+    plannedPurchaseAt?: Date | string | null
+    remindersEnabled?: boolean
+    reminderTimezone?: string | null
+    reminderVersion?: number
+    preReminderSentAt?: Date | string | null
+    followupReminderSentAt?: Date | string | null
+    purchasedAt?: Date | string | null
+    removedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -100667,6 +104013,54 @@ export namespace Prisma {
     subscriptionType?: StringFieldUpdateOperationsInput | string
     active?: BoolFieldUpdateOperationsInput | boolean
     lastNotifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WishlistItemUpdateWithoutProductInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: EnumWishlistStatusFieldUpdateOperationsInput | $Enums.WishlistStatus
+    plannedPurchaseAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    remindersEnabled?: BoolFieldUpdateOperationsInput | boolean
+    reminderTimezone?: NullableStringFieldUpdateOperationsInput | string | null
+    reminderVersion?: IntFieldUpdateOperationsInput | number
+    preReminderSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    followupReminderSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    purchasedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutWishlistItemsNestedInput
+  }
+
+  export type WishlistItemUncheckedUpdateWithoutProductInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    status?: EnumWishlistStatusFieldUpdateOperationsInput | $Enums.WishlistStatus
+    plannedPurchaseAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    remindersEnabled?: BoolFieldUpdateOperationsInput | boolean
+    reminderTimezone?: NullableStringFieldUpdateOperationsInput | string | null
+    reminderVersion?: IntFieldUpdateOperationsInput | number
+    preReminderSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    followupReminderSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    purchasedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WishlistItemUncheckedUpdateManyWithoutProductInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    status?: EnumWishlistStatusFieldUpdateOperationsInput | $Enums.WishlistStatus
+    plannedPurchaseAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    remindersEnabled?: BoolFieldUpdateOperationsInput | boolean
+    reminderTimezone?: NullableStringFieldUpdateOperationsInput | string | null
+    reminderVersion?: IntFieldUpdateOperationsInput | number
+    preReminderSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    followupReminderSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    purchasedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    removedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import { User, LogIn, LogOut, UserCircle2, Info, Phone, Package } from "lucide-react";
+import { User, LogIn, LogOut, UserCircle2, Info, Phone, Package, Heart } from "lucide-react";
 import { useAppUser } from "@/context/UserContext";
 
 const getInitials = (name: string): string => {
@@ -104,6 +104,14 @@ export default function UserMenu() {
                 >
                   <UserCircle2 size={18} className="text-slate-400" />
                   View Your Account
+                </Link>
+                <Link
+                  href="/profile?tab=wishlist"
+                  onClick={close}
+                  className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 transition-colors hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
+                >
+                  <Heart size={18} className="text-slate-400" />
+                  Wishlist
                 </Link>
               </>
             ) : (

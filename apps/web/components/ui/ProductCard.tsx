@@ -11,6 +11,7 @@ import { Plus } from "lucide-react";
 import { formatPrice } from "@/lib/formatPrice";
 import { getDiscountPercent, getOriginalPrice, getSellingPrice } from "@/lib/pricing";
 import { useSabbathStatus } from "@/lib/useSabbathStatus";
+import RatingStars from "./RatingStars";
 
 export default function ProductCard({ product }: { product: Product }) {
   const [mainImage, setMainImage] = useState<string>("");
@@ -31,9 +32,12 @@ export default function ProductCard({ product }: { product: Product }) {
     typeof product.createdAt === "number"
       ? product.createdAt
       : typeof product.createdAt === "string"
-      ? Date.parse(product.createdAt)
-      : 0;
-  const isNew = Number.isFinite(createdAtMs) && createdAtMs > 0 && Date.now() - createdAtMs <= 7 * 24 * 60 * 60 * 1000;
+        ? Date.parse(product.createdAt)
+        : 0;
+  const isNew =
+    Number.isFinite(createdAtMs) &&
+    createdAtMs > 0 &&
+    Date.now() - createdAtMs <= 7 * 24 * 60 * 60 * 1000;
   const inStock = product.inStock ?? (product.stock ?? 1) > 0;
 
   // ✅ Handle add to cart
@@ -41,20 +45,21 @@ export default function ProductCard({ product }: { product: Product }) {
     if (sabbathClosed || !inStock) return;
     addToCart({
       id: product.id,
+      slug: product.slug,
       name: product.name,
+      brandName: product.brandName,
+      storeName: product.storeName,
       price: sellingPrice,
       quantity: 1,
       image: mainImage,
+      maxQuantity: product.stock,
     });
   };
 
   // ✅ Shorten product description
   const shortDesc =
     product.shortDescription?.split(" ").slice(0, 15).join(" ") +
-    (product.shortDescription &&
-    product.shortDescription.split(" ").length > 15
-      ? "..."
-      : "");
+    (product.shortDescription && product.shortDescription.split(" ").length > 15 ? "..." : "");
 
   return (
     <motion.div
@@ -77,8 +82,13 @@ export default function ProductCard({ product }: { product: Product }) {
           Out of stock
         </div>
       )}
+      {inStock && product.stockStatus === "LOW_STOCK" && (
+        <div className="absolute inset-x-2 top-11 z-10 rounded-full bg-amber-500 px-2 py-1 text-center text-xs font-semibold text-white">
+          Only {product.stock} left
+        </div>
+      )}
       {/* ✅ Product Link */}
-      <Link href={`/products/${product.id}`} className="flex-grow block">
+      <Link href={`/products/${product.slug ?? product.id}`} className="flex-grow block">
         {/* ✅ Product Image */}
         <div className="relative w-full h-44 sm:h-48 bg-white">
           <Image
@@ -96,6 +106,21 @@ export default function ProductCard({ product }: { product: Product }) {
             {product.name}
           </h4>
 
+          {(product.brandName || product.storeName) && (
+            <p className="mt-1 truncate text-[11px] font-medium text-slate-500 dark:text-slate-400">
+              {product.brandName || product.storeName}
+            </p>
+          )}
+
+          {product.ratingSummary && (
+            <RatingStars
+              summary={product.ratingSummary}
+              size={13}
+              showValue={false}
+              className="mt-1 justify-center [&_span]:text-[11px]"
+            />
+          )}
+
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
             {shortDesc || "A quality product from NuruShop."}
           </p>
@@ -106,13 +131,9 @@ export default function ProductCard({ product }: { product: Product }) {
       <div className="flex items-center justify-between p-3 border-t border-gray-100 dark:border-gray-800">
         <div className="flex flex-col">
           {discountPercent && originalPrice && (
-            <span className="text-xs text-gray-400 line-through">
-              {formatPrice(originalPrice)}
-            </span>
+            <span className="text-xs text-gray-400 line-through">{formatPrice(originalPrice)}</span>
           )}
-          <span className="text-blue-600 font-bold">
-            {formatPrice(sellingPrice)}
-          </span>
+          <span className="text-blue-600 font-bold">{formatPrice(sellingPrice)}</span>
         </div>
 
         <Button
@@ -122,8 +143,8 @@ export default function ProductCard({ product }: { product: Product }) {
             !inStock
               ? "Out of stock"
               : sabbathClosed
-              ? "Shopping is paused for Sabbath"
-              : "Add to cart"
+                ? "Shopping is paused for Sabbath"
+                : "Add to cart"
           }
           className="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white rounded-full w-8 h-8 flex items-center justify-center disabled:cursor-not-allowed"
           onClick={(e) => {

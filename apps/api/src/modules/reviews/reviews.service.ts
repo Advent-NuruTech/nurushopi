@@ -15,6 +15,37 @@ import { toReviewDTO, type ReviewWithUser } from "./serializers.js";
 
 const withUser = { include: { user: { select: { name: true } } } } as const;
 
+/** Refresh the catalog-facing approved-rating projection transactionally. */
+async function refreshReviewProjection(
+  tx: Prisma.TransactionClient,
+  productId: string,
+): Promise<void> {
+  const where: Prisma.ReviewWhereInput = { productId, status: "APPROVED" };
+  const [aggregate, buckets] = await Promise.all([
+    tx.review.aggregate({ where, _avg: { rating: true }, _count: true }),
+    tx.review.groupBy({ by: ["rating"], where, _count: { _all: true } }),
+  ]);
+  const distribution: Record<"1" | "2" | "3" | "4" | "5", number> = {
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "4": 0,
+    "5": 0,
+  };
+  for (const bucket of buckets) {
+    const key = String(bucket.rating) as keyof typeof distribution;
+    if (key in distribution) distribution[key] = bucket._count._all;
+  }
+  await tx.product.update({
+    where: { id: productId },
+    data: {
+      ratingAverage: aggregate._avg.rating ?? 0,
+      ratingCount: aggregate._count,
+      ratingDistribution: distribution,
+    },
+  });
+}
+
 function buildOrderBy(sort: ReviewSort): Prisma.ReviewOrderByWithRelationInput {
   switch (sort) {
     case "oldest":
@@ -156,24 +187,36 @@ export async function update(
   id: string,
   input: ReviewUpdateInput,
 ): Promise<ReviewDTO> {
-  const current = await prisma.review.findUnique({ where: { id }, select: { userId: true } });
-  if (!current) throw Errors.notFound("Review not found.");
-  if (current.userId !== userId) throw Errors.forbidden("This is not your review.");
+  const updated = await prisma.$transaction(async (tx) => {
+    const current = await tx.review.findUnique({
+      where: { id },
+      select: { userId: true, productId: true },
+    });
+    if (!current) throw Errors.notFound("Review not found.");
+    if (current.userId !== userId) throw Errors.forbidden("This is not your review.");
 
-  const data: Prisma.ReviewUpdateInput = { status: "PENDING" };
-  if (input.rating !== undefined) data.rating = input.rating;
-  if (input.comment !== undefined) data.comment = input.comment ?? null;
-
-  const updated = await prisma.review.update({ where: { id }, data, ...withUser });
+    const data: Prisma.ReviewUpdateInput = { status: "PENDING" };
+    if (input.rating !== undefined) data.rating = input.rating;
+    if (input.comment !== undefined) data.comment = input.comment ?? null;
+    const row = await tx.review.update({ where: { id }, data, ...withUser });
+    await refreshReviewProjection(tx, current.productId);
+    return row;
+  });
   return toReviewDTO(updated as ReviewWithUser);
 }
 
 /** Delete the caller's own review. */
 export async function remove(userId: string, id: string): Promise<void> {
-  const current = await prisma.review.findUnique({ where: { id }, select: { userId: true } });
-  if (!current) throw Errors.notFound("Review not found.");
-  if (current.userId !== userId) throw Errors.forbidden("This is not your review.");
-  await prisma.review.delete({ where: { id } });
+  await prisma.$transaction(async (tx) => {
+    const current = await tx.review.findUnique({
+      where: { id },
+      select: { userId: true, productId: true },
+    });
+    if (!current) throw Errors.notFound("Review not found.");
+    if (current.userId !== userId) throw Errors.forbidden("This is not your review.");
+    await tx.review.delete({ where: { id } });
+    await refreshReviewProjection(tx, current.productId);
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -190,19 +233,31 @@ export function adminList(query: ReviewQuery): Promise<Paginated<ReviewDTO>> {
 }
 
 export async function moderate(id: string, input: ReviewModerateInput): Promise<ReviewDTO> {
-  const current = await prisma.review.findUnique({ where: { id }, select: { id: true } });
-  if (!current) throw Errors.notFound("Review not found.");
-
-  const updated = await prisma.review.update({
-    where: { id },
-    data: { status: input.status },
-    ...withUser,
+  const updated = await prisma.$transaction(async (tx) => {
+    const current = await tx.review.findUnique({
+      where: { id },
+      select: { id: true, productId: true },
+    });
+    if (!current) throw Errors.notFound("Review not found.");
+    const row = await tx.review.update({
+      where: { id },
+      data: { status: input.status },
+      ...withUser,
+    });
+    await refreshReviewProjection(tx, current.productId);
+    return row;
   });
   return toReviewDTO(updated as ReviewWithUser);
 }
 
 export async function adminRemove(id: string): Promise<void> {
-  const current = await prisma.review.findUnique({ where: { id }, select: { id: true } });
-  if (!current) throw Errors.notFound("Review not found.");
-  await prisma.review.delete({ where: { id } });
+  await prisma.$transaction(async (tx) => {
+    const current = await tx.review.findUnique({
+      where: { id },
+      select: { id: true, productId: true },
+    });
+    if (!current) throw Errors.notFound("Review not found.");
+    await tx.review.delete({ where: { id } });
+    await refreshReviewProjection(tx, current.productId);
+  });
 }

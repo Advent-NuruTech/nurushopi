@@ -7,19 +7,14 @@ import SectionHeader from "@/components/ui/SectionHeader";
 import { listProducts } from "@/lib/data/catalog";
 import { listWholesaleItems } from "@/lib/data/wholesale";
 import type { ProductCardVM } from "@/lib/view/catalog";
+import RatingStars from "@/components/ui/RatingStars";
 
 export const metadata = {
   title: "Shop – NuruShop",
   description: "Browse retail and wholesale products at NuruShop.",
 };
 
-function ProductCard({
-  product,
-  showCategory,
-}: {
-  product: ProductCardVM;
-  showCategory: boolean;
-}) {
+function ProductCard({ product, showCategory }: { product: ProductCardVM; showCategory: boolean }) {
   const discountPercent = getDiscountPercent(product);
   const originalPrice = getOriginalPrice(product);
   const sellingPrice = getSellingPrice(product);
@@ -63,12 +58,28 @@ function ProductCard({
             Out of stock
           </div>
         )}
+        {product.stockStatus === "LOW_STOCK" && (
+          <div className="absolute inset-x-2 bottom-2 rounded-full bg-amber-500 px-2 py-1 text-center text-xs font-semibold text-white">
+            Only {product.stock} left
+          </div>
+        )}
       </div>
 
       <div className="p-3 sm:p-4 flex flex-col flex-1">
         <h3 className="font-semibold text-gray-800 dark:text-gray-200 text-sm sm:text-base md:text-lg mb-2 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors min-h-[2.5em]">
           {product.name}
         </h3>
+        {(product.brandName || product.storeName) && (
+          <p className="mb-2 truncate text-xs font-medium text-slate-500">
+            {product.brandName || product.storeName}
+          </p>
+        )}
+        <RatingStars
+          summary={product.ratingSummary}
+          size={13}
+          showValue={false}
+          className="mb-2 [&_span]:text-[11px]"
+        />
         <div className="mt-auto">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div className="flex flex-col">

@@ -138,6 +138,7 @@ export function makeDbMock() {
     notificationPreference: model(),
     retentionTrigger: model(),
     retentionSubscription: model(),
+    wishlistItem: model(),
     experiment: model(),
     experimentAssignment: model(),
     // Supports both the array form (Promise.all) and the interactive callback

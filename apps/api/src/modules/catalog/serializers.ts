@@ -1,16 +1,5 @@
-import type {
-  Banner,
-  Category,
-  HeroAnnouncement,
-  Prisma,
-  Product,
-} from "@nuru/db";
-import type {
-  BannerDTO,
-  CategoryDTO,
-  HeroAnnouncementDTO,
-  ProductDTO,
-} from "@nuru/types";
+import type { Banner, Category, HeroAnnouncement, Prisma, Product } from "@nuru/db";
+import type { BannerDTO, CategoryDTO, HeroAnnouncementDTO, ProductDTO } from "@nuru/types";
 
 const toIso = (d: Date): string => d.toISOString();
 const decToStr = (d: Prisma.Decimal | null | undefined): string | null =>
@@ -40,11 +29,27 @@ export type ProductWithCategory = Product & {
   category?: Pick<Category, "id" | "name" | "slug"> | null;
 };
 
+function ratingDistribution(
+  value: Prisma.JsonValue | null,
+): ProductDTO["ratingSummary"]["distribution"] {
+  const empty = { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0 };
+  if (!value || typeof value !== "object" || Array.isArray(value)) return empty;
+  for (const key of Object.keys(empty) as Array<keyof typeof empty>) {
+    const count = (value as Record<string, unknown>)[key];
+    empty[key] =
+      typeof count === "number" && Number.isFinite(count) ? Math.max(0, Math.trunc(count)) : 0;
+  }
+  return empty;
+}
+
 export function toProductDTO(p: ProductWithCategory): ProductDTO {
   return {
     id: p.id,
     name: p.name,
     slug: p.slug,
+    sku: p.sku,
+    brandName: p.brandName,
+    storeName: p.storeName,
     description: p.description,
     shortDescription: p.shortDescription,
     price: p.price.toString(),
@@ -53,12 +58,20 @@ export function toProductDTO(p: ProductWithCategory): ProductDTO {
     images: p.images,
     stock: p.stock,
     inStock: p.stock > 0,
+    lowStockThreshold: p.lowStockThreshold,
+    stockStatus:
+      p.stock <= 0 ? "OUT_OF_STOCK" : p.stock <= p.lowStockThreshold ? "LOW_STOCK" : "IN_STOCK",
     isActive: p.isActive,
     isFeatured: p.isFeatured,
     categoryId: p.categoryId,
     category: p.category
       ? { id: p.category.id, name: p.category.name, slug: p.category.slug }
       : null,
+    ratingSummary: {
+      average: Number(p.ratingAverage),
+      count: p.ratingCount,
+      distribution: ratingDistribution(p.ratingDistribution),
+    },
     createdAt: toIso(p.createdAt),
     updatedAt: toIso(p.updatedAt),
   };

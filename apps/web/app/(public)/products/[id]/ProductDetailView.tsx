@@ -5,7 +5,18 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import type { Route } from "next";
-import { CheckCircle2, ChevronRight, CreditCard, Heart, PackageCheck, ShieldCheck, ShoppingCart, Star, Truck, X } from "lucide-react";
+import {
+  CheckCircle2,
+  ChevronRight,
+  CreditCard,
+  Minus,
+  PackageCheck,
+  Plus,
+  ShieldCheck,
+  ShoppingCart,
+  Truck,
+  X,
+} from "lucide-react";
 
 import { formatPrice } from "@/lib/formatPrice";
 import { Button } from "@/components/ui/button";
@@ -15,11 +26,16 @@ import FormattedDescription from "@/components/ui/FormattedDescription";
 import { useSabbathStatus } from "@/lib/useSabbathStatus";
 import { catalogApi, reviewsApi } from "@/lib/api";
 import { toProductCardVM, type ProductCardVM, type ProductDetailVM } from "@/lib/view/catalog";
+import RatingStars from "@/components/ui/RatingStars";
+import RatingBreakdown from "@/components/ui/RatingBreakdown";
+import WishlistPlanner from "@/components/ui/WishlistPlanner";
+import type { ReviewSummaryDTO } from "@nuru/types";
 
 interface Review {
   id: string;
   userName: string;
   message: string;
+  rating: number;
   createdAt?: string;
 }
 
@@ -51,20 +67,28 @@ export default function ProductDetailView({
   const [mainImage, setMainImage] = useState(product.images[0]);
   const [isDescriptionOpen, setIsDescriptionOpen] = useState(false);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewSummary, setReviewSummary] = useState<ReviewSummaryDTO>(product.ratingSummary);
+  const [reviewTotal, setReviewTotal] = useState(product.ratingSummary.count);
   const [recommendations, setRecommendations] = useState<ProductCardVM[]>(related);
   const [isStickyVisible, setIsStickyVisible] = useState(false);
+  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
     let cancelled = false;
-    reviewsApi
-      .listForProduct(product.id)
-      .then((page) => {
+    Promise.all([
+      reviewsApi.listForProduct(product.id, { pageSize: 50 }),
+      reviewsApi.summaryForProduct(product.id),
+    ])
+      .then(([page, { summary }]) => {
         if (cancelled) return;
+        setReviewSummary(summary);
+        setReviewTotal(page.total);
         setReviews(
           page.items.map((rv) => ({
             id: rv.id,
             userName: rv.userName ?? "Anonymous",
             message: rv.comment ?? "",
+            rating: rv.rating,
             createdAt: rv.createdAt,
           })),
         );
@@ -111,7 +135,7 @@ export default function ProductDetailView({
       {
         threshold: 0,
         rootMargin: "0px 0px -60px 0px", // Adjust based on sticky bar height
-      }
+      },
     );
 
     observer.observe(target);
@@ -122,15 +146,20 @@ export default function ProductDetailView({
     if (sabbathClosed || !product.inStock) return;
     addToCart({
       id: product.id,
+      slug: product.slug,
       name: product.name,
+      brandName: product.brandName,
+      storeName: product.storeName,
       price: getSellingPrice(product),
-      quantity: 1,
+      quantity,
       image: mainImage,
+      maxQuantity: product.stock,
     });
   };
 
   const handleBuyNow = () => {
     if (sabbathClosed || !product.inStock) return;
+    handleAddToCart();
     router.push("/checkout" as Route);
   };
 
@@ -166,7 +195,13 @@ export default function ProductDetailView({
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 lg:grid-cols-[1.05fr_0.95fr]">
         <section>
           <div className="relative h-[360px] w-full overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-gray-900 sm:h-[520px]">
-            <Image src={mainImage} alt={product.name} fill className="object-contain p-5 sm:p-8" priority />
+            <Image
+              src={mainImage}
+              alt={product.name}
+              fill
+              className="object-contain p-5 sm:p-8"
+              priority
+            />
             {discountPercent && (
               <span className="absolute left-4 top-4 rounded-md bg-orange-500 px-3 py-1 text-xs font-bold text-white">
                 Save {discountPercent}%
@@ -182,7 +217,9 @@ export default function ProductDetailView({
                   onClick={() => setMainImage(img)}
                   aria-label={`View image ${i + 1}`}
                   className={`relative h-20 w-20 shrink-0 overflow-hidden rounded-md border bg-white dark:bg-gray-900 ${
-                    mainImage === img ? "border-blue-600 ring-2 ring-blue-500" : "border-slate-200 dark:border-slate-700"
+                    mainImage === img
+                      ? "border-blue-600 ring-2 ring-blue-500"
+                      : "border-slate-200 dark:border-slate-700"
                   }`}
                 >
                   <Image src={img} alt="" fill className="object-contain p-1" />
@@ -211,14 +248,29 @@ export default function ProductDetailView({
               {product.name}
             </h1>
 
-            <div className="mt-3 flex items-center gap-2 text-sm text-amber-500">
-              {[...Array(5)].map((_, idx) => (
-                <Star key={idx} size={16} fill="currentColor" />
-              ))}
-              <span className="text-slate-500 dark:text-slate-400">
-                {reviews.length > 0 ? `${reviews.length} reviews` : "Customer favorite"}
-              </span>
-            </div>
+            {(product.brandName || product.storeName || product.sku) && (
+              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-500 dark:text-slate-400">
+                {product.brandName && (
+                  <span>
+                    Brand:{" "}
+                    <strong className="text-slate-700 dark:text-slate-200">
+                      {product.brandName}
+                    </strong>
+                  </span>
+                )}
+                {product.storeName && (
+                  <span>
+                    Sold by{" "}
+                    <strong className="text-slate-700 dark:text-slate-200">
+                      {product.storeName}
+                    </strong>
+                  </span>
+                )}
+                {product.sku && <span>SKU: {product.sku}</span>}
+              </div>
+            )}
+
+            <RatingStars summary={reviewSummary} className="mt-3" />
 
             <div className="mt-5 flex flex-wrap items-end gap-3">
               {discountPercent && originalPrice && (
@@ -236,10 +288,43 @@ export default function ProductDetailView({
               )}
             </div>
 
-            <p className={`mt-4 inline-flex items-center gap-2 text-sm font-bold ${product.inStock ? "text-green-700" : "text-red-600"}`}>
+            <p
+              className={`mt-4 inline-flex items-center gap-2 text-sm font-bold ${product.inStock ? "text-green-700" : "text-red-600"}`}
+            >
               {product.inStock ? <CheckCircle2 size={17} /> : <X size={17} />}
-              {product.inStock ? "In stock and ready to order" : "Out of stock - ordering is disabled"}
+              {product.stockStatus === "LOW_STOCK"
+                ? `Only ${product.stock} left — order soon`
+                : product.inStock
+                  ? "In stock and ready to order"
+                  : "Out of stock — ordering is disabled"}
             </p>
+
+            {product.inStock && (
+              <div
+                className="mt-5 inline-flex items-center rounded-xl border border-slate-200 bg-slate-50 p-1 dark:border-slate-700 dark:bg-slate-950"
+                aria-label="Quantity"
+              >
+                <button
+                  type="button"
+                  onClick={() => setQuantity((value) => Math.max(1, value - 1))}
+                  disabled={quantity <= 1}
+                  className="grid h-9 w-9 place-items-center rounded-lg disabled:opacity-35"
+                  aria-label="Decrease quantity"
+                >
+                  <Minus size={16} />
+                </button>
+                <span className="w-10 text-center font-semibold">{quantity}</span>
+                <button
+                  type="button"
+                  onClick={() => setQuantity((value) => Math.min(product.stock, value + 1))}
+                  disabled={quantity >= product.stock}
+                  className="grid h-9 w-9 place-items-center rounded-lg disabled:opacity-35"
+                  aria-label="Increase quantity"
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
+            )}
 
             {/* Original buttons with ID for intersection observer */}
             <div id="product-actions" className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -253,8 +338,8 @@ export default function ProductDetailView({
                   !product.inStock
                     ? "Out of stock"
                     : sabbathClosed
-                    ? "Shopping is paused for Sabbath"
-                    : "Add to cart"
+                      ? "Shopping is paused for Sabbath"
+                      : "Add to cart"
                 }
               >
                 <ShoppingCart size={18} />
@@ -268,8 +353,8 @@ export default function ProductDetailView({
                   !product.inStock
                     ? "Out of stock"
                     : sabbathClosed
-                    ? "Shopping is paused for Sabbath"
-                    : "Buy now"
+                      ? "Shopping is paused for Sabbath"
+                      : "Buy now"
                 }
                 onClick={handleBuyNow}
               >
@@ -278,14 +363,13 @@ export default function ProductDetailView({
               </Button>
             </div>
 
-            <button className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-blue-700 dark:text-slate-300 dark:hover:text-blue-300">
-              <Heart size={17} />
-              Save for later
-            </button>
+            <WishlistPlanner productId={product.id} productName={product.name} />
           </div>
 
           <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-gray-900">
-            <h2 className="mb-3 text-lg font-bold text-slate-950 dark:text-white">Product details</h2>
+            <h2 className="mb-3 text-lg font-bold text-slate-950 dark:text-white">
+              Product details
+            </h2>
             <div className="leading-relaxed text-slate-700 dark:text-slate-300">
               <p>{getShortDescription(productDescription)}</p>
               {productDescription.split(" ").length > 60 && (
@@ -301,9 +385,21 @@ export default function ProductDetailView({
 
           <section className="grid gap-3 sm:grid-cols-3">
             {[
-              { icon: Truck, title: "Fast delivery", text: "Delivery options confirmed after order." },
-              { icon: ShieldCheck, title: "Buyer support", text: "Help available before and after purchase." },
-              { icon: PackageCheck, title: "Order tracking", text: "Track your purchase from your profile." },
+              {
+                icon: Truck,
+                title: "Fast delivery",
+                text: "Delivery options confirmed after order.",
+              },
+              {
+                icon: ShieldCheck,
+                title: "Buyer support",
+                text: "Help available before and after purchase.",
+              },
+              {
+                icon: PackageCheck,
+                title: "Order tracking",
+                text: "Track your purchase from your profile.",
+              },
             ].map((item) => (
               <div
                 key={item.title}
@@ -311,7 +407,9 @@ export default function ProductDetailView({
               >
                 <item.icon className="mb-2 text-blue-700 dark:text-blue-400" size={20} />
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white">{item.title}</h3>
-                <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">{item.text}</p>
+                <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                  {item.text}
+                </p>
               </div>
             ))}
           </section>
@@ -344,13 +442,15 @@ export default function ProductDetailView({
                 !product.inStock
                   ? "Out of stock"
                   : sabbathClosed
-                  ? "Shopping is paused for Sabbath"
-                  : "Add to cart"
+                    ? "Shopping is paused for Sabbath"
+                    : "Add to cart"
               }
             >
               <ShoppingCart size={18} />
               <span className="sm:hidden">Cart</span>
-              <span className="hidden sm:inline">{product.inStock ? "Add to cart" : "Out of stock"}</span>
+              <span className="hidden sm:inline">
+                {product.inStock ? "Add to cart" : "Out of stock"}
+              </span>
             </Button>
             <Button
               size="lg"
@@ -360,8 +460,8 @@ export default function ProductDetailView({
                 !product.inStock
                   ? "Out of stock"
                   : sabbathClosed
-                  ? "Shopping is paused for Sabbath"
-                  : "Buy now"
+                    ? "Shopping is paused for Sabbath"
+                    : "Buy now"
               }
               onClick={handleBuyNow}
             >
@@ -415,8 +515,8 @@ export default function ProductDetailView({
                 !product.inStock
                   ? "Out of stock"
                   : sabbathClosed
-                  ? "Shopping is paused for Sabbath"
-                  : "Add to cart"
+                    ? "Shopping is paused for Sabbath"
+                    : "Add to cart"
               }
             >
               <ShoppingCart size={18} />
@@ -430,8 +530,8 @@ export default function ProductDetailView({
                 !product.inStock
                   ? "Out of stock"
                   : sabbathClosed
-                  ? "Shopping is paused for Sabbath"
-                  : "Buy now"
+                    ? "Shopping is paused for Sabbath"
+                    : "Buy now"
               }
               onClick={handleBuyNow}
             >
@@ -442,18 +542,22 @@ export default function ProductDetailView({
         </div>
       </div>
 
-      {reviews.length > 0 && (
-        <section className="max-w-6xl mx-auto mt-16 px-4 sm:px-6">
-          <div className="mb-10 text-center md:text-left">
-            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-3">
-              What clients say about this product
-            </h2>
-            <p className="text-slate-600 dark:text-slate-400">
-              Real experiences from {reviews.length} customers
-            </p>
-          </div>
+      <section className="max-w-6xl mx-auto mt-16 px-4 sm:px-6">
+        <div className="mb-10 text-center md:text-left">
+          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-3">
+            What clients say about this product
+          </h2>
+          <p className="text-slate-600 dark:text-slate-400">
+            {reviewTotal > 0
+              ? `Real experiences from ${reviewTotal} verified customers`
+              : "Be the first verified buyer to review this product"}
+          </p>
+        </div>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <RatingBreakdown summary={reviewSummary} />
+
+        {reviews.length > 0 ? (
+          <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {reviews.map((r) => (
               <div
                 key={r.id}
@@ -465,15 +569,28 @@ export default function ProductDetailView({
                   </div>
                   <h3 className="font-bold text-lg text-slate-900 dark:text-white">{r.userName}</h3>
                 </div>
-                <p className="text-slate-700 dark:text-slate-300 leading-relaxed">{r.message}</p>
+                <RatingStars
+                  summary={{ average: r.rating, count: 1 }}
+                  showValue={false}
+                  showCount={false}
+                />
+                {r.message && (
+                  <p className="mt-3 text-slate-700 dark:text-slate-300 leading-relaxed">
+                    {r.message}
+                  </p>
+                )}
                 <div className="mt-4 pt-4 border-t border-dashed border-slate-200 dark:border-slate-700 text-xs text-slate-400">
-                  {reviewDate(r.createdAt)}
+                  Verified purchase · {reviewDate(r.createdAt)}
                 </div>
               </div>
             ))}
           </div>
-        </section>
-      )}
+        ) : (
+          <div className="mt-8 rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
+            No approved reviews yet.
+          </div>
+        )}
+      </section>
 
       {recommendations.length > 0 && (
         <section className="max-w-6xl mx-auto mt-16">

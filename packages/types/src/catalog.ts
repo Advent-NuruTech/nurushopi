@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { ReviewSummaryDTO } from "./reviews.js";
 
 // ---------------------------------------------------------------------------
 // Shared primitives
@@ -11,7 +12,10 @@ export const slugSchema = z
   .toLowerCase()
   .min(1)
   .max(140)
-  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug may only contain lowercase letters, numbers and hyphens.");
+  .regex(
+    /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+    "Slug may only contain lowercase letters, numbers and hyphens.",
+  );
 
 /**
  * Entity id accepted in write/query payloads.
@@ -88,6 +92,20 @@ export const productCreateSchema = z
   .object({
     name: z.string().trim().min(1, "Name is required.").max(200),
     slug: slugSchema.optional(),
+    sku: z
+      .string()
+      .trim()
+      .toUpperCase()
+      .min(2)
+      .max(80)
+      .regex(
+        /^[A-Z0-9][A-Z0-9._-]*$/,
+        "SKU may only contain letters, numbers, dots, underscores and hyphens.",
+      )
+      .optional()
+      .nullable(),
+    brandName: z.string().trim().max(120).optional().nullable(),
+    storeName: z.string().trim().max(160).optional().nullable(),
     description: z.string().trim().max(5000).optional().nullable(),
     shortDescription: z.string().trim().max(300).optional().nullable(),
     price: moneySchema,
@@ -95,6 +113,7 @@ export const productCreateSchema = z
     sellingPrice: moneySchema.optional().nullable(),
     images: z.array(z.string().url("Each image must be a valid URL.")).max(3).default([]),
     stock: z.coerce.number().int().min(0).default(0),
+    lowStockThreshold: z.coerce.number().int().min(0).max(10_000).default(5),
     isActive: z.coerce.boolean().default(true),
     isFeatured: z.coerce.boolean().default(false),
     categoryId: idSchema.optional().nullable(),
@@ -128,6 +147,9 @@ export interface ProductDTO {
   id: string;
   name: string;
   slug: string | null;
+  sku: string | null;
+  brandName: string | null;
+  storeName: string | null;
   description: string | null;
   shortDescription: string | null;
   /** Decimal serialised as a string to avoid float precision loss. */
@@ -137,10 +159,13 @@ export interface ProductDTO {
   images: string[];
   stock: number;
   inStock: boolean;
+  lowStockThreshold: number;
+  stockStatus: "IN_STOCK" | "LOW_STOCK" | "OUT_OF_STOCK";
   isActive: boolean;
   isFeatured: boolean;
   categoryId: string | null;
   category: Pick<CategoryDTO, "id" | "name" | "slug"> | null;
+  ratingSummary: ReviewSummaryDTO;
   createdAt: string;
   updatedAt: string;
 }

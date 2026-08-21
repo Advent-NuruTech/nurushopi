@@ -68,7 +68,9 @@ const validCheckout = {
 beforeEach(() => {
   vi.clearAllMocks();
   p.$transaction.mockImplementation((arg: unknown) =>
-    typeof arg === "function" ? (arg as (tx: unknown) => unknown)(p) : Promise.all(arg as Promise<unknown>[]),
+    typeof arg === "function"
+      ? (arg as (tx: unknown) => unknown)(p)
+      : Promise.all(arg as Promise<unknown>[]),
   );
 });
 
@@ -93,6 +95,19 @@ describe("orders.checkout", () => {
     expect(created.walletApplied.toString()).toBe("0.00");
     expect(created.userId).toBe("user1");
     expect(dto.orderNumber).toBe("ord_abc");
+    expect(p.wishlistItem.updateMany).toHaveBeenCalledWith({
+      where: { userId: "user1", productId: { in: ["p1"] }, status: "ACTIVE" },
+      data: expect.objectContaining({ status: "PURCHASED", remindersEnabled: false }),
+    });
+    expect(p.retentionTrigger.updateMany).toHaveBeenCalledWith({
+      where: {
+        userId: "user1",
+        productId: { in: ["p1"] },
+        triggerType: "wishlist",
+        status: "PENDING",
+      },
+      data: { status: "SKIPPED", lastError: "Product purchased" },
+    });
   });
 
   it("snapshots name + first image and charges sellingPrice when set", async () => {
@@ -264,7 +279,12 @@ describe("orders.listForUser", () => {
     p.order.count.mockResolvedValue(0);
     p.order.findMany.mockResolvedValue([]);
 
-    await orders.listForUser("user1", { page: 1, pageSize: 20, sort: "newest", userId: "someone-else" } as never);
+    await orders.listForUser("user1", {
+      page: 1,
+      pageSize: 20,
+      sort: "newest",
+      userId: "someone-else",
+    } as never);
 
     expect(p.order.findMany.mock.calls[0][0].where.userId).toBe("user1");
   });
@@ -353,7 +373,9 @@ describe("orders.cancelOwnOrder", () => {
 
   it("400s once the 24-hour window has passed", async () => {
     const old = new Date(Date.now() - 25 * 60 * 60 * 1000);
-    p.order.findUnique.mockResolvedValue(orderRow({ userId: "user1", status: "PENDING", createdAt: old }));
+    p.order.findUnique.mockResolvedValue(
+      orderRow({ userId: "user1", status: "PENDING", createdAt: old }),
+    );
     await expect(orders.cancelOwnOrder("user1", "ord_abc")).rejects.toMatchObject({ status: 400 });
     expect(p.order.update).not.toHaveBeenCalled();
   });

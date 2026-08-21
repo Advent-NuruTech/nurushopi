@@ -241,6 +241,9 @@ exports.Prisma.ProductScalarFieldEnum = {
   id: 'id',
   name: 'name',
   slug: 'slug',
+  sku: 'sku',
+  brandName: 'brandName',
+  storeName: 'storeName',
   description: 'description',
   shortDescription: 'shortDescription',
   price: 'price',
@@ -248,8 +251,12 @@ exports.Prisma.ProductScalarFieldEnum = {
   sellingPrice: 'sellingPrice',
   images: 'images',
   stock: 'stock',
+  lowStockThreshold: 'lowStockThreshold',
   isActive: 'isActive',
   isFeatured: 'isFeatured',
+  ratingAverage: 'ratingAverage',
+  ratingCount: 'ratingCount',
+  ratingDistribution: 'ratingDistribution',
   categoryId: 'categoryId',
   createdById: 'createdById',
   createdAt: 'createdAt',
@@ -330,6 +337,23 @@ exports.Prisma.ReviewScalarFieldEnum = {
   rating: 'rating',
   comment: 'comment',
   status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.WishlistItemScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  productId: 'productId',
+  status: 'status',
+  plannedPurchaseAt: 'plannedPurchaseAt',
+  remindersEnabled: 'remindersEnabled',
+  reminderTimezone: 'reminderTimezone',
+  reminderVersion: 'reminderVersion',
+  preReminderSentAt: 'preReminderSentAt',
+  followupReminderSentAt: 'followupReminderSentAt',
+  purchasedAt: 'purchasedAt',
+  removedAt: 'removedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -864,6 +888,12 @@ exports.ReviewStatus = exports.$Enums.ReviewStatus = {
   REJECTED: 'REJECTED'
 };
 
+exports.WishlistStatus = exports.$Enums.WishlistStatus = {
+  ACTIVE: 'ACTIVE',
+  PURCHASED: 'PURCHASED',
+  REMOVED: 'REMOVED'
+};
+
 exports.WalletTxType = exports.$Enums.WalletTxType = {
   CREDIT: 'CREDIT',
   DEBIT: 'DEBIT'
@@ -981,6 +1011,7 @@ exports.Prisma.ModelName = {
   Order: 'Order',
   OrderItem: 'OrderItem',
   Review: 'Review',
+  WishlistItem: 'WishlistItem',
   ProductView: 'ProductView',
   WalletTransaction: 'WalletTransaction',
   WalletRedemption: 'WalletRedemption',

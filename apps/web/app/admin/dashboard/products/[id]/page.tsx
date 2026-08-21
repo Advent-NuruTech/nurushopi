@@ -12,9 +12,13 @@ import type { CategoryDTO } from "@nuru/types";
 interface ProductForm {
   id: string;
   name: string;
+  sku: string;
+  brandName: string;
+  storeName: string;
   price: number;
   originalPrice: number | null;
   stock: number;
+  lowStockThreshold: number;
   categoryId: string | null;
   description: string;
   shortDescription: string;
@@ -44,9 +48,13 @@ export default function ProductEditPage() {
         setProduct({
           id: p.id,
           name: p.name,
+          sku: p.sku ?? "",
+          brandName: p.brandName ?? "",
+          storeName: p.storeName ?? "",
           price: Number(p.sellingPrice ?? p.price),
           originalPrice: p.originalPrice != null ? Number(p.originalPrice) : null,
           stock: p.stock,
+          lowStockThreshold: p.lowStockThreshold,
           categoryId: p.categoryId,
           description: p.description ?? "",
           shortDescription: p.shortDescription ?? "",
@@ -59,16 +67,13 @@ export default function ProductEditPage() {
 
   /* ---------------- Load categories ---------------- */
   useEffect(() => {
-    catalogApi
-      .admin.listCategories()
+    catalogApi.admin
+      .listCategories()
       .then((d) => setCategories(d.categories))
       .catch(() => setCategories([]));
   }, []);
 
-  const updateField = (
-    key: keyof ProductForm,
-    value: string | number | string[] | null,
-  ) => {
+  const updateField = (key: keyof ProductForm, value: string | number | string[] | null) => {
     setProduct((prev) => (prev ? { ...prev, [key]: value } : prev));
   };
 
@@ -123,10 +128,14 @@ export default function ProductEditPage() {
     try {
       await catalogApi.admin.updateProduct(product.id, {
         name: product.name,
+        sku: product.sku || null,
+        brandName: product.brandName || null,
+        storeName: product.storeName || null,
         price: product.price,
         sellingPrice: product.price,
         originalPrice: product.originalPrice,
         stock: product.stock,
+        lowStockThreshold: product.lowStockThreshold,
         categoryId: product.categoryId,
         description: product.description || null,
         shortDescription: product.shortDescription || null,
@@ -199,6 +208,27 @@ export default function ProductEditPage() {
           onChange={(e) => updateField("name", e.target.value)}
         />
 
+        <div className="grid gap-3 md:grid-cols-3">
+          <input
+            className="w-full border p-3 rounded"
+            placeholder="SKU (optional)"
+            value={product.sku}
+            onChange={(e) => updateField("sku", e.target.value.toUpperCase())}
+          />
+          <input
+            className="w-full border p-3 rounded"
+            placeholder="Brand name"
+            value={product.brandName}
+            onChange={(e) => updateField("brandName", e.target.value)}
+          />
+          <input
+            className="w-full border p-3 rounded"
+            placeholder="Store / seller name"
+            value={product.storeName}
+            onChange={(e) => updateField("storeName", e.target.value)}
+          />
+        </div>
+
         <input
           className="w-full border p-3 rounded"
           type="number"
@@ -225,11 +255,23 @@ export default function ProductEditPage() {
           value={product.stock}
           onChange={(e) => updateField("stock", Math.max(0, Number(e.target.value)))}
         />
-        <p className={`text-sm font-medium ${product.stock > 0 ? "text-green-700" : "text-red-600"}`}>
+        <p
+          className={`text-sm font-medium ${product.stock > 0 ? "text-green-700" : "text-red-600"}`}
+        >
           {product.stock > 0
             ? `${product.stock} in stock`
             : "Out of stock - ordering is disabled and admins will be notified"}
         </p>
+        <div>
+          <label className="mb-1 block text-sm font-medium">Low-stock warning threshold</label>
+          <input
+            className="w-full border p-3 rounded"
+            type="number"
+            min={0}
+            value={product.lowStockThreshold}
+            onChange={(e) => updateField("lowStockThreshold", Math.max(0, Number(e.target.value)))}
+          />
+        </div>
 
         <div className="text-sm text-gray-600 flex items-center gap-3">
           {discountPercent ? (
@@ -338,7 +380,11 @@ export default function ProductEditPage() {
 
       {/* Actions */}
       <div className="flex gap-3">
-        <button onClick={save} disabled={saving} className="px-5 py-2 bg-sky-600 text-white rounded">
+        <button
+          onClick={save}
+          disabled={saving}
+          className="px-5 py-2 bg-sky-600 text-white rounded"
+        >
           {saving ? "Saving…" : "Save Changes"}
         </button>
 

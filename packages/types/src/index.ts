@@ -9,6 +9,7 @@ export * from "./dashboard.js";
 export * from "./reviews.js";
 export * from "./notifications.js";
 export * from "./vendors.js";
+export * from "./wishlist.js";
 export * from "./pwa.js";
 export * from "./sabbath.js";
 export * from "./users.js";

@@ -4,8 +4,9 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import { LogIn, ChevronDown, ChevronRight, Package } from "lucide-react";
+import { LogIn, ChevronDown, ChevronRight, Heart, Package } from "lucide-react";
 import { useAppUser } from "@/context/UserContext";
+import { wishlistApi } from "@/lib/api";
 
 interface Category {
   name: string;
@@ -22,8 +23,26 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, setIsOpen, categories }: SidebarProps) {
   const [showCategories, setShowCategories] = useState(false);
+  const [wishlistCount, setWishlistCount] = useState<number | null>(null);
   const sidebarRef = useRef<HTMLElement>(null);
   const { user, isLoading, logout } = useAppUser();
+
+  // Fetch the real wishlist count each time the sidebar opens (signed-in users only)
+  useEffect(() => {
+    if (!isOpen || !user) return;
+    let cancelled = false;
+    wishlistApi
+      .list({ status: "ACTIVE", pageSize: 1 })
+      .then((page) => {
+        if (!cancelled) setWishlistCount(page.total);
+      })
+      .catch(() => {
+        if (!cancelled) setWishlistCount(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, user]);
 
   const handleLogout = async () => {
     await logout();
@@ -155,6 +174,20 @@ export default function Sidebar({ isOpen, setIsOpen, categories }: SidebarProps)
               >
                 <Package size={18} className="text-gray-500" />
                 My Orders
+              </Link>
+
+              <Link
+                href="/profile?tab=wishlist"
+                onClick={handleLinkClick}
+                className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium transition-colors"
+              >
+                <Heart size={18} className="text-gray-500" />
+                Wishlist
+                {user && wishlistCount !== null && (
+                  <span className="ml-auto min-w-[20px] text-center text-[10px] font-bold bg-rose-500 text-white px-1.5 py-0.5 rounded-full">
+                    {wishlistCount}
+                  </span>
+                )}
               </Link>
 
               {/* Categories */}

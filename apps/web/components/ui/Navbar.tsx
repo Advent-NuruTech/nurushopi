@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
@@ -27,7 +27,7 @@ import { useCart } from "@/context/CartContext";
 
 type DrawerView = "menu" | "categories";
 
-export default function Navbar({
+function NavbarContent({
   categories = [],
 }: {
   categories?: SidebarCategory[];
@@ -297,5 +297,13 @@ export default function Navbar({
         </div>
       </nav>
     </>
+  );
+}
+
+export default function Navbar(props: { categories?: SidebarCategory[] }) {
+  return (
+    <Suspense fallback={null}>
+      <NavbarContent {...props} />
+    </Suspense>
   );
 }

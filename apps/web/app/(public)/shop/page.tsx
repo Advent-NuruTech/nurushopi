@@ -105,11 +105,14 @@ function ProductCard({ product, showCategory }: { product: ProductCardVM; showCa
 export default async function ShopPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ category?: string }>;
+  searchParams?: Promise<{ category?: string; search?: string }>;
 }) {
   const resolved = searchParams ? await searchParams : undefined;
   const selectedCategory = resolved?.category
     ? decodeURIComponent(String(resolved.category)).toLowerCase().trim()
+    : "";
+  const selectedSearch = resolved?.search
+    ? decodeURIComponent(String(resolved.search)).trim()
     : "";
 
   let allProducts: ProductCardVM[] = [];
@@ -117,7 +120,11 @@ export default async function ShopPage({
 
   try {
     const [productsResult, wholesaleResult] = await Promise.all([
-      listProducts({ pageSize: 100, sort: "newest" }),
+      listProducts({
+        pageSize: 100,
+        sort: "newest",
+        search: selectedSearch || undefined,
+      }),
       listWholesaleItems({ pageSize: 24, sort: "newest" }),
     ]);
     allProducts = productsResult.items;
@@ -153,6 +160,17 @@ export default async function ShopPage({
               Showing category: {formatCategoryLabel(selectedCategory)}
             </span>
             <Link href="/shop" className="text-sm font-semibold hover:underline">
+              Clear
+            </Link>
+          </div>
+        )}
+
+        {selectedSearch && (
+          <div className="mb-6 mx-2 sm:mx-0 flex items-center justify-between gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300">
+            <span className="min-w-0 truncate text-sm font-medium">
+              Search results for: <strong>&ldquo;{selectedSearch}&rdquo;</strong>
+            </span>
+            <Link href="/shop" className="shrink-0 text-sm font-semibold hover:underline">
               Clear
             </Link>
           </div>
@@ -216,7 +234,9 @@ export default async function ShopPage({
             title={
               selectedCategory
                 ? `${formatCategoryLabel(selectedCategory)} Retail`
-                : "Retail Products"
+                : selectedSearch
+                  ? "Matching Products"
+                  : "Retail Products"
             }
             href="/shop"
             showViewAll={false}

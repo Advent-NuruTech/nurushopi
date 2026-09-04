@@ -27,7 +27,15 @@ interface ListProductsParams {
   signal?: AbortSignal;
 }
 
-export default function SearchBar() {
+interface SearchBarProps {
+  compact?: boolean;
+  placeholder?: string;
+}
+
+export default function SearchBar({
+  compact = false,
+  placeholder = "Search foods, herbs, spices, oils, seeds...",
+}: SearchBarProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -199,10 +207,16 @@ export default function SearchBar() {
       <form
         onSubmit={handleSubmit}
         role="search"
-        className="flex h-[50px] w-full items-center rounded-full border border-[#E5E7EB] bg-white shadow-sm transition-all focus-within:border-[#009933] focus-within:ring-2 focus-within:ring-[#009933]/20 dark:border-slate-700 dark:bg-gray-800"
+        className={`flex w-full items-center rounded-full border border-[#E5E7EB] bg-white shadow-sm transition-all focus-within:border-[#009933] focus-within:ring-2 focus-within:ring-[#009933]/20 dark:border-slate-700 dark:bg-gray-800 ${
+          compact ? "h-10" : "h-[50px]"
+        }`}
       >
-        <span className="flex flex-shrink-0 items-center pl-4 text-gray-400 dark:text-gray-500">
-          <Search size={20} />
+        <span
+          className={`flex flex-shrink-0 items-center text-gray-400 dark:text-gray-500 ${
+            compact ? "pl-3" : "pl-4"
+          }`}
+        >
+          <Search size={compact ? 17 : 20} />
         </span>
 
         <input
@@ -210,8 +224,10 @@ export default function SearchBar() {
           onChange={(e) => setSearchQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           onFocus={() => setIsOpen(true)}
-          placeholder="Search foods, herbs, spices, oils, seeds..."
-          className="min-w-0 flex-1 bg-transparent px-3 text-sm text-slate-700 outline-none placeholder-gray-400 dark:text-gray-200 dark:placeholder-gray-500"
+          placeholder={placeholder}
+          className={`min-w-0 flex-1 bg-transparent text-sm text-slate-700 outline-none placeholder-gray-400 dark:text-gray-200 dark:placeholder-gray-500 ${
+            compact ? "px-2" : "px-3"
+          }`}
           aria-label="Search input"
         />
 
@@ -228,7 +244,7 @@ export default function SearchBar() {
 
         <button
           type="submit"
-          className="m-1.5 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#009933] text-white transition-colors hover:bg-[#006B2C] disabled:opacity-60"
+          className={`${compact ? "hidden" : "m-1.5 flex"} h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#009933] text-white transition-colors hover:bg-[#006B2C] disabled:opacity-60`}
           aria-label="Search"
           disabled={isLoading}
         >

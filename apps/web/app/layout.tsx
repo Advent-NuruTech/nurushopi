@@ -58,10 +58,10 @@ export const metadata = {
 
   icons: {
     icon: [
-      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
-      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+      { url: "/icons/nurushop-icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/nurushop-icon-512.png", sizes: "512x512", type: "image/png" },
     ],
-    apple: "/icons/icon-192.png",
+    apple: "/icons/nurushop-icon-192.png",
   },
 
   openGraph: {
@@ -95,7 +95,7 @@ export const metadata = {
   appleWebApp: {
     capable: true,
     title: "NuruShop",
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "default",
   },
 
   robots: {

@@ -35,15 +35,11 @@ export default function PwaSplash() {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#010216] text-white transition-opacity"
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-white transition-opacity"
       aria-hidden="true"
     >
-      <img
-        src="/icons/icon-192.png"
-        alt=""
-        className="h-36 w-36 rounded-[28px] object-contain shadow-xl"
-      />
-      <div className="absolute bottom-8 text-center text-xs tracking-wide text-white/70">
+      <img src="/icons/nurushop-icon-192.png" alt="" className="h-36 w-36 object-contain" />
+      <div className="absolute bottom-8 text-center text-xs tracking-wide text-slate-400">
         from Advent
       </div>
     </div>

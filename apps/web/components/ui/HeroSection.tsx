@@ -1,14 +1,12 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Sparkles, Zap } from "lucide-react";
+import { Zap } from "lucide-react";
 import {
   HERO_DEFAULT_GRADIENT,
   resolveHeroGradient,
 } from "@/lib/heroGradients";
 import { catalogApi } from "@/lib/api";
-import { useSabbathStatus } from "@/lib/useSabbathStatus";
-import Link from "next/link";
 
 type HeroAnnouncement = {
   id: string;
@@ -20,11 +18,23 @@ type HeroAnnouncement = {
 /** Constant scroll speed in px/second, independent of content length. */
 const SCROLL_SPEED_PX_PER_SEC = 25;
 
+const FALLBACK_ANNOUNCEMENTS: HeroAnnouncement[] = [
+  {
+    id: "1",
+    text: "\u{1F69A}WE TRY TO GIVE THE BEST",
+    gradient: "",
+    order: 1,
+  },
+  {
+    id: "2",
+    text: "\u{1F525} VERIFIED PRODUCTS \u2022 SECURE CHECKOUT \u2022 BEST PRICES",
+    gradient: "",
+    order: 2,
+  },
+];
+
 export default function HeroSection() {
-  const { isClosed: isSabbath } = useSabbathStatus();
-  const [announcements, setAnnouncements] = useState<
-    HeroAnnouncement[]
-  >([]);
+  const [announcements, setAnnouncements] = useState<HeroAnnouncement[]>([]);
   const trackRef = useRef<HTMLDivElement | null>(null);
   const [scrollDuration, setScrollDuration] = useState(56);
 
@@ -33,20 +43,17 @@ export default function HeroSection() {
 
     catalogApi
       .listHero()
-      .then((d) => {
+      .then((data) => {
         if (cancelled) return;
 
-        const cleaned = d.announcements
+        const cleaned = data.announcements
           .map((item, index) => ({
             id: item.id,
             text: (item.message ?? "").trim(),
             gradient: resolveHeroGradient(
-              (item.gradient ?? "").trim() ||
-                HERO_DEFAULT_GRADIENT
+              (item.gradient ?? "").trim() || HERO_DEFAULT_GRADIENT
             ),
-            order: Number.isFinite(item.order)
-              ? item.order
-              : index,
+            order: Number.isFinite(item.order) ? item.order : index,
           }))
           .filter((item) => item.text.length > 0)
           .sort((a, b) => a.order - b.order);
@@ -67,118 +74,61 @@ export default function HeroSection() {
     if (!track) return;
 
     const measure = () => {
-      const halfWidth = track.scrollWidth / 2;
-      if (halfWidth > 0) {
-        setScrollDuration(halfWidth / SCROLL_SPEED_PX_PER_SEC);
+      const singleCopyWidth = track.scrollWidth / 2;
+      if (singleCopyWidth > 0) {
+        setScrollDuration(singleCopyWidth / SCROLL_SPEED_PX_PER_SEC);
       }
     };
 
     measure();
     const rafId = requestAnimationFrame(measure);
     window.addEventListener("resize", measure);
+
     return () => {
       cancelAnimationFrame(rafId);
       window.removeEventListener("resize", measure);
     };
   }, [announcements]);
 
-  const marqueeItems = useMemo(() => {
-    if (!announcements.length) return [];
-
-    return [...announcements, ...announcements];
-  }, [announcements]);
-
-  const items =
-    marqueeItems.length > 0
-      ? marqueeItems
-      : [
-          {
-            id: "1",
-            text:
-              "🚚 NATIONWIDE DELIVERY ACROSS ALL 47 COUNTIES",
-            gradient: "",
-            order: 1,
-          },
-          {
-            id: "2",
-            text:
-              "🔥 VERIFIED PRODUCTS • SECURE CHECKOUT • BEST PRICES",
-            gradient: "",
-            order: 2,
-          },
-        ];
+  const items = useMemo(
+    () => (announcements.length ? announcements : FALLBACK_ANNOUNCEMENTS),
+    [announcements]
+  );
 
   return (
-    <section className="relative overflow-hidden border-b border-green-300 bg-gradient-to-r from-green-50 via-white to-emerald-50 py-3">
-
-      {/* Background glow */}
-      <div className="absolute inset-0">
-        <div className="absolute -top-40 right-0 h-96 w-96 rounded-full bg-green-300/20 blur-3xl" />
-      </div>
-
-      <div className="relative z-10 mx-auto flex max-w-7xl items-center gap-5 px-4">
-
-        {/* Nationwide Delivery */}
-        <div className="hidden md:flex shrink-0 items-center gap-4">
-
-          <Link
-            href="/vendors/meet"
-            className="flex items-center gap-2 rounded-full bg-[#009933] px-5 py-3 text-sm font-bold text-white shadow-xl transition hover:scale-105 hover:bg-[#006B2C]"
-          >
-            <Sparkles size={16} />
-            {isSabbath ? "Happy Sabbath" : "Sell on NuruShop"}
-          </Link>
-        </div>
-
-        {/* Marquee */}
-        <div className="flex-1 overflow-hidden">
-
-          <div
-            ref={trackRef}
-            className="flex animate-scroll whitespace-nowrap gap-8"
-            style={{ animationDuration: `${scrollDuration}s` }}
-          >
-
-            {items.map((item, i) => (
-              <div
-                key={`${item.id}-${i}`}
-                className="flex items-center gap-2 rounded-full bg-black/85 px-6 py-3 shadow-xl backdrop-blur-md"
-              >
-                <Zap
-                  size={18}
-                  className="text-yellow-400 animate-pulse"
-                />
-
-                <span
-                  className="
-                    text-sm
-                    sm:text-lg
-                    md:text-xl
-                    font-black
-                    tracking-wide
-                    text-white
-                  "
+    <section className="relative w-full overflow-hidden border-b border-green-300 bg-black/85 py-3">
+      <div className="w-full overflow-hidden">
+        <div
+          ref={trackRef}
+          className="animate-scroll items-center"
+          style={{ animationDuration: `${scrollDuration}s` }}
+        >
+          {[0, 1].map((copy) => (
+            <div
+              key={copy}
+              aria-hidden={copy === 1 ? true : undefined}
+              className="flex shrink-0 items-center"
+            >
+              {items.map((item) => (
+                <div
+                  key={`${copy}-${item.id}`}
+                  className="flex shrink-0 items-center gap-2 px-6 sm:px-8"
                 >
-                  {item.text}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Mobile Button */}
-        <div className="md:hidden shrink-0">
-
-          <Link
-            href="/vendors/meet"
-            className="rounded-full bg-[#009933] px-4 py-2 text-xs font-bold text-white shadow-lg"
-          >
-            {isSabbath ? "Happy Sabbath" : "Sell on NuruShop"}
-          </Link>
+                  <Zap
+                    aria-hidden="true"
+                    size={18}
+                    className="animate-pulse text-yellow-400"
+                  />
+                  <span className="text-sm font-black tracking-wide text-white sm:text-lg md:text-xl">
+                    {item.text}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Bottom Accent */}
       <div className="absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r from-green-500 via-yellow-400 to-green-500" />
     </section>
   );

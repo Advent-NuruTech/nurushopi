@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useAppUser } from "@/context/UserContext";
 import { pwaApi } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Download, Smartphone, Share2 } from "lucide-react";
+import { X, Download, Share2 } from "lucide-react";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => void;
@@ -33,11 +33,10 @@ export default function InstallPrompt() {
   const [promptEvent, setPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
 
   const showIOSInstructions = useMemo(
     () => isAuthenticated && !isStandalone && isIOSDevice() && !promptEvent,
-    [isAuthenticated, isStandalone, promptEvent]
+    [isAuthenticated, isStandalone, promptEvent],
   );
 
   useEffect(() => {
@@ -124,28 +123,21 @@ export default function InstallPrompt() {
           initial={{ y: 100, opacity: 0, scale: 0.95 }}
           animate={{ y: 0, opacity: 1, scale: 1 }}
           exit={{ y: 100, opacity: 0, scale: 0.95 }}
-          transition={{ 
-            type: "spring", 
-            stiffness: 300, 
+          transition={{
+            type: "spring",
+            stiffness: 300,
             damping: 30,
-            duration: 0.3
+            duration: 0.3,
           }}
           className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md"
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
         >
-          <div className="relative bg-white/95 backdrop-blur-xl shadow-2xl rounded-2xl border border-gray-100/50 p-5 overflow-hidden">
-            {/* Gradient accent line */}
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
-            
+          <div className="relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-2xl">
             <div className="flex items-start gap-4">
-              {/* App Icon with glow */}
               <div className="relative flex-shrink-0">
-                <div className="absolute inset-0 bg-blue-500/20 rounded-xl blur-xl" />
                 <img
-                  src="/icons/icon-192.png"
+                  src="/icons/nurushop-icon-192.png"
                   alt="Nurushop Logo"
-                  className="relative w-14 h-14 rounded-xl shadow-lg ring-2 ring-white/50"
+                  className="h-14 w-14 object-contain"
                 />
               </div>
 
@@ -157,7 +149,7 @@ export default function InstallPrompt() {
                 <p className="text-sm text-gray-500 mt-0.5 leading-relaxed">
                   {showIOSInstructions ? (
                     <span className="flex items-center gap-1.5">
-                      <Share2 className="w-3.5 h-3.5 text-blue-500" />
+                      <Share2 className="h-3.5 w-3.5 text-[#009933]" />
                       Tap Share and then Add to Home Screen
                     </span>
                   ) : (
@@ -173,13 +165,13 @@ export default function InstallPrompt() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={handleInstall}
-                    className="relative group flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 py-2 rounded-xl font-medium text-sm transition-all shadow-lg shadow-blue-600/25 hover:shadow-blue-600/40"
+                    className="relative flex items-center gap-1.5 rounded-xl bg-[#009933] px-4 py-2 text-sm font-medium text-white shadow-lg shadow-green-700/20 transition-colors hover:bg-[#006B2C]"
                   >
                     <Download className="w-4 h-4" />
                     Install
                   </motion.button>
                 )}
-                
+
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
@@ -200,7 +192,7 @@ export default function InstallPrompt() {
                     initial={{ width: "0%" }}
                     animate={{ width: "100%" }}
                     transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                    className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
+                    className="h-full rounded-full bg-[#009933]"
                   />
                 </div>
                 <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">
@@ -208,10 +200,6 @@ export default function InstallPrompt() {
                 </span>
               </div>
             )}
-
-            {/* Decorative dots */}
-            <div className="absolute -top-4 -right-4 w-16 h-16 bg-blue-500/5 rounded-full blur-2xl" />
-            <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-purple-500/5 rounded-full blur-2xl" />
           </div>
         </motion.div>
       )}

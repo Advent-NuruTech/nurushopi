@@ -16,8 +16,8 @@ export default function AuthRequired() {
           You need to be signed in to manage orders and profile.
         </p>
         <Link
-          href="/auth/login"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-sky-600 hover:bg-sky-700 text-white font-medium rounded-xl transition-colors"
+          href="/auth/login?redirectTo=%2Fprofile"
+          className="inline-flex items-center gap-2 rounded-xl bg-[#009933] px-6 py-3 font-medium text-white transition-colors hover:bg-[#006B2C]"
         >
           Sign in
         </Link>

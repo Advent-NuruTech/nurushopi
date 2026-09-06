@@ -79,7 +79,9 @@ export async function middleware(request: NextRequest) {
     const hasSession = Boolean(request.cookies.get(USER_ACCESS_COOKIE)?.value);
     if (!hasSession) {
       const loginUrl = new URL("/auth/login", request.url);
-      loginUrl.searchParams.set("redirectTo", pathname);
+      // Keep the complete intended location so profile subviews (for example
+      // the wishlist) remain available after sign-in.
+      loginUrl.searchParams.set("redirectTo", `${pathname}${request.nextUrl.search}`);
       return NextResponse.redirect(loginUrl);
     }
     return NextResponse.next();

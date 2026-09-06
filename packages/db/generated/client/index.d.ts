@@ -19644,6 +19644,7 @@ export namespace Prisma {
     originalPrice: number
     sellingPrice: number
     images: number
+    variants: number
     stock: number
     lowStockThreshold: number
     isActive: number
@@ -19740,6 +19741,7 @@ export namespace Prisma {
     originalPrice?: true
     sellingPrice?: true
     images?: true
+    variants?: true
     stock?: true
     lowStockThreshold?: true
     isActive?: true
@@ -19853,6 +19855,7 @@ export namespace Prisma {
     originalPrice: Decimal | null
     sellingPrice: Decimal | null
     images: string[]
+    variants: JsonValue
     stock: number
     lowStockThreshold: number
     isActive: boolean
@@ -19898,6 +19901,7 @@ export namespace Prisma {
     originalPrice?: boolean
     sellingPrice?: boolean
     images?: boolean
+    variants?: boolean
     stock?: boolean
     lowStockThreshold?: boolean
     isActive?: boolean
@@ -19943,6 +19947,7 @@ export namespace Prisma {
     originalPrice?: boolean
     sellingPrice?: boolean
     images?: boolean
+    variants?: boolean
     stock?: boolean
     lowStockThreshold?: boolean
     isActive?: boolean
@@ -19971,6 +19976,7 @@ export namespace Prisma {
     originalPrice?: boolean
     sellingPrice?: boolean
     images?: boolean
+    variants?: boolean
     stock?: boolean
     lowStockThreshold?: boolean
     isActive?: boolean
@@ -19999,6 +20005,7 @@ export namespace Prisma {
     originalPrice?: boolean
     sellingPrice?: boolean
     images?: boolean
+    variants?: boolean
     stock?: boolean
     lowStockThreshold?: boolean
     isActive?: boolean
@@ -20012,7 +20019,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "sku" | "brandName" | "storeName" | "description" | "shortDescription" | "price" | "originalPrice" | "sellingPrice" | "images" | "stock" | "lowStockThreshold" | "isActive" | "isFeatured" | "ratingAverage" | "ratingCount" | "ratingDistribution" | "categoryId" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["product"]>
+  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "sku" | "brandName" | "storeName" | "description" | "shortDescription" | "price" | "originalPrice" | "sellingPrice" | "images" | "variants" | "stock" | "lowStockThreshold" | "isActive" | "isFeatured" | "ratingAverage" | "ratingCount" | "ratingDistribution" | "categoryId" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["product"]>
   export type ProductInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     category?: boolean | Product$categoryArgs<ExtArgs>
     createdBy?: boolean | Product$createdByArgs<ExtArgs>
@@ -20078,6 +20085,7 @@ export namespace Prisma {
       originalPrice: Prisma.Decimal | null
       sellingPrice: Prisma.Decimal | null
       images: string[]
+      variants: Prisma.JsonValue
       stock: number
       lowStockThreshold: number
       isActive: boolean
@@ -20542,6 +20550,7 @@ export namespace Prisma {
     readonly originalPrice: FieldRef<"Product", 'Decimal'>
     readonly sellingPrice: FieldRef<"Product", 'Decimal'>
     readonly images: FieldRef<"Product", 'String[]'>
+    readonly variants: FieldRef<"Product", 'Json'>
     readonly stock: FieldRef<"Product", 'Int'>
     readonly lowStockThreshold: FieldRef<"Product", 'Int'>
     readonly isActive: FieldRef<"Product", 'Boolean'>
@@ -23631,6 +23640,7 @@ export namespace Prisma {
     minQuantity: number
     stock: number
     images: number
+    variants: number
     isActive: number
     createdAt: number
     updatedAt: number
@@ -23685,6 +23695,7 @@ export namespace Prisma {
     minQuantity?: true
     stock?: true
     images?: true
+    variants?: true
     isActive?: true
     createdAt?: true
     updatedAt?: true
@@ -23786,6 +23797,7 @@ export namespace Prisma {
     minQuantity: number
     stock: number
     images: string[]
+    variants: JsonValue
     isActive: boolean
     createdAt: Date
     updatedAt: Date
@@ -23819,6 +23831,7 @@ export namespace Prisma {
     minQuantity?: boolean
     stock?: boolean
     images?: boolean
+    variants?: boolean
     isActive?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -23833,6 +23846,7 @@ export namespace Prisma {
     minQuantity?: boolean
     stock?: boolean
     images?: boolean
+    variants?: boolean
     isActive?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -23847,6 +23861,7 @@ export namespace Prisma {
     minQuantity?: boolean
     stock?: boolean
     images?: boolean
+    variants?: boolean
     isActive?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -23861,12 +23876,13 @@ export namespace Prisma {
     minQuantity?: boolean
     stock?: boolean
     images?: boolean
+    variants?: boolean
     isActive?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type WholesaleItemOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "description" | "unitPrice" | "minQuantity" | "stock" | "images" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["wholesaleItem"]>
+  export type WholesaleItemOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "description" | "unitPrice" | "minQuantity" | "stock" | "images" | "variants" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["wholesaleItem"]>
 
   export type $WholesaleItemPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "WholesaleItem"
@@ -23880,6 +23896,7 @@ export namespace Prisma {
       minQuantity: number
       stock: number
       images: string[]
+      variants: Prisma.JsonValue
       isActive: boolean
       createdAt: Date
       updatedAt: Date
@@ -24314,6 +24331,7 @@ export namespace Prisma {
     readonly minQuantity: FieldRef<"WholesaleItem", 'Int'>
     readonly stock: FieldRef<"WholesaleItem", 'Int'>
     readonly images: FieldRef<"WholesaleItem", 'String[]'>
+    readonly variants: FieldRef<"WholesaleItem", 'Json'>
     readonly isActive: FieldRef<"WholesaleItem", 'Boolean'>
     readonly createdAt: FieldRef<"WholesaleItem", 'DateTime'>
     readonly updatedAt: FieldRef<"WholesaleItem", 'DateTime'>
@@ -68663,6 +68681,7 @@ export namespace Prisma {
     originalPrice: 'originalPrice',
     sellingPrice: 'sellingPrice',
     images: 'images',
+    variants: 'variants',
     stock: 'stock',
     lowStockThreshold: 'lowStockThreshold',
     isActive: 'isActive',
@@ -68719,6 +68738,7 @@ export namespace Prisma {
     minQuantity: 'minQuantity',
     stock: 'stock',
     images: 'images',
+    variants: 'variants',
     isActive: 'isActive',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -70656,6 +70676,7 @@ export namespace Prisma {
     originalPrice?: DecimalNullableFilter<"Product"> | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: DecimalNullableFilter<"Product"> | Decimal | DecimalJsLike | number | string | null
     images?: StringNullableListFilter<"Product">
+    variants?: JsonFilter<"Product">
     stock?: IntFilter<"Product"> | number
     lowStockThreshold?: IntFilter<"Product"> | number
     isActive?: BoolFilter<"Product"> | boolean
@@ -70700,6 +70721,7 @@ export namespace Prisma {
     originalPrice?: SortOrderInput | SortOrder
     sellingPrice?: SortOrderInput | SortOrder
     images?: SortOrder
+    variants?: SortOrder
     stock?: SortOrder
     lowStockThreshold?: SortOrder
     isActive?: SortOrder
@@ -70747,6 +70769,7 @@ export namespace Prisma {
     originalPrice?: DecimalNullableFilter<"Product"> | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: DecimalNullableFilter<"Product"> | Decimal | DecimalJsLike | number | string | null
     images?: StringNullableListFilter<"Product">
+    variants?: JsonFilter<"Product">
     stock?: IntFilter<"Product"> | number
     lowStockThreshold?: IntFilter<"Product"> | number
     isActive?: BoolFilter<"Product"> | boolean
@@ -70791,6 +70814,7 @@ export namespace Prisma {
     originalPrice?: SortOrderInput | SortOrder
     sellingPrice?: SortOrderInput | SortOrder
     images?: SortOrder
+    variants?: SortOrder
     stock?: SortOrder
     lowStockThreshold?: SortOrder
     isActive?: SortOrder
@@ -70825,6 +70849,7 @@ export namespace Prisma {
     originalPrice?: DecimalNullableWithAggregatesFilter<"Product"> | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: DecimalNullableWithAggregatesFilter<"Product"> | Decimal | DecimalJsLike | number | string | null
     images?: StringNullableListFilter<"Product">
+    variants?: JsonWithAggregatesFilter<"Product">
     stock?: IntWithAggregatesFilter<"Product"> | number
     lowStockThreshold?: IntWithAggregatesFilter<"Product"> | number
     isActive?: BoolWithAggregatesFilter<"Product"> | boolean
@@ -71003,6 +71028,7 @@ export namespace Prisma {
     minQuantity?: IntFilter<"WholesaleItem"> | number
     stock?: IntFilter<"WholesaleItem"> | number
     images?: StringNullableListFilter<"WholesaleItem">
+    variants?: JsonFilter<"WholesaleItem">
     isActive?: BoolFilter<"WholesaleItem"> | boolean
     createdAt?: DateTimeFilter<"WholesaleItem"> | Date | string
     updatedAt?: DateTimeFilter<"WholesaleItem"> | Date | string
@@ -71017,6 +71043,7 @@ export namespace Prisma {
     minQuantity?: SortOrder
     stock?: SortOrder
     images?: SortOrder
+    variants?: SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -71034,6 +71061,7 @@ export namespace Prisma {
     minQuantity?: IntFilter<"WholesaleItem"> | number
     stock?: IntFilter<"WholesaleItem"> | number
     images?: StringNullableListFilter<"WholesaleItem">
+    variants?: JsonFilter<"WholesaleItem">
     isActive?: BoolFilter<"WholesaleItem"> | boolean
     createdAt?: DateTimeFilter<"WholesaleItem"> | Date | string
     updatedAt?: DateTimeFilter<"WholesaleItem"> | Date | string
@@ -71048,6 +71076,7 @@ export namespace Prisma {
     minQuantity?: SortOrder
     stock?: SortOrder
     images?: SortOrder
+    variants?: SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -71070,6 +71099,7 @@ export namespace Prisma {
     minQuantity?: IntWithAggregatesFilter<"WholesaleItem"> | number
     stock?: IntWithAggregatesFilter<"WholesaleItem"> | number
     images?: StringNullableListFilter<"WholesaleItem">
+    variants?: JsonWithAggregatesFilter<"WholesaleItem">
     isActive?: BoolWithAggregatesFilter<"WholesaleItem"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"WholesaleItem"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"WholesaleItem"> | Date | string
@@ -75351,6 +75381,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -75393,6 +75424,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -75435,6 +75467,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -75477,6 +75510,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -75519,6 +75553,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -75545,6 +75580,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -75569,6 +75605,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -75766,6 +75803,7 @@ export namespace Prisma {
     minQuantity?: number
     stock?: number
     images?: WholesaleItemCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -75780,6 +75818,7 @@ export namespace Prisma {
     minQuantity?: number
     stock?: number
     images?: WholesaleItemCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -75794,6 +75833,7 @@ export namespace Prisma {
     minQuantity?: IntFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
     images?: WholesaleItemUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -75808,6 +75848,7 @@ export namespace Prisma {
     minQuantity?: IntFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
     images?: WholesaleItemUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -75822,6 +75863,7 @@ export namespace Prisma {
     minQuantity?: number
     stock?: number
     images?: WholesaleItemCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -75836,6 +75878,7 @@ export namespace Prisma {
     minQuantity?: IntFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
     images?: WholesaleItemUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -75850,6 +75893,7 @@ export namespace Prisma {
     minQuantity?: IntFieldUpdateOperationsInput | number
     stock?: IntFieldUpdateOperationsInput | number
     images?: WholesaleItemUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -80493,6 +80537,29 @@ export namespace Prisma {
     hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
     isEmpty?: boolean
   }
+  export type JsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
 
   export type CategoryNullableScalarRelationFilter = {
     is?: CategoryWhereInput | null
@@ -80582,6 +80649,7 @@ export namespace Prisma {
     originalPrice?: SortOrder
     sellingPrice?: SortOrder
     images?: SortOrder
+    variants?: SortOrder
     stock?: SortOrder
     lowStockThreshold?: SortOrder
     isActive?: SortOrder
@@ -80677,6 +80745,32 @@ export namespace Prisma {
     _sum?: NestedDecimalNullableFilter<$PrismaModel>
     _min?: NestedDecimalNullableFilter<$PrismaModel>
     _max?: NestedDecimalNullableFilter<$PrismaModel>
+  }
+  export type JsonWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedJsonFilter<$PrismaModel>
+    _max?: NestedJsonFilter<$PrismaModel>
   }
 
   export type BannerCountOrderByAggregateInput = {
@@ -80779,6 +80873,7 @@ export namespace Prisma {
     minQuantity?: SortOrder
     stock?: SortOrder
     images?: SortOrder
+    variants?: SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -83081,29 +83176,6 @@ export namespace Prisma {
     notIn?: $Enums.ExperimentStatus[] | ListEnumExperimentStatusFieldRefInput<$PrismaModel>
     not?: NestedEnumExperimentStatusFilter<$PrismaModel> | $Enums.ExperimentStatus
   }
-  export type JsonFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-  }
 
   export type ExperimentCountOrderByAggregateInput = {
     id?: SortOrder
@@ -83162,32 +83234,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumExperimentStatusFilter<$PrismaModel>
     _max?: NestedEnumExperimentStatusFilter<$PrismaModel>
-  }
-  export type JsonWithAggregatesFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonWithAggregatesFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedJsonFilter<$PrismaModel>
-    _max?: NestedJsonFilter<$PrismaModel>
   }
 
   export type ExperimentScalarRelationFilter = {
@@ -87306,6 +87352,29 @@ export namespace Prisma {
     _min?: NestedDecimalNullableFilter<$PrismaModel>
     _max?: NestedDecimalNullableFilter<$PrismaModel>
   }
+  export type NestedJsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
 
   export type NestedEnumOrderStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.OrderStatus | EnumOrderStatusFieldRefInput<$PrismaModel>
@@ -87671,29 +87740,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumExperimentStatusFilter<$PrismaModel>
     _max?: NestedEnumExperimentStatusFilter<$PrismaModel>
-  }
-  export type NestedJsonFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
-        Required<NestedJsonFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>
-
-  export type NestedJsonFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
   export type UserCreateWithoutReferralsInput = {
@@ -90287,6 +90333,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -90328,6 +90375,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -90724,6 +90772,7 @@ export namespace Prisma {
     originalPrice?: DecimalNullableFilter<"Product"> | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: DecimalNullableFilter<"Product"> | Decimal | DecimalJsLike | number | string | null
     images?: StringNullableListFilter<"Product">
+    variants?: JsonFilter<"Product">
     stock?: IntFilter<"Product"> | number
     lowStockThreshold?: IntFilter<"Product"> | number
     isActive?: BoolFilter<"Product"> | boolean
@@ -91154,6 +91203,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -91195,6 +91245,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -92679,6 +92730,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -92720,6 +92772,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -92826,6 +92879,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -92867,6 +92921,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -92991,6 +93046,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -93032,6 +93088,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -93178,6 +93235,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -93219,6 +93277,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -93343,6 +93402,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -93384,6 +93444,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -93530,6 +93591,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -93571,6 +93633,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -93612,6 +93675,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -93653,6 +93717,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -93793,6 +93858,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -93834,6 +93900,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -95865,6 +95932,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -95906,6 +95974,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -96046,6 +96115,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -96087,6 +96157,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -96205,6 +96276,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -96246,6 +96318,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -96427,6 +96500,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -96468,6 +96542,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -97113,6 +97188,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -97154,6 +97230,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -97300,6 +97377,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -97341,6 +97419,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -97476,6 +97555,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -97517,6 +97597,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -97790,6 +97871,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -97831,6 +97913,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -98185,6 +98268,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -98226,6 +98310,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -98332,6 +98417,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -98373,6 +98459,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -98585,6 +98672,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -98626,6 +98714,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -98849,6 +98938,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -98890,6 +98980,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -99014,6 +99105,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -99055,6 +99147,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -99112,6 +99205,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -99153,6 +99247,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -99194,6 +99289,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -99235,6 +99331,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -99292,6 +99389,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -99333,6 +99431,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -99611,6 +99710,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -99652,6 +99752,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -99792,6 +99893,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -99833,6 +99935,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -99957,6 +100060,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -99998,6 +100102,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -100144,6 +100249,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -100185,6 +100291,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -100481,6 +100588,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -100522,6 +100630,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -100668,6 +100777,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -100709,6 +100819,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -100833,6 +100944,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -100874,6 +100986,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -101020,6 +101133,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -101061,6 +101175,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -102490,6 +102605,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -102653,6 +102769,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -102694,6 +102811,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -102735,6 +102853,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -103104,6 +103223,7 @@ export namespace Prisma {
     originalPrice?: Decimal | DecimalJsLike | number | string | null
     sellingPrice?: Decimal | DecimalJsLike | number | string | null
     images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: number
     lowStockThreshold?: number
     isActive?: boolean
@@ -103129,6 +103249,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -103170,6 +103291,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -103211,6 +103333,7 @@ export namespace Prisma {
     originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
     stock?: IntFieldUpdateOperationsInput | number
     lowStockThreshold?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean

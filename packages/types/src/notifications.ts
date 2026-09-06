@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { emailSchema } from "./auth.js";
-import { idSchema, paginationQuerySchema } from "./catalog.js";
+import { emailSchema } from "./auth";
+import { idSchema, paginationQuerySchema } from "./catalog";
 
 // ---------------------------------------------------------------------------
 // Engagement: notifications, support messages, contact form

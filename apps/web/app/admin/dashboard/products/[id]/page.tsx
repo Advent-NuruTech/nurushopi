@@ -5,6 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { Upload } from "lucide-react";
 import Image from "next/image";
+import ProductVariantsEditor, { prepareVariants, type VariantDraft } from "@/components/admin/ProductVariantsEditor";
+import RichTextEditor from "@/components/ui/RichTextEditor";
 import { ADMIN_DASHBOARD_PATH, adminRoute } from "@/lib/adminPaths";
 import { catalogApi, ApiClientError } from "@/lib/api";
 import type { CategoryDTO } from "@nuru/types";
@@ -34,6 +36,7 @@ export default function ProductEditPage() {
 
   const [product, setProduct] = useState<ProductForm | null>(null);
   const [loading, setLoading] = useState(true);
+  const [variants, setVariants] = useState<VariantDraft[]>([]);
   const [saving, setSaving] = useState(false);
   const [categories, setCategories] = useState<CategoryDTO[]>([]);
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
@@ -45,6 +48,7 @@ export default function ProductEditPage() {
     catalogApi
       .getProduct(id)
       .then(({ product: p }) => {
+        setVariants((p.variants ?? []).map((v, key) => ({ key, name: v.name, imageUrl: v.imageUrl ?? "", file: null })));
         setProduct({
           id: p.id,
           name: p.name,
@@ -140,13 +144,14 @@ export default function ProductEditPage() {
         description: product.description || null,
         shortDescription: product.shortDescription || null,
         images: product.images.slice(0, 3),
+        variants: await prepareVariants(variants),
       });
       setFeedback({ type: "success", text: "Product updated successfully." });
       router.refresh();
     } catch (err) {
       setFeedback({
         type: "error",
-        text: err instanceof ApiClientError ? err.message : "Update failed.",
+        text: err instanceof Error ? err.message : "Update failed.",
       });
     } finally {
       setSaving(false);
@@ -319,13 +324,7 @@ export default function ProductEditPage() {
           onChange={(e) => updateField("shortDescription", e.target.value)}
         />
 
-        <textarea
-          className="w-full border p-3 rounded"
-          rows={6}
-          placeholder="Full description"
-          value={product.description}
-          onChange={(e) => updateField("description", e.target.value)}
-        />
+        <RichTextEditor value={product.description} onChange={(description) => updateField("description", description)} placeholder="Write product details, benefits and ingredients..." disabled={saving} />
       </div>
 
       {/* Images */}
@@ -379,11 +378,13 @@ export default function ProductEditPage() {
       </div>
 
       {/* Actions */}
+      <ProductVariantsEditor value={variants} onChange={setVariants} disabled={saving} />
+
       <div className="flex gap-3">
         <button
           onClick={save}
           disabled={saving}
-          className="px-5 py-2 bg-sky-600 text-white rounded"
+          className="px-5 py-2 bg-brand text-white rounded"
         >
           {saving ? "Saving…" : "Save Changes"}
         </button>

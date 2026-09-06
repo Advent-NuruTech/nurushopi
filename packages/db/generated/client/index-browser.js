@@ -250,6 +250,7 @@ exports.Prisma.ProductScalarFieldEnum = {
   originalPrice: 'originalPrice',
   sellingPrice: 'sellingPrice',
   images: 'images',
+  variants: 'variants',
   stock: 'stock',
   lowStockThreshold: 'lowStockThreshold',
   isActive: 'isActive',
@@ -297,6 +298,7 @@ exports.Prisma.WholesaleItemScalarFieldEnum = {
   minQuantity: 'minQuantity',
   stock: 'stock',
   images: 'images',
+  variants: 'variants',
   isActive: 'isActive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

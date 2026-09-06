@@ -219,7 +219,7 @@ export default function AdminLayout({
         )}
 
         <aside
-          className={`hidden md:flex md:flex-col border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 transition-all duration-300 ${
+          className={`hidden md:sticky md:top-16 md:flex md:h-[calc(100vh-4rem)] md:self-start md:flex-col border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 transition-all duration-300 ${
             desktopSidebarCollapsed ? "md:w-20" : "md:w-72"
           }`}
         >

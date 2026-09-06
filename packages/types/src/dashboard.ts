@@ -1,4 +1,4 @@
-import type { OrderDTO, OrderStatus } from "./orders.js";
+import type { OrderDTO, OrderStatus } from "./orders";
 
 // ---------------------------------------------------------------------------
 // Admin dashboard

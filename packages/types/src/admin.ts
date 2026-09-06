@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { emailSchema, passwordSchema } from "./auth.js";
+import { emailSchema, passwordSchema } from "./auth";
 
 // ---------------------------------------------------------------------------
 // Admin authentication & management

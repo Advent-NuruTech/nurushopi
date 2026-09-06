@@ -14,6 +14,7 @@ import {
   XCircle,
 } from "lucide-react";
 import Image from "next/image";
+import ProductVariantsEditor, { prepareVariants, type VariantDraft } from "@/components/admin/ProductVariantsEditor";
 import { slugifyCategory } from "@/lib/categoryUtils";
 import { catalogApi, wholesaleApi, ApiClientError } from "@/lib/api";
 
@@ -38,6 +39,8 @@ interface CategoryOption {
 type UploadStatus = "idle" | "uploading" | "success" | "error";
 
 export default function UploadWholesalePage() {
+  const [variants, setVariants] = useState<VariantDraft[]>([]);
+  const [variantError, setVariantError] = useState("");
   const [formData, setFormData] = useState<WholesaleFormData>({
     name: "",
     retailPrice: "",
@@ -110,6 +113,8 @@ export default function UploadWholesalePage() {
   };
 
   const resetForm = () => {
+    setVariants([]);
+    setVariantError("");
     setFormData({
       name: "",
       retailPrice: "",
@@ -155,6 +160,7 @@ export default function UploadWholesalePage() {
     setUploadedImages([]);
 
     try {
+      const savedVariants = await prepareVariants(variants);
       const uploaded: string[] = [];
       for (let i = 0; i < formData.files.length; i += 1) {
         const fd = new FormData();
@@ -178,12 +184,13 @@ export default function UploadWholesalePage() {
         unitPrice: Number(formData.wholesalePrice),
         minQuantity: Number(formData.wholesaleMinQty) || 1,
         stock: formData.stock === "" ? 0 : Number(formData.stock),
+        variants: savedVariants,
         images: uploaded.slice(0, 3),
         isActive: true,
       });
       setStatus("success");
     } catch (error) {
-      setErrorText(error instanceof ApiClientError ? error.message : "Upload failed.");
+      setErrorText(error instanceof Error ? error.message : "Upload failed.");
       setStatus("error");
     }
   };
@@ -208,14 +215,14 @@ export default function UploadWholesalePage() {
         >
           <div>
             <label className="mb-2 flex items-center gap-2 font-semibold">
-              <Tag className="h-4 w-4 text-sky-600 dark:text-sky-400" />
+              <Tag className="h-4 w-4 text-brand-strong dark:text-brand-bright" />
               Product Name
             </label>
             <input
               required
               value={formData.name}
               onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-              className="w-full rounded border border-slate-300 bg-white p-3 text-slate-900 outline-none ring-sky-500 focus:ring-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+              className="w-full rounded border border-slate-300 bg-white p-3 text-slate-900 outline-none ring-brand focus:ring-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             />
           </div>
 
@@ -231,7 +238,7 @@ export default function UploadWholesalePage() {
                     retailPrice: e.target.value === "" ? "" : Number(e.target.value),
                   }))
                 }
-                className="w-full rounded border border-slate-300 bg-white p-3 text-slate-900 outline-none ring-sky-500 focus:ring-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                className="w-full rounded border border-slate-300 bg-white p-3 text-slate-900 outline-none ring-brand focus:ring-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
               />
             </div>
             <div>
@@ -245,7 +252,7 @@ export default function UploadWholesalePage() {
                     wholesalePrice: e.target.value === "" ? "" : Number(e.target.value),
                   }))
                 }
-                className="w-full rounded border border-slate-300 bg-white p-3 text-slate-900 outline-none ring-sky-500 focus:ring-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                className="w-full rounded border border-slate-300 bg-white p-3 text-slate-900 outline-none ring-brand focus:ring-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
               />
             </div>
           </div>
@@ -268,7 +275,7 @@ export default function UploadWholesalePage() {
                     wholesaleMinQty: e.target.value === "" ? "" : Number(e.target.value),
                   }))
                 }
-                className="w-full rounded border border-slate-300 bg-white p-3 text-slate-900 outline-none ring-sky-500 focus:ring-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                className="w-full rounded border border-slate-300 bg-white p-3 text-slate-900 outline-none ring-brand focus:ring-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
               />
             </div>
             <div>
@@ -279,7 +286,7 @@ export default function UploadWholesalePage() {
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, wholesaleUnit: e.target.value }))
                 }
-                className="w-full rounded border border-slate-300 bg-white p-3 text-slate-900 outline-none ring-sky-500 focus:ring-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                className="w-full rounded border border-slate-300 bg-white p-3 text-slate-900 outline-none ring-brand focus:ring-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
               />
             </div>
             <div>
@@ -294,7 +301,7 @@ export default function UploadWholesalePage() {
                     stock: e.target.value === "" ? "" : Number(e.target.value),
                   }))
                 }
-                className="w-full rounded border border-slate-300 bg-white p-3 text-slate-900 outline-none ring-sky-500 focus:ring-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                className="w-full rounded border border-slate-300 bg-white p-3 text-slate-900 outline-none ring-brand focus:ring-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
               />
               <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
                 When stock reaches 0, customers cannot order this wholesale item.
@@ -304,13 +311,13 @@ export default function UploadWholesalePage() {
 
           <div>
             <label className="mb-2 flex items-center gap-2 font-semibold">
-              <Package className="h-4 w-4 text-sky-600 dark:text-sky-400" />
+              <Package className="h-4 w-4 text-brand-strong dark:text-brand-bright" />
               Category
             </label>
             <select
               value={categoryInput}
               onChange={(e) => handleCategorySelect(e.target.value)}
-              className="mb-2 w-full rounded border border-slate-300 bg-white p-3 text-slate-900 outline-none ring-sky-500 focus:ring-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+              className="mb-2 w-full rounded border border-slate-300 bg-white p-3 text-slate-900 outline-none ring-brand focus:ring-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             >
               <option value="">Select category</option>
               {categories.map((c) => (
@@ -323,26 +330,26 @@ export default function UploadWholesalePage() {
               placeholder="Or type new category"
               value={categoryInput}
               onChange={(e) => handleCategoryTyping(e.target.value)}
-              className="w-full rounded border border-slate-300 bg-white p-3 text-slate-900 outline-none ring-sky-500 focus:ring-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+              className="w-full rounded border border-slate-300 bg-white p-3 text-slate-900 outline-none ring-brand focus:ring-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             />
           </div>
 
           <div>
             <label className="mb-2 flex items-center gap-2 font-semibold">
-              <FileText className="h-4 w-4 text-sky-600 dark:text-sky-400" />
+              <FileText className="h-4 w-4 text-brand-strong dark:text-brand-bright" />
               Description
             </label>
             <textarea
               rows={6}
               value={formData.description}
               onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
-              className="w-full resize-y rounded border border-slate-300 bg-white p-3 text-slate-900 outline-none ring-sky-500 focus:ring-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+              className="w-full resize-y rounded border border-slate-300 bg-white p-3 text-slate-900 outline-none ring-brand focus:ring-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             />
           </div>
 
           <div>
             <label className="mb-2 flex items-center gap-2 font-semibold">
-              <ImageIcon className="h-4 w-4 text-sky-600 dark:text-sky-400" />
+              <ImageIcon className="h-4 w-4 text-brand-strong dark:text-brand-bright" />
               Product Images
             </label>
             <label className="flex cursor-pointer flex-col items-center gap-2 rounded border-2 border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-600 hover:border-sky-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
@@ -386,10 +393,12 @@ export default function UploadWholesalePage() {
             )}
           </div>
 
+          <ProductVariantsEditor value={variants} onChange={setVariants} disabled={status === "uploading"} />
+
           <button
             type="submit"
             disabled={status === "uploading"}
-            className="w-full rounded bg-sky-600 py-3 font-semibold text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded bg-brand py-3 font-semibold text-white transition hover:bg-brand-strong disabled:cursor-not-allowed disabled:opacity-60"
           >
             {status === "uploading" ? "Uploading..." : "Create Wholesale Product"}
           </button>
@@ -412,7 +421,7 @@ export default function UploadWholesalePage() {
             >
               {status === "uploading" && (
                 <div className="space-y-4 text-center">
-                  <Loader2 className="mx-auto h-10 w-10 animate-spin text-sky-600" />
+                  <Loader2 className="mx-auto h-10 w-10 animate-spin text-brand-strong" />
                   <h3 className="text-lg font-semibold">Uploading wholesale product...</h3>
                   <p className="text-sm text-slate-600 dark:text-slate-400">{Math.round(progress)}%</p>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -420,7 +429,7 @@ export default function UploadWholesalePage() {
                   </p>
                   <div className="h-2 rounded bg-slate-200 dark:bg-slate-700">
                     <div
-                      className="h-2 rounded bg-sky-600 transition-all"
+                      className="h-2 rounded bg-brand transition-all"
                       style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
                     />
                   </div>
@@ -443,7 +452,7 @@ export default function UploadWholesalePage() {
                     </button>
                     <button
                       onClick={resetForm}
-                      className="flex-1 rounded bg-sky-600 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-700"
+                      className="flex-1 rounded bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-strong"
                     >
                       Upload Another
                     </button>
@@ -467,7 +476,7 @@ export default function UploadWholesalePage() {
                     </button>
                     <button
                       onClick={() => setStatus("idle")}
-                      className="flex-1 rounded bg-sky-600 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-700"
+                      className="flex-1 rounded bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-strong"
                     >
                       Try Again
                     </button>

@@ -11,6 +11,7 @@ import { AiOutlineEye, AiOutlineEyeInvisible, AiOutlineMail, AiOutlineLock } fro
 
 import AuthHeader from "@/components/ui/auth/AuthHeader";
 import AuthCard from "@/components/ui/auth/AuthCard";
+import AuthHero from "@/components/ui/auth/AuthHero";
 import StatusMessage from "@/components/ui/auth/StatusMessage";
 import { authApi, ApiClientError } from "@/lib/api";
 import { useAppUser } from "@/context/UserContext";
@@ -69,17 +70,10 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 transition-colors">
-      {/* Header remains */}
-      <AuthHeader />
-
-      {/* Centered login card */}
-      <main className="flex-1 flex items-center justify-center p-2">
-        <AuthCard
-          title="Welcome Back"
-          subtitle="Sign in to your account to continue shopping"
-          icon={<AiOutlineMail className="w-6 h-6 text-gray-500 dark:text-gray-300" />}
-        >
+    <div className="min-h-screen bg-[#EFFCF3] lg:flex">
+      <AuthHero />
+      <main className="relative -mt-8 flex flex-1 items-center justify-center rounded-t-[2rem] bg-white px-4 py-8 sm:px-6 lg:mt-0 lg:rounded-none lg:px-10">
+        <AuthCard subtitle="Sign in to your account to continue shopping">
           <StatusMessage
             error={error}
             success={success}
@@ -88,20 +82,19 @@ function LoginForm() {
           />
 
           <form onSubmit={handleEmailLogin}>
-            {/* Google Button - Placed at the top */}
             <button
               type="button"
               onClick={handleGoogleLogin}
-              className="w-full flex items-center justify-center gap-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 py-3 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition mb-6"
+              className="mb-5 flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-300 bg-white py-3.5 font-semibold text-slate-800 shadow-sm transition hover:border-[#009933] hover:bg-[#EFFCF3]"
             >
               <FcGoogle className="w-5 h-5" />
               Continue with Google
             </button>
 
             <div className="my-6 flex items-center gap-3">
-              <span className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
-              <span className="text-xs uppercase tracking-wide text-gray-400">or sign in with email</span>
-              <span className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
+              <span className="h-px flex-1 bg-slate-200" />
+              <span className="text-xs uppercase tracking-wide text-slate-400">or continue with email</span>
+              <span className="h-px flex-1 bg-slate-200" />
             </div>
 
             <div className="mb-4">
@@ -159,7 +152,7 @@ function LoginForm() {
               disabled={loading}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full bg-[#009933] text-white py-3 rounded-lg font-semibold shadow-lg hover:bg-[#006B2C] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full rounded-2xl bg-[#009933] py-3.5 font-semibold text-white shadow-lg shadow-[#009933]/20 transition-all hover:bg-[#006B2C] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading ? (
                 <div className="flex items-center justify-center gap-2">
@@ -193,7 +186,7 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 transition-colors p-4">
+      <div className="min-h-screen flex items-center justify-center bg-[#EFFCF3] p-4">
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-[#009933] border-t-transparent rounded-full animate-spin mx-auto"></div>
           <p className="mt-2 text-gray-600 dark:text-gray-400">Loading...</p>

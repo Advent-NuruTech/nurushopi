@@ -1,5 +1,6 @@
+import { productVariantsSchema, type ProductVariant } from "./variants";
 import { z } from "zod";
-import { moneySchema, paginationQuerySchema, slugSchema } from "./catalog.js";
+import { moneySchema, paginationQuerySchema, slugSchema } from "./catalog";
 
 // ---------------------------------------------------------------------------
 // Wholesale items
@@ -23,6 +24,7 @@ export const wholesaleItemCreateSchema = z
       .default(1),
     stock: z.coerce.number().int().min(0).default(0),
     images: z.array(z.string().url("Each image must be a valid URL.")).max(3).default([]),
+    variants: productVariantsSchema.optional(),
     isActive: z.coerce.boolean().default(true),
   })
   .strict();
@@ -59,6 +61,7 @@ export interface WholesaleItemDTO {
   stock: number;
   inStock: boolean;
   images: string[];
+  variants?: ProductVariant[];
   isActive: boolean;
   createdAt: string;
   updatedAt: string;

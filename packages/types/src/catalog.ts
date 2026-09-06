@@ -1,5 +1,6 @@
+import { productVariantsSchema, type ProductVariant } from "./variants";
 import { z } from "zod";
-import type { ReviewSummaryDTO } from "./reviews.js";
+import type { ReviewSummaryDTO } from "./reviews";
 
 // ---------------------------------------------------------------------------
 // Shared primitives
@@ -112,6 +113,7 @@ export const productCreateSchema = z
     originalPrice: moneySchema.optional().nullable(),
     sellingPrice: moneySchema.optional().nullable(),
     images: z.array(z.string().url("Each image must be a valid URL.")).max(3).default([]),
+    variants: productVariantsSchema.optional(),
     stock: z.coerce.number().int().min(0).default(0),
     lowStockThreshold: z.coerce.number().int().min(0).max(10_000).default(5),
     isActive: z.coerce.boolean().default(true),
@@ -157,6 +159,7 @@ export interface ProductDTO {
   originalPrice: string | null;
   sellingPrice: string | null;
   images: string[];
+  variants?: ProductVariant[];
   stock: number;
   inStock: boolean;
   lowStockThreshold: number;

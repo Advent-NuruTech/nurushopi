@@ -1,3 +1,4 @@
+import { productVariantsSchema } from "@nuru/types";
 import type { Banner, Category, HeroAnnouncement, Prisma, Product } from "@nuru/db";
 import type { BannerDTO, CategoryDTO, HeroAnnouncementDTO, ProductDTO } from "@nuru/types";
 
@@ -56,6 +57,7 @@ export function toProductDTO(p: ProductWithCategory): ProductDTO {
     originalPrice: decToStr(p.originalPrice),
     sellingPrice: decToStr(p.sellingPrice),
     images: p.images,
+    variants: productVariantsSchema.parse(p.variants ?? []),
     stock: p.stock,
     inStock: p.stock > 0,
     lowStockThreshold: p.lowStockThreshold,

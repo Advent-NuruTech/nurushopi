@@ -1,105 +1,36 @@
-import Image from "next/image";
 import Link from "next/link";
-import { formatPrice } from "@/lib/formatPrice";
+import { Search, SlidersHorizontal, X } from "lucide-react";
+import FeaturedSection from "@/components/ui/FeaturedSection";
 import { formatCategoryLabel } from "@/lib/categoryUtils";
-import { getDiscountPercent, getOriginalPrice, getSellingPrice } from "@/lib/pricing";
-import SectionHeader from "@/components/ui/SectionHeader";
-import { listProducts } from "@/lib/data/catalog";
+import { listBanners, listCategories, listProducts } from "@/lib/data/catalog";
 import { listWholesaleItems } from "@/lib/data/wholesale";
 import type { ProductCardVM } from "@/lib/view/catalog";
-import RatingStars from "@/components/ui/RatingStars";
 
 export const metadata = {
   title: "Shop – NuruShop",
   description: "Browse retail and wholesale products at NuruShop.",
 };
 
-function ProductCard({ product, showCategory }: { product: ProductCardVM; showCategory: boolean }) {
-  const discountPercent = getDiscountPercent(product);
-  const originalPrice = getOriginalPrice(product);
-  const sellingPrice = getSellingPrice(product);
-
-  return (
-    <Link
-      href={product.href}
-      className="group bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-sm dark:shadow-gray-900 hover:shadow-lg dark:hover:shadow-gray-700 transition-all duration-300 overflow-hidden border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-500 flex flex-col h-full"
-    >
-      <div className="relative w-full pt-[100%] overflow-hidden bg-gray-100 dark:bg-gray-700">
-        <div className="absolute inset-0">
-          <Image
-            src={product.image}
-            alt={product.name}
-            fill
-            className="object-contain p-3 group-hover:scale-105 transition-transform duration-300"
-            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
-          />
-        </div>
-        {showCategory && product.categoryName && (
-          <div className="absolute top-2 left-2 sm:top-3 sm:left-3">
-            <span className="px-2 py-1 sm:px-3 sm:py-1 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm text-xs font-semibold text-gray-800 dark:text-gray-200 rounded-full truncate max-w-[100px]">
-              {product.categoryName}
-            </span>
-          </div>
-        )}
-        <div className="absolute top-2 right-2 sm:top-3 sm:right-3 flex flex-col items-end gap-2">
-          {discountPercent && (
-            <span className="px-2 py-1 sm:px-3 sm:py-1 bg-red-600 text-white text-xs font-semibold rounded-full">
-              {discountPercent}% OFF
-            </span>
-          )}
-          {product.isNew && (
-            <span className="px-2 py-1 sm:px-3 sm:py-1 bg-green-500 text-white text-xs font-semibold rounded-full">
-              NEW
-            </span>
-          )}
-        </div>
-        {!product.inStock && (
-          <div className="absolute inset-x-2 bottom-2 rounded-full bg-slate-900/85 px-2 py-1 text-center text-xs font-semibold text-white">
-            Out of stock
-          </div>
-        )}
-        {product.stockStatus === "LOW_STOCK" && (
-          <div className="absolute inset-x-2 bottom-2 rounded-full bg-amber-500 px-2 py-1 text-center text-xs font-semibold text-white">
-            Only {product.stock} left
-          </div>
-        )}
-      </div>
-
-      <div className="p-3 sm:p-4 flex flex-col flex-1">
-        <h3 className="font-semibold text-gray-800 dark:text-gray-200 text-sm sm:text-base md:text-lg mb-2 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors min-h-[2.5em]">
-          {product.name}
-        </h3>
-        {(product.brandName || product.storeName) && (
-          <p className="mb-2 truncate text-xs font-medium text-slate-500">
-            {product.brandName || product.storeName}
-          </p>
-        )}
-        <RatingStars
-          summary={product.ratingSummary}
-          size={13}
-          showValue={false}
-          className="mb-2 [&_span]:text-[11px]"
-        />
-        <div className="mt-auto">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div className="flex flex-col">
-              {discountPercent && originalPrice && (
-                <span className="text-xs text-gray-400 line-through">
-                  {formatPrice(originalPrice)}
-                </span>
-              )}
-              <span className="text-lg sm:text-xl md:text-2xl font-bold text-blue-600 dark:text-blue-400">
-                {formatPrice(sellingPrice)}
-              </span>
-            </div>
-            <span className="sm:hidden text-xs text-gray-500 dark:text-gray-400 text-right">
-              Tap to view →
-            </span>
-          </div>
-        </div>
-      </div>
-    </Link>
-  );
+function toFeedProduct(product: ProductCardVM) {
+  return {
+    id: product.id,
+    slug: product.slug,
+    name: product.name,
+    brandName: product.brandName,
+    storeName: product.storeName,
+    ratingSummary: product.ratingSummary,
+    image: product.image,
+    category: product.categorySlug ?? "",
+    price: product.price,
+    originalPrice: product.originalPrice,
+    sellingPrice: product.sellingPrice,
+    shortDescription: product.shortDescription ?? undefined,
+    inStock: product.inStock,
+    stock: product.stock,
+    stockStatus: product.stockStatus,
+    createdAt: product.createdAtMs,
+    isNew: product.isNew,
+  };
 }
 
 export default async function ShopPage({
@@ -111,171 +42,148 @@ export default async function ShopPage({
   const selectedCategory = resolved?.category
     ? decodeURIComponent(String(resolved.category)).toLowerCase().trim()
     : "";
-  const selectedSearch = resolved?.search
-    ? decodeURIComponent(String(resolved.search)).trim()
-    : "";
+  const selectedSearch = resolved?.search ? decodeURIComponent(String(resolved.search)).trim() : "";
 
   let allProducts: ProductCardVM[] = [];
   let wholesaleProducts = [] as Awaited<ReturnType<typeof listWholesaleItems>>["items"];
+  let promotions = [] as Awaited<ReturnType<typeof listBanners>>;
+  let categories = [] as Awaited<ReturnType<typeof listCategories>>;
 
   try {
-    const [productsResult, wholesaleResult] = await Promise.all([
+    const [productsResult, wholesaleResult, bannerResult, categoryResult] = await Promise.all([
       listProducts({
         pageSize: 100,
         sort: "newest",
         search: selectedSearch || undefined,
       }),
       listWholesaleItems({ pageSize: 24, sort: "newest" }),
+      listBanners(),
+      listCategories(),
     ]);
     allProducts = productsResult.items;
     wholesaleProducts = wholesaleResult.items;
+    promotions = bannerResult;
+    categories = categoryResult;
   } catch (error) {
     console.error("Error loading products:", error);
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-        <div className="container mx-auto px-4 py-20 text-center">
-          <h1 className="text-2xl font-bold text-red-600 dark:text-red-400 mb-4">
-            Error Loading Products
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">Please try again later.</p>
+      <div className="min-h-screen bg-slate-50 px-4 py-20 text-center dark:bg-slate-950">
+        <div className="mx-auto max-w-md rounded-3xl border border-rose-200 bg-white p-8 shadow-sm dark:border-rose-950 dark:bg-slate-900">
+          <h1 className="text-2xl font-bold text-rose-600">We couldn&apos;t load the shop</h1>
+          <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-400">
+            Please refresh the page or try again in a few moments.
+          </p>
         </div>
       </div>
     );
   }
 
   const products = selectedCategory
-    ? allProducts.filter((p) => p.categorySlug === selectedCategory)
+    ? allProducts.filter((product) => product.categorySlug === selectedCategory)
     : allProducts;
-
   const suggestions = selectedCategory
-    ? allProducts.filter((p) => p.categorySlug !== selectedCategory).slice(0, 8)
+    ? allProducts.filter((product) => product.categorySlug !== selectedCategory).slice(0, 8)
     : [];
+  const hasActiveFilter = Boolean(selectedCategory || selectedSearch);
+  const categoryOptions = categories.map((category) => ({
+    name: category.name,
+    slug: category.slug,
+    image: category.image,
+  }));
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-      <div className="container mx-auto px-2 sm:px-4 py-8 md:py-12">
-        {selectedCategory && (
-          <div className="mb-6 mx-2 sm:mx-0 flex items-center justify-between rounded-lg border border-blue-200 bg-blue-50 text-blue-700 px-4 py-3">
-            <span className="text-sm font-medium">
-              Showing category: {formatCategoryLabel(selectedCategory)}
-            </span>
-            <Link href="/shop" className="text-sm font-semibold hover:underline">
-              Clear
+    <main className="-mx-2 min-h-screen bg-slate-50 dark:bg-black sm:-mx-4 lg:-mx-8">
+      <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+            <div>
+             
+              <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-4xl">
+                {selectedCategory
+                  ? formatCategoryLabel(selectedCategory)
+                  : selectedSearch
+                    ? "Search results"
+                    : "Explore the shop"}
+              </h1>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
+                {selectedCategory
+                  ? `Browse every available product in ${formatCategoryLabel(selectedCategory)}.`
+                  : selectedSearch
+                    ? `Products matching “${selectedSearch}”.`
+                    : "Discover trusted retail products, timely offers, and selected wholesale value in one continuous collection."}
+              </p>
+            </div>
+            <Link
+              href="/"
+              className="inline-flex h-10 w-fit items-center rounded-full border border-slate-300 bg-white px-4 text-sm font-bold text-slate-700 transition hover:border-brand hover:text-brand-strong dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+            >
+              Back to home
             </Link>
           </div>
-        )}
 
-        {selectedSearch && (
-          <div className="mb-6 mx-2 sm:mx-0 flex items-center justify-between gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300">
-            <span className="min-w-0 truncate text-sm font-medium">
-              Search results for: <strong>&ldquo;{selectedSearch}&rdquo;</strong>
-            </span>
-            <Link href="/shop" className="shrink-0 text-sm font-semibold hover:underline">
-              Clear
-            </Link>
+          {hasActiveFilter && (
+            <div className="mt-5 flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                <SlidersHorizontal size={14} /> Active filters
+              </span>
+              {selectedCategory && (
+                <span className="inline-flex items-center gap-2 rounded-full bg-brand-surface px-3 py-1.5 text-xs font-semibold text-brand-strong dark:bg-[#063D1E] dark:text-brand-bright">
+                  {formatCategoryLabel(selectedCategory)}
+                </span>
+              )}
+              {selectedSearch && (
+                <span className="inline-flex min-w-0 items-center gap-2 rounded-full bg-brand-surface px-3 py-1.5 text-xs font-semibold text-brand-strong dark:bg-[#063D1E] dark:text-brand-bright">
+                  <Search size={13} /> <span className="max-w-48 truncate">{selectedSearch}</span>
+                </span>
+              )}
+              <Link
+                href="/shop"
+                className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800"
+              >
+                <X size={13} /> Clear all
+              </Link>
+            </div>
+          )}
+        </div>
+      </header>
+
+      {products.length > 0 ? (
+        <FeaturedSection
+          products={products.map(toFeedProduct)}
+          categories={categoryOptions}
+          promotions={hasActiveFilter ? [] : promotions}
+          wholesale={hasActiveFilter ? [] : wholesaleProducts}
+          preserveProductOrder
+          enableFeedModules={!hasActiveFilter}
+        />
+      ) : (
+        <section className="mx-auto max-w-7xl px-4 py-20 text-center sm:px-6">
+          <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-brand-surface text-2xl dark:bg-[#063D1E]">
+            <Search className="text-brand-strong dark:text-brand-bright" />
           </div>
-        )}
-
-        {wholesaleProducts.length > 0 && (
-          <section className="mb-10 mx-2 sm:mx-0">
-            <div className="mb-3">
-              <SectionHeader title="Wholesale Deals" href="/wholeseller" showViewAll={false} />
-            </div>
-
-            <div className="grid grid-flow-col auto-cols-[minmax(160px,1fr)] sm:auto-cols-[minmax(200px,1fr)] gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-hide">
-              {wholesaleProducts.map((product) => (
-                <Link
-                  key={product.id}
-                  href={product.href}
-                  className="group bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-sm dark:shadow-gray-900 hover:shadow-lg dark:hover:shadow-gray-700 transition-all duration-300 overflow-hidden border border-blue-200 dark:border-blue-700 hover:border-blue-400 dark:hover:border-blue-500 flex flex-col h-full snap-start"
-                >
-                  <div className="relative w-full pt-[100%] overflow-hidden bg-blue-50 dark:bg-blue-950/30">
-                    <div className="absolute inset-0">
-                      <Image
-                        src={product.image}
-                        alt={product.name}
-                        fill
-                        className="object-contain p-3 group-hover:scale-105 transition-transform duration-300"
-                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
-                      />
-                    </div>
-                    <div className="absolute top-2 left-2">
-                      <span className="px-2 py-1 bg-blue-600 text-white text-[10px] font-bold uppercase rounded-full">
-                        Wholesale
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="p-3 flex flex-col flex-1">
-                    <h3 className="font-semibold text-gray-800 dark:text-gray-200 text-sm sm:text-base line-clamp-2">
-                      {product.name}
-                    </h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                      Min: {product.minQuantity} unit
-                    </p>
-                    <div className="mt-auto pt-2">
-                      <div className="text-blue-600 dark:text-blue-400 font-bold text-base">
-                        {formatPrice(product.unitPrice)}
-                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                          {" "}
-                          / unit
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
-
-        <div className="mb-3 mx-2 sm:mx-0">
-          <SectionHeader
-            title={
-              selectedCategory
-                ? `${formatCategoryLabel(selectedCategory)} Retail`
-                : selectedSearch
-                  ? "Matching Products"
-                  : "Retail Products"
-            }
+          <h2 className="mt-5 text-xl font-bold text-slate-900 dark:text-white">
+            No matching products
+          </h2>
+          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500 dark:text-slate-400">
+            Try another search or clear the active filters to browse the full collection.
+          </p>
+          <Link
             href="/shop"
-            showViewAll={false}
-          />
-        </div>
+            className="mt-5 inline-flex h-10 items-center rounded-full bg-brand px-5 text-sm font-bold text-white transition hover:bg-brand-strong"
+          >
+            View all products
+          </Link>
+        </section>
+      )}
 
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} showCategory={!selectedCategory} />
-          ))}
-        </div>
-
-        {selectedCategory && suggestions.length > 0 && (
-          <div className="mt-12">
-            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
-              You may also like
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-              {suggestions.map((product) => (
-                <ProductCard key={product.id} product={product} showCategory />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {products.length === 0 && (
-          <div className="text-center py-20">
-            <div className="w-24 h-24 mx-auto mb-6 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center">
-              <span className="text-4xl">📦</span>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              No Products Available
-            </h3>
-            <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
-              Our store is currently being stocked. Check back soon for amazing products!
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
+      {selectedCategory && suggestions.length > 0 && (
+        <FeaturedSection
+          title="You may also like"
+          products={suggestions.map(toFeedProduct)}
+          preserveProductOrder
+          enableFeedModules={false}
+        />
+      )}
+    </main>
   );
 }

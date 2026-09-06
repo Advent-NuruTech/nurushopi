@@ -115,6 +115,7 @@ export async function create(input: WholesaleItemCreateInput) {
       minQuantity: input.minQuantity ?? 1,
       stock: input.stock ?? 0,
       images: input.images ?? [],
+      variants: input.variants ?? [],
       isActive: input.isActive ?? true,
     },
   });
@@ -141,6 +142,7 @@ export async function update(id: string, input: WholesaleItemUpdateInput) {
       ...(input.minQuantity !== undefined ? { minQuantity: input.minQuantity } : {}),
       ...(input.stock !== undefined ? { stock: input.stock } : {}),
       ...(input.images !== undefined ? { images: input.images } : {}),
+      ...(input.variants !== undefined ? { variants: input.variants } : {}),
       ...(input.isActive !== undefined ? { isActive: input.isActive } : {}),
     },
   });

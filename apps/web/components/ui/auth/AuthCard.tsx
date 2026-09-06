@@ -5,9 +5,9 @@ import { ReactNode } from "react";
 
 interface AuthCardProps {
   children: ReactNode;
-  title: string;
-  subtitle: string;
-  icon: ReactNode;
+  title?: string;
+  subtitle?: string;
+  icon?: ReactNode;
 }
 
 export default function AuthCard({ children, title, subtitle, icon }: AuthCardProps) {
@@ -16,22 +16,19 @@ export default function AuthCard({ children, title, subtitle, icon }: AuthCardPr
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="max-w-md w-full"
+      className="w-full max-w-md"
     >
-      <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden border-2 border-[#009933]/20 dark:border-[#009933]/20 transition-colors hover:border-[#009933]/40 dark:hover:border-[#009933]/40">
-        {/* Top Gradient - Green */}
-        <div className="h-2 bg-gradient-to-r from-[#009933] via-[#00b33c] to-[#006B2C]"></div>
-
-        <div className="p-8">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-lg bg-[#009933]/10 dark:bg-[#009933]/20 text-[#009933] dark:text-[#009933] transition-colors">
-              {icon}
+      <div className="overflow-hidden rounded-[2rem] bg-white shadow-[0_18px_50px_rgb(15_23_42_/_12%)] ring-1 ring-slate-200">
+        <div className="p-6 sm:p-8">
+          {title || subtitle || icon ? (
+            <div className="mb-4 flex items-center gap-3">
+              {icon ? <div className="rounded-xl bg-[#EFFCF3] p-2 text-[#006B2C]">{icon}</div> : null}
+              <div>
+                {title ? <h2 className="text-2xl font-bold text-slate-900">{title}</h2> : null}
+                {subtitle ? <p className="text-sm text-slate-600">{subtitle}</p> : null}
+              </div>
             </div>
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 transition-colors">{title}</h2>
-              <p className="text-gray-600 dark:text-gray-400 text-sm transition-colors">{subtitle}</p>
-            </div>
-          </div>
+          ) : null}
           {children}
         </div>
       </div>

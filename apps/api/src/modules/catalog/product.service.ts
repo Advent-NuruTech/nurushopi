@@ -185,6 +185,7 @@ export async function create(input: ProductCreateInput, createdById?: string) {
       originalPrice: input.originalPrice ?? null,
       sellingPrice: input.sellingPrice ?? null,
       images: input.images ?? [],
+      variants: input.variants ?? [],
       stock: input.stock ?? 0,
       lowStockThreshold: input.lowStockThreshold ?? 5,
       isActive: input.isActive ?? true,
@@ -226,6 +227,7 @@ export async function update(id: string, input: ProductUpdateInput) {
         ...(input.originalPrice !== undefined ? { originalPrice: input.originalPrice } : {}),
         ...(input.sellingPrice !== undefined ? { sellingPrice: input.sellingPrice } : {}),
         ...(input.images !== undefined ? { images: input.images } : {}),
+      ...(input.variants !== undefined ? { variants: input.variants } : {}),
         ...(input.stock !== undefined ? { stock: input.stock } : {}),
         ...(input.lowStockThreshold !== undefined
           ? { lowStockThreshold: input.lowStockThreshold }

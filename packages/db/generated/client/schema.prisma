@@ -384,6 +384,7 @@ model Product {
   originalPrice     Decimal? @db.Decimal(12, 2)
   sellingPrice      Decimal? @db.Decimal(12, 2)
   images            String[] // Cloudinary URLs (up to 3)
+  variants          Json     @default("[]")
   stock             Int      @default(0)
   lowStockThreshold Int      @default(5)
   isActive          Boolean  @default(true)
@@ -471,6 +472,7 @@ model WholesaleItem {
   minQuantity Int      @default(1)
   stock       Int      @default(0)
   images      String[]
+  variants    Json     @default("[]")
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

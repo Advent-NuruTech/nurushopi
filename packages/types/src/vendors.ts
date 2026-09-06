@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { emailSchema, passwordSchema } from "./auth.js";
-import { paginationQuerySchema } from "./catalog.js";
+import { emailSchema, passwordSchema } from "./auth";
+import { paginationQuerySchema } from "./catalog";
 
 // ---------------------------------------------------------------------------
 // Vendor applications

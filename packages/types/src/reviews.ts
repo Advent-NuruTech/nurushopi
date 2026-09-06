@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { idSchema, paginationQuerySchema } from "./catalog.js";
+import { idSchema, paginationQuerySchema } from "./catalog";
 
 // ---------------------------------------------------------------------------
 // Product reviews

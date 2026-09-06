@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { idSchema, moneySchema, type ProductDTO } from "./catalog.js";
+import { idSchema, moneySchema, type ProductDTO } from "./catalog";
 
 const nullableDate = z.coerce.date().optional().nullable();
 const jsonObject = z.record(z.unknown()).optional().nullable();

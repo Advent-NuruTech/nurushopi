@@ -6,11 +6,25 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --brand-primary: #009933;
+  --brand-strong: #006b2c;
+  --brand-bright: #00c83a;
+  --brand-ink: #004d20;
+  --brand-surface: #effcf3;
+  --brand-surface-strong: #ddfbe5;
+  --brand-border: #b8f5c8;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-brand: var(--brand-primary);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-bright: var(--brand-bright);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-surface: var(--brand-surface);
+  --color-brand-surface-strong: var(--brand-surface-strong);
+  --color-brand-border: var(--brand-border);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -28,6 +42,29 @@ body {
   max-width: 100%;
   overflow-x: hidden;
   overflow-x: clip;
+}
+
+/* NuruShop loading surfaces: gentle movement signals progress without flashing. */
+@keyframes nurushop-skeleton-shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+.nurushop-skeleton {
+  background: linear-gradient(100deg, #eef1f4 38%, #f8fafc 50%, #eef1f4 62%);
+  background-size: 200% 100%;
+  animation: nurushop-skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+@media (prefers-color-scheme: dark) {
+  .nurushop-skeleton {
+    background: linear-gradient(100deg, #1e293b 38%, #334155 50%, #1e293b 62%);
+    background-size: 200% 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nurushop-skeleton { animation: none; }
 }
 
 body {

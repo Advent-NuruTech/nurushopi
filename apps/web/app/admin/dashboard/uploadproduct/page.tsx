@@ -14,6 +14,8 @@ import {
   Upload,
 } from "lucide-react";
 import Image from "next/image";
+import ProductVariantsEditor, { prepareVariants, type VariantDraft } from "@/components/admin/ProductVariantsEditor";
+import RichTextEditor, { richTextToPlainText } from "@/components/ui/RichTextEditor";
 import { catalogApi, ApiClientError } from "@/lib/api";
 import type { CategoryDTO } from "@nuru/types";
 
@@ -32,6 +34,8 @@ interface ProductFormData {
 }
 
 export default function UploadProductPage() {
+  const [variants, setVariants] = useState<VariantDraft[]>([]);
+  const [variantError, setVariantError] = useState("");
   const [formData, setFormData] = useState<ProductFormData>({
     name: "",
     sku: "",
@@ -109,11 +113,13 @@ export default function UploadProductPage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
 
+    setVariantError("");
     setStatus("uploading");
     setProgress(0);
     setUploadedImages([]);
 
     try {
+      const savedVariants = await prepareVariants(variants);
       const uploaded: string[] = [];
       const publicIds: string[] = [];
 
@@ -128,6 +134,7 @@ export default function UploadProductPage() {
           });
 
           const result = await res.json();
+          if (!res.ok || !result.url) throw new Error(result.error || "Image upload failed.");
           uploaded.push(result.url);
           if (result.public_id) publicIds.push(result.public_id);
           setUploadedImages([...uploaded]);
@@ -149,8 +156,9 @@ export default function UploadProductPage() {
             ? originalPriceValue
             : null,
         description: formData.description || null,
-        shortDescription: formData.description.slice(0, 160) || null,
+        shortDescription: richTextToPlainText(formData.description).slice(0, 160) || null,
         categoryId: formData.categoryId || null,
+        variants: savedVariants,
         images: uploaded.slice(0, 3), // API accepts up to 3; first is the cover
         stock: formData.stock === "" ? 0 : Number(formData.stock),
         lowStockThreshold:
@@ -162,6 +170,7 @@ export default function UploadProductPage() {
       setStatus("success");
       setProgress(100);
     } catch (err) {
+      setVariantError(err instanceof Error ? err.message : "Upload failed. Please try again.");
       if (err instanceof ApiClientError) console.error(err.message);
       setStatus("error");
     }
@@ -169,6 +178,8 @@ export default function UploadProductPage() {
 
   /* ---------- Reset form after success ---------- */
   const handleReset = () => {
+    setVariants([]);
+    setVariantError("");
     setStatus("idle");
     setUploadedImages([]);
     setImagePreviews([]);
@@ -237,7 +248,7 @@ export default function UploadProductPage() {
 
         <motion.form
           onSubmit={handleSubmit}
-          className={`rounded-xl shadow-lg border p-8 space-y-6 transition-colors duration-300 ${
+          className={`rounded-xl shadow-lg border p-4 sm:p-8 space-y-6 transition-colors duration-300 ${
             darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
           }`}
           initial={{ opacity: 0, y: 20 }}
@@ -251,7 +262,7 @@ export default function UploadProductPage() {
                 darkMode ? "text-gray-300" : "text-gray-700"
               }`}
             >
-              <Tag size={16} className={darkMode ? "text-blue-400" : "text-blue-600"} />
+              <Tag size={16} className={darkMode ? "text-brand-bright" : "text-brand-strong"} />
               Product Name
             </label>
             <input
@@ -260,8 +271,8 @@ export default function UploadProductPage() {
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               className={`w-full p-3 rounded transition-colors duration-300 ${
                 darkMode
-                  ? "bg-gray-700 border-gray-600 text-gray-100 focus:border-blue-500 focus:ring-blue-500"
-                  : "border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+                  ? "bg-gray-700 border-gray-600 text-gray-100 focus:border-brand focus:ring-brand"
+                  : "border-gray-300 text-gray-900 focus:border-brand focus:ring-brand"
               } border focus:outline-none focus:ring-2`}
             />
           </div>
@@ -327,8 +338,8 @@ export default function UploadProductPage() {
               }
               className={`w-full p-3 rounded transition-colors duration-300 ${
                 darkMode
-                  ? "bg-gray-700 border-gray-600 text-gray-100 focus:border-blue-500 focus:ring-blue-500"
-                  : "border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+                  ? "bg-gray-700 border-gray-600 text-gray-100 focus:border-brand focus:ring-brand"
+                  : "border-gray-300 text-gray-900 focus:border-brand focus:ring-brand"
               } border focus:outline-none focus:ring-2`}
             />
             <label
@@ -349,8 +360,8 @@ export default function UploadProductPage() {
               }
               className={`w-full p-3 rounded transition-colors duration-300 ${
                 darkMode
-                  ? "bg-gray-700 border-gray-600 text-gray-100 focus:border-blue-500 focus:ring-blue-500"
-                  : "border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+                  ? "bg-gray-700 border-gray-600 text-gray-100 focus:border-brand focus:ring-brand"
+                  : "border-gray-300 text-gray-900 focus:border-brand focus:ring-brand"
               } border focus:outline-none focus:ring-2`}
             />
             <div className="mt-3 flex items-center gap-3 text-sm">
@@ -378,7 +389,7 @@ export default function UploadProductPage() {
                 <span className="line-through text-gray-400">
                   KSh {originalPrice.toLocaleString()}
                 </span>
-                <span className="font-semibold text-blue-600">
+                <span className="font-semibold text-brand-strong">
                   KSh {sellingPrice.toLocaleString()}
                 </span>
               </div>
@@ -404,8 +415,8 @@ export default function UploadProductPage() {
               }
               className={`w-full p-3 rounded transition-colors duration-300 ${
                 darkMode
-                  ? "bg-gray-700 border-gray-600 text-gray-100 focus:border-blue-500 focus:ring-blue-500"
-                  : "border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+                  ? "bg-gray-700 border-gray-600 text-gray-100 focus:border-brand focus:ring-brand"
+                  : "border-gray-300 text-gray-900 focus:border-brand focus:ring-brand"
               } border focus:outline-none focus:ring-2`}
             />
             <p className={`text-sm mt-2 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
@@ -437,7 +448,7 @@ export default function UploadProductPage() {
                 darkMode ? "text-gray-300" : "text-gray-700"
               }`}
             >
-              <Package size={16} className={darkMode ? "text-blue-400" : "text-blue-600"} />
+              <Package size={16} className={darkMode ? "text-brand-bright" : "text-brand-strong"} />
               Category
             </label>
 
@@ -446,8 +457,8 @@ export default function UploadProductPage() {
               onChange={(e) => handleCategorySelect(e.target.value)}
               className={`w-full p-3 rounded transition-colors duration-300 ${
                 darkMode
-                  ? "bg-gray-700 border-gray-600 text-gray-100 focus:border-blue-500 focus:ring-blue-500"
-                  : "border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+                  ? "bg-gray-700 border-gray-600 text-gray-100 focus:border-brand focus:ring-brand"
+                  : "border-gray-300 text-gray-900 focus:border-brand focus:ring-brand"
               } border focus:outline-none focus:ring-2`}
             >
               <option value="" className={darkMode ? "bg-gray-700" : "bg-white"}>
@@ -468,21 +479,11 @@ export default function UploadProductPage() {
                 darkMode ? "text-gray-300" : "text-gray-700"
               }`}
             >
-              <FileText size={16} className={darkMode ? "text-blue-400" : "text-blue-600"} />
+              <FileText size={16} className={darkMode ? "text-brand-bright" : "text-brand-strong"} />
               Product Description
             </label>
 
-            <textarea
-              rows={8}
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Write product description with paragraphs..."
-              className={`w-full p-3 rounded leading-relaxed resize-y transition-colors duration-300 ${
-                darkMode
-                  ? "bg-gray-700 border-gray-600 text-gray-100 focus:border-blue-500 focus:ring-blue-500"
-                  : "border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
-              } border focus:outline-none focus:ring-2`}
-            />
+            <RichTextEditor value={formData.description} onChange={(description) => setFormData((current) => ({ ...current, description }))} placeholder="Write product details, benefits and ingredients..." disabled={status === "uploading"} />
           </div>
 
           {/* Images */}
@@ -492,15 +493,15 @@ export default function UploadProductPage() {
                 darkMode ? "text-gray-300" : "text-gray-700"
               }`}
             >
-              <ImageIcon size={16} className={darkMode ? "text-blue-400" : "text-blue-600"} />
+              <ImageIcon size={16} className={darkMode ? "text-brand-bright" : "text-brand-strong"} />
               Product Images
             </label>
 
             <div
               className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors duration-300 ${
                 darkMode
-                  ? "border-gray-600 hover:border-blue-500 bg-gray-700/50"
-                  : "border-gray-300 hover:border-blue-500 bg-gray-50"
+                  ? "border-gray-600 hover:border-brand bg-gray-700/50"
+                  : "border-gray-300 hover:border-brand bg-gray-50"
               }`}
             >
               <input
@@ -600,14 +601,17 @@ export default function UploadProductPage() {
             )}
           </div>
 
+          <ProductVariantsEditor value={variants} onChange={(value) => { setVariants(value); setVariantError(""); }} disabled={status === "uploading"} />
+          {variantError && <p role="alert" className="text-sm text-rose-600">{variantError}</p>}
+
           {/* Submit Button */}
           <button
             type="submit"
             disabled={status === "uploading" || imagePreviews.length === 0}
             className={`w-full py-3 rounded font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
               darkMode
-                ? "bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500"
-                : "bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500"
+                ? "bg-brand hover:bg-brand-strong text-white focus:ring-brand"
+                : "bg-brand hover:bg-brand-strong text-white focus:ring-brand"
             } focus:outline-none focus:ring-2 focus:ring-offset-2 ${
               darkMode ? "focus:ring-offset-gray-900" : "focus:ring-offset-white"
             }`}
@@ -669,7 +673,7 @@ export default function UploadProductPage() {
                         Uploading images...
                       </span>
                       <span
-                        className={`font-medium ${darkMode ? "text-blue-400" : "text-blue-600"}`}
+                        className={`font-medium ${darkMode ? "text-brand-bright" : "text-brand-strong"}`}
                       >
                         {Math.round(progress)}%
                       </span>
@@ -680,7 +684,7 @@ export default function UploadProductPage() {
                       }`}
                     >
                       <motion.div
-                        className={`h-full ${darkMode ? "bg-blue-500" : "bg-blue-600"}`}
+                        className={`h-full ${darkMode ? "bg-brand" : "bg-brand"}`}
                         initial={{ width: "0%" }}
                         animate={{ width: `${progress}%` }}
                         transition={{ duration: 0.3 }}
@@ -775,8 +779,8 @@ export default function UploadProductPage() {
                     onClick={handleReset}
                     className={`w-full py-3 rounded-lg font-semibold transition-all duration-300 ${
                       darkMode
-                        ? "bg-blue-600 hover:bg-blue-700 text-white"
-                        : "bg-blue-600 hover:bg-blue-700 text-white"
+                        ? "bg-brand hover:bg-brand-strong text-white"
+                        : "bg-brand hover:bg-brand-strong text-white"
                     }`}
                   >
                     Upload Another Product
@@ -799,7 +803,7 @@ export default function UploadProductPage() {
                       Upload Failed
                     </h3>
                     <p className={`mb-4 ${darkMode ? "text-gray-400" : "text-gray-600"}`}>
-                      There was an error uploading your product. Please try again.
+                      {variantError || "There was an error uploading your product. Please try again."}
                     </p>
                   </div>
 
@@ -818,8 +822,8 @@ export default function UploadProductPage() {
                       onClick={() => setStatus("idle")}
                       className={`flex-1 py-3 rounded-lg font-semibold transition-all duration-300 ${
                         darkMode
-                          ? "bg-blue-600 hover:bg-blue-700 text-white"
-                          : "bg-blue-600 hover:bg-blue-700 text-white"
+                          ? "bg-brand hover:bg-brand-strong text-white"
+                          : "bg-brand hover:bg-brand-strong text-white"
                       }`}
                     >
                       Back to Form

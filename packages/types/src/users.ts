@@ -1,6 +1,6 @@
 import { z } from "zod";
-import type { OrderDTO } from "./orders.js";
-import type { WalletRedemptionDTO, WalletTransactionDTO } from "./wallet.js";
+import type { OrderDTO } from "./orders";
+import type { WalletRedemptionDTO, WalletTransactionDTO } from "./wallet";
 
 // ---------------------------------------------------------------------------
 // Admin customer management

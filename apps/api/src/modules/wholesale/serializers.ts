@@ -1,3 +1,4 @@
+import { productVariantsSchema } from "@nuru/types";
 import type { WholesaleItem } from "@nuru/db";
 import type { WholesaleItemDTO } from "@nuru/types";
 
@@ -14,6 +15,7 @@ export function toWholesaleItemDTO(w: WholesaleItem): WholesaleItemDTO {
     stock: w.stock,
     inStock: w.stock > 0,
     images: w.images,
+    variants: productVariantsSchema.parse(w.variants ?? []),
     isActive: w.isActive,
     createdAt: toIso(w.createdAt),
     updatedAt: toIso(w.updatedAt),

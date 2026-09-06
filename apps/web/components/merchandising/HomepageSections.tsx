@@ -39,7 +39,7 @@ export default function HomepageSections({ homepage }: { homepage: HomepageDTO }
                     {collection.displayName}
                   </h2>
                   {collection.badgeText && (
-                    <span className="rounded-full bg-blue-100 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-blue-700 dark:bg-blue-950 dark:text-blue-300">
+                    <span className="rounded-full bg-[#DDFBE5] px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-[#006B2C] dark:bg-[#063D1E] dark:text-[#B8F5C8]">
                       {collection.badgeText}
                     </span>
                   )}
@@ -55,7 +55,7 @@ export default function HomepageSections({ homepage }: { homepage: HomepageDTO }
                   (collection.ctaUrl ||
                     `/collections/${encodeURIComponent(collection.key)}`) as Route
                 }
-                className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-blue-700 hover:text-blue-900 dark:text-blue-400"
+                className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-[#006B2C] hover:text-[#004D20] dark:text-[#00C83A]"
               >
                 {collection.ctaText || "View all"} <ArrowRight size={15} />
               </Link>
@@ -114,7 +114,7 @@ export default function HomepageSections({ homepage }: { homepage: HomepageDTO }
                               {formatPrice(base)}
                             </p>
                           )}
-                          <p className="font-bold text-blue-700 dark:text-blue-400">
+                          <p className="font-bold text-[#006B2C] dark:text-[#00C83A]">
                             {formatPrice(effective)}
                           </p>
                         </div>

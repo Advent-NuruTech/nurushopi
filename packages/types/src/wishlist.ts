@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { idSchema, paginationQuerySchema, type ProductDTO } from "./catalog.js";
+import { idSchema, paginationQuerySchema, type ProductDTO } from "./catalog";
 
 export const WISHLIST_STATUSES = ["ACTIVE", "PURCHASED", "REMOVED"] as const;
 export type WishlistStatus = (typeof WISHLIST_STATUSES)[number];

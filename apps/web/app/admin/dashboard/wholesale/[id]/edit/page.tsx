@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
+import ProductVariantsEditor, { prepareVariants, type VariantDraft } from "@/components/admin/ProductVariantsEditor";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { Upload } from "lucide-react";
 import { ADMIN_DASHBOARD_PATH, adminRoute } from "@/lib/adminPaths";
@@ -27,6 +28,7 @@ export default function WholesaleEditPage() {
 
   const [item, setItem] = useState<WholesaleForm | null>(null);
   const [loading, setLoading] = useState(true);
+  const [variants, setVariants] = useState<VariantDraft[]>([]);
   const [saving, setSaving] = useState(false);
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
   const [feedback, setFeedback] = useState<Feedback>(null);
@@ -36,7 +38,8 @@ export default function WholesaleEditPage() {
     if (!id) return;
     wholesaleApi.admin
       .getItem(id)
-      .then(({ item: i }) =>
+      .then(({ item: i }) => {
+        setVariants((i.variants ?? []).map((v, key) => ({ key, name: v.name, imageUrl: v.imageUrl ?? "", file: null })));
         setItem({
           id: i.id,
           name: i.name,
@@ -45,8 +48,8 @@ export default function WholesaleEditPage() {
           minQuantity: i.minQuantity,
           stock: i.stock,
           images: i.images,
-        }),
-      )
+        });
+      })
       .catch(() => setItem(null))
       .finally(() => setLoading(false));
   }, [id]);
@@ -111,13 +114,14 @@ export default function WholesaleEditPage() {
         minQuantity: item.minQuantity,
         stock: item.stock,
         images: item.images.slice(0, 3),
+        variants: await prepareVariants(variants),
       });
       setFeedback({ type: "success", text: "Wholesale item updated successfully." });
       router.refresh();
     } catch (err) {
       setFeedback({
         type: "error",
-        text: err instanceof ApiClientError ? err.message : "Update failed.",
+        text: err instanceof Error ? err.message : "Update failed.",
       });
     } finally {
       setSaving(false);
@@ -254,11 +258,13 @@ export default function WholesaleEditPage() {
       </div>
 
       {/* Actions */}
+      <ProductVariantsEditor value={variants} onChange={setVariants} disabled={saving} />
+
       <div className="flex flex-wrap gap-3">
         <button
           onClick={save}
           disabled={saving}
-          className="px-5 py-2 bg-sky-600 text-white rounded hover:bg-sky-700 disabled:opacity-60 disabled:cursor-not-allowed"
+          className="px-5 py-2 bg-brand text-white rounded hover:bg-brand-strong disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {saving ? "Saving..." : "Save Changes"}
         </button>

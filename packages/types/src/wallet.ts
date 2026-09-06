@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { idSchema, moneySchema, paginationQuerySchema } from "./catalog.js";
+import { idSchema, moneySchema, paginationQuerySchema } from "./catalog";
 
 // ---------------------------------------------------------------------------
 // Wallet & referral

@@ -4,6 +4,8 @@ import {
   orderPaymentUpdateSchema,
   orderQuerySchema,
   orderStatusUpdateSchema,
+  fulfillmentConfigurationUpdateSchema,
+  pickupStationCreateSchema,
 } from "@nuru/types";
 
 const cuid = "ckabcdefghijklmnopqrstuvwx";
@@ -91,5 +93,26 @@ describe("order transition schemas", () => {
   it("validates a payment transition", () => {
     expect(orderPaymentUpdateSchema.parse({ paymentStatus: "PAID" }).paymentStatus).toBe("PAID");
     expect(orderPaymentUpdateSchema.safeParse({ paymentStatus: "SHIPPED" }).success).toBe(false);
+  });
+});
+
+describe("fulfillment schemas", () => {
+  it("requires an available method when the feature is enabled", () => {
+    expect(
+      fulfillmentConfigurationUpdateSchema.safeParse({
+        featureEnabled: true,
+        pickupEnabled: false,
+        doorstepEnabled: false,
+        doorstepFee: 0,
+        doorstepEstimatedDeliveryTime: null,
+      }).success,
+    ).toBe(false);
+  });
+
+  it("validates station coordinates and non-negative delivery fees", () => {
+    const base = { name: "CBD", address: "Market Street", deliveryFee: 100 };
+    expect(pickupStationCreateSchema.safeParse(base).success).toBe(true);
+    expect(pickupStationCreateSchema.safeParse({ ...base, latitude: 91 }).success).toBe(false);
+    expect(pickupStationCreateSchema.safeParse({ ...base, deliveryFee: -1 }).success).toBe(false);
   });
 });

@@ -35,6 +35,10 @@ import {
   merchandisingVendorRouter,
 } from "./modules/merchandising/merchandising.routes.js";
 import { wishlistRouter } from "./modules/wishlist/wishlist.routes.js";
+import {
+  fulfillmentAdminRouter,
+  fulfillmentPublicRouter,
+} from "./modules/fulfillment/fulfillment.routes.js";
 
 export const apiRouter: Router = Router();
 
@@ -53,6 +57,8 @@ apiRouter.use("/admin/wholesale", wholesaleAdminRouter);
 apiRouter.use("/vendor/wholesale", wholesaleVendorRouter);
 apiRouter.use("/orders", ordersCustomerRouter);
 apiRouter.use("/admin/orders", ordersAdminRouter);
+apiRouter.use("/fulfillment", fulfillmentPublicRouter);
+apiRouter.use("/admin/fulfillment", fulfillmentAdminRouter);
 apiRouter.use("/wallet", walletCustomerRouter);
 apiRouter.use("/admin/wallet", walletAdminRouter);
 apiRouter.use("/admin/dashboard", dashboardAdminRouter);

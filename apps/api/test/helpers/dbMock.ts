@@ -103,6 +103,8 @@ export function makeDbMock() {
     wholesaleItem: model(),
     order: model(),
     orderItem: model(),
+    fulfillmentConfiguration: model(),
+    pickupStation: model(),
     user: model(),
     walletTransaction: model(),
     walletRedemption: model(),

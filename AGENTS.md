@@ -35,6 +35,7 @@ These rules apply to all work in this repository.
 ## Verification
 
 - Run `pnpm.cmd --filter web run typecheck` after storefront changes on Windows.
+- After every Prisma schema change, deploy all pending migrations and regenerate the Prisma client. Only skip this when the configured database or required credentials are unavailable; report the blocker explicitly when that happens.
 - Do not run browser or visual-layout checks unless the user explicitly requests them.
 - Check browser console output for hydration errors and check `document.documentElement.scrollWidth` against the viewport width.
 

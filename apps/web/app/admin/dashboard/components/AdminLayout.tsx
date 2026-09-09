@@ -14,6 +14,7 @@ import {
   Package,
   Palette,
   ShoppingCart,
+  Truck,
   Tags,
   Smartphone,
   UserPlus,
@@ -45,6 +46,7 @@ const TAB_ICONS = {
   Tags,
   Package,
   ShoppingCart,
+  Truck,
   ClipboardList,
   Warehouse,
   MessageSquare,
@@ -57,11 +59,7 @@ const TAB_ICONS = {
 } as const;
 
 function getInitials(name: string): string {
-  const parts = name
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2);
+  const parts = name.trim().split(/\s+/).filter(Boolean).slice(0, 2);
   if (!parts.length) return "AD";
   return parts.map((p) => p[0]?.toUpperCase() ?? "").join("");
 }
@@ -78,10 +76,7 @@ export default function AdminLayout({
   const [desktopSidebarCollapsed, setDesktopSidebarCollapsed] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
-  const tabs = useMemo(
-    () => (admin.role === "senior" ? TABS_SENIOR : TABS_SUB),
-    [admin.role]
-  );
+  const tabs = useMemo(() => (admin.role === "senior" ? TABS_SENIOR : TABS_SUB), [admin.role]);
 
   const handleLogout = async () => {
     await adminAuthApi.logout().catch(() => {});

@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { emailSchema } from "./auth";
 import { idSchema, paginationQuerySchema } from "./catalog";
+import { CUSTOMER_FULFILLMENT_METHODS } from "./fulfillment";
+import type { FulfillmentMethod } from "./fulfillment";
 
 // ---------------------------------------------------------------------------
 // Orders & checkout
@@ -56,6 +58,8 @@ export const checkoutSchema = z
     contactPhone: z.string().trim().min(1, "Phone is required.").max(32),
     contactEmail: emailSchema.optional().nullable(),
     address: z.string().trim().min(1, "Delivery address is required.").max(500),
+    deliveryMethod: z.enum(CUSTOMER_FULFILLMENT_METHODS).optional(),
+    pickupStationId: idSchema.optional().nullable(),
     note: z.string().trim().max(1000).optional().nullable(),
     /** Stable guest id used only for server-side promotion/frequency limits. */
     anonymousId: z.string().trim().min(8).max(191).optional().nullable(),
@@ -83,9 +87,7 @@ export const orderQuerySchema = paginationQuerySchema.extend({
 export type OrderQuery = z.infer<typeof orderQuerySchema>;
 
 /** Admin status transition payload. */
-export const orderStatusUpdateSchema = z
-  .object({ status: z.enum(ORDER_STATUSES) })
-  .strict();
+export const orderStatusUpdateSchema = z.object({ status: z.enum(ORDER_STATUSES) }).strict();
 export type OrderStatusUpdateInput = z.infer<typeof orderStatusUpdateSchema>;
 
 /** Admin payment-status transition payload. */
@@ -120,6 +122,12 @@ export interface OrderDTO {
   contactEmail: string | null;
   address: string | null;
   note: string | null;
+  fulfillmentMethod: FulfillmentMethod;
+  pickupStationId: string | null;
+  pickupStationName: string | null;
+  pickupStationAddress: string | null;
+  deliveryFee: string;
+  deliveryEta: string | null;
   items: OrderItemDTO[];
   /** Sum of line quantities. */
   itemCount: number;

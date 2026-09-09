@@ -65,7 +65,9 @@ const validBody = {
 beforeEach(() => {
   vi.clearAllMocks();
   p.$transaction.mockImplementation((arg: unknown) =>
-    typeof arg === "function" ? (arg as (tx: unknown) => unknown)(p) : Promise.all(arg as Promise<unknown>[]),
+    typeof arg === "function"
+      ? (arg as (tx: unknown) => unknown)(p)
+      : Promise.all(arg as Promise<unknown>[]),
   );
 });
 
@@ -113,6 +115,30 @@ describe("GET /api/v1/orders/:orderNumber", () => {
     const res = await request(app).get("/api/v1/orders/does-not-exist");
     expect(res.status).toBe(404);
     expect(res.body.error.code).toBe("NOT_FOUND");
+  });
+});
+
+describe("fulfillment routes", () => {
+  it("returns a safe disabled public configuration when it has not been configured", async () => {
+    p.fulfillmentConfiguration.findUnique.mockResolvedValue(null);
+    const res = await request(app).get("/api/v1/fulfillment");
+    expect(res.status).toBe(200);
+    expect(res.body.data.fulfillment).toMatchObject({
+      featureEnabled: false,
+      stations: [],
+    });
+  });
+
+  it("protects fulfillment administration", async () => {
+    const res = await request(app).put("/api/v1/admin/fulfillment/configuration").send({
+      featureEnabled: false,
+      pickupEnabled: true,
+      doorstepEnabled: true,
+      doorstepFee: 0,
+      doorstepEstimatedDeliveryTime: null,
+    });
+    expect(res.status).toBe(401);
+    expect(p.fulfillmentConfiguration.upsert).not.toHaveBeenCalled();
   });
 });
 

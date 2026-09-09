@@ -4,6 +4,7 @@ export * from "./api";
 export * from "./catalog";
 export * from "./wholesale";
 export * from "./orders";
+export * from "./fulfillment";
 export * from "./wallet";
 export * from "./dashboard";
 export * from "./reviews";

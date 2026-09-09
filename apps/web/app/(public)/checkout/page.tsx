@@ -9,6 +9,7 @@ import {
   AlertCircle,
   ArrowRight,
   CreditCard,
+  MapPin,
   Minus,
   PackageCheck,
   Plus,
@@ -21,8 +22,9 @@ import {
 import PhoneInput, { validatePhoneForSubmission } from "@/components/ui/PhoneInput";
 import { useSabbathStatus } from "@/lib/useSabbathStatus";
 import { useAppUser } from "@/context/UserContext";
-import { catalogApi, orderApi, ApiClientError } from "@/lib/api";
-import type { ProductDTO } from "@nuru/types";
+import { catalogApi, fulfillmentApi, orderApi, ApiClientError } from "@/lib/api";
+import { formatPrice } from "@/lib/formatPrice";
+import type { CustomerFulfillmentMethod, ProductDTO, PublicFulfillmentDTO } from "@nuru/types";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +34,15 @@ type RelatedProduct = {
   name: string;
   price: number;
   image: string;
+};
+
+const disabledFulfillment: PublicFulfillmentDTO = {
+  featureEnabled: false,
+  pickupEnabled: false,
+  doorstepEnabled: false,
+  doorstepFee: "0.00",
+  doorstepEstimatedDeliveryTime: null,
+  stations: [],
 };
 
 // -------------------- Common Countries --------------------
@@ -82,6 +93,10 @@ function CheckoutContent() {
   const [phoneValid, setPhoneValid] = useState(true);
   const [showCountrySuggestions, setShowCountrySuggestions] = useState(false);
   const [useWallet, setUseWallet] = useState(false);
+  const [fulfillment, setFulfillment] = useState<PublicFulfillmentDTO>(disabledFulfillment);
+  const [deliveryMethod, setDeliveryMethod] = useState<CustomerFulfillmentMethod | null>(null);
+  const [pickupStationId, setPickupStationId] = useState("");
+  const [stationSearch, setStationSearch] = useState("");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -96,6 +111,25 @@ function CheckoutContent() {
   const { isClosed: sabbathClosed, end: sabbathEndsAt } = useSabbathStatus();
 
   const walletBalance = user ? Number(user.walletBalance) || 0 : 0;
+
+  const fulfillmentEnabled =
+    fulfillment.featureEnabled && (fulfillment.pickupEnabled || fulfillment.doorstepEnabled);
+  const selectedStation = fulfillment.stations.find((station) => station.id === pickupStationId);
+  const deliveryFee = fulfillmentEnabled
+    ? deliveryMethod === "PICKUP_STATION"
+      ? Number(selectedStation?.deliveryFee ?? 0)
+      : deliveryMethod === "DOORSTEP"
+        ? Number(fulfillment.doorstepFee)
+        : 0
+    : 0;
+  const checkoutTotal = total + deliveryFee;
+  const filteredStations = fulfillment.stations.filter((station) => {
+    const query = stationSearch.trim().toLowerCase();
+    if (!query) return true;
+    return [station.name, station.address, station.city, station.region]
+      .filter(Boolean)
+      .some((value) => value!.toLowerCase().includes(query));
+  });
 
   // Prefill contact details from the signed-in user.
   useEffect(() => {
@@ -114,6 +148,33 @@ function CheckoutContent() {
       country: prev.country || addressParts.at(-1) || "",
     }));
   }, [user]);
+
+  // Configuration failure intentionally preserves the existing checkout path.
+  useEffect(() => {
+    let cancelled = false;
+    fulfillmentApi
+      .get()
+      .then(({ fulfillment: next }) => {
+        if (cancelled) return;
+        setFulfillment(next);
+        if (!next.featureEnabled) {
+          setDeliveryMethod(null);
+          setPickupStationId("");
+          return;
+        }
+        setDeliveryMethod((current) => {
+          if (current === "PICKUP_STATION" && next.pickupEnabled) return current;
+          if (current === "DOORSTEP" && next.doorstepEnabled) return current;
+          return next.pickupEnabled ? "PICKUP_STATION" : next.doorstepEnabled ? "DOORSTEP" : null;
+        });
+      })
+      .catch(() => {
+        if (!cancelled) setFulfillment(disabledFulfillment);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Auth gating: a logged-out user landing on ?step=details is sent to login.
   useEffect(() => {
@@ -213,9 +274,15 @@ function CheckoutContent() {
     const phoneValidation = validatePhoneForSubmission(phone, true);
     if (!phoneValidation.isValid) errors.push(phoneValidation.message);
 
-    if (!country.trim()) errors.push("Country is required");
-    if (!county.trim()) errors.push("County/State/Province is required");
-    if (!locality.trim()) errors.push("Locality/Address is required");
+    if (fulfillmentEnabled && !deliveryMethod) errors.push("Choose a delivery method");
+    if (fulfillmentEnabled && deliveryMethod === "PICKUP_STATION" && !selectedStation) {
+      errors.push("Choose an available pickup station");
+    }
+    if (!fulfillmentEnabled || deliveryMethod === "DOORSTEP") {
+      if (!country.trim()) errors.push("Country is required");
+      if (!county.trim()) errors.push("County/State/Province is required");
+      if (!locality.trim()) errors.push("Locality/Address is required");
+    }
 
     if (errors.length > 0) {
       setErrorMessage(errors.join(", "));
@@ -226,10 +293,13 @@ function CheckoutContent() {
 
     try {
       const normalizedPhone = phoneValidation.normalized || phone;
-      const address = [locality, county, country]
-        .map((p) => p.trim())
-        .filter(Boolean)
-        .join(", ");
+      const address =
+        fulfillmentEnabled && deliveryMethod === "PICKUP_STATION" && selectedStation
+          ? selectedStation.address
+          : [locality, county, country]
+              .map((p) => p.trim())
+              .filter(Boolean)
+              .join(", ");
 
       const { order } = await orderApi.checkout({
         items: cart.map((item) => ({ productId: item.id, quantity: item.quantity })),
@@ -237,6 +307,8 @@ function CheckoutContent() {
         contactPhone: normalizedPhone,
         contactEmail: email.trim() || user.email || null,
         address,
+        ...(fulfillmentEnabled && deliveryMethod ? { deliveryMethod } : {}),
+        ...(fulfillmentEnabled && deliveryMethod === "PICKUP_STATION" ? { pickupStationId } : {}),
         note: message.trim() || null,
         useWallet,
       });
@@ -245,20 +317,45 @@ function CheckoutContent() {
       const productList = cart
         .map(
           (item, idx) =>
-            `${idx + 1}. ${item.name} (x${item.quantity}) — KSh ${(item.price * item.quantity).toFixed(2)} [ID: ${item.id}]`,
+            `${idx + 1}. ${item.name} (x${item.quantity}) — ${formatPrice(item.price * item.quantity)} [ID: ${item.id}]`,
         )
-        .join("%0A");
+        .join("\n");
 
-      const whatsappMessage = `🛍️ *New Order ${order.orderNumber}*%0A--------------------------------%0A*Name:* ${name}%0A*Phone:* ${normalizedPhone}%0A*Address:* ${address}%0A--------------------------------%0A${productList}%0A--------------------------------%0A*Total:* KSh ${Number(order.total).toFixed(2)}%0AThank you!`;
+      const methodLabel =
+        order.fulfillmentMethod === "PICKUP_STATION"
+          ? `Pickup: ${order.pickupStationName}`
+          : order.fulfillmentMethod === "DOORSTEP"
+            ? "Doorstep delivery"
+            : "Standard delivery";
+      const whatsappMessage = `🛍️ *New Order ${order.orderNumber}*\n--------------------------------\n*Name:* ${name}\n*Phone:* ${normalizedPhone}\n*Method:* ${methodLabel}\n*Address:* ${address}\n--------------------------------\n${productList}\n--------------------------------\n*Total:* ${formatPrice(Number(order.total))}\nThank you!`;
 
       const phoneNumber = "254142225233";
-      window.open(`https://wa.me/${phoneNumber}?text=${whatsappMessage}`, "_blank");
+      window.open(
+        `https://wa.me/${phoneNumber}?text=${encodeURIComponent(whatsappMessage)}`,
+        "_blank",
+      );
 
       setOrderNumber(order.orderNumber);
       setSuccess(true);
       clearCart();
     } catch (err) {
       console.error(err);
+      if (err instanceof ApiClientError && err.status === 409) {
+        await fulfillmentApi
+          .get()
+          .then(({ fulfillment: next }) => {
+            setFulfillment(next);
+            if (!next.stations.some((station) => station.id === pickupStationId)) {
+              setPickupStationId("");
+            }
+            if (deliveryMethod === "PICKUP_STATION" && !next.pickupEnabled) {
+              setDeliveryMethod(next.doorstepEnabled ? "DOORSTEP" : null);
+            } else if (deliveryMethod === "DOORSTEP" && !next.doorstepEnabled) {
+              setDeliveryMethod(next.pickupEnabled ? "PICKUP_STATION" : null);
+            }
+          })
+          .catch(() => setFulfillment(disabledFulfillment));
+      }
       setErrorMessage(
         err instanceof ApiClientError ? err.message : "Something went wrong. Please try again.",
       );
@@ -381,7 +478,7 @@ function CheckoutContent() {
                     <p className="line-clamp-2 font-semibold text-gray-900 dark:text-gray-100">
                       {item.name}
                     </p>
-                    <p className="text-gray-500 text-sm">KSh {item.price.toFixed(2)}</p>
+                    <p className="text-gray-500 text-sm">{formatPrice(item.price)}</p>
                     {(item.brandName || item.storeName) && (
                       <p className="mt-1 text-xs text-slate-500">
                         {item.brandName || item.storeName}
@@ -416,7 +513,7 @@ function CheckoutContent() {
                   </div>
                   <div className="flex items-center justify-between gap-3 sm:flex-col sm:items-end">
                     <p className="font-bold text-blue-700">
-                      KSh {(item.price * item.quantity).toFixed(2)}
+                      {formatPrice(item.price * item.quantity)}
                     </p>
                     <button
                       onClick={() => removeFromCart(item.id)}
@@ -440,16 +537,22 @@ function CheckoutContent() {
                 </div>
                 <div className="flex justify-between text-slate-600 dark:text-slate-300">
                   <span>Subtotal</span>
-                  <span>KSh {total.toFixed(2)}</span>
+                  <span>{formatPrice(total)}</span>
                 </div>
                 <div className="flex justify-between text-slate-600 dark:text-slate-300">
                   <span>Delivery</span>
-                  <span>Confirmed after order</span>
+                  <span>
+                    {fulfillmentEnabled && deliveryMethod
+                      ? formatPrice(deliveryFee)
+                      : "Confirmed after order"}
+                  </span>
                 </div>
               </div>
               <div className="mt-4 flex items-center justify-between">
                 <span className="text-base font-bold text-slate-900 dark:text-white">Total</span>
-                <span className="text-2xl font-black text-blue-700">KSh {total.toFixed(2)}</span>
+                <span className="text-2xl font-black text-brand-strong">
+                  {formatPrice(checkoutTotal)}
+                </span>
               </div>
               <button
                 onClick={() => {
@@ -506,7 +609,7 @@ function CheckoutContent() {
                 <div className="p-3">
                   <h3 className="font-medium text-sm">{product.name}</h3>
                   <p className="text-blue-700 font-semibold text-sm mt-1">
-                    KSh {product.price.toFixed(2)}
+                    {formatPrice(product.price)}
                   </p>
                 </div>
               </Link>
@@ -551,52 +654,173 @@ function CheckoutContent() {
               />
               {user.email && <p className="text-xs text-gray-500">Signed in as {user.email}</p>}
 
-              {/* Country with suggestions */}
-              <div className="relative">
-                <input
-                  name="country"
-                  placeholder="Country *"
-                  value={formData.country}
-                  onChange={handleChange}
-                  onFocus={() => formData.country.trim() && setShowCountrySuggestions(true)}
-                  onBlur={() => setTimeout(() => setShowCountrySuggestions(false), 200)}
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                  required
-                />
-                {showCountrySuggestions && filteredCountries.length > 0 && (
-                  <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                    {filteredCountries.map((country) => (
+              {fulfillmentEnabled && (
+                <fieldset className="space-y-3 rounded-2xl border border-brand-border bg-brand-surface p-4">
+                  <legend className="px-1 text-sm font-bold text-brand-ink">Delivery method</legend>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {fulfillment.pickupEnabled && (
                       <button
-                        key={country}
                         type="button"
-                        onClick={() => handleCountrySelect(country)}
-                        onMouseDown={(e) => e.preventDefault()}
-                        className="w-full text-left px-4 py-2 hover:bg-blue-50 dark:hover:bg-gray-600 transition-colors first:rounded-t-lg last:rounded-b-lg"
+                        aria-pressed={deliveryMethod === "PICKUP_STATION"}
+                        onClick={() => setDeliveryMethod("PICKUP_STATION")}
+                        className={`rounded-xl border p-3 text-left transition ${
+                          deliveryMethod === "PICKUP_STATION"
+                            ? "border-brand bg-white text-brand-ink ring-2 ring-brand/15"
+                            : "border-slate-200 bg-white text-slate-700 hover:border-brand-border"
+                        }`}
                       >
-                        {country}
+                        <span className="flex items-center gap-2 font-semibold">
+                          <MapPin size={17} /> Pickup station
+                        </span>
+                        <span className="mt-1 block text-xs text-slate-500">
+                          Collect from a location you choose
+                        </span>
                       </button>
-                    ))}
+                    )}
+                    {fulfillment.doorstepEnabled && (
+                      <button
+                        type="button"
+                        aria-pressed={deliveryMethod === "DOORSTEP"}
+                        onClick={() => setDeliveryMethod("DOORSTEP")}
+                        className={`rounded-xl border p-3 text-left transition ${
+                          deliveryMethod === "DOORSTEP"
+                            ? "border-brand bg-white text-brand-ink ring-2 ring-brand/15"
+                            : "border-slate-200 bg-white text-slate-700 hover:border-brand-border"
+                        }`}
+                      >
+                        <span className="flex items-center gap-2 font-semibold">
+                          <Truck size={17} /> Doorstep
+                        </span>
+                        <span className="mt-1 block text-xs text-slate-500">
+                          {formatPrice(Number(fulfillment.doorstepFee))}
+                          {fulfillment.doorstepEstimatedDeliveryTime
+                            ? ` · ${fulfillment.doorstepEstimatedDeliveryTime}`
+                            : ""}
+                        </span>
+                      </button>
+                    )}
                   </div>
-                )}
-              </div>
 
-              <input
-                name="county"
-                placeholder="County/State/Province *"
-                value={formData.county}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                required
-              />
+                  {deliveryMethod === "PICKUP_STATION" && (
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="station-search"
+                        className="text-xs font-semibold text-slate-700"
+                      >
+                        Find a pickup station
+                      </label>
+                      <input
+                        id="station-search"
+                        value={stationSearch}
+                        onChange={(event) => setStationSearch(event.target.value)}
+                        placeholder="Search by name, city, region or address"
+                        className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+                      />
+                      <div className="max-h-56 space-y-2 overflow-y-auto pr-1">
+                        {filteredStations.map((station) => (
+                          <label
+                            key={station.id}
+                            className={`flex cursor-pointer gap-3 rounded-xl border bg-white p-3 ${
+                              pickupStationId === station.id
+                                ? "border-brand ring-2 ring-brand/15"
+                                : "border-slate-200"
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="pickupStation"
+                              value={station.id}
+                              checked={pickupStationId === station.id}
+                              onChange={() => setPickupStationId(station.id)}
+                              className="mt-1 accent-brand"
+                            />
+                            <span className="min-w-0 text-sm">
+                              <span className="block font-semibold text-slate-900">
+                                {station.name}
+                              </span>
+                              <span className="block text-xs text-slate-600">
+                                {station.address}
+                              </span>
+                              <span className="mt-1 block text-xs font-medium text-brand-strong">
+                                {formatPrice(Number(station.deliveryFee))}
+                                {station.estimatedDeliveryTime
+                                  ? ` · ${station.estimatedDeliveryTime}`
+                                  : ""}
+                              </span>
+                              {station.operatingHours && (
+                                <span className="block text-xs text-slate-500">
+                                  Hours: {station.operatingHours}
+                                </span>
+                              )}
+                              {station.instructions && (
+                                <span className="mt-1 block text-xs text-slate-500">
+                                  {station.instructions}
+                                </span>
+                              )}
+                            </span>
+                          </label>
+                        ))}
+                        {filteredStations.length === 0 && (
+                          <p className="rounded-xl border border-dashed border-slate-300 p-3 text-sm text-slate-500">
+                            No active pickup stations match your search.
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </fieldset>
+              )}
 
-              <input
-                name="locality"
-                placeholder="Exact Locality/Address * (e.g., Street, City, ZIP Code)"
-                value={formData.locality}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                required
-              />
+              {/* Country with suggestions */}
+              {(!fulfillmentEnabled || deliveryMethod === "DOORSTEP") && (
+                <>
+                  <div className="relative">
+                    <input
+                      name="country"
+                      placeholder="Country *"
+                      value={formData.country}
+                      onChange={handleChange}
+                      onFocus={() => formData.country.trim() && setShowCountrySuggestions(true)}
+                      onBlur={() => setTimeout(() => setShowCountrySuggestions(false), 200)}
+                      className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                      required
+                    />
+                    {showCountrySuggestions && filteredCountries.length > 0 && (
+                      <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                        {filteredCountries.map((country) => (
+                          <button
+                            key={country}
+                            type="button"
+                            onClick={() => handleCountrySelect(country)}
+                            onMouseDown={(e) => e.preventDefault()}
+                            className="w-full text-left px-4 py-2 hover:bg-blue-50 dark:hover:bg-gray-600 transition-colors first:rounded-t-lg last:rounded-b-lg"
+                          >
+                            {country}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <input
+                    name="county"
+                    placeholder="County/State/Province *"
+                    value={formData.county}
+                    onChange={handleChange}
+                    className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                    required
+                  />
+
+                  <input
+                    name="locality"
+                    placeholder="Exact Locality/Address * (e.g., Street, City, ZIP Code)"
+                    value={formData.locality}
+                    onChange={handleChange}
+                    className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                    required
+                  />
+                </>
+              )}
 
               <textarea
                 name="message"
@@ -614,7 +838,7 @@ function CheckoutContent() {
                     onChange={(e) => setUseWallet(e.target.checked)}
                     className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
-                  Apply wallet balance (KSh {walletBalance.toFixed(2)} available)
+                  Apply wallet balance ({formatPrice(walletBalance)} available)
                 </label>
               )}
             </div>

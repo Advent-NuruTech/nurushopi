@@ -1,6 +1,10 @@
 import { describe, it, expect } from "vitest";
 import type { Order, OrderItem } from "@nuru/db";
-import { toOrderDTO, toOrderItemDTO, type OrderWithItems } from "../../src/modules/orders/serializers.js";
+import {
+  toOrderDTO,
+  toOrderItemDTO,
+  type OrderWithItems,
+} from "../../src/modules/orders/serializers.js";
 
 const decimal = (s: string) => ({ toString: () => s }) as unknown as Order["total"];
 
@@ -76,5 +80,26 @@ describe("toOrderDTO", () => {
     expect(dto.createdAt).toBe("2026-01-01T00:00:00.000Z");
     expect(dto.status).toBe("SHIPPED");
     expect(dto.paymentStatus).toBe("PAID");
+  });
+
+  it("preserves the immutable pickup and delivery snapshot", () => {
+    const dto = toOrderDTO(
+      makeOrder({
+        fulfillmentMethod: "PICKUP_STATION",
+        pickupStationId: "station1",
+        pickupStationName: "Nairobi CBD",
+        pickupStationAddress: "Market Street, Nairobi",
+        deliveryFee: decimal("125.00"),
+        deliveryEta: "Next business day",
+      }),
+    );
+    expect(dto).toMatchObject({
+      fulfillmentMethod: "PICKUP_STATION",
+      pickupStationId: "station1",
+      pickupStationName: "Nairobi CBD",
+      pickupStationAddress: "Market Street, Nairobi",
+      deliveryFee: "125.00",
+      deliveryEta: "Next business day",
+    });
   });
 });

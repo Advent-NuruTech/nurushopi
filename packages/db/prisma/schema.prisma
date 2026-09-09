@@ -46,6 +46,12 @@ enum PaymentStatus {
   FAILED
 }
 
+enum FulfillmentMethod {
+  LEGACY
+  PICKUP_STATION
+  DOORSTEP
+}
+
 enum ReviewStatus {
   PENDING
   APPROVED
@@ -511,6 +517,16 @@ model Order {
   address      String?
   note         String?
 
+  // Immutable fulfillment snapshot. LEGACY keeps pre-feature orders and the
+  // existing checkout path valid when the fulfillment feature is disabled.
+  fulfillmentMethod    FulfillmentMethod @default(LEGACY)
+  pickupStationId      String?
+  pickupStation        PickupStation?     @relation(fields: [pickupStationId], references: [id], onDelete: SetNull)
+  pickupStationName    String?
+  pickupStationAddress String?
+  deliveryFee          Decimal           @default(0) @db.Decimal(12, 2)
+  deliveryEta          String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -519,7 +535,50 @@ model Order {
 
   @@index([userId])
   @@index([status])
+  @@index([pickupStationId])
   @@map("orders")
+}
+
+// A singleton row (id = "default") controls the optional fulfillment flow.
+// The absence of this row is intentionally equivalent to feature-disabled.
+model FulfillmentConfiguration {
+  id                            String   @id @default("default")
+  featureEnabled                Boolean  @default(false)
+  pickupEnabled                 Boolean  @default(true)
+  doorstepEnabled               Boolean  @default(true)
+  doorstepFee                   Decimal  @default(0) @db.Decimal(12, 2)
+  doorstepEstimatedDeliveryTime String?
+  createdAt                     DateTime @default(now())
+  updatedAt                     DateTime @updatedAt
+
+  @@map("fulfillment_configurations")
+}
+
+model PickupStation {
+  id                    String    @id @default(cuid())
+  name                  String
+  address               String
+  city                  String?
+  region                String?
+  latitude              Decimal?  @db.Decimal(10, 7)
+  longitude             Decimal?  @db.Decimal(10, 7)
+  contactPhone          String?
+  operatingHours        String?
+  deliveryFee           Decimal   @default(0) @db.Decimal(12, 2)
+  estimatedDeliveryTime String?
+  instructions          String?
+  isActive              Boolean   @default(true)
+  archivedAt            DateTime?
+  displayOrder          Int       @default(0)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  orders Order[]
+
+  @@index([isActive, archivedAt, displayOrder])
+  @@index([city])
+  @@index([region])
+  @@map("pickup_stations")
 }
 
 model OrderItem {

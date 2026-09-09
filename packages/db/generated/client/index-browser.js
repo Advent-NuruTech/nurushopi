@@ -321,6 +321,43 @@ exports.Prisma.OrderScalarFieldEnum = {
   contactEmail: 'contactEmail',
   address: 'address',
   note: 'note',
+  fulfillmentMethod: 'fulfillmentMethod',
+  pickupStationId: 'pickupStationId',
+  pickupStationName: 'pickupStationName',
+  pickupStationAddress: 'pickupStationAddress',
+  deliveryFee: 'deliveryFee',
+  deliveryEta: 'deliveryEta',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.FulfillmentConfigurationScalarFieldEnum = {
+  id: 'id',
+  featureEnabled: 'featureEnabled',
+  pickupEnabled: 'pickupEnabled',
+  doorstepEnabled: 'doorstepEnabled',
+  doorstepFee: 'doorstepFee',
+  doorstepEstimatedDeliveryTime: 'doorstepEstimatedDeliveryTime',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.PickupStationScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  address: 'address',
+  city: 'city',
+  region: 'region',
+  latitude: 'latitude',
+  longitude: 'longitude',
+  contactPhone: 'contactPhone',
+  operatingHours: 'operatingHours',
+  deliveryFee: 'deliveryFee',
+  estimatedDeliveryTime: 'estimatedDeliveryTime',
+  instructions: 'instructions',
+  isActive: 'isActive',
+  archivedAt: 'archivedAt',
+  displayOrder: 'displayOrder',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -887,6 +924,12 @@ exports.PaymentStatus = exports.$Enums.PaymentStatus = {
   FAILED: 'FAILED'
 };
 
+exports.FulfillmentMethod = exports.$Enums.FulfillmentMethod = {
+  LEGACY: 'LEGACY',
+  PICKUP_STATION: 'PICKUP_STATION',
+  DOORSTEP: 'DOORSTEP'
+};
+
 exports.ReviewStatus = exports.$Enums.ReviewStatus = {
   PENDING: 'PENDING',
   APPROVED: 'APPROVED',
@@ -1014,6 +1057,8 @@ exports.Prisma.ModelName = {
   HeroAnnouncement: 'HeroAnnouncement',
   WholesaleItem: 'WholesaleItem',
   Order: 'Order',
+  FulfillmentConfiguration: 'FulfillmentConfiguration',
+  PickupStation: 'PickupStation',
   OrderItem: 'OrderItem',
   Review: 'Review',
   WishlistItem: 'WishlistItem',

@@ -2,6 +2,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { prisma, Prisma } from "@nuru/db";
 import type {
   CheckoutInput,
+  FulfillmentMethod,
   OrderDTO,
   OrderQuery,
   OrderStatus,
@@ -14,6 +15,119 @@ import { toOrderDTO, type OrderWithItems } from "./serializers.js";
 import { loadEffectivePrices } from "../merchandising/pricing.service.js";
 
 const withItems = { include: { items: true } } as const;
+
+type FulfillmentGate = {
+  featureEnabled: boolean;
+  pickupEnabled: boolean;
+  doorstepEnabled: boolean;
+};
+
+const disabledGate: FulfillmentGate = {
+  featureEnabled: false,
+  pickupEnabled: false,
+  doorstepEnabled: false,
+};
+
+async function loadFulfillmentGate(): Promise<FulfillmentGate> {
+  try {
+    const configuration = await prisma.fulfillmentConfiguration.findUnique({
+      where: { id: "default" },
+      select: { featureEnabled: true, pickupEnabled: true, doorstepEnabled: true },
+    });
+    if (!configuration?.featureEnabled) return disabledGate;
+    const activeStationCount = configuration.pickupEnabled
+      ? await prisma.pickupStation.count({ where: { isActive: true, archivedAt: null } })
+      : 0;
+    const pickupEnabled = configuration.pickupEnabled && activeStationCount > 0;
+    return {
+      featureEnabled: pickupEnabled || configuration.doorstepEnabled,
+      pickupEnabled,
+      doorstepEnabled: configuration.doorstepEnabled,
+    };
+  } catch (error) {
+    // During rolling deployments the legacy checkout remains available until
+    // the additive fulfillment migration has reached the database.
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2021") {
+      return disabledGate;
+    }
+    throw error;
+  }
+}
+
+type FulfillmentSnapshot = {
+  fulfillmentMethod: FulfillmentMethod;
+  pickupStationId: string | null;
+  pickupStationName: string | null;
+  pickupStationAddress: string | null;
+  deliveryFee: Prisma.Decimal;
+  deliveryEta: string | null;
+  address: string;
+};
+
+async function resolveFulfillment(
+  tx: Prisma.TransactionClient,
+  input: CheckoutInput,
+  gate: FulfillmentGate,
+): Promise<FulfillmentSnapshot> {
+  if (!gate.featureEnabled || (!gate.pickupEnabled && !gate.doorstepEnabled)) {
+    return {
+      fulfillmentMethod: "LEGACY",
+      pickupStationId: null,
+      pickupStationName: null,
+      pickupStationAddress: null,
+      deliveryFee: new Prisma.Decimal(0),
+      deliveryEta: null,
+      address: input.address,
+    };
+  }
+
+  // Re-read inside the order transaction so a method or station cannot be
+  // disabled between the public configuration read and order creation.
+  const configuration = await tx.fulfillmentConfiguration.findUnique({
+    where: { id: "default" },
+  });
+  if (!configuration?.featureEnabled) {
+    throw Errors.conflict("Delivery options changed. Please review your order and try again.");
+  }
+  if (!input.deliveryMethod) {
+    throw Errors.badRequest("Choose pickup station or doorstep delivery.");
+  }
+
+  if (input.deliveryMethod === "DOORSTEP") {
+    if (!configuration.doorstepEnabled) {
+      throw Errors.conflict("Doorstep delivery is no longer available. Choose another method.");
+    }
+    return {
+      fulfillmentMethod: "DOORSTEP",
+      pickupStationId: null,
+      pickupStationName: null,
+      pickupStationAddress: null,
+      deliveryFee: new Prisma.Decimal(configuration.doorstepFee.toString()),
+      deliveryEta: configuration.doorstepEstimatedDeliveryTime,
+      address: input.address,
+    };
+  }
+
+  if (!configuration.pickupEnabled) {
+    throw Errors.conflict("Pickup delivery is no longer available. Choose another method.");
+  }
+  if (!input.pickupStationId) throw Errors.badRequest("Choose a pickup station.");
+  const station = await tx.pickupStation.findFirst({
+    where: { id: input.pickupStationId, isActive: true, archivedAt: null },
+  });
+  if (!station) {
+    throw Errors.conflict("The selected pickup station is no longer available.");
+  }
+  return {
+    fulfillmentMethod: "PICKUP_STATION",
+    pickupStationId: station.id,
+    pickupStationName: station.name,
+    pickupStationAddress: station.address,
+    deliveryFee: new Prisma.Decimal(station.deliveryFee.toString()),
+    deliveryEta: station.estimatedDeliveryTime,
+    address: station.address,
+  };
+}
 
 async function serializableTransaction<T>(
   work: (tx: Prisma.TransactionClient) => Promise<T>,
@@ -125,6 +239,7 @@ export async function getByOrderNumber(orderNumber: string): Promise<OrderDTO> {
  * failure never leaves stock or orders inconsistent.
  */
 export async function checkout(input: CheckoutInput, userId?: string): Promise<OrderDTO> {
+  const fulfillmentGate = await loadFulfillmentGate();
   // Collapse duplicate product lines so stock checks see the true total.
   const quantityByProduct = new Map<string, number>();
   for (const line of input.items) {
@@ -139,6 +254,7 @@ export async function checkout(input: CheckoutInput, userId?: string): Promise<O
     `guest:${createHash("sha256").update(input.contactPhone.trim()).digest("hex")}`;
 
   const order = await serializableTransaction(async (tx) => {
+    const fulfillment = await resolveFulfillment(tx, input, fulfillmentGate);
     const products = await tx.product.findMany({ where: { id: { in: productIds } } });
     const byId = new Map(products.map((p) => [p.id, p]));
     // Promotions are resolved from their own time-bound layer. Product base/
@@ -195,8 +311,9 @@ export async function checkout(input: CheckoutInput, userId?: string): Promise<O
       }
     }
 
-    // Decide how much wallet credit to apply — server-side only. The amount is
-    // capped at the live balance and the subtotal; the client only opts in.
+    // Decide how much wallet credit to apply server-side. The amount is capped
+    // at the live balance and the item subtotal plus delivery fee.
+    const payableBeforeWallet = subtotal.add(fulfillment.deliveryFee);
     let walletApplied = new Prisma.Decimal(0);
     if (userId && input.useWallet) {
       const wallet = await tx.user.findUnique({
@@ -205,10 +322,10 @@ export async function checkout(input: CheckoutInput, userId?: string): Promise<O
       });
       const balance = new Prisma.Decimal((wallet?.walletBalance ?? 0).toString());
       if (balance.greaterThan(0)) {
-        walletApplied = balance.greaterThan(subtotal) ? subtotal : balance;
+        walletApplied = balance.greaterThan(payableBeforeWallet) ? payableBeforeWallet : balance;
       }
     }
-    const total = subtotal.sub(walletApplied);
+    const total = payableBeforeWallet.sub(walletApplied);
 
     const created = await tx.order.create({
       data: {
@@ -219,8 +336,14 @@ export async function checkout(input: CheckoutInput, userId?: string): Promise<O
         contactName: input.contactName,
         contactPhone: input.contactPhone,
         contactEmail: input.contactEmail ?? null,
-        address: input.address,
+        address: fulfillment.address,
         note: input.note ?? null,
+        fulfillmentMethod: fulfillment.fulfillmentMethod,
+        pickupStationId: fulfillment.pickupStationId,
+        pickupStationName: fulfillment.pickupStationName,
+        pickupStationAddress: fulfillment.pickupStationAddress,
+        deliveryFee: fulfillment.deliveryFee,
+        deliveryEta: fulfillment.deliveryEta,
         items: { create: orderItems },
       },
       include: { items: true },
@@ -334,7 +457,10 @@ export async function checkout(input: CheckoutInput, userId?: string): Promise<O
         data: {
           name: input.contactName.trim() || undefined,
           phone: input.contactPhone.trim() || undefined,
-          address: input.address.trim() || undefined,
+          address:
+            fulfillment.fulfillmentMethod === "PICKUP_STATION"
+              ? undefined
+              : input.address.trim() || undefined,
         },
       });
     }

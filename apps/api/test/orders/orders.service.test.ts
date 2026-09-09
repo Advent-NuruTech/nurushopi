@@ -67,6 +67,7 @@ const validCheckout = {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  p.fulfillmentConfiguration.findUnique.mockResolvedValue(null);
   p.$transaction.mockImplementation((arg: unknown) =>
     typeof arg === "function"
       ? (arg as (tx: unknown) => unknown)(p)
@@ -75,6 +76,105 @@ beforeEach(() => {
 });
 
 describe("orders.checkout", () => {
+  it("keeps the legacy order path and zero delivery fee when the feature is off", async () => {
+    p.fulfillmentConfiguration.findUnique.mockResolvedValue({
+      featureEnabled: false,
+      pickupEnabled: true,
+      doorstepEnabled: true,
+    });
+    p.product.findMany.mockResolvedValue([product()]);
+    p.product.updateMany.mockResolvedValue({ count: 1 });
+    p.order.create.mockResolvedValue(orderRow());
+
+    await orders.checkout(validCheckout);
+
+    const created = p.order.create.mock.calls[0][0].data;
+    expect(created.fulfillmentMethod).toBe("LEGACY");
+    expect(created.deliveryFee.toString()).toBe("0.00");
+    expect(created.total.toString()).toBe("59.97");
+  });
+
+  it("revalidates and snapshots a pickup station and its server-side fee", async () => {
+    p.fulfillmentConfiguration.findUnique.mockResolvedValue({
+      featureEnabled: true,
+      pickupEnabled: true,
+      doorstepEnabled: true,
+      doorstepFee: decimal("250.00"),
+      doorstepEstimatedDeliveryTime: "1 day",
+    });
+    p.pickupStation.count.mockResolvedValue(1);
+    p.pickupStation.findFirst.mockResolvedValue({
+      id: "station1",
+      name: "Nairobi CBD",
+      address: "Market Street, Nairobi",
+      deliveryFee: decimal("125.00"),
+      estimatedDeliveryTime: "Next business day",
+    });
+    p.product.findMany.mockResolvedValue([product()]);
+    p.product.updateMany.mockResolvedValue({ count: 1 });
+    p.order.create.mockResolvedValue(orderRow());
+
+    await orders.checkout({
+      ...validCheckout,
+      deliveryMethod: "PICKUP_STATION",
+      pickupStationId: "station1",
+    } as never);
+
+    expect(p.pickupStation.findFirst).toHaveBeenCalledWith({
+      where: { id: "station1", isActive: true, archivedAt: null },
+    });
+    const created = p.order.create.mock.calls[0][0].data;
+    expect(created.fulfillmentMethod).toBe("PICKUP_STATION");
+    expect(created.pickupStationName).toBe("Nairobi CBD");
+    expect(created.pickupStationAddress).toBe("Market Street, Nairobi");
+    expect(created.address).toBe("Market Street, Nairobi");
+    expect(created.deliveryFee.toString()).toBe("125.00");
+    expect(created.total.toString()).toBe("184.97");
+  });
+
+  it("prices doorstep delivery from live configuration", async () => {
+    p.fulfillmentConfiguration.findUnique.mockResolvedValue({
+      featureEnabled: true,
+      pickupEnabled: false,
+      doorstepEnabled: true,
+      doorstepFee: decimal("250.00"),
+      doorstepEstimatedDeliveryTime: "1–2 days",
+    });
+    p.product.findMany.mockResolvedValue([product()]);
+    p.product.updateMany.mockResolvedValue({ count: 1 });
+    p.order.create.mockResolvedValue(orderRow());
+
+    await orders.checkout({ ...validCheckout, deliveryMethod: "DOORSTEP" } as never);
+
+    const created = p.order.create.mock.calls[0][0].data;
+    expect(created.fulfillmentMethod).toBe("DOORSTEP");
+    expect(created.deliveryFee.toString()).toBe("250.00");
+    expect(created.deliveryEta).toBe("1–2 days");
+    expect(created.total.toString()).toBe("309.97");
+  });
+
+  it("rejects a pickup station that was disabled before submission", async () => {
+    p.fulfillmentConfiguration.findUnique.mockResolvedValue({
+      featureEnabled: true,
+      pickupEnabled: true,
+      doorstepEnabled: false,
+      doorstepFee: decimal("0.00"),
+      doorstepEstimatedDeliveryTime: null,
+    });
+    p.pickupStation.count.mockResolvedValue(1);
+    p.pickupStation.findFirst.mockResolvedValue(null);
+
+    await expect(
+      orders.checkout({
+        ...validCheckout,
+        deliveryMethod: "PICKUP_STATION",
+        pickupStationId: "disabled-station",
+      } as never),
+    ).rejects.toMatchObject({ status: 409 });
+    expect(p.product.findMany).not.toHaveBeenCalled();
+    expect(p.order.create).not.toHaveBeenCalled();
+  });
+
   it("prices from the live product, decrements stock and persists the order", async () => {
     p.product.findMany.mockResolvedValue([product()]);
     p.product.updateMany.mockResolvedValue({ count: 1 });

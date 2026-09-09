@@ -5,6 +5,7 @@ export type TabId =
   | "admins"
   | "products"
   | "orders"
+  | "fulfillment"
   | "vendorApplications"
   | "banners"
   | "contacts"
@@ -35,6 +36,7 @@ export const TABS_SENIOR: { id: TabId; label: string; icon: string }[] = [
   { id: "products", label: "Products", icon: "Package" },
   { id: "merchandising", label: "Merchandising", icon: "Sparkles" },
   { id: "orders", label: "Orders", icon: "ShoppingCart" },
+  { id: "fulfillment", label: "Delivery", icon: "Truck" },
   { id: "vendorApplications", label: "Vendor Applications", icon: "ClipboardList" },
   { id: "wholesale", label: "Wholesale", icon: "Warehouse" },
   { id: "reviews", label: "Reviews", icon: "MessageSquare" },

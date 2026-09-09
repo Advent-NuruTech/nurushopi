@@ -1,5 +1,11 @@
 import type { Order, OrderItem } from "@nuru/db";
-import type { OrderDTO, OrderItemDTO, OrderStatus, PaymentStatus } from "@nuru/types";
+import type {
+  FulfillmentMethod,
+  OrderDTO,
+  OrderItemDTO,
+  OrderStatus,
+  PaymentStatus,
+} from "@nuru/types";
 
 export type OrderWithItems = Order & { items: OrderItem[] };
 
@@ -43,6 +49,12 @@ export function toOrderDTO(o: OrderWithItems): OrderDTO {
     contactEmail: o.contactEmail,
     address: o.address,
     note: o.note,
+    fulfillmentMethod: (o.fulfillmentMethod ?? "LEGACY") as FulfillmentMethod,
+    pickupStationId: o.pickupStationId ?? null,
+    pickupStationName: o.pickupStationName ?? null,
+    pickupStationAddress: o.pickupStationAddress ?? null,
+    deliveryFee: o.deliveryFee?.toString() ?? "0.00",
+    deliveryEta: o.deliveryEta ?? null,
     items,
     itemCount: o.items.reduce((sum, i) => sum + i.quantity, 0),
     createdAt: toIso(o.createdAt),

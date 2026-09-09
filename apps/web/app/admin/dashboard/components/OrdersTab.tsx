@@ -96,7 +96,9 @@ export default function OrdersTab({ role }: OrdersTabProps) {
         >
           <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
             <div>
-              <p className="font-semibold text-slate-900 dark:text-white">Order #{order.orderNumber}</p>
+              <p className="font-semibold text-slate-900 dark:text-white">
+                Order #{order.orderNumber}
+              </p>
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 {new Date(order.createdAt).toLocaleString()}
               </p>
@@ -107,7 +109,9 @@ export default function OrdersTab({ role }: OrdersTabProps) {
           <div className="mt-4 grid gap-4 lg:grid-cols-2">
             <div className="space-y-3 text-sm">
               <div>
-                <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Customer</p>
+                <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  Customer
+                </p>
                 <p className="font-medium text-slate-900 dark:text-white">
                   {order.contactName || "Unknown customer"}
                 </p>
@@ -120,27 +124,50 @@ export default function OrdersTab({ role }: OrdersTabProps) {
               </div>
 
               <div>
-                <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Delivery location</p>
-                <p className="font-medium text-slate-900 dark:text-white">
-                  {order.address || "Location not provided"}
+                <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  Fulfillment
                 </p>
+                <p className="font-semibold text-brand-strong">
+                  {order.fulfillmentMethod === "PICKUP_STATION"
+                    ? `Pickup · ${order.pickupStationName || "Station"}`
+                    : order.fulfillmentMethod === "DOORSTEP"
+                      ? "Doorstep delivery"
+                      : "Standard delivery"}
+                </p>
+                <p className="font-medium text-slate-900 dark:text-white">
+                  {order.pickupStationAddress || order.address || "Location not provided"}
+                </p>
+                {Number(order.deliveryFee) > 0 && (
+                  <p className="text-xs text-slate-500">
+                    Delivery fee: {formatPrice(Number(order.deliveryFee))}
+                    {order.deliveryEta ? ` · ${order.deliveryEta}` : ""}
+                  </p>
+                )}
               </div>
 
               <div>
-                <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Special message</p>
+                <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  Special message
+                </p>
                 <p className="text-slate-700 dark:text-slate-300">
                   {order.note?.trim() ? order.note : "No special message"}
                 </p>
               </div>
 
               <div>
-                <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Total amount</p>
-                <p className="font-semibold text-slate-900 dark:text-white">{formatPrice(Number(order.total))}</p>
+                <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  Total amount
+                </p>
+                <p className="font-semibold text-slate-900 dark:text-white">
+                  {formatPrice(Number(order.total))}
+                </p>
               </div>
             </div>
 
             <div>
-              <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">Order items</p>
+              <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">
+                Order items
+              </p>
               <div className="space-y-2">
                 {order.items?.length ? (
                   order.items.map((item) => {
@@ -149,7 +176,10 @@ export default function OrdersTab({ role }: OrdersTabProps) {
                       : null;
 
                     return (
-                      <div key={item.id} className="flex gap-3 rounded-lg border border-slate-200 dark:border-slate-700 p-2">
+                      <div
+                        key={item.id}
+                        className="flex gap-3 rounded-lg border border-slate-200 dark:border-slate-700 p-2"
+                      >
                         <div className="relative h-12 w-12 rounded-md overflow-hidden bg-slate-100 dark:bg-slate-800 shrink-0">
                           <Image
                             src={item.imageUrl || "/assets/logo.png"}
@@ -165,7 +195,10 @@ export default function OrdersTab({ role }: OrdersTabProps) {
                           </p>
                           <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                             {href ? (
-                              <Link href={href} className="text-sky-600 dark:text-sky-400 hover:underline break-all">
+                              <Link
+                                href={href}
+                                className="text-sky-600 dark:text-sky-400 hover:underline break-all"
+                              >
                                 {item.productId}
                               </Link>
                             ) : (
@@ -205,7 +238,11 @@ export default function OrdersTab({ role }: OrdersTabProps) {
             {role === "senior" && (
               <button
                 onClick={() => setStatus(order.id, "CANCELLED")}
-                disabled={order.status === "CANCELLED" || order.status === "DELIVERED" || order.status === "REFUNDED"}
+                disabled={
+                  order.status === "CANCELLED" ||
+                  order.status === "DELIVERED" ||
+                  order.status === "REFUNDED"
+                }
                 className="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white text-sm"
               >
                 Cancel

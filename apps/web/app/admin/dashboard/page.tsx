@@ -12,7 +12,7 @@ import { adminAuthApi, ApiClientError } from "@/lib/api";
 
 const DashboardOverviewTab = dynamic<{ role: AdminRole }>(
   () => import("./components/DashboardOverviewTab"),
-  { loading: () => <TabSkeleton /> }
+  { loading: () => <TabSkeleton /> },
 );
 const InviteTab = dynamic(() => import("./components/InviteTab"), {
   loading: () => <TabSkeleton />,
@@ -28,12 +28,15 @@ const HeroTab = dynamic(() => import("./components/HeroTab"), {
 });
 const ProductsTab = dynamic<{ adminId: string; role: AdminRole }>(
   () => import("./components/ProductsTab"),
-  { loading: () => <TabSkeleton /> }
+  { loading: () => <TabSkeleton /> },
 );
 const OrdersTab = dynamic<{ adminId: string; role: AdminRole }>(
   () => import("./components/OrdersTab"),
-  { loading: () => <TabSkeleton /> }
+  { loading: () => <TabSkeleton /> },
 );
+const FulfillmentTab = dynamic(() => import("./components/FulfillmentTab"), {
+  loading: () => <TabSkeleton />,
+});
 const VendorApplicationsTab = dynamic(() => import("./components/VendorApplicationsTab"), {
   loading: () => <TabSkeleton />,
 });
@@ -57,7 +60,7 @@ const ContactsTab = dynamic(() => import("./components/ContactsTab"), {
 });
 const MessagesTab = dynamic<{ adminId: string; role: AdminRole }>(
   () => import("./components/MessagesTab"),
-  { loading: () => <TabSkeleton /> }
+  { loading: () => <TabSkeleton /> },
 );
 const SabbathMessagesTab = dynamic(() => import("./components/SabbathMessagesTab"), {
   loading: () => <TabSkeleton />,
@@ -69,7 +72,9 @@ const MerchandisingTab = dynamic(() => import("./components/MerchandisingTab"), 
   loading: () => <TabSkeleton />,
 });
 
-const TAB_LABELS = new Map<TabId, string>([...TABS_SENIOR, ...TABS_SUB].map((tab) => [tab.id, tab.label]));
+const TAB_LABELS = new Map<TabId, string>(
+  [...TABS_SENIOR, ...TABS_SUB].map((tab) => [tab.id, tab.label]),
+);
 
 function isValidTab(value: string | null, role: AdminRole): value is TabId {
   if (!value) return false;
@@ -166,7 +171,7 @@ function AdminDashboardPageContent() {
       params.set("tab", tab);
       router.push(adminRoute(`${ADMIN_DASHBOARD_PATH}?${params.toString()}`), { scroll: false });
     },
-    [router, searchParams]
+    [router, searchParams],
   );
 
   const pageTitle = TAB_LABELS.get(currentTab) ?? "Dashboard";
@@ -191,6 +196,8 @@ function AdminDashboardPageContent() {
         return admin.role === "senior" ? <MerchandisingTab /> : null;
       case "orders":
         return <OrdersTab adminId={admin.adminId} role={admin.role} />;
+      case "fulfillment":
+        return admin.role === "senior" ? <FulfillmentTab /> : null;
       case "vendorApplications":
         return admin.role === "senior" ? <VendorApplicationsTab /> : null;
       case "wholesale":

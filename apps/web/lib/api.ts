@@ -77,6 +77,12 @@ import type {
   CollectionUpdateInput,
   HomepageSectionCreateInput,
   HomepageSectionUpdateInput,
+  FulfillmentConfigurationDTO,
+  FulfillmentConfigurationUpdateInput,
+  PickupStationCreateInput,
+  PickupStationDTO,
+  PickupStationUpdateInput,
+  PublicFulfillmentDTO,
   MerchandisingCollectionDTO,
   CollectionMembershipDTO,
   CollectionMembershipImportInput,
@@ -397,6 +403,38 @@ export const orderApi = {
       api.patch<{ order: OrderDTO }>(`/admin/orders/${id}/status`, { status }),
     updatePayment: (id: string, paymentStatus: PaymentStatus) =>
       api.patch<{ order: OrderDTO }>(`/admin/orders/${id}/payment`, { paymentStatus }),
+  },
+};
+
+// ---- Optional pickup / doorstep fulfillment ----
+
+export const fulfillmentApi = {
+  get: () => api.get<{ fulfillment: PublicFulfillmentDTO }>("/fulfillment"),
+  admin: {
+    getConfiguration: () =>
+      api.get<{ configuration: FulfillmentConfigurationDTO }>("/admin/fulfillment/configuration"),
+    updateConfiguration: (input: FulfillmentConfigurationUpdateInput) =>
+      api.put<{ configuration: FulfillmentConfigurationDTO }>(
+        "/admin/fulfillment/configuration",
+        input,
+      ),
+    listStations: (
+      query: Partial<{
+        page: number;
+        pageSize: number;
+        search: string;
+        includeArchived: boolean;
+      }> = {},
+    ) => api.get<Paginated<PickupStationDTO>>(`/admin/fulfillment/stations${qs(query)}`),
+    createStation: (input: PickupStationCreateInput) =>
+      api.post<{ station: PickupStationDTO }>("/admin/fulfillment/stations", input),
+    updateStation: (id: string, input: PickupStationUpdateInput) =>
+      api.patch<{ station: PickupStationDTO }>(
+        `/admin/fulfillment/stations/${encodeURIComponent(id)}`,
+        input,
+      ),
+    archiveStation: (id: string) =>
+      api.del<{ success: boolean }>(`/admin/fulfillment/stations/${encodeURIComponent(id)}`),
   },
 };
 

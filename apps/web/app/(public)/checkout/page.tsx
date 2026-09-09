@@ -328,7 +328,9 @@ function CheckoutContent() {
   }, []);
 
   // -------------------- Handlers --------------------
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -438,9 +440,10 @@ function CheckoutContent() {
                 town: formData.town.trim(),
                 address: locality.trim(),
               },
-              saveAddressAsDefault,
             }
           : {}),
+        saveAddressAsDefault:
+          fulfillmentEnabled && deliveryMethod === "DOORSTEP" && saveAddressAsDefault,
         note: message.trim() || null,
         useWallet,
       });

@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   ArrowRight,
+  BadgePercent,
   ChevronRight,
   Grid3X3,
   Headphones,
@@ -183,6 +184,7 @@ export default function Sidebar({
                 <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800">
                   {[
                     { href: "/shop", label: "Shop all products", icon: ShoppingBag },
+                    { href: "/banners", label: "Promotions & offers", icon: BadgePercent },
                     { href: "/wholeseller", label: "Wholesale & bulk", icon: Package },
                     { href: "/new-arrivals", label: "New arrivals", icon: Sparkles },
                     { href: "/contact", label: "Help & contact", icon: Headphones },

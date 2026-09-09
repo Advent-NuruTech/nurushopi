@@ -3,7 +3,7 @@ import type { Route } from "next";
 import HeroSection from "@/components/ui/HeroSection";
 import FeaturedSection from "@/components/ui/FeaturedSection";
 import SabbathExperience from "@/components/ui/SabbathExperience";
-import { listProducts, listCategories, listBanners } from "@/lib/data/catalog";
+import { listProducts, listCategories } from "@/lib/data/catalog";
 import { listWholesaleItems } from "@/lib/data/wholesale";
 import { getHomepageMerchandising } from "@/lib/data/merchandising";
 import type { ProductCardVM } from "@/lib/view/catalog";
@@ -36,10 +36,9 @@ function toFeaturedProduct(p: ProductCardVM) {
 }
 
 export default async function HomePage() {
-  const [productsResult, categories, banners, wholesaleResult, homepage] = await Promise.all([
+  const [productsResult, categories, wholesaleResult, homepage] = await Promise.all([
     listProducts({ pageSize: 60, sort: "newest" }),
     listCategories(),
-    listBanners(),
     listWholesaleItems({ pageSize: 12, sort: "newest" }),
     getHomepageMerchandising(),
   ]);
@@ -70,10 +69,8 @@ export default async function HomePage() {
       <FeaturedSection
         products={featuredProducts}
         categories={categoryOptions}
-        promotions={banners}
         wholesale={wholesaleProducts}
         merchandising={merchandisingCards}
-        showRecommendationHeading
       />
     </main>
   );

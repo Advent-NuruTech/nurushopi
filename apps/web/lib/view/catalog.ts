@@ -114,6 +114,9 @@ export interface WholesaleCardVM {
   stock: number;
   inStock: boolean;
   description: string | null;
+  categoryId: string | null;
+  categoryName: string | null;
+  categorySlug: string | null;
 }
 
 export function toWholesaleCardVM(w: WholesaleItemDTO): WholesaleCardVM {
@@ -130,6 +133,9 @@ export function toWholesaleCardVM(w: WholesaleItemDTO): WholesaleCardVM {
     stock: w.stock,
     inStock: w.inStock,
     description: w.description,
+    categoryId: w.categoryId,
+    categoryName: w.category?.name ?? null,
+    categorySlug: w.category?.slug ?? null,
   };
 }
 

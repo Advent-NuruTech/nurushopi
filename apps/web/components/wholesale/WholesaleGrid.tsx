@@ -6,10 +6,8 @@ interface WholesaleGridProps {
 }
 
 export default function WholesaleGrid({ products }: WholesaleGridProps) {
-  if (!products?.length) return <p>No wholesale products available.</p>;
-
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
       {products.map((p) => (
         <WholesaleCard key={p.id} product={p} />
       ))}

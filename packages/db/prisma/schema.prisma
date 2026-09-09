@@ -377,7 +377,8 @@ model Category {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  products Product[]
+  products       Product[]
+  wholesaleItems WholesaleItem[]
 
   @@map("categories")
 }
@@ -479,22 +480,25 @@ model HeroAnnouncement {
 }
 
 model WholesaleItem {
-  id          String   @id @default(cuid())
+  id          String         @id @default(cuid())
   name        String
-  slug        String?  @unique
-  sku         String?  @unique
+  slug        String?        @unique
+  sku         String?        @unique
   description String?
-  unitPrice   Decimal  @db.Decimal(12, 2)
-  minQuantity Int      @default(1)
-  stock       Int      @default(0)
+  unitPrice   Decimal        @db.Decimal(12, 2)
+  minQuantity Int            @default(1)
+  stock       Int            @default(0)
   images      String[]
-  variants    Json @default("[]")
-  isActive    Boolean  @default(true)
+  variants    Json           @default("[]")
+  isActive    Boolean        @default(true)
+  categoryId  String?
+  category    Category?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   vendorId    String?
   vendor      VendorAccount? @relation(fields: [vendorId], references: [id], onDelete: SetNull)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
 
+  @@index([categoryId])
   @@index([vendorId])
   @@map("wholesale_items")
 }

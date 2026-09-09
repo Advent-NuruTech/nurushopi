@@ -38,10 +38,9 @@ describe("wholesale.list", () => {
     p.wholesaleItem.count.mockResolvedValue(1);
     p.wholesaleItem.findMany.mockResolvedValue([row()]);
 
-    const res = await items.list(
-      { page: 1, pageSize: 20, sort: "newest" } as never,
-      { enforceActive: true },
-    );
+    const res = await items.list({ page: 1, pageSize: 20, sort: "newest" } as never, {
+      enforceActive: true,
+    });
 
     expect(res.total).toBe(1);
     expect(res.totalPages).toBe(1);
@@ -53,10 +52,9 @@ describe("wholesale.list", () => {
     p.wholesaleItem.count.mockResolvedValue(40);
     p.wholesaleItem.findMany.mockResolvedValue([]);
 
-    await items.list(
-      { page: 3, pageSize: 10, sort: "price_asc" } as never,
-      { enforceActive: false },
-    );
+    await items.list({ page: 3, pageSize: 10, sort: "price_asc" } as never, {
+      enforceActive: false,
+    });
 
     const args = p.wholesaleItem.findMany.mock.calls[0][0];
     expect(args.skip).toBe(20);
@@ -68,21 +66,34 @@ describe("wholesale.list", () => {
     p.wholesaleItem.count.mockResolvedValue(0);
     p.wholesaleItem.findMany.mockResolvedValue([]);
 
+    await items.list({ page: 1, pageSize: 20, sort: "newest", minQuantity: 5 } as never, {
+      enforceActive: true,
+    });
+
+    expect(p.wholesaleItem.findMany.mock.calls[0][0].where.minQuantity).toEqual({ gte: 5 });
+  });
+
+  it("filters wholesale inventory by category slug", async () => {
+    p.wholesaleItem.count.mockResolvedValue(0);
+    p.wholesaleItem.findMany.mockResolvedValue([]);
+
     await items.list(
-      { page: 1, pageSize: 20, sort: "newest", minQuantity: 5 } as never,
+      { page: 1, pageSize: 20, sort: "newest", categorySlug: "food-cupboard" } as never,
       { enforceActive: true },
     );
 
-    expect(p.wholesaleItem.findMany.mock.calls[0][0].where.minQuantity).toEqual({ gte: 5 });
+    expect(p.wholesaleItem.findMany.mock.calls[0][0].where.category).toEqual({
+      slug: "food-cupboard",
+    });
   });
 });
 
 describe("wholesale.getByIdOrSlug", () => {
   it("throws 404 when not found", async () => {
     p.wholesaleItem.findFirst.mockResolvedValue(null);
-    await expect(
-      items.getByIdOrSlug("nope", { activeOnly: true }),
-    ).rejects.toMatchObject({ status: 404 });
+    await expect(items.getByIdOrSlug("nope", { activeOnly: true })).rejects.toMatchObject({
+      status: 404,
+    });
   });
 });
 

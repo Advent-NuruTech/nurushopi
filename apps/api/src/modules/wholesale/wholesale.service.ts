@@ -33,6 +33,7 @@ function buildWhere(
 
   if (query.minQuantity !== undefined) where.minQuantity = { gte: query.minQuantity };
   if (query.inStock) where.stock = { gt: 0 };
+  if (query.categorySlug) where.category = { slug: query.categorySlug };
 
   if (query.minPrice !== undefined || query.maxPrice !== undefined) {
     where.unitPrice = {
@@ -81,6 +82,7 @@ export async function list(
     prisma.wholesaleItem.count({ where }),
     prisma.wholesaleItem.findMany({
       where,
+      include: { category: { select: { id: true, name: true, slug: true } } },
       orderBy: buildOrderBy(query.sort),
       skip,
       take: query.pageSize,
@@ -106,12 +108,14 @@ export async function getByIdOrSlug(
       ...(activeOnly ? { isActive: true } : {}),
       ...(vendorId ? { vendorId } : {}),
     },
+    include: { category: { select: { id: true, name: true, slug: true } } },
   });
   if (!row) throw Errors.notFound("Wholesale item not found.");
   return toWholesaleItemDTO(row);
 }
 
 export async function create(input: WholesaleItemCreateInput, vendorId?: string) {
+  await assertCategoryExists(input.categoryId);
   const slug = await uniqueSlug(input.slug ?? input.name, (s) => slugTaken(s));
 
   const row = await prisma.wholesaleItem.create({
@@ -126,8 +130,10 @@ export async function create(input: WholesaleItemCreateInput, vendorId?: string)
       images: input.images ?? [],
       variants: input.variants ?? [],
       isActive: input.isActive ?? true,
+      categoryId: input.categoryId ?? null,
       vendorId: vendorId ?? null,
     },
+    include: { category: { select: { id: true, name: true, slug: true } } },
   });
   return toWholesaleItemDTO(row);
 }
@@ -137,6 +143,7 @@ export async function update(id: string, input: WholesaleItemUpdateInput, vendor
     where: { id, ...(vendorId ? { vendorId } : {}) },
   });
   if (!current) throw Errors.notFound("Wholesale item not found.");
+  if (input.categoryId !== undefined) await assertCategoryExists(input.categoryId);
 
   let slug = current.slug;
   if (input.slug !== undefined || input.name !== undefined) {
@@ -157,7 +164,9 @@ export async function update(id: string, input: WholesaleItemUpdateInput, vendor
       ...(input.images !== undefined ? { images: input.images } : {}),
       ...(input.variants !== undefined ? { variants: input.variants } : {}),
       ...(input.isActive !== undefined ? { isActive: input.isActive } : {}),
+      ...(input.categoryId !== undefined ? { categoryId: input.categoryId } : {}),
     },
+    include: { category: { select: { id: true, name: true, slug: true } } },
   });
   if (input.images !== undefined) {
     const next = new Set(input.images);
@@ -176,6 +185,15 @@ export async function update(id: string, input: WholesaleItemUpdateInput, vendor
     });
   }
   return toWholesaleItemDTO(row);
+}
+
+async function assertCategoryExists(categoryId: string | null | undefined): Promise<void> {
+  if (!categoryId) return;
+  const category = await prisma.category.findUnique({
+    where: { id: categoryId },
+    select: { id: true },
+  });
+  if (!category) throw Errors.badRequest("The selected category does not exist.");
 }
 
 export async function remove(id: string, vendorId?: string): Promise<void> {

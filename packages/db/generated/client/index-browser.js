@@ -302,6 +302,7 @@ exports.Prisma.WholesaleItemScalarFieldEnum = {
   images: 'images',
   variants: 'variants',
   isActive: 'isActive',
+  categoryId: 'categoryId',
   vendorId: 'vendorId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

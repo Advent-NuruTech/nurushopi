@@ -1,6 +1,6 @@
 import { productVariantsSchema, type ProductVariant } from "./variants";
 import { z } from "zod";
-import { moneySchema, paginationQuerySchema, slugSchema } from "./catalog";
+import { idSchema, moneySchema, paginationQuerySchema, slugSchema } from "./catalog";
 
 // ---------------------------------------------------------------------------
 // Wholesale items
@@ -35,6 +35,7 @@ export const wholesaleItemCreateSchema = z
     images: z.array(z.string().url("Each image must be a valid URL.")).max(3).default([]),
     variants: productVariantsSchema.optional(),
     isActive: z.coerce.boolean().default(true),
+    categoryId: idSchema.optional().nullable(),
   })
   .strict();
 export type WholesaleItemCreateInput = z.infer<typeof wholesaleItemCreateSchema>;
@@ -50,6 +51,7 @@ export type WholesaleSort = z.infer<typeof wholesaleSortSchema>;
 /** Wholesale listing filters (merged with pagination). */
 export const wholesaleItemQuerySchema = paginationQuerySchema.extend({
   search: z.string().trim().max(120).optional(),
+  categorySlug: slugSchema.optional(),
   isActive: z.coerce.boolean().optional(),
   minPrice: moneySchema.optional(),
   maxPrice: moneySchema.optional(),
@@ -74,6 +76,8 @@ export interface WholesaleItemDTO {
   variants?: ProductVariant[];
   isActive: boolean;
   vendorId?: string | null;
+  categoryId: string | null;
+  category: { id: string; name: string; slug: string } | null;
   createdAt: string;
   updatedAt: string;
 }

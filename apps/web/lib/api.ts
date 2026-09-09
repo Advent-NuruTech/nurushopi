@@ -105,6 +105,7 @@ type WholesaleQuery = Partial<{
   page: number;
   pageSize: number;
   search: string;
+  categorySlug: string;
   minPrice: number;
   maxPrice: number;
   minQuantity: number;

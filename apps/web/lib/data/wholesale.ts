@@ -14,6 +14,7 @@ export interface ListWholesaleParams {
   page?: number;
   pageSize?: number;
   search?: string;
+  categorySlug?: string;
   minQuantity?: number;
   sort?: WholesaleSort;
 }
@@ -41,6 +42,7 @@ export async function listWholesaleItems(
     page: params.page,
     pageSize: params.pageSize,
     search: params.search,
+    categorySlug: params.categorySlug,
     minQuantity: params.minQuantity,
     sort: params.sort,
   });

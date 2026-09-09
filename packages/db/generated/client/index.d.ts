@@ -6410,10 +6410,12 @@ export namespace Prisma {
 
   export type CategoryCountOutputType = {
     products: number
+    wholesaleItems: number
   }
 
   export type CategoryCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     products?: boolean | CategoryCountOutputTypeCountProductsArgs
+    wholesaleItems?: boolean | CategoryCountOutputTypeCountWholesaleItemsArgs
   }
 
   // Custom InputTypes
@@ -6432,6 +6434,13 @@ export namespace Prisma {
    */
   export type CategoryCountOutputTypeCountProductsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ProductWhereInput
+  }
+
+  /**
+   * CategoryCountOutputType without action
+   */
+  export type CategoryCountOutputTypeCountWholesaleItemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: WholesaleItemWhereInput
   }
 
 
@@ -19026,6 +19035,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     products?: boolean | Category$productsArgs<ExtArgs>
+    wholesaleItems?: boolean | Category$wholesaleItemsArgs<ExtArgs>
     _count?: boolean | CategoryCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["category"]>
 
@@ -19068,6 +19078,7 @@ export namespace Prisma {
   export type CategoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "icon" | "imageUrl" | "description" | "sortOrder" | "createdAt" | "updatedAt", ExtArgs["result"]["category"]>
   export type CategoryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     products?: boolean | Category$productsArgs<ExtArgs>
+    wholesaleItems?: boolean | Category$wholesaleItemsArgs<ExtArgs>
     _count?: boolean | CategoryCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type CategoryIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -19077,6 +19088,7 @@ export namespace Prisma {
     name: "Category"
     objects: {
       products: Prisma.$ProductPayload<ExtArgs>[]
+      wholesaleItems: Prisma.$WholesaleItemPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -19483,6 +19495,7 @@ export namespace Prisma {
   export interface Prisma__CategoryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     products<T extends Category$productsArgs<ExtArgs> = {}>(args?: Subset<T, Category$productsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    wholesaleItems<T extends Category$wholesaleItemsArgs<ExtArgs> = {}>(args?: Subset<T, Category$wholesaleItemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WholesaleItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -19930,6 +19943,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: ProductScalarFieldEnum | ProductScalarFieldEnum[]
+  }
+
+  /**
+   * Category.wholesaleItems
+   */
+  export type Category$wholesaleItemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WholesaleItem
+     */
+    select?: WholesaleItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WholesaleItem
+     */
+    omit?: WholesaleItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WholesaleItemInclude<ExtArgs> | null
+    where?: WholesaleItemWhereInput
+    orderBy?: WholesaleItemOrderByWithRelationInput | WholesaleItemOrderByWithRelationInput[]
+    cursor?: WholesaleItemWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: WholesaleItemScalarFieldEnum | WholesaleItemScalarFieldEnum[]
   }
 
   /**
@@ -24055,6 +24092,7 @@ export namespace Prisma {
     minQuantity: number | null
     stock: number | null
     isActive: boolean | null
+    categoryId: string | null
     vendorId: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -24070,6 +24108,7 @@ export namespace Prisma {
     minQuantity: number | null
     stock: number | null
     isActive: boolean | null
+    categoryId: string | null
     vendorId: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -24087,6 +24126,7 @@ export namespace Prisma {
     images: number
     variants: number
     isActive: number
+    categoryId: number
     vendorId: number
     createdAt: number
     updatedAt: number
@@ -24116,6 +24156,7 @@ export namespace Prisma {
     minQuantity?: true
     stock?: true
     isActive?: true
+    categoryId?: true
     vendorId?: true
     createdAt?: true
     updatedAt?: true
@@ -24131,6 +24172,7 @@ export namespace Prisma {
     minQuantity?: true
     stock?: true
     isActive?: true
+    categoryId?: true
     vendorId?: true
     createdAt?: true
     updatedAt?: true
@@ -24148,6 +24190,7 @@ export namespace Prisma {
     images?: true
     variants?: true
     isActive?: true
+    categoryId?: true
     vendorId?: true
     createdAt?: true
     updatedAt?: true
@@ -24252,6 +24295,7 @@ export namespace Prisma {
     images: string[]
     variants: JsonValue
     isActive: boolean
+    categoryId: string | null
     vendorId: string | null
     createdAt: Date
     updatedAt: Date
@@ -24288,9 +24332,11 @@ export namespace Prisma {
     images?: boolean
     variants?: boolean
     isActive?: boolean
+    categoryId?: boolean
     vendorId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    category?: boolean | WholesaleItem$categoryArgs<ExtArgs>
     vendor?: boolean | WholesaleItem$vendorArgs<ExtArgs>
   }, ExtArgs["result"]["wholesaleItem"]>
 
@@ -24306,9 +24352,11 @@ export namespace Prisma {
     images?: boolean
     variants?: boolean
     isActive?: boolean
+    categoryId?: boolean
     vendorId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    category?: boolean | WholesaleItem$categoryArgs<ExtArgs>
     vendor?: boolean | WholesaleItem$vendorArgs<ExtArgs>
   }, ExtArgs["result"]["wholesaleItem"]>
 
@@ -24324,9 +24372,11 @@ export namespace Prisma {
     images?: boolean
     variants?: boolean
     isActive?: boolean
+    categoryId?: boolean
     vendorId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    category?: boolean | WholesaleItem$categoryArgs<ExtArgs>
     vendor?: boolean | WholesaleItem$vendorArgs<ExtArgs>
   }, ExtArgs["result"]["wholesaleItem"]>
 
@@ -24342,25 +24392,30 @@ export namespace Prisma {
     images?: boolean
     variants?: boolean
     isActive?: boolean
+    categoryId?: boolean
     vendorId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type WholesaleItemOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "sku" | "description" | "unitPrice" | "minQuantity" | "stock" | "images" | "variants" | "isActive" | "vendorId" | "createdAt" | "updatedAt", ExtArgs["result"]["wholesaleItem"]>
+  export type WholesaleItemOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "sku" | "description" | "unitPrice" | "minQuantity" | "stock" | "images" | "variants" | "isActive" | "categoryId" | "vendorId" | "createdAt" | "updatedAt", ExtArgs["result"]["wholesaleItem"]>
   export type WholesaleItemInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    category?: boolean | WholesaleItem$categoryArgs<ExtArgs>
     vendor?: boolean | WholesaleItem$vendorArgs<ExtArgs>
   }
   export type WholesaleItemIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    category?: boolean | WholesaleItem$categoryArgs<ExtArgs>
     vendor?: boolean | WholesaleItem$vendorArgs<ExtArgs>
   }
   export type WholesaleItemIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    category?: boolean | WholesaleItem$categoryArgs<ExtArgs>
     vendor?: boolean | WholesaleItem$vendorArgs<ExtArgs>
   }
 
   export type $WholesaleItemPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "WholesaleItem"
     objects: {
+      category: Prisma.$CategoryPayload<ExtArgs> | null
       vendor: Prisma.$VendorAccountPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -24375,6 +24430,7 @@ export namespace Prisma {
       images: string[]
       variants: Prisma.JsonValue
       isActive: boolean
+      categoryId: string | null
       vendorId: string | null
       createdAt: Date
       updatedAt: Date
@@ -24772,6 +24828,7 @@ export namespace Prisma {
    */
   export interface Prisma__WholesaleItemClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    category<T extends WholesaleItem$categoryArgs<ExtArgs> = {}>(args?: Subset<T, WholesaleItem$categoryArgs<ExtArgs>>): Prisma__CategoryClient<$Result.GetResult<Prisma.$CategoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     vendor<T extends WholesaleItem$vendorArgs<ExtArgs> = {}>(args?: Subset<T, WholesaleItem$vendorArgs<ExtArgs>>): Prisma__VendorAccountClient<$Result.GetResult<Prisma.$VendorAccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -24813,6 +24870,7 @@ export namespace Prisma {
     readonly images: FieldRef<"WholesaleItem", 'String[]'>
     readonly variants: FieldRef<"WholesaleItem", 'Json'>
     readonly isActive: FieldRef<"WholesaleItem", 'Boolean'>
+    readonly categoryId: FieldRef<"WholesaleItem", 'String'>
     readonly vendorId: FieldRef<"WholesaleItem", 'String'>
     readonly createdAt: FieldRef<"WholesaleItem", 'DateTime'>
     readonly updatedAt: FieldRef<"WholesaleItem", 'DateTime'>
@@ -25209,6 +25267,25 @@ export namespace Prisma {
      * Limit how many WholesaleItems to delete.
      */
     limit?: number
+  }
+
+  /**
+   * WholesaleItem.category
+   */
+  export type WholesaleItem$categoryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Category
+     */
+    select?: CategorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Category
+     */
+    omit?: CategoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CategoryInclude<ExtArgs> | null
+    where?: CategoryWhereInput
   }
 
   /**
@@ -73114,6 +73191,7 @@ export namespace Prisma {
     images: 'images',
     variants: 'variants',
     isActive: 'isActive',
+    categoryId: 'categoryId',
     vendorId: 'vendorId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -75068,6 +75146,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Category"> | Date | string
     updatedAt?: DateTimeFilter<"Category"> | Date | string
     products?: ProductListRelationFilter
+    wholesaleItems?: WholesaleItemListRelationFilter
   }
 
   export type CategoryOrderByWithRelationInput = {
@@ -75081,6 +75160,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     products?: ProductOrderByRelationAggregateInput
+    wholesaleItems?: WholesaleItemOrderByRelationAggregateInput
   }
 
   export type CategoryWhereUniqueInput = Prisma.AtLeast<{
@@ -75097,6 +75177,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Category"> | Date | string
     updatedAt?: DateTimeFilter<"Category"> | Date | string
     products?: ProductListRelationFilter
+    wholesaleItems?: WholesaleItemListRelationFilter
   }, "id" | "slug">
 
   export type CategoryOrderByWithAggregationInput = {
@@ -75510,9 +75591,11 @@ export namespace Prisma {
     images?: StringNullableListFilter<"WholesaleItem">
     variants?: JsonFilter<"WholesaleItem">
     isActive?: BoolFilter<"WholesaleItem"> | boolean
+    categoryId?: StringNullableFilter<"WholesaleItem"> | string | null
     vendorId?: StringNullableFilter<"WholesaleItem"> | string | null
     createdAt?: DateTimeFilter<"WholesaleItem"> | Date | string
     updatedAt?: DateTimeFilter<"WholesaleItem"> | Date | string
+    category?: XOR<CategoryNullableScalarRelationFilter, CategoryWhereInput> | null
     vendor?: XOR<VendorAccountNullableScalarRelationFilter, VendorAccountWhereInput> | null
   }
 
@@ -75528,9 +75611,11 @@ export namespace Prisma {
     images?: SortOrder
     variants?: SortOrder
     isActive?: SortOrder
+    categoryId?: SortOrderInput | SortOrder
     vendorId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    category?: CategoryOrderByWithRelationInput
     vendor?: VendorAccountOrderByWithRelationInput
   }
 
@@ -75549,9 +75634,11 @@ export namespace Prisma {
     images?: StringNullableListFilter<"WholesaleItem">
     variants?: JsonFilter<"WholesaleItem">
     isActive?: BoolFilter<"WholesaleItem"> | boolean
+    categoryId?: StringNullableFilter<"WholesaleItem"> | string | null
     vendorId?: StringNullableFilter<"WholesaleItem"> | string | null
     createdAt?: DateTimeFilter<"WholesaleItem"> | Date | string
     updatedAt?: DateTimeFilter<"WholesaleItem"> | Date | string
+    category?: XOR<CategoryNullableScalarRelationFilter, CategoryWhereInput> | null
     vendor?: XOR<VendorAccountNullableScalarRelationFilter, VendorAccountWhereInput> | null
   }, "id" | "slug" | "sku">
 
@@ -75567,6 +75654,7 @@ export namespace Prisma {
     images?: SortOrder
     variants?: SortOrder
     isActive?: SortOrder
+    categoryId?: SortOrderInput | SortOrder
     vendorId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -75592,6 +75680,7 @@ export namespace Prisma {
     images?: StringNullableListFilter<"WholesaleItem">
     variants?: JsonWithAggregatesFilter<"WholesaleItem">
     isActive?: BoolWithAggregatesFilter<"WholesaleItem"> | boolean
+    categoryId?: StringNullableWithAggregatesFilter<"WholesaleItem"> | string | null
     vendorId?: StringNullableWithAggregatesFilter<"WholesaleItem"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"WholesaleItem"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"WholesaleItem"> | Date | string
@@ -80138,6 +80227,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     products?: ProductCreateNestedManyWithoutCategoryInput
+    wholesaleItems?: WholesaleItemCreateNestedManyWithoutCategoryInput
   }
 
   export type CategoryUncheckedCreateInput = {
@@ -80151,6 +80241,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     products?: ProductUncheckedCreateNestedManyWithoutCategoryInput
+    wholesaleItems?: WholesaleItemUncheckedCreateNestedManyWithoutCategoryInput
   }
 
   export type CategoryUpdateInput = {
@@ -80164,6 +80255,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     products?: ProductUpdateManyWithoutCategoryNestedInput
+    wholesaleItems?: WholesaleItemUpdateManyWithoutCategoryNestedInput
   }
 
   export type CategoryUncheckedUpdateInput = {
@@ -80177,6 +80269,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     products?: ProductUncheckedUpdateManyWithoutCategoryNestedInput
+    wholesaleItems?: WholesaleItemUncheckedUpdateManyWithoutCategoryNestedInput
   }
 
   export type CategoryCreateManyInput = {
@@ -80661,6 +80754,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    category?: CategoryCreateNestedOneWithoutWholesaleItemsInput
     vendor?: VendorAccountCreateNestedOneWithoutWholesaleItemsInput
   }
 
@@ -80676,6 +80770,7 @@ export namespace Prisma {
     images?: WholesaleItemCreateimagesInput | string[]
     variants?: JsonNullValueInput | InputJsonValue
     isActive?: boolean
+    categoryId?: string | null
     vendorId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -80695,6 +80790,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    category?: CategoryUpdateOneWithoutWholesaleItemsNestedInput
     vendor?: VendorAccountUpdateOneWithoutWholesaleItemsNestedInput
   }
 
@@ -80710,6 +80806,7 @@ export namespace Prisma {
     images?: WholesaleItemUpdateimagesInput | string[]
     variants?: JsonNullValueInput | InputJsonValue
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     vendorId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -80727,6 +80824,7 @@ export namespace Prisma {
     images?: WholesaleItemCreateimagesInput | string[]
     variants?: JsonNullValueInput | InputJsonValue
     isActive?: boolean
+    categoryId?: string | null
     vendorId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -80760,6 +80858,7 @@ export namespace Prisma {
     images?: WholesaleItemUpdateimagesInput | string[]
     variants?: JsonNullValueInput | InputJsonValue
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     vendorId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -85768,6 +85867,16 @@ export namespace Prisma {
     _max?: NestedJsonNullableFilter<$PrismaModel>
   }
 
+  export type WholesaleItemListRelationFilter = {
+    every?: WholesaleItemWhereInput
+    some?: WholesaleItemWhereInput
+    none?: WholesaleItemWhereInput
+  }
+
+  export type WholesaleItemOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type CategoryCountOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
@@ -86177,6 +86286,7 @@ export namespace Prisma {
     images?: SortOrder
     variants?: SortOrder
     isActive?: SortOrder
+    categoryId?: SortOrder
     vendorId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -86198,6 +86308,7 @@ export namespace Prisma {
     minQuantity?: SortOrder
     stock?: SortOrder
     isActive?: SortOrder
+    categoryId?: SortOrder
     vendorId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -86213,6 +86324,7 @@ export namespace Prisma {
     minQuantity?: SortOrder
     stock?: SortOrder
     isActive?: SortOrder
+    categoryId?: SortOrder
     vendorId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -87195,16 +87307,6 @@ export namespace Prisma {
   export type VendorApplicationScalarRelationFilter = {
     is?: VendorApplicationWhereInput
     isNot?: VendorApplicationWhereInput
-  }
-
-  export type WholesaleItemListRelationFilter = {
-    every?: WholesaleItemWhereInput
-    some?: WholesaleItemWhereInput
-    none?: WholesaleItemWhereInput
-  }
-
-  export type WholesaleItemOrderByRelationAggregateInput = {
-    _count?: SortOrder
   }
 
   export type VendorAccountCountOrderByAggregateInput = {
@@ -90317,11 +90419,25 @@ export namespace Prisma {
     connect?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
   }
 
+  export type WholesaleItemCreateNestedManyWithoutCategoryInput = {
+    create?: XOR<WholesaleItemCreateWithoutCategoryInput, WholesaleItemUncheckedCreateWithoutCategoryInput> | WholesaleItemCreateWithoutCategoryInput[] | WholesaleItemUncheckedCreateWithoutCategoryInput[]
+    connectOrCreate?: WholesaleItemCreateOrConnectWithoutCategoryInput | WholesaleItemCreateOrConnectWithoutCategoryInput[]
+    createMany?: WholesaleItemCreateManyCategoryInputEnvelope
+    connect?: WholesaleItemWhereUniqueInput | WholesaleItemWhereUniqueInput[]
+  }
+
   export type ProductUncheckedCreateNestedManyWithoutCategoryInput = {
     create?: XOR<ProductCreateWithoutCategoryInput, ProductUncheckedCreateWithoutCategoryInput> | ProductCreateWithoutCategoryInput[] | ProductUncheckedCreateWithoutCategoryInput[]
     connectOrCreate?: ProductCreateOrConnectWithoutCategoryInput | ProductCreateOrConnectWithoutCategoryInput[]
     createMany?: ProductCreateManyCategoryInputEnvelope
     connect?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+  }
+
+  export type WholesaleItemUncheckedCreateNestedManyWithoutCategoryInput = {
+    create?: XOR<WholesaleItemCreateWithoutCategoryInput, WholesaleItemUncheckedCreateWithoutCategoryInput> | WholesaleItemCreateWithoutCategoryInput[] | WholesaleItemUncheckedCreateWithoutCategoryInput[]
+    connectOrCreate?: WholesaleItemCreateOrConnectWithoutCategoryInput | WholesaleItemCreateOrConnectWithoutCategoryInput[]
+    createMany?: WholesaleItemCreateManyCategoryInputEnvelope
+    connect?: WholesaleItemWhereUniqueInput | WholesaleItemWhereUniqueInput[]
   }
 
   export type ProductUpdateManyWithoutCategoryNestedInput = {
@@ -90338,6 +90454,20 @@ export namespace Prisma {
     deleteMany?: ProductScalarWhereInput | ProductScalarWhereInput[]
   }
 
+  export type WholesaleItemUpdateManyWithoutCategoryNestedInput = {
+    create?: XOR<WholesaleItemCreateWithoutCategoryInput, WholesaleItemUncheckedCreateWithoutCategoryInput> | WholesaleItemCreateWithoutCategoryInput[] | WholesaleItemUncheckedCreateWithoutCategoryInput[]
+    connectOrCreate?: WholesaleItemCreateOrConnectWithoutCategoryInput | WholesaleItemCreateOrConnectWithoutCategoryInput[]
+    upsert?: WholesaleItemUpsertWithWhereUniqueWithoutCategoryInput | WholesaleItemUpsertWithWhereUniqueWithoutCategoryInput[]
+    createMany?: WholesaleItemCreateManyCategoryInputEnvelope
+    set?: WholesaleItemWhereUniqueInput | WholesaleItemWhereUniqueInput[]
+    disconnect?: WholesaleItemWhereUniqueInput | WholesaleItemWhereUniqueInput[]
+    delete?: WholesaleItemWhereUniqueInput | WholesaleItemWhereUniqueInput[]
+    connect?: WholesaleItemWhereUniqueInput | WholesaleItemWhereUniqueInput[]
+    update?: WholesaleItemUpdateWithWhereUniqueWithoutCategoryInput | WholesaleItemUpdateWithWhereUniqueWithoutCategoryInput[]
+    updateMany?: WholesaleItemUpdateManyWithWhereWithoutCategoryInput | WholesaleItemUpdateManyWithWhereWithoutCategoryInput[]
+    deleteMany?: WholesaleItemScalarWhereInput | WholesaleItemScalarWhereInput[]
+  }
+
   export type ProductUncheckedUpdateManyWithoutCategoryNestedInput = {
     create?: XOR<ProductCreateWithoutCategoryInput, ProductUncheckedCreateWithoutCategoryInput> | ProductCreateWithoutCategoryInput[] | ProductUncheckedCreateWithoutCategoryInput[]
     connectOrCreate?: ProductCreateOrConnectWithoutCategoryInput | ProductCreateOrConnectWithoutCategoryInput[]
@@ -90350,6 +90480,20 @@ export namespace Prisma {
     update?: ProductUpdateWithWhereUniqueWithoutCategoryInput | ProductUpdateWithWhereUniqueWithoutCategoryInput[]
     updateMany?: ProductUpdateManyWithWhereWithoutCategoryInput | ProductUpdateManyWithWhereWithoutCategoryInput[]
     deleteMany?: ProductScalarWhereInput | ProductScalarWhereInput[]
+  }
+
+  export type WholesaleItemUncheckedUpdateManyWithoutCategoryNestedInput = {
+    create?: XOR<WholesaleItemCreateWithoutCategoryInput, WholesaleItemUncheckedCreateWithoutCategoryInput> | WholesaleItemCreateWithoutCategoryInput[] | WholesaleItemUncheckedCreateWithoutCategoryInput[]
+    connectOrCreate?: WholesaleItemCreateOrConnectWithoutCategoryInput | WholesaleItemCreateOrConnectWithoutCategoryInput[]
+    upsert?: WholesaleItemUpsertWithWhereUniqueWithoutCategoryInput | WholesaleItemUpsertWithWhereUniqueWithoutCategoryInput[]
+    createMany?: WholesaleItemCreateManyCategoryInputEnvelope
+    set?: WholesaleItemWhereUniqueInput | WholesaleItemWhereUniqueInput[]
+    disconnect?: WholesaleItemWhereUniqueInput | WholesaleItemWhereUniqueInput[]
+    delete?: WholesaleItemWhereUniqueInput | WholesaleItemWhereUniqueInput[]
+    connect?: WholesaleItemWhereUniqueInput | WholesaleItemWhereUniqueInput[]
+    update?: WholesaleItemUpdateWithWhereUniqueWithoutCategoryInput | WholesaleItemUpdateWithWhereUniqueWithoutCategoryInput[]
+    updateMany?: WholesaleItemUpdateManyWithWhereWithoutCategoryInput | WholesaleItemUpdateManyWithWhereWithoutCategoryInput[]
+    deleteMany?: WholesaleItemScalarWhereInput | WholesaleItemScalarWhereInput[]
   }
 
   export type ProductCreateimagesInput = {
@@ -91093,6 +91237,12 @@ export namespace Prisma {
     set: string[]
   }
 
+  export type CategoryCreateNestedOneWithoutWholesaleItemsInput = {
+    create?: XOR<CategoryCreateWithoutWholesaleItemsInput, CategoryUncheckedCreateWithoutWholesaleItemsInput>
+    connectOrCreate?: CategoryCreateOrConnectWithoutWholesaleItemsInput
+    connect?: CategoryWhereUniqueInput
+  }
+
   export type VendorAccountCreateNestedOneWithoutWholesaleItemsInput = {
     create?: XOR<VendorAccountCreateWithoutWholesaleItemsInput, VendorAccountUncheckedCreateWithoutWholesaleItemsInput>
     connectOrCreate?: VendorAccountCreateOrConnectWithoutWholesaleItemsInput
@@ -91102,6 +91252,16 @@ export namespace Prisma {
   export type WholesaleItemUpdateimagesInput = {
     set?: string[]
     push?: string | string[]
+  }
+
+  export type CategoryUpdateOneWithoutWholesaleItemsNestedInput = {
+    create?: XOR<CategoryCreateWithoutWholesaleItemsInput, CategoryUncheckedCreateWithoutWholesaleItemsInput>
+    connectOrCreate?: CategoryCreateOrConnectWithoutWholesaleItemsInput
+    upsert?: CategoryUpsertWithoutWholesaleItemsInput
+    disconnect?: CategoryWhereInput | boolean
+    delete?: CategoryWhereInput | boolean
+    connect?: CategoryWhereUniqueInput
+    update?: XOR<XOR<CategoryUpdateToOneWithWhereWithoutWholesaleItemsInput, CategoryUpdateWithoutWholesaleItemsInput>, CategoryUncheckedUpdateWithoutWholesaleItemsInput>
   }
 
   export type VendorAccountUpdateOneWithoutWholesaleItemsNestedInput = {
@@ -97157,6 +97317,50 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type WholesaleItemCreateWithoutCategoryInput = {
+    id?: string
+    name: string
+    slug?: string | null
+    sku?: string | null
+    description?: string | null
+    unitPrice: Decimal | DecimalJsLike | number | string
+    minQuantity?: number
+    stock?: number
+    images?: WholesaleItemCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    vendor?: VendorAccountCreateNestedOneWithoutWholesaleItemsInput
+  }
+
+  export type WholesaleItemUncheckedCreateWithoutCategoryInput = {
+    id?: string
+    name: string
+    slug?: string | null
+    sku?: string | null
+    description?: string | null
+    unitPrice: Decimal | DecimalJsLike | number | string
+    minQuantity?: number
+    stock?: number
+    images?: WholesaleItemCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
+    isActive?: boolean
+    vendorId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type WholesaleItemCreateOrConnectWithoutCategoryInput = {
+    where: WholesaleItemWhereUniqueInput
+    create: XOR<WholesaleItemCreateWithoutCategoryInput, WholesaleItemUncheckedCreateWithoutCategoryInput>
+  }
+
+  export type WholesaleItemCreateManyCategoryInputEnvelope = {
+    data: WholesaleItemCreateManyCategoryInput | WholesaleItemCreateManyCategoryInput[]
+    skipDuplicates?: boolean
+  }
+
   export type ProductUpsertWithWhereUniqueWithoutCategoryInput = {
     where: ProductWhereUniqueInput
     update: XOR<ProductUpdateWithoutCategoryInput, ProductUncheckedUpdateWithoutCategoryInput>
@@ -97173,6 +97377,43 @@ export namespace Prisma {
     data: XOR<ProductUpdateManyMutationInput, ProductUncheckedUpdateManyWithoutCategoryInput>
   }
 
+  export type WholesaleItemUpsertWithWhereUniqueWithoutCategoryInput = {
+    where: WholesaleItemWhereUniqueInput
+    update: XOR<WholesaleItemUpdateWithoutCategoryInput, WholesaleItemUncheckedUpdateWithoutCategoryInput>
+    create: XOR<WholesaleItemCreateWithoutCategoryInput, WholesaleItemUncheckedCreateWithoutCategoryInput>
+  }
+
+  export type WholesaleItemUpdateWithWhereUniqueWithoutCategoryInput = {
+    where: WholesaleItemWhereUniqueInput
+    data: XOR<WholesaleItemUpdateWithoutCategoryInput, WholesaleItemUncheckedUpdateWithoutCategoryInput>
+  }
+
+  export type WholesaleItemUpdateManyWithWhereWithoutCategoryInput = {
+    where: WholesaleItemScalarWhereInput
+    data: XOR<WholesaleItemUpdateManyMutationInput, WholesaleItemUncheckedUpdateManyWithoutCategoryInput>
+  }
+
+  export type WholesaleItemScalarWhereInput = {
+    AND?: WholesaleItemScalarWhereInput | WholesaleItemScalarWhereInput[]
+    OR?: WholesaleItemScalarWhereInput[]
+    NOT?: WholesaleItemScalarWhereInput | WholesaleItemScalarWhereInput[]
+    id?: StringFilter<"WholesaleItem"> | string
+    name?: StringFilter<"WholesaleItem"> | string
+    slug?: StringNullableFilter<"WholesaleItem"> | string | null
+    sku?: StringNullableFilter<"WholesaleItem"> | string | null
+    description?: StringNullableFilter<"WholesaleItem"> | string | null
+    unitPrice?: DecimalFilter<"WholesaleItem"> | Decimal | DecimalJsLike | number | string
+    minQuantity?: IntFilter<"WholesaleItem"> | number
+    stock?: IntFilter<"WholesaleItem"> | number
+    images?: StringNullableListFilter<"WholesaleItem">
+    variants?: JsonFilter<"WholesaleItem">
+    isActive?: BoolFilter<"WholesaleItem"> | boolean
+    categoryId?: StringNullableFilter<"WholesaleItem"> | string | null
+    vendorId?: StringNullableFilter<"WholesaleItem"> | string | null
+    createdAt?: DateTimeFilter<"WholesaleItem"> | Date | string
+    updatedAt?: DateTimeFilter<"WholesaleItem"> | Date | string
+  }
+
   export type CategoryCreateWithoutProductsInput = {
     id?: string
     name: string
@@ -97183,6 +97424,7 @@ export namespace Prisma {
     sortOrder?: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    wholesaleItems?: WholesaleItemCreateNestedManyWithoutCategoryInput
   }
 
   export type CategoryUncheckedCreateWithoutProductsInput = {
@@ -97195,6 +97437,7 @@ export namespace Prisma {
     sortOrder?: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    wholesaleItems?: WholesaleItemUncheckedCreateNestedManyWithoutCategoryInput
   }
 
   export type CategoryCreateOrConnectWithoutProductsInput = {
@@ -97875,6 +98118,7 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    wholesaleItems?: WholesaleItemUpdateManyWithoutCategoryNestedInput
   }
 
   export type CategoryUncheckedUpdateWithoutProductsInput = {
@@ -97887,6 +98131,7 @@ export namespace Prisma {
     sortOrder?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    wholesaleItems?: WholesaleItemUncheckedUpdateManyWithoutCategoryNestedInput
   }
 
   export type AdminUpsertWithoutCreatedProductsInput = {
@@ -98345,6 +98590,37 @@ export namespace Prisma {
     data: XOR<WishlistItemUpdateManyMutationInput, WishlistItemUncheckedUpdateManyWithoutProductInput>
   }
 
+  export type CategoryCreateWithoutWholesaleItemsInput = {
+    id?: string
+    name: string
+    slug: string
+    icon?: string | null
+    imageUrl?: string | null
+    description?: string | null
+    sortOrder?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    products?: ProductCreateNestedManyWithoutCategoryInput
+  }
+
+  export type CategoryUncheckedCreateWithoutWholesaleItemsInput = {
+    id?: string
+    name: string
+    slug: string
+    icon?: string | null
+    imageUrl?: string | null
+    description?: string | null
+    sortOrder?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    products?: ProductUncheckedCreateNestedManyWithoutCategoryInput
+  }
+
+  export type CategoryCreateOrConnectWithoutWholesaleItemsInput = {
+    where: CategoryWhereUniqueInput
+    create: XOR<CategoryCreateWithoutWholesaleItemsInput, CategoryUncheckedCreateWithoutWholesaleItemsInput>
+  }
+
   export type VendorAccountCreateWithoutWholesaleItemsInput = {
     id?: string
     email: string
@@ -98372,6 +98648,43 @@ export namespace Prisma {
   export type VendorAccountCreateOrConnectWithoutWholesaleItemsInput = {
     where: VendorAccountWhereUniqueInput
     create: XOR<VendorAccountCreateWithoutWholesaleItemsInput, VendorAccountUncheckedCreateWithoutWholesaleItemsInput>
+  }
+
+  export type CategoryUpsertWithoutWholesaleItemsInput = {
+    update: XOR<CategoryUpdateWithoutWholesaleItemsInput, CategoryUncheckedUpdateWithoutWholesaleItemsInput>
+    create: XOR<CategoryCreateWithoutWholesaleItemsInput, CategoryUncheckedCreateWithoutWholesaleItemsInput>
+    where?: CategoryWhereInput
+  }
+
+  export type CategoryUpdateToOneWithWhereWithoutWholesaleItemsInput = {
+    where?: CategoryWhereInput
+    data: XOR<CategoryUpdateWithoutWholesaleItemsInput, CategoryUncheckedUpdateWithoutWholesaleItemsInput>
+  }
+
+  export type CategoryUpdateWithoutWholesaleItemsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    products?: ProductUpdateManyWithoutCategoryNestedInput
+  }
+
+  export type CategoryUncheckedUpdateWithoutWholesaleItemsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    products?: ProductUncheckedUpdateManyWithoutCategoryNestedInput
   }
 
   export type VendorAccountUpsertWithoutWholesaleItemsInput = {
@@ -101714,6 +102027,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    category?: CategoryCreateNestedOneWithoutWholesaleItemsInput
   }
 
   export type WholesaleItemUncheckedCreateWithoutVendorInput = {
@@ -101728,6 +102042,7 @@ export namespace Prisma {
     images?: WholesaleItemCreateimagesInput | string[]
     variants?: JsonNullValueInput | InputJsonValue
     isActive?: boolean
+    categoryId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -101811,26 +102126,6 @@ export namespace Prisma {
   export type WholesaleItemUpdateManyWithWhereWithoutVendorInput = {
     where: WholesaleItemScalarWhereInput
     data: XOR<WholesaleItemUpdateManyMutationInput, WholesaleItemUncheckedUpdateManyWithoutVendorInput>
-  }
-
-  export type WholesaleItemScalarWhereInput = {
-    AND?: WholesaleItemScalarWhereInput | WholesaleItemScalarWhereInput[]
-    OR?: WholesaleItemScalarWhereInput[]
-    NOT?: WholesaleItemScalarWhereInput | WholesaleItemScalarWhereInput[]
-    id?: StringFilter<"WholesaleItem"> | string
-    name?: StringFilter<"WholesaleItem"> | string
-    slug?: StringNullableFilter<"WholesaleItem"> | string | null
-    sku?: StringNullableFilter<"WholesaleItem"> | string | null
-    description?: StringNullableFilter<"WholesaleItem"> | string | null
-    unitPrice?: DecimalFilter<"WholesaleItem"> | Decimal | DecimalJsLike | number | string
-    minQuantity?: IntFilter<"WholesaleItem"> | number
-    stock?: IntFilter<"WholesaleItem"> | number
-    images?: StringNullableListFilter<"WholesaleItem">
-    variants?: JsonFilter<"WholesaleItem">
-    isActive?: BoolFilter<"WholesaleItem"> | boolean
-    vendorId?: StringNullableFilter<"WholesaleItem"> | string | null
-    createdAt?: DateTimeFilter<"WholesaleItem"> | Date | string
-    updatedAt?: DateTimeFilter<"WholesaleItem"> | Date | string
   }
 
   export type VendorApplicationCreateWithoutVendorInvitesInput = {
@@ -109956,6 +110251,23 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type WholesaleItemCreateManyCategoryInput = {
+    id?: string
+    name: string
+    slug?: string | null
+    sku?: string | null
+    description?: string | null
+    unitPrice: Decimal | DecimalJsLike | number | string
+    minQuantity?: number
+    stock?: number
+    images?: WholesaleItemCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
+    isActive?: boolean
+    vendorId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type ProductUpdateWithoutCategoryInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
@@ -110064,6 +110376,57 @@ export namespace Prisma {
     ratingCount?: IntFieldUpdateOperationsInput | number
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WholesaleItemUpdateWithoutCategoryInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    unitPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    minQuantity?: IntFieldUpdateOperationsInput | number
+    stock?: IntFieldUpdateOperationsInput | number
+    images?: WholesaleItemUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    vendor?: VendorAccountUpdateOneWithoutWholesaleItemsNestedInput
+  }
+
+  export type WholesaleItemUncheckedUpdateWithoutCategoryInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    unitPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    minQuantity?: IntFieldUpdateOperationsInput | number
+    stock?: IntFieldUpdateOperationsInput | number
+    images?: WholesaleItemUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    vendorId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WholesaleItemUncheckedUpdateManyWithoutCategoryInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    unitPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    minQuantity?: IntFieldUpdateOperationsInput | number
+    stock?: IntFieldUpdateOperationsInput | number
+    images?: WholesaleItemUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
+    isActive?: BoolFieldUpdateOperationsInput | boolean
     vendorId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -111290,6 +111653,7 @@ export namespace Prisma {
     images?: WholesaleItemCreateimagesInput | string[]
     variants?: JsonNullValueInput | InputJsonValue
     isActive?: boolean
+    categoryId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -111421,6 +111785,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    category?: CategoryUpdateOneWithoutWholesaleItemsNestedInput
   }
 
   export type WholesaleItemUncheckedUpdateWithoutVendorInput = {
@@ -111435,6 +111800,7 @@ export namespace Prisma {
     images?: WholesaleItemUpdateimagesInput | string[]
     variants?: JsonNullValueInput | InputJsonValue
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -111451,6 +111817,7 @@ export namespace Prisma {
     images?: WholesaleItemUpdateimagesInput | string[]
     variants?: JsonNullValueInput | InputJsonValue
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

@@ -1,7 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
+import { Boxes, Check, ShoppingCart, X } from "lucide-react";
+
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/formatPrice";
 import { useSabbathStatus } from "@/lib/useSabbathStatus";
@@ -10,71 +12,83 @@ import type { WholesaleCardVM } from "@/lib/view/catalog";
 export default function WholesaleCard({ product }: { product: WholesaleCardVM }) {
   const { addToCart } = useCart();
   const { isClosed: sabbathClosed } = useSabbathStatus();
-
-  const minQty = product.minQuantity > 0 ? product.minQuantity : 1;
+  const minQty = Math.max(1, product.minQuantity);
   const inStock = product.inStock && product.stock >= minQty;
 
-  const addWholesale = (e: React.MouseEvent) => {
-    e.preventDefault(); // stop navigation
-    e.stopPropagation();
+  const addWholesale = () => {
     if (sabbathClosed || !inStock) return;
-
     addToCart({
       id: product.id,
+      slug: product.slug,
       name: product.name,
       price: product.unitPrice,
       quantity: minQty,
       image: product.image,
-      category: undefined,
+      maxQuantity: product.stock,
+      category: product.categorySlug ?? undefined,
       mode: "wholesale",
     });
   };
 
   return (
-    <Link
-      href={product.href}
-      className="border rounded-xl p-3 block hover:shadow transition bg-white dark:bg-slate-900"
-    >
-      <div className="relative h-40 w-full rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800">
+    <article className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-brand-border hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+      <Link
+        href={product.href}
+        className="relative block aspect-square overflow-hidden bg-white dark:bg-slate-950"
+      >
         <Image
           src={product.image}
           alt={product.name}
           fill
-          sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          className="object-cover"
+          sizes="(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 25vw"
+          className="object-contain p-3 transition-transform duration-500 group-hover:scale-105 sm:p-4"
         />
+        <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-brand px-2 py-1 text-[10px] font-extrabold uppercase tracking-wide text-white shadow-sm sm:left-3 sm:top-3">
+          <Boxes size={12} /> Wholesale
+        </span>
         {!inStock && (
-          <div className="absolute inset-x-2 top-2 rounded-full bg-slate-900/85 px-2 py-1 text-center text-xs font-semibold text-white">
+          <span className="absolute inset-x-2 bottom-2 rounded-full bg-slate-950/85 px-2 py-1 text-center text-[11px] font-bold text-white">
             Out of stock
-          </div>
+          </span>
         )}
+      </Link>
+
+      <div className="flex flex-1 flex-col p-3 sm:p-4">
+        {product.categoryName && (
+          <p className="mb-1 truncate text-[10px] font-extrabold uppercase tracking-[0.12em] text-brand-strong dark:text-brand-bright">
+            {product.categoryName}
+          </p>
+        )}
+        <Link
+          href={product.href}
+          className="line-clamp-2 min-h-10 text-sm font-semibold leading-5 text-slate-900 hover:text-brand-strong dark:text-white dark:hover:text-brand-bright"
+        >
+          {product.name}
+        </Link>
+
+        <p className="mt-2 text-base font-black tracking-tight text-slate-950 dark:text-white">
+          {formatPrice(product.unitPrice)}{" "}
+          <span className="text-[11px] font-medium text-slate-500">/ unit</span>
+        </p>
+        <p className="mt-1 inline-flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+          <Boxes size={13} /> Minimum order: {minQty} units
+        </p>
+        <p
+          className={`mt-2 inline-flex items-center gap-1 text-xs font-semibold ${inStock ? "text-brand-strong dark:text-brand-bright" : "text-rose-600"}`}
+        >
+          {inStock ? <Check size={13} /> : <X size={13} />}
+          {inStock ? `${product.stock} units available` : "Ordering unavailable"}
+        </p>
+
+        <button
+          type="button"
+          onClick={addWholesale}
+          disabled={sabbathClosed || !inStock}
+          className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-brand px-3 text-xs font-bold text-white transition hover:bg-brand-strong disabled:cursor-not-allowed disabled:bg-slate-300 dark:disabled:bg-slate-700"
+        >
+          <ShoppingCart size={15} /> {inStock ? `Add ${minQty} to cart` : "Out of stock"}
+        </button>
       </div>
-
-      <h3 className="font-semibold mt-2">{product.name}</h3>
-
-      <p className="text-blue-600 font-bold">{formatPrice(product.unitPrice)} / unit</p>
-
-      <p className="text-sm text-gray-500">
-        Minimum: {minQty} unit
-      </p>
-      <p className={`text-xs font-medium ${inStock ? "text-green-700" : "text-red-600"}`}>
-        {inStock ? `${product.stock} in stock` : "Ordering disabled"}
-      </p>
-
-      <button
-        onClick={addWholesale}
-        disabled={sabbathClosed || !inStock}
-        title={
-          !inStock
-            ? "Out of stock"
-            : sabbathClosed
-            ? "Shopping is paused for Sabbath"
-            : "Add to Cart"
-        }
-        className="mt-3 w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed"
-      >
-        {inStock ? "Add to Cart" : "Out of Stock"}
-      </button>
-    </Link>
+    </article>
   );
 }

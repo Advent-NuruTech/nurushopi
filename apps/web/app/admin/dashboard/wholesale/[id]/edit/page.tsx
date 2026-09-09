@@ -3,11 +3,14 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
-import ProductVariantsEditor, { prepareVariants, type VariantDraft } from "@/components/admin/ProductVariantsEditor";
+import ProductVariantsEditor, {
+  prepareVariants,
+  type VariantDraft,
+} from "@/components/admin/ProductVariantsEditor";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { Upload } from "lucide-react";
 import { ADMIN_DASHBOARD_PATH, adminRoute } from "@/lib/adminPaths";
-import { wholesaleApi, ApiClientError } from "@/lib/api";
+import { catalogApi, wholesaleApi } from "@/lib/api";
 
 interface WholesaleForm {
   id: string;
@@ -17,6 +20,12 @@ interface WholesaleForm {
   minQuantity: number;
   stock: number;
   images: string[];
+  categoryId: string;
+}
+
+interface CategoryOption {
+  id: string;
+  name: string;
 }
 
 type Feedback = { type: "success" | "error"; text: string } | null;
@@ -32,14 +41,29 @@ export default function WholesaleEditPage() {
   const [saving, setSaving] = useState(false);
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
   const [feedback, setFeedback] = useState<Feedback>(null);
+  const [categories, setCategories] = useState<CategoryOption[]>([]);
 
   /* ---------------- Load item ---------------- */
+  useEffect(() => {
+    catalogApi.admin
+      .listCategories()
+      .then(({ categories: options }) => setCategories(options))
+      .catch(() => setCategories([]));
+  }, []);
+
   useEffect(() => {
     if (!id) return;
     wholesaleApi.admin
       .getItem(id)
       .then(({ item: i }) => {
-        setVariants((i.variants ?? []).map((v, key) => ({ key, name: v.name, imageUrl: v.imageUrl ?? "", file: null })));
+        setVariants(
+          (i.variants ?? []).map((v, key) => ({
+            key,
+            name: v.name,
+            imageUrl: v.imageUrl ?? "",
+            file: null,
+          })),
+        );
         setItem({
           id: i.id,
           name: i.name,
@@ -48,6 +72,7 @@ export default function WholesaleEditPage() {
           minQuantity: i.minQuantity,
           stock: i.stock,
           images: i.images,
+          categoryId: i.categoryId ?? "",
         });
       })
       .catch(() => setItem(null))
@@ -115,6 +140,7 @@ export default function WholesaleEditPage() {
         stock: item.stock,
         images: item.images.slice(0, 3),
         variants: await prepareVariants(variants),
+        categoryId: item.categoryId || null,
       });
       setFeedback({ type: "success", text: "Wholesale item updated successfully." });
       router.refresh();
@@ -198,6 +224,18 @@ export default function WholesaleEditPage() {
           onChange={(e) => update("stock", Math.max(0, Number(e.target.value)))}
           placeholder="Quantity in stock"
         />
+        <select
+          className="w-full rounded border border-gray-300 bg-white p-3 dark:border-gray-700 dark:bg-gray-800"
+          value={item.categoryId}
+          onChange={(e) => update("categoryId", e.target.value)}
+        >
+          <option value="">No category</option>
+          {categories.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
+        </select>
         <p className={`text-sm font-medium ${item.stock > 0 ? "text-green-700" : "text-red-600"}`}>
           {item.stock > 0
             ? `${item.stock} in stock`
@@ -219,7 +257,10 @@ export default function WholesaleEditPage() {
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {item.images.map((img, i) => (
-            <div key={i} className="border border-gray-200 dark:border-gray-700 rounded p-2 space-y-2">
+            <div
+              key={i}
+              className="border border-gray-200 dark:border-gray-700 rounded p-2 space-y-2"
+            >
               <div className="relative w-full h-32">
                 <Image src={img} alt="Item image" fill className="object-cover rounded" />
               </div>
@@ -269,7 +310,10 @@ export default function WholesaleEditPage() {
           {saving ? "Saving..." : "Save Changes"}
         </button>
 
-        <button onClick={remove} className="px-5 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+        <button
+          onClick={remove}
+          className="px-5 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+        >
           Delete
         </button>
 

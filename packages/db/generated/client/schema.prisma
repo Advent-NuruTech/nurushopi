@@ -377,7 +377,8 @@ model Category {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  products Product[]
+  products       Product[]
+  wholesaleItems WholesaleItem[]
 
   @@map("categories")
 }
@@ -490,11 +491,14 @@ model WholesaleItem {
   images      String[]
   variants    Json           @default("[]")
   isActive    Boolean        @default(true)
+  categoryId  String?
+  category    Category?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   vendorId    String?
   vendor      VendorAccount? @relation(fields: [vendorId], references: [id], onDelete: SetNull)
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
 
+  @@index([categoryId])
   @@index([vendorId])
   @@map("wholesale_items")
 }

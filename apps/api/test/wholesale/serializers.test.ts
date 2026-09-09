@@ -42,4 +42,17 @@ describe("toWholesaleItemDTO", () => {
     expect(dto.slug).toBeNull();
     expect(dto.description).toBeNull();
   });
+
+  it("includes the assigned storefront category", () => {
+    const dto = toWholesaleItemDTO({
+      ...makeItem({ categoryId: "cat-food" }),
+      category: { id: "cat-food", name: "Food Cupboard", slug: "food-cupboard" },
+    });
+
+    expect(dto.category).toEqual({
+      id: "cat-food",
+      name: "Food Cupboard",
+      slug: "food-cupboard",
+    });
+  });
 });

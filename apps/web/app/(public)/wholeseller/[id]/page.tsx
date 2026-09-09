@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getWholesaleItem, listWholesaleItems } from "@/lib/data/wholesale";
+import { listProducts } from "@/lib/data/catalog";
 import WholesaleDetailView from "./WholesaleDetailView";
 
 interface PageProps {
@@ -22,8 +23,25 @@ export default async function WholesaleProductPage({ params }: PageProps) {
   const product = await getWholesaleItem(id);
   if (!product) notFound();
 
-  const { items } = await listWholesaleItems({ pageSize: 5, sort: "newest" });
-  const related = items.filter((p) => p.id !== product.id).slice(0, 4);
+  const [wholesaleResult, retailResult] = await Promise.all([
+    listWholesaleItems({
+      pageSize: 5,
+      sort: "newest",
+      categorySlug: product.categorySlug ?? undefined,
+    }),
+    listProducts({
+      pageSize: 4,
+      sort: "newest",
+      categorySlug: product.categorySlug ?? undefined,
+    }),
+  ]);
+  const related = wholesaleResult.items.filter((item) => item.id !== product.id).slice(0, 4);
 
-  return <WholesaleDetailView product={product} related={related} />;
+  return (
+    <WholesaleDetailView
+      product={product}
+      related={related}
+      retailSuggestions={retailResult.items}
+    />
+  );
 }

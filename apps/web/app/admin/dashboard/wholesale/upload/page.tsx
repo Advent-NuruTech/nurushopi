@@ -14,9 +14,11 @@ import {
   XCircle,
 } from "lucide-react";
 import Image from "next/image";
-import ProductVariantsEditor, { prepareVariants, type VariantDraft } from "@/components/admin/ProductVariantsEditor";
-import { slugifyCategory } from "@/lib/categoryUtils";
-import { catalogApi, wholesaleApi, ApiClientError } from "@/lib/api";
+import ProductVariantsEditor, {
+  prepareVariants,
+  type VariantDraft,
+} from "@/components/admin/ProductVariantsEditor";
+import { catalogApi, wholesaleApi } from "@/lib/api";
 
 interface WholesaleFormData {
   name: string;
@@ -26,7 +28,7 @@ interface WholesaleFormData {
   stock: number | "";
   wholesaleUnit: string;
   description: string;
-  category: string;
+  categoryId: string;
   files: FileList | null;
 }
 
@@ -49,10 +51,9 @@ export default function UploadWholesalePage() {
     stock: "",
     wholesaleUnit: "",
     description: "",
-    category: "",
+    categoryId: "",
     files: null,
   });
-  const [categoryInput, setCategoryInput] = useState("");
   const [categories, setCategories] = useState<CategoryOption[]>([]);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -62,8 +63,8 @@ export default function UploadWholesalePage() {
   const [fileInputKey, setFileInputKey] = useState(0);
 
   useEffect(() => {
-    catalogApi
-      .admin.listCategories()
+    catalogApi.admin
+      .listCategories()
       .then((d) => setCategories(d.categories))
       .catch(() => setCategories([]));
   }, []);
@@ -74,16 +75,6 @@ export default function UploadWholesalePage() {
       previews.forEach((url) => URL.revokeObjectURL(url));
     };
   }, [imagePreviews]);
-
-  const handleCategorySelect = (value: string) => {
-    setCategoryInput(value);
-    setFormData((prev) => ({ ...prev, category: slugifyCategory(value) }));
-  };
-
-  const handleCategoryTyping = (value: string) => {
-    setCategoryInput(value);
-    setFormData((prev) => ({ ...prev, category: slugifyCategory(value) }));
-  };
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -123,10 +114,9 @@ export default function UploadWholesalePage() {
       stock: "",
       wholesaleUnit: "",
       description: "",
-      category: "",
+      categoryId: "",
       files: null,
     });
-    setCategoryInput("");
     setUploadedImages([]);
     setImagePreviews([]);
     setProgress(0);
@@ -187,6 +177,7 @@ export default function UploadWholesalePage() {
         variants: savedVariants,
         images: uploaded.slice(0, 3),
         isActive: true,
+        categoryId: formData.categoryId || null,
       });
       setStatus("success");
     } catch (error) {
@@ -315,23 +306,20 @@ export default function UploadWholesalePage() {
               Category
             </label>
             <select
-              value={categoryInput}
-              onChange={(e) => handleCategorySelect(e.target.value)}
+              value={formData.categoryId}
+              onChange={(e) => setFormData((prev) => ({ ...prev, categoryId: e.target.value }))}
               className="mb-2 w-full rounded border border-slate-300 bg-white p-3 text-slate-900 outline-none ring-brand focus:ring-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             >
               <option value="">Select category</option>
               {categories.map((c) => (
-                <option key={c.id} value={c.slug}>
+                <option key={c.id} value={c.id}>
                   {c.name}
                 </option>
               ))}
             </select>
-            <input
-              placeholder="Or type new category"
-              value={categoryInput}
-              onChange={(e) => handleCategoryTyping(e.target.value)}
-              className="w-full rounded border border-slate-300 bg-white p-3 text-slate-900 outline-none ring-brand focus:ring-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-            />
+            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+              Only categories assigned to wholesale items appear in wholesale navigation.
+            </p>
           </div>
 
           <div>
@@ -393,7 +381,11 @@ export default function UploadWholesalePage() {
             )}
           </div>
 
-          <ProductVariantsEditor value={variants} onChange={setVariants} disabled={status === "uploading"} />
+          <ProductVariantsEditor
+            value={variants}
+            onChange={setVariants}
+            disabled={status === "uploading"}
+          />
 
           <button
             type="submit"
@@ -423,7 +415,9 @@ export default function UploadWholesalePage() {
                 <div className="space-y-4 text-center">
                   <Loader2 className="mx-auto h-10 w-10 animate-spin text-brand-strong" />
                   <h3 className="text-lg font-semibold">Uploading wholesale product...</h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">{Math.round(progress)}%</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                    {Math.round(progress)}%
+                  </p>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
                     Uploaded {uploadedImages.length} of {formData.files?.length ?? 0} images
                   </p>

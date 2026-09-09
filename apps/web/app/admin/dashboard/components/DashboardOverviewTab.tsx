@@ -78,19 +78,19 @@ export default function DashboardOverviewTab({ role }: { role: AdminRole }) {
         </p>
       </div>
 
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
         {cards.map((card) => {
           const Icon = card.icon;
           return (
             <article
               key={card.label}
-              className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md dark:border-slate-700 dark:bg-slate-900"
+              className="min-w-0 rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md sm:p-5 dark:border-slate-700 dark:bg-slate-900"
             >
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{card.label}</p>
-                <Icon className="h-5 w-5 text-sky-600 dark:text-sky-400" />
+              <div className="flex items-center justify-between gap-3">
+                <p className="min-w-0 text-sm font-medium text-slate-500 dark:text-slate-400">{card.label}</p>
+                <Icon className="h-5 w-5 shrink-0 text-sky-600 dark:text-sky-400" />
               </div>
-              <p className="mt-3 text-2xl font-bold text-slate-900 dark:text-slate-100">
+              <p className="mt-3 break-words text-lg font-bold text-slate-900 sm:text-xl md:text-2xl dark:text-slate-100">
                 {typeof card.value === "number" ? card.value.toLocaleString() : card.value}
               </p>
             </article>

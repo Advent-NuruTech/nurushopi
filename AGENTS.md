@@ -24,6 +24,11 @@ These rules apply to all work in this repository.
 - Preserve responsive behavior at 390px, tablet widths, and desktop widths. Never introduce horizontal page overflow.
 - Use generous rounded cards, subtle slate borders, restrained shadows, and consistent spacing. Avoid mixing unrelated card styles on one page.
 
+## Admin dashboard UI
+
+- Homepage dashboard summary/stat cards (admin and vendor) must show at least 2 columns on mobile (`grid-cols-2`), 3 at `sm`, and 4 at `md`. Never reduce them to a single column on phones.
+- Card value text must never cause horizontal overflow: keep `min-w-0` on card containers, allow `break-words` on values, and scale value font size down on small screens (`text-lg ... md:text-2xl`) so large numbers/prices fit.
+
 ## SSR and hydration safety
 
 - Server-rendered and client-rendered text must be deterministic.

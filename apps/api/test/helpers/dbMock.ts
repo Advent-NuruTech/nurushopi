@@ -112,6 +112,7 @@ export function makeDbMock() {
     message: model(),
     contact: model(),
     vendorApplication: model(),
+    vendorAccount: model(),
     admin: model(),
     adminLog: model(),
     adminInvite: model(),

@@ -260,6 +260,7 @@ exports.Prisma.ProductScalarFieldEnum = {
   ratingDistribution: 'ratingDistribution',
   categoryId: 'categoryId',
   createdById: 'createdById',
+  vendorId: 'vendorId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -293,6 +294,7 @@ exports.Prisma.WholesaleItemScalarFieldEnum = {
   id: 'id',
   name: 'name',
   slug: 'slug',
+  sku: 'sku',
   description: 'description',
   unitPrice: 'unitPrice',
   minQuantity: 'minQuantity',
@@ -300,6 +302,7 @@ exports.Prisma.WholesaleItemScalarFieldEnum = {
   images: 'images',
   variants: 'variants',
   isActive: 'isActive',
+  vendorId: 'vendorId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

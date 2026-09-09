@@ -43,7 +43,7 @@ export default function UserMenu() {
       <button
         type="button"
         onClick={() => setIsOpen((v) => !v)}
-        className="relative rounded-full border border-slate-200 p-1.5 transition-colors hover:border-sky-300 hover:text-sky-600 dark:border-slate-700 dark:hover:border-emerald-500 dark:hover:text-emerald-400"
+        className="relative rounded-full border border-slate-200 p-1.5 transition-colors hover:border-brand hover:text-brand dark:border-slate-700 dark:hover:border-brand-bright dark:hover:text-brand-bright"
         aria-label="Account menu"
         aria-expanded={isOpen}
       >
@@ -82,7 +82,7 @@ export default function UserMenu() {
                         className="rounded-full object-cover"
                       />
                     ) : (
-                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-emerald-500 text-sm font-bold text-white">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-brand to-brand-strong text-sm font-bold text-white">
                         {getInitials(user.name || "User")}
                       </div>
                     )}
@@ -116,7 +116,7 @@ export default function UserMenu() {
               </>
             ) : (
               <Link
-                href="/auth/login"
+                href="/auth/login?redirectTo=%2Fprofile"
                 onClick={close}
                 className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 transition-colors hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
               >

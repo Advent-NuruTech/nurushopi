@@ -65,6 +65,7 @@ export function toProductDTO(p: ProductWithCategory): ProductDTO {
       p.stock <= 0 ? "OUT_OF_STOCK" : p.stock <= p.lowStockThreshold ? "LOW_STOCK" : "IN_STOCK",
     isActive: p.isActive,
     isFeatured: p.isFeatured,
+    vendorId: p.vendorId,
     categoryId: p.categoryId,
     category: p.category
       ? { id: p.category.id, name: p.category.name, slug: p.category.slug }

@@ -22,8 +22,11 @@ async function slugTaken(slug: string, excludeId?: string): Promise<boolean> {
 function buildWhere(
   query: WholesaleItemQuery,
   enforceActive: boolean,
+  vendorId?: string,
 ): Prisma.WholesaleItemWhereInput {
   const where: Prisma.WholesaleItemWhereInput = {};
+
+  if (vendorId) where.vendorId = vendorId;
 
   if (enforceActive) where.isActive = true;
   else if (query.isActive !== undefined) where.isActive = query.isActive;
@@ -41,6 +44,7 @@ function buildWhere(
   if (query.search) {
     where.OR = [
       { name: { contains: query.search, mode: "insensitive" } },
+      { sku: { contains: query.search, mode: "insensitive" } },
       { description: { contains: query.search, mode: "insensitive" } },
     ];
   }
@@ -68,9 +72,9 @@ function buildOrderBy(
 
 export async function list(
   query: WholesaleItemQuery,
-  { enforceActive }: { enforceActive: boolean },
+  { enforceActive, vendorId }: { enforceActive: boolean; vendorId?: string },
 ): Promise<Paginated<WholesaleItemDTO>> {
-  const where = buildWhere(query, enforceActive);
+  const where = buildWhere(query, enforceActive, vendorId);
   const skip = (query.page - 1) * query.pageSize;
 
   const [total, rows] = await prisma.$transaction([
@@ -92,24 +96,29 @@ export async function list(
   };
 }
 
-export async function getByIdOrSlug(idOrSlug: string, { activeOnly }: { activeOnly: boolean }) {
+export async function getByIdOrSlug(
+  idOrSlug: string,
+  { activeOnly, vendorId }: { activeOnly: boolean; vendorId?: string },
+) {
   const row = await prisma.wholesaleItem.findFirst({
     where: {
       OR: [{ id: idOrSlug }, { slug: idOrSlug }],
       ...(activeOnly ? { isActive: true } : {}),
+      ...(vendorId ? { vendorId } : {}),
     },
   });
   if (!row) throw Errors.notFound("Wholesale item not found.");
   return toWholesaleItemDTO(row);
 }
 
-export async function create(input: WholesaleItemCreateInput) {
+export async function create(input: WholesaleItemCreateInput, vendorId?: string) {
   const slug = await uniqueSlug(input.slug ?? input.name, (s) => slugTaken(s));
 
   const row = await prisma.wholesaleItem.create({
     data: {
       name: input.name,
       slug,
+      sku: input.sku ?? null,
       description: input.description ?? null,
       unitPrice: input.unitPrice,
       minQuantity: input.minQuantity ?? 1,
@@ -117,13 +126,16 @@ export async function create(input: WholesaleItemCreateInput) {
       images: input.images ?? [],
       variants: input.variants ?? [],
       isActive: input.isActive ?? true,
+      vendorId: vendorId ?? null,
     },
   });
   return toWholesaleItemDTO(row);
 }
 
-export async function update(id: string, input: WholesaleItemUpdateInput) {
-  const current = await prisma.wholesaleItem.findUnique({ where: { id } });
+export async function update(id: string, input: WholesaleItemUpdateInput, vendorId?: string) {
+  const current = await prisma.wholesaleItem.findFirst({
+    where: { id, ...(vendorId ? { vendorId } : {}) },
+  });
   if (!current) throw Errors.notFound("Wholesale item not found.");
 
   let slug = current.slug;
@@ -137,6 +149,7 @@ export async function update(id: string, input: WholesaleItemUpdateInput) {
     data: {
       ...(input.name !== undefined ? { name: input.name } : {}),
       ...(slug !== current.slug ? { slug } : {}),
+      ...(input.sku !== undefined ? { sku: input.sku } : {}),
       ...(input.description !== undefined ? { description: input.description } : {}),
       ...(input.unitPrice !== undefined ? { unitPrice: input.unitPrice } : {}),
       ...(input.minQuantity !== undefined ? { minQuantity: input.minQuantity } : {}),
@@ -165,10 +178,14 @@ export async function update(id: string, input: WholesaleItemUpdateInput) {
   return toWholesaleItemDTO(row);
 }
 
-export async function remove(id: string): Promise<void> {
-  const current = await prisma.wholesaleItem.findUnique({ where: { id }, select: { images: true } });
+export async function remove(id: string, vendorId?: string): Promise<void> {
+  const current = await prisma.wholesaleItem.findFirst({
+    where: { id, ...(vendorId ? { vendorId } : {}) },
+    select: { id: true, images: true },
+  });
+  if (!current) throw Errors.notFound("Wholesale item not found.");
   try {
-    await prisma.wholesaleItem.delete({ where: { id } });
+    await prisma.wholesaleItem.delete({ where: { id: current.id } });
     await deleteCloudinaryImages(current?.images ?? []);
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") {

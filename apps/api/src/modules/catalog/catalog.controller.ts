@@ -7,6 +7,7 @@ import {
   heroCreateSchema,
   heroUpdateSchema,
   productCreateSchema,
+  productImportEnvelopeSchema,
   productQuerySchema,
   productUpdateSchema,
   productViewSchema,
@@ -17,6 +18,7 @@ import * as categories from "./category.service.js";
 import * as products from "./product.service.js";
 import * as banners from "./banner.service.js";
 import * as hero from "./hero.service.js";
+import { importProducts } from "./product-import.service.js";
 
 /** Read a required route param (guaranteed present by the route pattern). */
 function idParam(req: Request): string {
@@ -96,7 +98,7 @@ export async function adminGetProduct(req: Request, res: Response): Promise<void
 
 export async function createProduct(req: Request, res: Response): Promise<void> {
   const input = productCreateSchema.parse(req.body);
-  sendOk(res, { product: await products.create(input, req.admin?.sub) }, 201);
+  sendOk(res, { product: await products.create(input, { adminId: req.admin?.sub }) }, 201);
 }
 
 export async function updateProduct(req: Request, res: Response): Promise<void> {
@@ -107,6 +109,64 @@ export async function updateProduct(req: Request, res: Response): Promise<void> 
 export async function deleteProduct(req: Request, res: Response): Promise<void> {
   await products.remove(idParam(req));
   sendOk(res, { success: true });
+}
+
+export async function importAdminProducts(req: Request, res: Response): Promise<void> {
+  if (!req.admin) throw Errors.unauthorized();
+  const input = productImportEnvelopeSchema.parse(req.body);
+  if (
+    req.admin.role !== "SENIOR" &&
+    input.rows.some(
+      (row) =>
+        typeof row === "object" &&
+        row !== null &&
+        Array.isArray((row as { collectionKeys?: unknown }).collectionKeys) &&
+        (row as { collectionKeys: unknown[] }).collectionKeys.length > 0,
+    )
+  ) {
+    throw Errors.forbidden("Senior admin access is required to assign merchandising collections.");
+  }
+  sendOk(res, { import: await importProducts(input, { kind: "admin", id: req.admin.sub }) }, 201);
+}
+
+export async function vendorListProducts(req: Request, res: Response): Promise<void> {
+  if (!req.vendor) throw Errors.unauthorized();
+  const query = productQuerySchema.parse(req.query);
+  sendOk(res, await products.list(query, { enforceActive: false, vendorId: req.vendor.sub }));
+}
+
+export async function vendorGetProduct(req: Request, res: Response): Promise<void> {
+  if (!req.vendor) throw Errors.unauthorized();
+  sendOk(res, {
+    product: await products.getByIdOrSlug(idParam(req), {
+      activeOnly: false,
+      vendorId: req.vendor.sub,
+    }),
+  });
+}
+
+export async function vendorCreateProduct(req: Request, res: Response): Promise<void> {
+  if (!req.vendor) throw Errors.unauthorized();
+  const input = productCreateSchema.parse(req.body);
+  sendOk(res, { product: await products.create(input, { vendorId: req.vendor.sub }) }, 201);
+}
+
+export async function vendorUpdateProduct(req: Request, res: Response): Promise<void> {
+  if (!req.vendor) throw Errors.unauthorized();
+  const input = productUpdateSchema.parse(req.body);
+  sendOk(res, { product: await products.update(idParam(req), input, req.vendor.sub) });
+}
+
+export async function vendorDeleteProduct(req: Request, res: Response): Promise<void> {
+  if (!req.vendor) throw Errors.unauthorized();
+  await products.remove(idParam(req), req.vendor.sub);
+  sendOk(res, { success: true });
+}
+
+export async function importVendorProducts(req: Request, res: Response): Promise<void> {
+  if (!req.vendor) throw Errors.unauthorized();
+  const input = productImportEnvelopeSchema.parse(req.body);
+  sendOk(res, { import: await importProducts(input, { kind: "vendor", id: req.vendor.sub }) }, 201);
 }
 
 // ---- Banners ----

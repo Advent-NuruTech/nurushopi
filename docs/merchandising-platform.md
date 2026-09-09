@@ -10,9 +10,9 @@ remain canonical.
 
 Important current constraints are preserved instead of hidden:
 
-- Products currently have one stock counter and no variants or seller owner.
-  The platform therefore references the canonical product inventory and keeps
-  seller targeting in JSON until ownership is normalized.
+- Products retain one authoritative stock counter and now have an optional
+  vendor owner. Existing admin-managed rows remain ownerless; vendor reads and
+  writes are always scoped by `vendorId`.
 - `sellingPrice` remains supported for legacy catalog offers. All new temporary
   campaigns use `promotions` and never mutate the product row.
 - PostgreSQL and Next Data Cache are economically appropriate today. The data
@@ -21,16 +21,16 @@ Important current constraints are preserved instead of hidden:
 
 ## Separation of concerns
 
-| Concern | Source |
-| --- | --- |
-| Identity | `merchandising_collections.id` and immutable unique `key` |
-| Presentation | editable collection display fields |
-| Eligibility | memberships, time windows, product status/stock, rules |
-| Ranking | versioned ranking snapshots and expiring overrides |
-| Placement | scheduled `homepage_sections` |
-| Promotion | time-bound campaign/product rows and redemption counters |
-| Personalization | global candidates plus user affinities and diversity |
-| Analytics | immutable event ids, aggregates, ranking snapshots |
+| Concern         | Source                                                    |
+| --------------- | --------------------------------------------------------- |
+| Identity        | `merchandising_collections.id` and immutable unique `key` |
+| Presentation    | editable collection display fields                        |
+| Eligibility     | memberships, time windows, product status/stock, rules    |
+| Ranking         | versioned ranking snapshots and expiring overrides        |
+| Placement       | scheduled `homepage_sections`                             |
+| Promotion       | time-bound campaign/product rows and redemption counters  |
+| Personalization | global candidates plus user affinities and diversity      |
+| Analytics       | immutable event ids, aggregates, ranking snapshots        |
 
 The initial identities are `flash_sale`, `new_arrivals`, `best_sellers`,
 `spotlight`, `bundles`, and `trending`. Seed execution creates them once and
@@ -71,6 +71,20 @@ Admin control plane (authenticated, writes require senior role):
 - `/api/v1/admin/merchandising/homepage-sections`
 - `/api/v1/admin/merchandising/promotions`
 
+Inventory import and vendor control plane:
+
+- `POST /api/v1/admin/catalog/products/import`
+- `GET|POST|PUT|DELETE /api/v1/vendor/catalog/products`
+- `GET|POST|PUT|DELETE /api/v1/vendor/wholesale/items`
+- `GET /api/v1/vendor/merchandising/collections`
+- `GET|POST|DELETE /api/v1/vendor/merchandising/collections/:id/memberships`
+
+CSV/JSON imports accept up to 250 rows, use SKU-based duplicate handling, and
+return a result for every row. A `both` row creates or updates retail and
+wholesale records in one database transaction. Retail rows may reference
+immutable collection keys; wholesale rows automatically enter the existing
+wholesale discovery feed.
+
 Collection pages use immutable keys, not display names. Collection pagination
 uses `(rank, productId)` keysets encoded as opaque cursors; no collection query
 uses `OFFSET`.
@@ -94,15 +108,15 @@ bundle discount.
 Run `pnpm --filter api worker:merchandising` from a scheduler. The job is
 idempotent and safe to retry.
 
-| Work | Target cadence | Reason |
-| --- | --- | --- |
-| promotion status and expired memberships | every minute | operational correctness; reads also enforce timestamps |
-| event-to-hour aggregate | every 5 minutes | near-real-time discovery without request-time scans |
-| trending | every 15 minutes | reacts to velocity while damping noise |
-| Fresh Finds | hourly | publication eligibility changes slowly |
-| rolling bestseller | hourly | commerce quality does not need per-request updates |
-| retention outbox | every minute | timely but frequency-capped notifications |
-| daily rollups/long retention | nightly | reporting and storage efficiency |
+| Work                                     | Target cadence   | Reason                                                 |
+| ---------------------------------------- | ---------------- | ------------------------------------------------------ |
+| promotion status and expired memberships | every minute     | operational correctness; reads also enforce timestamps |
+| event-to-hour aggregate                  | every 5 minutes  | near-real-time discovery without request-time scans    |
+| trending                                 | every 15 minutes | reacts to velocity while damping noise                 |
+| Fresh Finds                              | hourly           | publication eligibility changes slowly                 |
+| rolling bestseller                       | hourly           | commerce quality does not need per-request updates     |
+| retention outbox                         | every minute     | timely but frequency-capped notifications              |
+| daily rollups/long retention             | nightly          | reporting and storage efficiency                       |
 
 At larger traffic, split this command into queue consumers with leases. Event
 ingestion is already append-only/idempotent and the aggregate query is bounded,
@@ -133,8 +147,8 @@ PostgreSQL handles the current indexed category, price, availability and ranked
 membership reads. Before collections regularly exceed 100k searchable products,
 stream the product document plus collection ids/ranks to OpenSearch. Perform
 category, price, seller, rating, availability and text relevance there, then
-batch-hydrate only returned ids from PostgreSQL. Do not add a seller filter until
-`products` has an authoritative seller relation.
+batch-hydrate only returned ids from PostgreSQL. Seller filtering uses the
+authoritative optional `products.vendorId` relation.
 
 ## Retention and consent
 
@@ -176,4 +190,3 @@ so a status-worker failure cannot extend a discount.
 
 Rollback is configuration-first: pause homepage sections or collections. The
 schema is additive and the legacy catalog homepage fallback remains independent.
-

@@ -24,14 +24,11 @@ import UserMenu from "./UserMenu";
 import UserNotificationsBell from "./UserNotificationsBell";
 
 import { useCart } from "@/context/CartContext";
+import { useAppUser } from "@/context/UserContext";
 
 type DrawerView = "menu" | "categories";
 
-function NavbarContent({
-  categories = [],
-}: {
-  categories?: SidebarCategory[];
-}) {
+function NavbarContent({ categories = [] }: { categories?: SidebarCategory[] }) {
   const [isOpen, setIsOpen] = useState(false);
   const [drawerView, setDrawerView] = useState<DrawerView>("menu");
   const [showDropdown, setShowDropdown] = useState(false);
@@ -41,6 +38,7 @@ function NavbarContent({
   const searchParams = useSearchParams();
 
   const { cart } = useCart();
+  const { user } = useAppUser();
   const cartCount = isClient ? cart.reduce((count, item) => count + item.quantity, 0) : 0;
 
   useEffect(() => setIsClient(true), []);
@@ -83,7 +81,7 @@ function NavbarContent({
     },
     {
       label: "Profile",
-      href: "/profile",
+      href: user ? "/profile" : "/auth/login?redirectTo=%2Fprofile",
       icon: UserRound,
       active: pathname === "/profile" && searchParams.get("tab") !== "wishlist",
     },
@@ -165,7 +163,9 @@ function NavbarContent({
                             </span>
                             <span className="min-w-0 flex-1 truncate">{category.name}</span>
                             {typeof category.productCount === "number" && (
-                              <span className="text-xs text-slate-400">{category.productCount}</span>
+                              <span className="text-xs text-slate-400">
+                                {category.productCount}
+                              </span>
                             )}
                           </Link>
                         ))
@@ -232,7 +232,6 @@ function NavbarContent({
             </button>
           </div>
         </div>
-
       </nav>
 
       <Sidebar

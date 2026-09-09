@@ -19,8 +19,14 @@ async function slugTaken(slug: string, excludeId?: string): Promise<boolean> {
   return existing != null && existing.id !== excludeId;
 }
 
-function buildWhere(query: ProductQuery, enforceActive: boolean): Prisma.ProductWhereInput {
+function buildWhere(
+  query: ProductQuery,
+  enforceActive: boolean,
+  vendorId?: string,
+): Prisma.ProductWhereInput {
   const where: Prisma.ProductWhereInput = {};
+
+  if (vendorId) where.vendorId = vendorId;
 
   if (enforceActive) where.isActive = true;
   else if (query.isActive !== undefined) where.isActive = query.isActive;
@@ -77,9 +83,9 @@ function todayStart(): Date {
 
 async function listMostViewedToday(
   query: ProductQuery,
-  { enforceActive }: { enforceActive: boolean },
+  { enforceActive, vendorId }: { enforceActive: boolean; vendorId?: string },
 ): Promise<Paginated<ProductDTO>> {
-  const baseWhere = buildWhere({ ...query, sort: "newest" }, enforceActive);
+  const baseWhere = buildWhere({ ...query, sort: "newest" }, enforceActive, vendorId);
   const skip = (query.page - 1) * query.pageSize;
   const viewed = await prisma.productView.groupBy({
     by: ["productId"],
@@ -121,13 +127,13 @@ async function listMostViewedToday(
 
 export async function list(
   query: ProductQuery,
-  { enforceActive }: { enforceActive: boolean },
+  { enforceActive, vendorId }: { enforceActive: boolean; vendorId?: string },
 ): Promise<Paginated<ProductDTO>> {
   if (query.sort === "most_viewed_today") {
-    return listMostViewedToday(query, { enforceActive });
+    return listMostViewedToday(query, { enforceActive, vendorId });
   }
 
-  const where = buildWhere(query, enforceActive);
+  const where = buildWhere(query, enforceActive, vendorId);
   const skip = (query.page - 1) * query.pageSize;
 
   const [total, rows] = await prisma.$transaction([
@@ -150,11 +156,15 @@ export async function list(
   };
 }
 
-export async function getByIdOrSlug(idOrSlug: string, { activeOnly }: { activeOnly: boolean }) {
+export async function getByIdOrSlug(
+  idOrSlug: string,
+  { activeOnly, vendorId }: { activeOnly: boolean; vendorId?: string },
+) {
   const row = await prisma.product.findFirst({
     where: {
       OR: [{ id: idOrSlug }, { slug: idOrSlug }],
       ...(activeOnly ? { isActive: true } : {}),
+      ...(vendorId ? { vendorId } : {}),
     },
     include: { category: categorySelect },
   });
@@ -168,7 +178,11 @@ async function assertCategoryExists(categoryId: string | null | undefined): Prom
   if (!cat) throw Errors.badRequest("The selected category does not exist.");
 }
 
-export async function create(input: ProductCreateInput, createdById?: string) {
+export async function create(
+  input: ProductCreateInput,
+  ownership: { adminId?: string; vendorId?: string } | string = {},
+) {
+  const owner = typeof ownership === "string" ? { adminId: ownership } : ownership;
   await assertCategoryExists(input.categoryId);
   const slug = await uniqueSlug(input.slug ?? input.name, (s) => slugTaken(s));
 
@@ -191,15 +205,18 @@ export async function create(input: ProductCreateInput, createdById?: string) {
       isActive: input.isActive ?? true,
       isFeatured: input.isFeatured ?? false,
       categoryId: input.categoryId ?? null,
-      createdById: createdById ?? null,
+      createdById: owner.adminId ?? null,
+      vendorId: owner.vendorId ?? null,
     },
     include: { category: categorySelect },
   });
   return toProductDTO(row as ProductWithCategory);
 }
 
-export async function update(id: string, input: ProductUpdateInput) {
-  const current = await prisma.product.findUnique({ where: { id } });
+export async function update(id: string, input: ProductUpdateInput, vendorId?: string) {
+  const current = await prisma.product.findFirst({
+    where: { id, ...(vendorId ? { vendorId } : {}) },
+  });
   if (!current) throw Errors.notFound("Product not found.");
 
   if (input.categoryId !== undefined) await assertCategoryExists(input.categoryId);
@@ -227,7 +244,7 @@ export async function update(id: string, input: ProductUpdateInput) {
         ...(input.originalPrice !== undefined ? { originalPrice: input.originalPrice } : {}),
         ...(input.sellingPrice !== undefined ? { sellingPrice: input.sellingPrice } : {}),
         ...(input.images !== undefined ? { images: input.images } : {}),
-      ...(input.variants !== undefined ? { variants: input.variants } : {}),
+        ...(input.variants !== undefined ? { variants: input.variants } : {}),
         ...(input.stock !== undefined ? { stock: input.stock } : {}),
         ...(input.lowStockThreshold !== undefined
           ? { lowStockThreshold: input.lowStockThreshold }
@@ -258,10 +275,14 @@ export async function update(id: string, input: ProductUpdateInput) {
   return toProductDTO(row as ProductWithCategory);
 }
 
-export async function remove(id: string): Promise<void> {
-  const current = await prisma.product.findUnique({ where: { id }, select: { images: true } });
+export async function remove(id: string, vendorId?: string): Promise<void> {
+  const current = await prisma.product.findFirst({
+    where: { id, ...(vendorId ? { vendorId } : {}) },
+    select: { id: true, images: true },
+  });
+  if (!current) throw Errors.notFound("Product not found.");
   try {
-    await prisma.product.delete({ where: { id } });
+    await prisma.product.delete({ where: { id: current.id } });
     await deleteCloudinaryImages(current?.images ?? []);
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") {

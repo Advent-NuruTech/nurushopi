@@ -402,6 +402,9 @@ model Product {
   createdById String?
   createdBy   Admin?  @relation("ProductCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
 
+  vendorId String?
+  vendor   VendorAccount? @relation(fields: [vendorId], references: [id], onDelete: SetNull)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -424,6 +427,7 @@ model Product {
 
   @@index([categoryId])
   @@index([createdById])
+  @@index([vendorId])
   @@map("products")
 }
 
@@ -467,6 +471,7 @@ model WholesaleItem {
   id          String   @id @default(cuid())
   name        String
   slug        String?  @unique
+  sku         String?  @unique
   description String?
   unitPrice   Decimal  @db.Decimal(12, 2)
   minQuantity Int      @default(1)
@@ -474,9 +479,12 @@ model WholesaleItem {
   images      String[]
   variants    Json @default("[]")
   isActive    Boolean  @default(true)
+  vendorId    String?
+  vendor      VendorAccount? @relation(fields: [vendorId], references: [id], onDelete: SetNull)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  @@index([vendorId])
   @@map("wholesale_items")
 }
 
@@ -723,6 +731,9 @@ model VendorAccount {
   isActive      Boolean           @default(true)
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
+
+  products       Product[]
+  wholesaleItems WholesaleItem[]
 
   @@map("vendor_accounts")
 }

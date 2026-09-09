@@ -9,6 +9,7 @@ export function toWholesaleItemDTO(w: WholesaleItem): WholesaleItemDTO {
     id: w.id,
     name: w.name,
     slug: w.slug,
+    sku: w.sku,
     description: w.description,
     unitPrice: w.unitPrice.toString(),
     minQuantity: w.minQuantity,
@@ -17,6 +18,7 @@ export function toWholesaleItemDTO(w: WholesaleItem): WholesaleItemDTO {
     images: w.images,
     variants: productVariantsSchema.parse(w.variants ?? []),
     isActive: w.isActive,
+    vendorId: w.vendorId,
     createdAt: toIso(w.createdAt),
     updatedAt: toIso(w.updatedAt),
   };

@@ -14,5 +14,6 @@ export * from "./pwa";
 export * from "./sabbath";
 export * from "./users";
 export * from "./merchandising";
+export * from "./product-import";
 
 export * from "./variants";

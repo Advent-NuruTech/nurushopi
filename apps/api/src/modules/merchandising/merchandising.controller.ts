@@ -3,6 +3,7 @@ import {
   bundleQuoteSchema,
   collectionCreateSchema,
   collectionMembershipSchema,
+  collectionMembershipImportSchema,
   collectionOverrideSchema,
   collectionProductsQuerySchema,
   collectionUpdateSchema,
@@ -30,9 +31,8 @@ function adminId(req: Request): string {
 }
 
 export async function homepage(req: Request, res: Response): Promise<void> {
-  const device = req.query.device === "mobile" || req.query.device === "desktop"
-    ? req.query.device
-    : "all";
+  const device =
+    req.query.device === "mobile" || req.query.device === "desktop" ? req.query.device : "all";
   const anonymousId = typeof req.query.anonymousId === "string" ? req.query.anonymousId : undefined;
   res.setHeader(
     "Cache-Control",
@@ -51,9 +51,12 @@ export async function collectionProducts(req: Request, res: Response): Promise<v
     "Cache-Control",
     req.user ? "private, no-store" : "public, s-maxage=60, stale-while-revalidate=300",
   );
-  sendOk(res, await merchandising.listCollectionProducts(param(req, "idOrKey"), query, {
-    userId: req.user?.sub,
-  }));
+  sendOk(
+    res,
+    await merchandising.listCollectionProducts(param(req, "idOrKey"), query, {
+      userId: req.user?.sub,
+    }),
+  );
 }
 
 export async function events(req: Request, res: Response): Promise<void> {
@@ -109,12 +112,28 @@ export async function adminCreateCollection(req: Request, res: Response): Promis
 
 export async function adminUpdateCollection(req: Request, res: Response): Promise<void> {
   const input = collectionUpdateSchema.parse(req.body);
-  sendOk(res, { collection: await merchandising.updateCollection(param(req, "id"), input, adminId(req)) });
+  sendOk(res, {
+    collection: await merchandising.updateCollection(param(req, "id"), input, adminId(req)),
+  });
 }
 
 export async function adminUpsertMembership(req: Request, res: Response): Promise<void> {
   const input = collectionMembershipSchema.parse(req.body);
-  sendOk(res, { membership: await merchandising.upsertMembership(param(req, "id"), input, adminId(req)) });
+  sendOk(res, {
+    membership: await merchandising.upsertMembership(param(req, "id"), input, adminId(req)),
+  });
+}
+
+export async function adminMemberships(req: Request, res: Response): Promise<void> {
+  sendOk(res, { memberships: await merchandising.listMemberships(param(req, "id")) });
+}
+
+export async function adminImportMemberships(req: Request, res: Response): Promise<void> {
+  const input = collectionMembershipImportSchema.parse(req.body);
+  sendOk(
+    res,
+    await merchandising.importMemberships(param(req, "id"), input, { adminId: adminId(req) }),
+  );
 }
 
 export async function adminRemoveMembership(req: Request, res: Response): Promise<void> {
@@ -124,7 +143,11 @@ export async function adminRemoveMembership(req: Request, res: Response): Promis
 
 export async function adminCreateOverride(req: Request, res: Response): Promise<void> {
   const input = collectionOverrideSchema.parse(req.body);
-  sendOk(res, { override: await merchandising.createOverride(param(req, "id"), input, adminId(req)) }, 201);
+  sendOk(
+    res,
+    { override: await merchandising.createOverride(param(req, "id"), input, adminId(req)) },
+    201,
+  );
 }
 
 export async function adminHomepageSections(_req: Request, res: Response): Promise<void> {
@@ -138,7 +161,9 @@ export async function adminCreateHomepageSection(req: Request, res: Response): P
 
 export async function adminUpdateHomepageSection(req: Request, res: Response): Promise<void> {
   const input = homepageSectionUpdateSchema.parse(req.body);
-  sendOk(res, { section: await merchandising.updateHomepageSection(param(req, "id"), input, adminId(req)) });
+  sendOk(res, {
+    section: await merchandising.updateHomepageSection(param(req, "id"), input, adminId(req)),
+  });
 }
 
 export async function adminCreatePromotion(req: Request, res: Response): Promise<void> {
@@ -149,4 +174,34 @@ export async function adminCreatePromotion(req: Request, res: Response): Promise
 export async function adminCollectionAnalytics(req: Request, res: Response): Promise<void> {
   const days = typeof req.query.days === "string" ? Number.parseInt(req.query.days, 10) : 30;
   sendOk(res, { analytics: await merchandising.collectionAnalytics(param(req, "id"), days) });
+}
+
+export async function vendorCollections(_req: Request, res: Response): Promise<void> {
+  sendOk(res, { collections: await merchandising.listCollections({ activeOnly: true }) });
+}
+
+export async function vendorMemberships(req: Request, res: Response): Promise<void> {
+  if (!req.vendor) throw Errors.unauthorized();
+  sendOk(res, {
+    memberships: await merchandising.listMemberships(param(req, "id"), req.vendor.sub),
+  });
+}
+
+export async function vendorImportMemberships(req: Request, res: Response): Promise<void> {
+  if (!req.vendor) throw Errors.unauthorized();
+  const input = collectionMembershipImportSchema.parse(req.body);
+  sendOk(
+    res,
+    await merchandising.importMemberships(param(req, "id"), input, { vendorId: req.vendor.sub }),
+  );
+}
+
+export async function vendorRemoveMembership(req: Request, res: Response): Promise<void> {
+  if (!req.vendor) throw Errors.unauthorized();
+  await merchandising.removeVendorMembership(
+    param(req, "id"),
+    param(req, "productId"),
+    req.vendor.sub,
+  );
+  sendOk(res, { success: true });
 }

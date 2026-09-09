@@ -17,31 +17,43 @@ import {
   ChevronLeft,
   ChevronRight,
   Store,
+  Sparkles,
+  Warehouse,
 } from "lucide-react";
 import Link from "next/link";
 
 const DashboardOverviewTab = dynamic<{ role: "sub" }>(
   () => import("../../admin/dashboard/components/DashboardOverviewTab"),
-  { loading: () => <TabSkeleton /> }
+  { loading: () => <TabSkeleton /> },
 );
-const ProductsTab = dynamic<{ adminId: string; role: "sub" }>(
+const ProductsTab = dynamic<{ adminId: string; role: "sub"; actor: "vendor" }>(
   () => import("../../admin/dashboard/components/ProductsTab"),
-  { loading: () => <TabSkeleton /> }
+  { loading: () => <TabSkeleton /> },
 );
 const OrdersTab = dynamic<{ adminId: string; role: "sub" }>(
   () => import("../../admin/dashboard/components/OrdersTab"),
-  { loading: () => <TabSkeleton /> }
+  { loading: () => <TabSkeleton /> },
 );
 const MessagesTab = dynamic<{ adminId: string; role: "sub" }>(
   () => import("../../admin/dashboard/components/MessagesTab"),
-  { loading: () => <TabSkeleton /> }
+  { loading: () => <TabSkeleton /> },
+);
+const MerchandisingTab = dynamic<{ actor: "vendor" }>(
+  () => import("../../admin/dashboard/components/MerchandisingTab"),
+  { loading: () => <TabSkeleton /> },
+);
+const WholesaleTab = dynamic<{ actor: "vendor" }>(
+  () => import("../../admin/dashboard/components/WholesaleTab"),
+  { loading: () => <TabSkeleton /> },
 );
 
-type VendorTabId = "overview" | "products" | "orders" | "messages";
+type VendorTabId = "overview" | "products" | "wholesale" | "merchandising" | "orders" | "messages";
 
 const VENDOR_TABS: { id: VendorTabId; label: string; icon: string }[] = [
   { id: "overview", label: "Overview", icon: "LayoutDashboard" },
   { id: "products", label: "Products", icon: "Package" },
+  { id: "wholesale", label: "Wholesale", icon: "Warehouse" },
+  { id: "merchandising", label: "Merchandising", icon: "Sparkles" },
   { id: "orders", label: "Orders", icon: "ShoppingCart" },
   { id: "messages", label: "Messages", icon: "MessageSquare" },
 ];
@@ -53,6 +65,8 @@ const TAB_ICONS = {
   Package,
   ShoppingCart,
   MessageSquare,
+  Sparkles,
+  Warehouse,
 } as const;
 
 interface Vendor {
@@ -116,7 +130,9 @@ function VendorDashboardPageContent() {
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [router]);
 
   const requestedTab = searchParams.get("tab");
@@ -137,7 +153,7 @@ function VendorDashboardPageContent() {
       params.set("tab", tab);
       router.push(vendorRoute(`${VENDOR_DASHBOARD_PATH}?${params.toString()}`), { scroll: false });
     },
-    [router, searchParams]
+    [router, searchParams],
   );
 
   const handleLogout = async () => {
@@ -154,7 +170,11 @@ function VendorDashboardPageContent() {
       case "overview":
         return <DashboardOverviewTab role="sub" />;
       case "products":
-        return <ProductsTab adminId={vendor.vendorId} role="sub" />;
+        return <ProductsTab adminId={vendor.vendorId} role="sub" actor="vendor" />;
+      case "merchandising":
+        return <MerchandisingTab actor="vendor" />;
+      case "wholesale":
+        return <WholesaleTab actor="vendor" />;
       case "orders":
         return <OrdersTab adminId={vendor.vendorId} role="sub" />;
       case "messages":
@@ -195,7 +215,7 @@ function VendorDashboardPageContent() {
             </button>
             <Link
               href={vendorRoute(`${VENDOR_DASHBOARD_PATH}?tab=overview`)}
-              className="inline-flex items-center gap-2 text-sky-600 dark:text-sky-400 font-bold shrink-0"
+              className="inline-flex items-center gap-2 text-brand-strong dark:text-brand-bright font-bold shrink-0"
             >
               <Store size={20} />
               <span className="hidden sm:inline">NuruShop</span>
@@ -272,7 +292,10 @@ function VendorDashboardPageContent() {
               </div>
               <VendorSidebarNav
                 currentTab={currentTab}
-                onTabChange={(tab) => { onTabChange(tab); setMobileSidebarOpen(false); }}
+                onTabChange={(tab) => {
+                  onTabChange(tab);
+                  setMobileSidebarOpen(false);
+                }}
                 collapsed={false}
               />
             </aside>
@@ -320,7 +343,7 @@ function VendorSidebarNav({
             onClick={() => onTabChange(tabItem.id)}
             className={`w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors ${
               active
-                ? "bg-sky-600 text-white"
+                ? "bg-brand text-white"
                 : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
             }`}
             title={collapsed ? tabItem.label : undefined}
@@ -336,7 +359,13 @@ function VendorSidebarNav({
 
 export default function VendorDashboardPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><LoadingSpinner size={48} text="Loading..." /></div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <LoadingSpinner size={48} text="Loading..." />
+        </div>
+      }
+    >
       <VendorDashboardPageContent />
     </Suspense>
   );

@@ -73,6 +73,7 @@ export default async function HomePage() {
         promotions={banners}
         wholesale={wholesaleProducts}
         merchandising={merchandisingCards}
+        showRecommendationHeading
       />
     </main>
   );

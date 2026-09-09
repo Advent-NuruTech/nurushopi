@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, beforeAll } from "vitest";
 
 vi.mock("@nuru/db", async () => {
   const { makeDbMock } = await import("../helpers/dbMock.js");
@@ -8,11 +8,20 @@ vi.mock("@nuru/db", async () => {
 import request from "supertest";
 import { prisma } from "@nuru/db";
 import { createApp } from "../../src/app.js";
+import { signAdminAccessToken, signVendorAccessToken } from "@nuru/auth/tokens";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const p = prisma as any;
 const app = createApp();
 const decimal = (s: string) => ({ toString: () => s });
+let subAdminAuth: string;
+let vendorAuth: string;
+
+beforeAll(async () => {
+  const secret = process.env.JWT_ACCESS_SECRET as string;
+  subAdminAuth = `Bearer ${await signAdminAccessToken({ sub: "a-sub", email: "sub@nuru.com", role: "SUB" }, { secret, ttlSeconds: 3600 })}`;
+  vendorAuth = `Bearer ${await signVendorAccessToken({ sub: "vendor-1", email: "vendor@nuru.com" }, { secret, ttlSeconds: 3600 })}`;
+});
 
 const productRow = {
   id: "p1",
@@ -102,6 +111,39 @@ describe("admin catalog guards", () => {
   it("rejects unauthenticated deletes with 401", async () => {
     const res = await request(app).delete("/api/v1/admin/catalog/products/p1");
     expect(res.status).toBe(401);
+  });
+
+  it("does not let a sub-admin bypass senior merchandising permissions through import", async () => {
+    const res = await request(app)
+      .post("/api/v1/admin/catalog/products/import")
+      .set("Authorization", subAdminAuth)
+      .send({
+        rows: [
+          {
+            channel: "retail",
+            name: "Merch product",
+            sku: "MERCH-1",
+            price: 10,
+            stock: 1,
+            collectionKeys: ["spotlight"],
+          },
+        ],
+      });
+    expect(res.status).toBe(403);
+    expect(p.product.create).not.toHaveBeenCalled();
+  });
+});
+
+describe("vendor catalog ownership", () => {
+  it("always scopes vendor inventory lists to the signed-in vendor", async () => {
+    p.product.count.mockResolvedValue(0);
+    p.product.findMany.mockResolvedValue([]);
+    const res = await request(app)
+      .get("/api/v1/vendor/catalog/products")
+      .set("Authorization", vendorAuth);
+    expect(res.status).toBe(200);
+    expect(p.product.count.mock.calls[0][0].where.vendorId).toBe("vendor-1");
+    expect(p.product.findMany.mock.calls[0][0].where.vendorId).toBe("vendor-1");
   });
 });
 

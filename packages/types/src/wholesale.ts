@@ -14,6 +14,15 @@ export const wholesaleItemCreateSchema = z
   .object({
     name: z.string().trim().min(1, "Name is required.").max(200),
     slug: slugSchema.optional(),
+    sku: z
+      .string()
+      .trim()
+      .toUpperCase()
+      .min(2)
+      .max(80)
+      .regex(/^[A-Z0-9][A-Z0-9._-]*$/, "Invalid SKU format.")
+      .optional()
+      .nullable(),
     description: z.string().trim().max(5000).optional().nullable(),
     unitPrice: moneySchema,
     minQuantity: z.coerce
@@ -54,6 +63,7 @@ export interface WholesaleItemDTO {
   id: string;
   name: string;
   slug: string | null;
+  sku: string | null;
   description: string | null;
   /** Decimal serialised as a string to avoid float precision loss. */
   unitPrice: string;
@@ -63,6 +73,7 @@ export interface WholesaleItemDTO {
   images: string[];
   variants?: ProductVariant[];
   isActive: boolean;
+  vendorId?: string | null;
   createdAt: string;
   updatedAt: string;
 }

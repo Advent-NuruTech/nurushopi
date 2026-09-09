@@ -16,6 +16,7 @@ import {
   ShoppingBag,
   Star,
   Heart,
+  LogOut,
   Menu,
   X,
 } from "lucide-react";
@@ -43,7 +44,7 @@ import { adaptAppUser } from "./utils/typeAdapter";
 function ProfilePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user: contextUser, isLoading: userLoading } = useAppUser();
+  const { user: contextUser, isLoading: userLoading, logout } = useAppUser();
 
   /* ------------------- Hooks ------------------- */
   const [activeTab, setActiveTab] = useState("overview");
@@ -197,6 +198,13 @@ function ProfilePageContent() {
     setActiveTab(tabId);
   };
 
+  const handleLogout = async () => {
+    setMobileSidebarOpen(false);
+    await logout();
+    router.replace("/");
+    router.refresh();
+  };
+
   /* ------------------- Early Loading ------------------- */
   if (userLoading)
     return (
@@ -209,7 +217,7 @@ function ProfilePageContent() {
 
   /* ------------------- Header ------------------- */
   const Header = () => (
-    <div className="sticky top-0 z-40 bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
+    <div className="sticky top-0 z-40 border-b border-brand-strong bg-gradient-to-r from-brand-strong to-brand text-white shadow-sm">
       <div className="px-4 md:px-8 py-6 flex justify-between items-center">
         <div>
           <h1 className="text-xl md:text-3xl font-bold">
@@ -267,7 +275,7 @@ function ProfilePageContent() {
                 onClick={() => handleTabChange(t.id)}
                 className={`w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl text-sm transition-colors ${
                   isActive
-                    ? "bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300"
+                    ? "bg-brand-surface-strong text-brand-strong dark:bg-brand-strong/30 dark:text-brand-bright"
                     : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                 }`}
               >
@@ -284,6 +292,16 @@ function ProfilePageContent() {
             );
           })}
         </nav>
+        <div className="mt-3 border-t border-slate-200 pt-3 dark:border-slate-700">
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-sm text-rose-600 transition-colors hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/30"
+          >
+            <LogOut className="h-4 w-4" />
+            Logout
+          </button>
+        </div>
       </div>
     </aside>
   );
@@ -321,7 +339,7 @@ function ProfilePageContent() {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <nav className="p-3 space-y-1 overflow-y-auto">
+            <nav className="flex-1 space-y-1 overflow-y-auto p-3">
               {tabs.map((t) => {
                 const Icon = t.icon;
                 const isActive = activeTab === t.id;
@@ -340,7 +358,7 @@ function ProfilePageContent() {
                     onClick={() => handleTabChange(t.id)}
                     className={`w-full flex items-center justify-between gap-2 px-3 py-3 rounded-xl text-sm transition-colors ${
                       isActive
-                        ? "bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300"
+                        ? "bg-brand-surface-strong text-brand-strong dark:bg-brand-strong/30 dark:text-brand-bright"
                         : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                     }`}
                   >
@@ -357,6 +375,16 @@ function ProfilePageContent() {
                 );
               })}
             </nav>
+            <div className="border-t border-slate-200 p-3 dark:border-slate-700">
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-3 text-sm text-rose-600 transition-colors hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/30"
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
+              </button>
+            </div>
           </motion.aside>
         </>
       )}
@@ -388,6 +416,8 @@ function ProfilePageContent() {
                 totalOrders={totalOrders}
                 pendingOrders={pendingOrders}
                 deliveredOrders={deliveredOrders}
+                inviteCount={inviteCount}
+                onNavigate={handleTabChange}
               />
             )}
 

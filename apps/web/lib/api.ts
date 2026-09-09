@@ -58,6 +58,8 @@ import type {
   ProductCreateInput,
   ProductDTO,
   ProductUpdateInput,
+  ProductImportInput,
+  ProductImportResult,
   DashboardStatsDTO,
   RedemptionRequestInput,
   RedemptionStatus,
@@ -76,6 +78,8 @@ import type {
   HomepageSectionCreateInput,
   HomepageSectionUpdateInput,
   MerchandisingCollectionDTO,
+  CollectionMembershipDTO,
+  CollectionMembershipImportInput,
   WishlistItemDTO,
   WishlistQuery,
   WishlistUpsertInput,
@@ -290,6 +294,8 @@ export const catalogApi = {
       api.get<Paginated<ProductDTO>>(`/admin/catalog/products${qs(query)}`),
     createProduct: (input: ProductCreateInput) =>
       api.post<{ product: ProductDTO }>("/admin/catalog/products", input),
+    importProducts: (input: ProductImportInput) =>
+      api.post<{ import: ProductImportResult }>("/admin/catalog/products/import", input),
     updateProduct: (id: string, input: ProductUpdateInput) =>
       api.put<{ product: ProductDTO }>(`/admin/catalog/products/${id}`, input),
     deleteProduct: (id: string) => api.del<{ success: boolean }>(`/admin/catalog/products/${id}`),
@@ -315,6 +321,20 @@ export const catalogApi = {
       api.put<{ announcement: HeroAnnouncementDTO }>(`/admin/catalog/hero/${id}`, input),
     deleteHero: (id: string) => api.del<{ success: boolean }>(`/admin/catalog/hero/${id}`),
   },
+  vendor: {
+    listProducts: (query: ProductQuery = {}) =>
+      api.get<Paginated<ProductDTO>>(`/vendor/catalog/products${qs(query)}`),
+    getProduct: (id: string) =>
+      api.get<{ product: ProductDTO }>(`/vendor/catalog/products/${encodeURIComponent(id)}`),
+    createProduct: (input: ProductCreateInput) =>
+      api.post<{ product: ProductDTO }>("/vendor/catalog/products", input),
+    importProducts: (input: ProductImportInput) =>
+      api.post<{ import: ProductImportResult }>("/vendor/catalog/products/import", input),
+    updateProduct: (id: string, input: ProductUpdateInput) =>
+      api.put<{ product: ProductDTO }>(`/vendor/catalog/products/${encodeURIComponent(id)}`, input),
+    deleteProduct: (id: string) =>
+      api.del<{ success: boolean }>(`/vendor/catalog/products/${encodeURIComponent(id)}`),
+  },
 };
 
 // ---- Wholesale endpoints ----
@@ -336,6 +356,21 @@ export const wholesaleApi = {
     updateItem: (id: string, input: WholesaleItemUpdateInput) =>
       api.put<{ item: WholesaleItemDTO }>(`/admin/wholesale/items/${id}`, input),
     deleteItem: (id: string) => api.del<{ success: boolean }>(`/admin/wholesale/items/${id}`),
+  },
+  vendor: {
+    listItems: (query: WholesaleQuery = {}) =>
+      api.get<Paginated<WholesaleItemDTO>>(`/vendor/wholesale/items${qs(query)}`),
+    getItem: (id: string) =>
+      api.get<{ item: WholesaleItemDTO }>(`/vendor/wholesale/items/${encodeURIComponent(id)}`),
+    createItem: (input: WholesaleItemCreateInput) =>
+      api.post<{ item: WholesaleItemDTO }>("/vendor/wholesale/items", input),
+    updateItem: (id: string, input: WholesaleItemUpdateInput) =>
+      api.put<{ item: WholesaleItemDTO }>(
+        `/vendor/wholesale/items/${encodeURIComponent(id)}`,
+        input,
+      ),
+    deleteItem: (id: string) =>
+      api.del<{ success: boolean }>(`/vendor/wholesale/items/${encodeURIComponent(id)}`),
   },
 };
 
@@ -629,6 +664,19 @@ export const merchandisingApi = {
         `/admin/merchandising/collections/${encodeURIComponent(id)}`,
         input,
       ),
+    memberships: (id: string) =>
+      api.get<{ memberships: CollectionMembershipDTO[] }>(
+        `/admin/merchandising/collections/${encodeURIComponent(id)}/memberships`,
+      ),
+    importMemberships: (id: string, input: CollectionMembershipImportInput) =>
+      api.post<{ imported: number; collectionKey: string }>(
+        `/admin/merchandising/collections/${encodeURIComponent(id)}/memberships/import`,
+        input,
+      ),
+    removeMembership: (id: string, productId: string) =>
+      api.del<{ success: boolean }>(
+        `/admin/merchandising/collections/${encodeURIComponent(id)}/memberships/${encodeURIComponent(productId)}`,
+      ),
     sections: () =>
       api.get<{ sections: AdminHomepageSection[] }>("/admin/merchandising/homepage-sections"),
     createSection: (input: HomepageSectionCreateInput) =>
@@ -641,6 +689,23 @@ export const merchandisingApi = {
     analytics: (id: string, days = 30) =>
       api.get<{ analytics: Record<string, number | string | null> }>(
         `/admin/merchandising/collections/${encodeURIComponent(id)}/analytics?days=${days}`,
+      ),
+  },
+  vendor: {
+    collections: () =>
+      api.get<{ collections: MerchandisingCollectionDTO[] }>("/vendor/merchandising/collections"),
+    memberships: (id: string) =>
+      api.get<{ memberships: CollectionMembershipDTO[] }>(
+        `/vendor/merchandising/collections/${encodeURIComponent(id)}/memberships`,
+      ),
+    importMemberships: (id: string, input: CollectionMembershipImportInput) =>
+      api.post<{ imported: number; collectionKey: string }>(
+        `/vendor/merchandising/collections/${encodeURIComponent(id)}/memberships/import`,
+        input,
+      ),
+    removeMembership: (id: string, productId: string) =>
+      api.del<{ success: boolean }>(
+        `/vendor/merchandising/collections/${encodeURIComponent(id)}/memberships/${encodeURIComponent(productId)}`,
       ),
   },
 };

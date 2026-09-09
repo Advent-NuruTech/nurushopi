@@ -3,10 +3,15 @@ import { sendOk } from "./lib/response.js";
 import { authRouter } from "./modules/auth/auth.routes.js";
 import { adminAuthRouter } from "./modules/admin/admin.routes.js";
 import { vendorAuthRouter } from "./modules/vendor-auth/vendor-auth.routes.js";
-import { catalogAdminRouter, catalogPublicRouter } from "./modules/catalog/catalog.routes.js";
+import {
+  catalogAdminRouter,
+  catalogPublicRouter,
+  catalogVendorRouter,
+} from "./modules/catalog/catalog.routes.js";
 import {
   wholesaleAdminRouter,
   wholesalePublicRouter,
+  wholesaleVendorRouter,
 } from "./modules/wholesale/wholesale.routes.js";
 import { ordersAdminRouter, ordersCustomerRouter } from "./modules/orders/orders.routes.js";
 import { walletAdminRouter, walletCustomerRouter } from "./modules/wallet/wallet.routes.js";
@@ -27,6 +32,7 @@ import { sabbathAdminRouter, sabbathPublicRouter } from "./modules/sabbath/sabba
 import {
   merchandisingAdminRouter,
   merchandisingPublicRouter,
+  merchandisingVendorRouter,
 } from "./modules/merchandising/merchandising.routes.js";
 import { wishlistRouter } from "./modules/wishlist/wishlist.routes.js";
 
@@ -41,8 +47,10 @@ apiRouter.use("/admin/auth", adminAuthRouter);
 apiRouter.use("/vendor/auth", vendorAuthRouter);
 apiRouter.use("/catalog", catalogPublicRouter);
 apiRouter.use("/admin/catalog", catalogAdminRouter);
+apiRouter.use("/vendor/catalog", catalogVendorRouter);
 apiRouter.use("/wholesale", wholesalePublicRouter);
 apiRouter.use("/admin/wholesale", wholesaleAdminRouter);
+apiRouter.use("/vendor/wholesale", wholesaleVendorRouter);
 apiRouter.use("/orders", ordersCustomerRouter);
 apiRouter.use("/admin/orders", ordersAdminRouter);
 apiRouter.use("/wallet", walletCustomerRouter);
@@ -66,3 +74,4 @@ apiRouter.use("/admin/sabbath-messages", sabbathAdminRouter);
 apiRouter.use("/admin/users", usersAdminRouter);
 apiRouter.use("/", merchandisingPublicRouter);
 apiRouter.use("/admin/merchandising", merchandisingAdminRouter);
+apiRouter.use("/vendor/merchandising", merchandisingVendorRouter);

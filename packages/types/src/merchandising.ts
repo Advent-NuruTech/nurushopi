@@ -23,35 +23,37 @@ export const collectionKeySchema = z
   .regex(/^[a-z0-9]+(?:_[a-z0-9]+)*$/, "Use lowercase letters, numbers and underscores.");
 
 const collectionFields = z.object({
-    key: collectionKeySchema,
-    displayName: z.string().trim().min(1).max(160),
-    shortName: z.string().trim().max(80).optional().nullable(),
-    description: z.string().trim().max(2000).optional().nullable(),
-    collectionType: z.string().trim().min(1).max(80).default("generic"),
-    selectionStrategy: z.string().trim().min(1).max(80).default("hybrid"),
-    status: merchandisingStatus.default("DRAFT"),
-    priority: z.coerce.number().int().min(-100_000).max(100_000).default(0),
-    placement: z.string().trim().max(120).optional().nullable(),
-    startAt: nullableDate,
-    endAt: nullableDate,
-    maxProducts: z.coerce.number().int().min(1).max(1000).default(24),
-    sortStrategy: z.string().trim().min(1).max(80).default("rank"),
-    eligibilityRules: jsonObject,
-    configuration: jsonObject,
-    imageUrl: z.string().url().optional().nullable(),
-    icon: z.string().trim().max(120).optional().nullable(),
-    badgeText: z.string().trim().max(80).optional().nullable(),
-    ctaText: z.string().trim().max(80).optional().nullable(),
-    ctaUrl: z.string().trim().max(500).optional().nullable(),
-    isPersonalized: z.coerce.boolean().default(false),
-    isSponsored: z.coerce.boolean().default(false),
-  });
+  key: collectionKeySchema,
+  displayName: z.string().trim().min(1).max(160),
+  shortName: z.string().trim().max(80).optional().nullable(),
+  description: z.string().trim().max(2000).optional().nullable(),
+  collectionType: z.string().trim().min(1).max(80).default("generic"),
+  selectionStrategy: z.string().trim().min(1).max(80).default("hybrid"),
+  status: merchandisingStatus.default("DRAFT"),
+  priority: z.coerce.number().int().min(-100_000).max(100_000).default(0),
+  placement: z.string().trim().max(120).optional().nullable(),
+  startAt: nullableDate,
+  endAt: nullableDate,
+  maxProducts: z.coerce.number().int().min(1).max(1000).default(24),
+  sortStrategy: z.string().trim().min(1).max(80).default("rank"),
+  eligibilityRules: jsonObject,
+  configuration: jsonObject,
+  imageUrl: z.string().url().optional().nullable(),
+  icon: z.string().trim().max(120).optional().nullable(),
+  badgeText: z.string().trim().max(80).optional().nullable(),
+  ctaText: z.string().trim().max(80).optional().nullable(),
+  ctaUrl: z.string().trim().max(500).optional().nullable(),
+  isPersonalized: z.coerce.boolean().default(false),
+  isSponsored: z.coerce.boolean().default(false),
+});
 
-export const collectionCreateSchema = collectionFields
-  .refine((v) => !v.startAt || !v.endAt || v.endAt > v.startAt, {
+export const collectionCreateSchema = collectionFields.refine(
+  (v) => !v.startAt || !v.endAt || v.endAt > v.startAt,
+  {
     message: "endAt must be after startAt.",
     path: ["endAt"],
-  });
+  },
+);
 export type CollectionCreateInput = z.infer<typeof collectionCreateSchema>;
 
 // The immutable key is intentionally absent. Renaming presentation can never
@@ -61,7 +63,9 @@ export type CollectionUpdateInput = z.infer<typeof collectionUpdateSchema>;
 
 export const collectionMembershipSchema = z.object({
   productId: idSchema,
-  source: z.enum(["AUTOMATIC", "MANUAL", "ALGORITHM", "PROMOTION", "RECOMMENDATION", "SPONSORED"]).default("MANUAL"),
+  source: z
+    .enum(["AUTOMATIC", "MANUAL", "ALGORITHM", "PROMOTION", "RECOMMENDATION", "SPONSORED"])
+    .default("MANUAL"),
   score: z.coerce.number().finite().default(0),
   rank: z.coerce.number().int().positive().optional().nullable(),
   startsAt: nullableDate,
@@ -69,6 +73,23 @@ export const collectionMembershipSchema = z.object({
   metadata: jsonObject,
 });
 export type CollectionMembershipInput = z.infer<typeof collectionMembershipSchema>;
+
+export const collectionMembershipImportSchema = z.object({
+  items: z.array(collectionMembershipSchema).min(1).max(250),
+});
+export type CollectionMembershipImportInput = z.infer<typeof collectionMembershipImportSchema>;
+
+export interface CollectionMembershipDTO {
+  id: string;
+  collectionId: string;
+  productId: string;
+  source: z.infer<typeof collectionMembershipSchema>["source"];
+  score: number;
+  rank: number | null;
+  startsAt: string | null;
+  expiresAt: string | null;
+  product: Pick<ProductDTO, "id" | "name" | "sku" | "images" | "stock" | "isActive" | "vendorId">;
+}
 
 export const collectionOverrideSchema = z.object({
   productId: idSchema,
@@ -81,22 +102,24 @@ export const collectionOverrideSchema = z.object({
 export type CollectionOverrideInput = z.infer<typeof collectionOverrideSchema>;
 
 const homepageSectionFields = z.object({
-    collectionId: idSchema,
-    position: z.coerce.number().int().min(0).max(10_000),
-    status: merchandisingStatus.default("DRAFT"),
-    audience: jsonObject,
-    device: z.enum(["all", "desktop", "mobile"]).default("all"),
-    startAt: nullableDate,
-    endAt: nullableDate,
-    configuration: jsonObject,
-    experimentKey: collectionKeySchema.optional().nullable(),
-  });
+  collectionId: idSchema,
+  position: z.coerce.number().int().min(0).max(10_000),
+  status: merchandisingStatus.default("DRAFT"),
+  audience: jsonObject,
+  device: z.enum(["all", "desktop", "mobile"]).default("all"),
+  startAt: nullableDate,
+  endAt: nullableDate,
+  configuration: jsonObject,
+  experimentKey: collectionKeySchema.optional().nullable(),
+});
 
-export const homepageSectionCreateSchema = homepageSectionFields
-  .refine((v) => !v.startAt || !v.endAt || v.endAt > v.startAt, {
+export const homepageSectionCreateSchema = homepageSectionFields.refine(
+  (v) => !v.startAt || !v.endAt || v.endAt > v.startAt,
+  {
     message: "endAt must be after startAt.",
     path: ["endAt"],
-  });
+  },
+);
 export const homepageSectionUpdateSchema = homepageSectionFields.partial();
 export type HomepageSectionCreateInput = z.infer<typeof homepageSectionCreateSchema>;
 export type HomepageSectionUpdateInput = z.infer<typeof homepageSectionUpdateSchema>;
@@ -230,14 +253,22 @@ export const promotionCreateSchema = z
     inventoryLimit: z.coerce.number().int().positive().optional().nullable(),
     perCustomerLimit: z.coerce.number().int().positive().optional().nullable(),
     configuration: jsonObject,
-    products: z.array(z.object({
-      productId: idSchema,
-      promotionalPrice: moneySchema.optional().nullable(),
-      inventoryLimit: z.coerce.number().int().positive().optional().nullable(),
-      perCustomerLimit: z.coerce.number().int().positive().optional().nullable(),
-    })).min(1).max(1000),
+    products: z
+      .array(
+        z.object({
+          productId: idSchema,
+          promotionalPrice: moneySchema.optional().nullable(),
+          inventoryLimit: z.coerce.number().int().positive().optional().nullable(),
+          perCustomerLimit: z.coerce.number().int().positive().optional().nullable(),
+        }),
+      )
+      .min(1)
+      .max(1000),
   })
-  .refine((v) => v.endsAt > v.startsAt, { message: "endsAt must be after startsAt.", path: ["endsAt"] });
+  .refine((v) => v.endsAt > v.startsAt, {
+    message: "endsAt must be after startsAt.",
+    path: ["endsAt"],
+  });
 export type PromotionCreateInput = z.infer<typeof promotionCreateSchema>;
 
 export const bundleQuoteSchema = z.object({
@@ -248,7 +279,14 @@ export type BundleQuoteInput = z.infer<typeof bundleQuoteSchema>;
 
 export const notificationPreferenceSchema = z.object({
   channel: z.enum(["in_app", "email", "sms", "push"]),
-  topic: z.enum(["back_in_stock", "price_drop", "wishlist", "cart_recovery", "new_discovery", "reorder"]),
+  topic: z.enum([
+    "back_in_stock",
+    "price_drop",
+    "wishlist",
+    "cart_recovery",
+    "new_discovery",
+    "reorder",
+  ]),
   enabled: z.boolean(),
   maxPerDay: z.coerce.number().int().min(0).max(20).default(2),
   maxPerWeek: z.coerce.number().int().min(0).max(50).default(5),

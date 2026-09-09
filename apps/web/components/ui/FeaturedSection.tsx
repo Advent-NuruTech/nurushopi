@@ -59,11 +59,12 @@ interface FeaturedSectionProps {
   wholesale?: WholesaleCardVM[];
   merchandising?: MerchandisingFeedCard[];
   title?: string;
+  showRecommendationHeading?: boolean;
   preserveProductOrder?: boolean;
   enableFeedModules?: boolean;
 }
 
-type FeedModule = "category" | "merchandising" | "promotion" | "wholesale";
+type FeedModule = "category" | "merchandising" | "wholesale";
 
 const FEED_MODULE_INTERVAL = 6;
 
@@ -83,6 +84,7 @@ export default function FeaturedSection({
   wholesale = [],
   merchandising = [],
   title,
+  showRecommendationHeading = false,
   preserveProductOrder = false,
   enableFeedModules = true,
 }: FeaturedSectionProps) {
@@ -121,7 +123,6 @@ export default function FeaturedSection({
     ? [
         ...(categoryList.length ? (["category"] as const) : []),
         ...(merchandising.length ? (["merchandising"] as const) : []),
-        ...(promotions.length ? (["promotion"] as const) : []),
         ...(wholesale.length ? (["wholesale"] as const) : []),
       ]
     : [];
@@ -165,6 +166,72 @@ export default function FeaturedSection({
           </div>
         )}
 
+        {promotions[0] && (
+          <motion.aside
+            initial={{ opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-70px" }}
+            transition={{ duration: 0.45 }}
+            className="group relative mb-8 overflow-hidden rounded-3xl border border-slate-200 bg-slate-950 shadow-lg dark:border-slate-800"
+            aria-label={`Promotion: ${promotions[0].title}`}
+          >
+            <Link
+              href={promotions[0].href}
+              className="grid min-h-[250px] sm:min-h-[300px] md:grid-cols-[1.05fr_0.95fr]"
+            >
+              <div className="relative min-h-[180px] overflow-hidden md:order-2 md:min-h-full">
+                {promotions[0].image ? (
+                  <Image
+                    src={promotions[0].image}
+                    alt={promotions[0].title}
+                    fill
+                    className="object-cover transition duration-500 group-hover:scale-105"
+                    sizes="(max-width: 767px) 100vw, 50vw"
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#009933] to-[#004D20]" />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-r from-slate-950/10 to-transparent md:bg-gradient-to-l md:from-transparent md:to-slate-950/35" />
+              </div>
+              <div className="relative flex flex-col justify-center p-6 text-white sm:p-9 md:order-1 lg:p-12">
+                <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-[#009933] px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.14em] text-white">
+                  <Megaphone size={13} /> Limited-time offer
+                </span>
+                <h2 className="mt-4 max-w-xl text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
+                  {promotions[0].title}
+                </h2>
+                {promotions[0].subtitle && (
+                  <p className="mt-3 max-w-lg text-sm leading-6 text-slate-200 sm:text-base">
+                    {promotions[0].subtitle.replace(/\*\*|__/g, " ").replace(/\s+/g, " ").trim()}
+                  </p>
+                )}
+                <span className="mt-6 inline-flex w-fit items-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-bold text-[#006B2C] transition group-hover:bg-[#EFFCF3]">
+                  Shop this offer <ArrowRight size={16} />
+                </span>
+              </div>
+            </Link>
+          </motion.aside>
+        )}
+
+        {showRecommendationHeading && (
+          <div className="mb-5 flex items-end justify-between gap-4 px-1">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#006B2C] dark:text-[#00C83A]">
+                Hand-picked for you
+              </p>
+              <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-950 dark:text-white">
+                You may also like
+              </h2>
+            </div>
+            <Link
+              href="/shop"
+              className="inline-flex items-center gap-1 text-sm font-semibold text-[#009933] hover:text-[#006B2C] dark:text-[#00C83A]"
+            >
+              Shop all <ArrowRight size={16} />
+            </Link>
+          </div>
+        )}
+
         <div className="grid grid-cols-2 items-stretch gap-2.5 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
           {orderedProducts.map((item, index) => {
             const discountPercent = getDiscountPercent(item);
@@ -183,7 +250,6 @@ export default function FeaturedSection({
               { length: Math.min(4, categoryList.length) },
               (_, offset) => categoryList[(discoveryIndex + offset) % categoryList.length],
             );
-            const promotion = promotions[moduleCycle % Math.max(promotions.length, 1)];
             const wholesaleItem = wholesale[moduleCycle % Math.max(wholesale.length, 1)];
             const merchandisingCard =
               merchandising[moduleCycle % Math.max(merchandising.length, 1)];
@@ -351,49 +417,6 @@ export default function FeaturedSection({
                         )}
                         <span className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-brand-strong dark:text-brand-bright">
                           {merchandisingCard.cta || "Explore collection"} <ArrowRight size={14} />
-                        </span>
-                      </div>
-                    </Link>
-                  </motion.aside>
-                )}
-
-                {moduleKind === "promotion" && promotion && (
-                  <motion.aside
-                    initial={{ opacity: 0, y: 18 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-70px" }}
-                    transition={{ duration: 0.45 }}
-                    className="group relative min-h-full overflow-hidden rounded-2xl bg-slate-950 shadow-lg"
-                    aria-label={`Promotion: ${promotion.title}`}
-                  >
-                    <Link href={promotion.href} className="flex h-full min-h-[300px] flex-col">
-                      {promotion.image && (
-                        <Image
-                          src={promotion.image}
-                          alt=""
-                          fill
-                          className="object-cover transition duration-500 group-hover:scale-105"
-                          sizes="(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 25vw"
-                        />
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/55 to-slate-950/10" />
-                      <div className="relative z-10 mt-auto p-4 text-white sm:p-5">
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-brand px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide">
-                          <Megaphone size={12} /> Promotion
-                        </span>
-                        <h3 className="mt-3 line-clamp-2 text-lg font-bold leading-tight sm:text-xl">
-                          {promotion.title}
-                        </h3>
-                        {promotion.subtitle && (
-                          <p className="mt-2 line-clamp-2 text-xs leading-5 text-slate-200">
-                            {promotion.subtitle
-                              .replace(/\*\*|__/g, " ")
-                              .replace(/\s+/g, " ")
-                              .trim()}
-                          </p>
-                        )}
-                        <span className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-brand-bright">
-                          View offer <ArrowRight size={14} />
                         </span>
                       </div>
                     </Link>

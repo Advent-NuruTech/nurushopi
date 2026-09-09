@@ -6375,6 +6375,46 @@ export namespace Prisma {
 
 
   /**
+   * Count Type VendorAccountCountOutputType
+   */
+
+  export type VendorAccountCountOutputType = {
+    products: number
+    wholesaleItems: number
+  }
+
+  export type VendorAccountCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    products?: boolean | VendorAccountCountOutputTypeCountProductsArgs
+    wholesaleItems?: boolean | VendorAccountCountOutputTypeCountWholesaleItemsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * VendorAccountCountOutputType without action
+   */
+  export type VendorAccountCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VendorAccountCountOutputType
+     */
+    select?: VendorAccountCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * VendorAccountCountOutputType without action
+   */
+  export type VendorAccountCountOutputTypeCountProductsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ProductWhereInput
+  }
+
+  /**
+   * VendorAccountCountOutputType without action
+   */
+  export type VendorAccountCountOutputTypeCountWholesaleItemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: WholesaleItemWhereInput
+  }
+
+
+  /**
    * Count Type MerchandisingCollectionCountOutputType
    */
 
@@ -19603,6 +19643,7 @@ export namespace Prisma {
     ratingCount: number | null
     categoryId: string | null
     createdById: string | null
+    vendorId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -19627,6 +19668,7 @@ export namespace Prisma {
     ratingCount: number | null
     categoryId: string | null
     createdById: string | null
+    vendorId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -19654,6 +19696,7 @@ export namespace Prisma {
     ratingDistribution: number
     categoryId: number
     createdById: number
+    vendorId: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -19700,6 +19743,7 @@ export namespace Prisma {
     ratingCount?: true
     categoryId?: true
     createdById?: true
+    vendorId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -19724,6 +19768,7 @@ export namespace Prisma {
     ratingCount?: true
     categoryId?: true
     createdById?: true
+    vendorId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -19751,6 +19796,7 @@ export namespace Prisma {
     ratingDistribution?: true
     categoryId?: true
     createdById?: true
+    vendorId?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -19865,6 +19911,7 @@ export namespace Prisma {
     ratingDistribution: JsonValue | null
     categoryId: string | null
     createdById: string | null
+    vendorId: string | null
     createdAt: Date
     updatedAt: Date
     _count: ProductCountAggregateOutputType | null
@@ -19911,10 +19958,12 @@ export namespace Prisma {
     ratingDistribution?: boolean
     categoryId?: boolean
     createdById?: boolean
+    vendorId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     category?: boolean | Product$categoryArgs<ExtArgs>
     createdBy?: boolean | Product$createdByArgs<ExtArgs>
+    vendor?: boolean | Product$vendorArgs<ExtArgs>
     orderItems?: boolean | Product$orderItemsArgs<ExtArgs>
     reviews?: boolean | Product$reviewsArgs<ExtArgs>
     views?: boolean | Product$viewsArgs<ExtArgs>
@@ -19957,10 +20006,12 @@ export namespace Prisma {
     ratingDistribution?: boolean
     categoryId?: boolean
     createdById?: boolean
+    vendorId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     category?: boolean | Product$categoryArgs<ExtArgs>
     createdBy?: boolean | Product$createdByArgs<ExtArgs>
+    vendor?: boolean | Product$vendorArgs<ExtArgs>
   }, ExtArgs["result"]["product"]>
 
   export type ProductSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -19986,10 +20037,12 @@ export namespace Prisma {
     ratingDistribution?: boolean
     categoryId?: boolean
     createdById?: boolean
+    vendorId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     category?: boolean | Product$categoryArgs<ExtArgs>
     createdBy?: boolean | Product$createdByArgs<ExtArgs>
+    vendor?: boolean | Product$vendorArgs<ExtArgs>
   }, ExtArgs["result"]["product"]>
 
   export type ProductSelectScalar = {
@@ -20015,14 +20068,16 @@ export namespace Prisma {
     ratingDistribution?: boolean
     categoryId?: boolean
     createdById?: boolean
+    vendorId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "sku" | "brandName" | "storeName" | "description" | "shortDescription" | "price" | "originalPrice" | "sellingPrice" | "images" | "variants" | "stock" | "lowStockThreshold" | "isActive" | "isFeatured" | "ratingAverage" | "ratingCount" | "ratingDistribution" | "categoryId" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["product"]>
+  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "sku" | "brandName" | "storeName" | "description" | "shortDescription" | "price" | "originalPrice" | "sellingPrice" | "images" | "variants" | "stock" | "lowStockThreshold" | "isActive" | "isFeatured" | "ratingAverage" | "ratingCount" | "ratingDistribution" | "categoryId" | "createdById" | "vendorId" | "createdAt" | "updatedAt", ExtArgs["result"]["product"]>
   export type ProductInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     category?: boolean | Product$categoryArgs<ExtArgs>
     createdBy?: boolean | Product$createdByArgs<ExtArgs>
+    vendor?: boolean | Product$vendorArgs<ExtArgs>
     orderItems?: boolean | Product$orderItemsArgs<ExtArgs>
     reviews?: boolean | Product$reviewsArgs<ExtArgs>
     views?: boolean | Product$viewsArgs<ExtArgs>
@@ -20044,10 +20099,12 @@ export namespace Prisma {
   export type ProductIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     category?: boolean | Product$categoryArgs<ExtArgs>
     createdBy?: boolean | Product$createdByArgs<ExtArgs>
+    vendor?: boolean | Product$vendorArgs<ExtArgs>
   }
   export type ProductIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     category?: boolean | Product$categoryArgs<ExtArgs>
     createdBy?: boolean | Product$createdByArgs<ExtArgs>
+    vendor?: boolean | Product$vendorArgs<ExtArgs>
   }
 
   export type $ProductPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -20055,6 +20112,7 @@ export namespace Prisma {
     objects: {
       category: Prisma.$CategoryPayload<ExtArgs> | null
       createdBy: Prisma.$AdminPayload<ExtArgs> | null
+      vendor: Prisma.$VendorAccountPayload<ExtArgs> | null
       orderItems: Prisma.$OrderItemPayload<ExtArgs>[]
       reviews: Prisma.$ReviewPayload<ExtArgs>[]
       views: Prisma.$ProductViewPayload<ExtArgs>[]
@@ -20095,6 +20153,7 @@ export namespace Prisma {
       ratingDistribution: Prisma.JsonValue | null
       categoryId: string | null
       createdById: string | null
+      vendorId: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["product"]>
@@ -20493,6 +20552,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     category<T extends Product$categoryArgs<ExtArgs> = {}>(args?: Subset<T, Product$categoryArgs<ExtArgs>>): Prisma__CategoryClient<$Result.GetResult<Prisma.$CategoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     createdBy<T extends Product$createdByArgs<ExtArgs> = {}>(args?: Subset<T, Product$createdByArgs<ExtArgs>>): Prisma__AdminClient<$Result.GetResult<Prisma.$AdminPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    vendor<T extends Product$vendorArgs<ExtArgs> = {}>(args?: Subset<T, Product$vendorArgs<ExtArgs>>): Prisma__VendorAccountClient<$Result.GetResult<Prisma.$VendorAccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     orderItems<T extends Product$orderItemsArgs<ExtArgs> = {}>(args?: Subset<T, Product$orderItemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OrderItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     reviews<T extends Product$reviewsArgs<ExtArgs> = {}>(args?: Subset<T, Product$reviewsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     views<T extends Product$viewsArgs<ExtArgs> = {}>(args?: Subset<T, Product$viewsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductViewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -20560,6 +20620,7 @@ export namespace Prisma {
     readonly ratingDistribution: FieldRef<"Product", 'Json'>
     readonly categoryId: FieldRef<"Product", 'String'>
     readonly createdById: FieldRef<"Product", 'String'>
+    readonly vendorId: FieldRef<"Product", 'String'>
     readonly createdAt: FieldRef<"Product", 'DateTime'>
     readonly updatedAt: FieldRef<"Product", 'DateTime'>
   }
@@ -20993,6 +21054,25 @@ export namespace Prisma {
      */
     include?: AdminInclude<ExtArgs> | null
     where?: AdminWhereInput
+  }
+
+  /**
+   * Product.vendor
+   */
+  export type Product$vendorArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VendorAccount
+     */
+    select?: VendorAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VendorAccount
+     */
+    omit?: VendorAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VendorAccountInclude<ExtArgs> | null
+    where?: VendorAccountWhereInput
   }
 
   /**
@@ -23609,11 +23689,13 @@ export namespace Prisma {
     id: string | null
     name: string | null
     slug: string | null
+    sku: string | null
     description: string | null
     unitPrice: Decimal | null
     minQuantity: number | null
     stock: number | null
     isActive: boolean | null
+    vendorId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -23622,11 +23704,13 @@ export namespace Prisma {
     id: string | null
     name: string | null
     slug: string | null
+    sku: string | null
     description: string | null
     unitPrice: Decimal | null
     minQuantity: number | null
     stock: number | null
     isActive: boolean | null
+    vendorId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -23635,6 +23719,7 @@ export namespace Prisma {
     id: number
     name: number
     slug: number
+    sku: number
     description: number
     unitPrice: number
     minQuantity: number
@@ -23642,6 +23727,7 @@ export namespace Prisma {
     images: number
     variants: number
     isActive: number
+    vendorId: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -23664,11 +23750,13 @@ export namespace Prisma {
     id?: true
     name?: true
     slug?: true
+    sku?: true
     description?: true
     unitPrice?: true
     minQuantity?: true
     stock?: true
     isActive?: true
+    vendorId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -23677,11 +23765,13 @@ export namespace Prisma {
     id?: true
     name?: true
     slug?: true
+    sku?: true
     description?: true
     unitPrice?: true
     minQuantity?: true
     stock?: true
     isActive?: true
+    vendorId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -23690,6 +23780,7 @@ export namespace Prisma {
     id?: true
     name?: true
     slug?: true
+    sku?: true
     description?: true
     unitPrice?: true
     minQuantity?: true
@@ -23697,6 +23788,7 @@ export namespace Prisma {
     images?: true
     variants?: true
     isActive?: true
+    vendorId?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -23792,6 +23884,7 @@ export namespace Prisma {
     id: string
     name: string
     slug: string | null
+    sku: string | null
     description: string | null
     unitPrice: Decimal
     minQuantity: number
@@ -23799,6 +23892,7 @@ export namespace Prisma {
     images: string[]
     variants: JsonValue
     isActive: boolean
+    vendorId: string | null
     createdAt: Date
     updatedAt: Date
     _count: WholesaleItemCountAggregateOutputType | null
@@ -23826,6 +23920,7 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     slug?: boolean
+    sku?: boolean
     description?: boolean
     unitPrice?: boolean
     minQuantity?: boolean
@@ -23833,14 +23928,17 @@ export namespace Prisma {
     images?: boolean
     variants?: boolean
     isActive?: boolean
+    vendorId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    vendor?: boolean | WholesaleItem$vendorArgs<ExtArgs>
   }, ExtArgs["result"]["wholesaleItem"]>
 
   export type WholesaleItemSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
     slug?: boolean
+    sku?: boolean
     description?: boolean
     unitPrice?: boolean
     minQuantity?: boolean
@@ -23848,14 +23946,17 @@ export namespace Prisma {
     images?: boolean
     variants?: boolean
     isActive?: boolean
+    vendorId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    vendor?: boolean | WholesaleItem$vendorArgs<ExtArgs>
   }, ExtArgs["result"]["wholesaleItem"]>
 
   export type WholesaleItemSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
     slug?: boolean
+    sku?: boolean
     description?: boolean
     unitPrice?: boolean
     minQuantity?: boolean
@@ -23863,14 +23964,17 @@ export namespace Prisma {
     images?: boolean
     variants?: boolean
     isActive?: boolean
+    vendorId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    vendor?: boolean | WholesaleItem$vendorArgs<ExtArgs>
   }, ExtArgs["result"]["wholesaleItem"]>
 
   export type WholesaleItemSelectScalar = {
     id?: boolean
     name?: boolean
     slug?: boolean
+    sku?: boolean
     description?: boolean
     unitPrice?: boolean
     minQuantity?: boolean
@@ -23878,19 +23982,32 @@ export namespace Prisma {
     images?: boolean
     variants?: boolean
     isActive?: boolean
+    vendorId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type WholesaleItemOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "description" | "unitPrice" | "minQuantity" | "stock" | "images" | "variants" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["wholesaleItem"]>
+  export type WholesaleItemOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "slug" | "sku" | "description" | "unitPrice" | "minQuantity" | "stock" | "images" | "variants" | "isActive" | "vendorId" | "createdAt" | "updatedAt", ExtArgs["result"]["wholesaleItem"]>
+  export type WholesaleItemInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    vendor?: boolean | WholesaleItem$vendorArgs<ExtArgs>
+  }
+  export type WholesaleItemIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    vendor?: boolean | WholesaleItem$vendorArgs<ExtArgs>
+  }
+  export type WholesaleItemIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    vendor?: boolean | WholesaleItem$vendorArgs<ExtArgs>
+  }
 
   export type $WholesaleItemPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "WholesaleItem"
-    objects: {}
+    objects: {
+      vendor: Prisma.$VendorAccountPayload<ExtArgs> | null
+    }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       name: string
       slug: string | null
+      sku: string | null
       description: string | null
       unitPrice: Prisma.Decimal
       minQuantity: number
@@ -23898,6 +24015,7 @@ export namespace Prisma {
       images: string[]
       variants: Prisma.JsonValue
       isActive: boolean
+      vendorId: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["wholesaleItem"]>
@@ -24294,6 +24412,7 @@ export namespace Prisma {
    */
   export interface Prisma__WholesaleItemClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    vendor<T extends WholesaleItem$vendorArgs<ExtArgs> = {}>(args?: Subset<T, WholesaleItem$vendorArgs<ExtArgs>>): Prisma__VendorAccountClient<$Result.GetResult<Prisma.$VendorAccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -24326,6 +24445,7 @@ export namespace Prisma {
     readonly id: FieldRef<"WholesaleItem", 'String'>
     readonly name: FieldRef<"WholesaleItem", 'String'>
     readonly slug: FieldRef<"WholesaleItem", 'String'>
+    readonly sku: FieldRef<"WholesaleItem", 'String'>
     readonly description: FieldRef<"WholesaleItem", 'String'>
     readonly unitPrice: FieldRef<"WholesaleItem", 'Decimal'>
     readonly minQuantity: FieldRef<"WholesaleItem", 'Int'>
@@ -24333,6 +24453,7 @@ export namespace Prisma {
     readonly images: FieldRef<"WholesaleItem", 'String[]'>
     readonly variants: FieldRef<"WholesaleItem", 'Json'>
     readonly isActive: FieldRef<"WholesaleItem", 'Boolean'>
+    readonly vendorId: FieldRef<"WholesaleItem", 'String'>
     readonly createdAt: FieldRef<"WholesaleItem", 'DateTime'>
     readonly updatedAt: FieldRef<"WholesaleItem", 'DateTime'>
   }
@@ -24352,6 +24473,10 @@ export namespace Prisma {
      */
     omit?: WholesaleItemOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WholesaleItemInclude<ExtArgs> | null
+    /**
      * Filter, which WholesaleItem to fetch.
      */
     where: WholesaleItemWhereUniqueInput
@@ -24370,6 +24495,10 @@ export namespace Prisma {
      */
     omit?: WholesaleItemOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WholesaleItemInclude<ExtArgs> | null
+    /**
      * Filter, which WholesaleItem to fetch.
      */
     where: WholesaleItemWhereUniqueInput
@@ -24387,6 +24516,10 @@ export namespace Prisma {
      * Omit specific fields from the WholesaleItem
      */
     omit?: WholesaleItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WholesaleItemInclude<ExtArgs> | null
     /**
      * Filter, which WholesaleItem to fetch.
      */
@@ -24436,6 +24569,10 @@ export namespace Prisma {
      */
     omit?: WholesaleItemOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WholesaleItemInclude<ExtArgs> | null
+    /**
      * Filter, which WholesaleItem to fetch.
      */
     where?: WholesaleItemWhereInput
@@ -24484,6 +24621,10 @@ export namespace Prisma {
      */
     omit?: WholesaleItemOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WholesaleItemInclude<ExtArgs> | null
+    /**
      * Filter, which WholesaleItems to fetch.
      */
     where?: WholesaleItemWhereInput
@@ -24527,6 +24668,10 @@ export namespace Prisma {
      */
     omit?: WholesaleItemOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WholesaleItemInclude<ExtArgs> | null
+    /**
      * The data needed to create a WholesaleItem.
      */
     data: XOR<WholesaleItemCreateInput, WholesaleItemUncheckedCreateInput>
@@ -24560,6 +24705,10 @@ export namespace Prisma {
      */
     data: WholesaleItemCreateManyInput | WholesaleItemCreateManyInput[]
     skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WholesaleItemIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -24574,6 +24723,10 @@ export namespace Prisma {
      * Omit specific fields from the WholesaleItem
      */
     omit?: WholesaleItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WholesaleItemInclude<ExtArgs> | null
     /**
      * The data needed to update a WholesaleItem.
      */
@@ -24626,6 +24779,10 @@ export namespace Prisma {
      * Limit how many WholesaleItems to update.
      */
     limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WholesaleItemIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -24640,6 +24797,10 @@ export namespace Prisma {
      * Omit specific fields from the WholesaleItem
      */
     omit?: WholesaleItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WholesaleItemInclude<ExtArgs> | null
     /**
      * The filter to search for the WholesaleItem to update in case it exists.
      */
@@ -24667,6 +24828,10 @@ export namespace Prisma {
      */
     omit?: WholesaleItemOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WholesaleItemInclude<ExtArgs> | null
+    /**
      * Filter which WholesaleItem to delete.
      */
     where: WholesaleItemWhereUniqueInput
@@ -24687,6 +24852,25 @@ export namespace Prisma {
   }
 
   /**
+   * WholesaleItem.vendor
+   */
+  export type WholesaleItem$vendorArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VendorAccount
+     */
+    select?: VendorAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VendorAccount
+     */
+    omit?: VendorAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VendorAccountInclude<ExtArgs> | null
+    where?: VendorAccountWhereInput
+  }
+
+  /**
    * WholesaleItem without action
    */
   export type WholesaleItemDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -24698,6 +24882,10 @@ export namespace Prisma {
      * Omit specific fields from the WholesaleItem
      */
     omit?: WholesaleItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WholesaleItemInclude<ExtArgs> | null
   }
 
 
@@ -38598,6 +38786,9 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     application?: boolean | VendorApplicationDefaultArgs<ExtArgs>
+    products?: boolean | VendorAccount$productsArgs<ExtArgs>
+    wholesaleItems?: boolean | VendorAccount$wholesaleItemsArgs<ExtArgs>
+    _count?: boolean | VendorAccountCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["vendorAccount"]>
 
   export type VendorAccountSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -38638,6 +38829,9 @@ export namespace Prisma {
   export type VendorAccountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "passwordHash" | "name" | "applicationId" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["vendorAccount"]>
   export type VendorAccountInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     application?: boolean | VendorApplicationDefaultArgs<ExtArgs>
+    products?: boolean | VendorAccount$productsArgs<ExtArgs>
+    wholesaleItems?: boolean | VendorAccount$wholesaleItemsArgs<ExtArgs>
+    _count?: boolean | VendorAccountCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type VendorAccountIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     application?: boolean | VendorApplicationDefaultArgs<ExtArgs>
@@ -38650,6 +38844,8 @@ export namespace Prisma {
     name: "VendorAccount"
     objects: {
       application: Prisma.$VendorApplicationPayload<ExtArgs>
+      products: Prisma.$ProductPayload<ExtArgs>[]
+      wholesaleItems: Prisma.$WholesaleItemPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -39055,6 +39251,8 @@ export namespace Prisma {
   export interface Prisma__VendorAccountClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     application<T extends VendorApplicationDefaultArgs<ExtArgs> = {}>(args?: Subset<T, VendorApplicationDefaultArgs<ExtArgs>>): Prisma__VendorApplicationClient<$Result.GetResult<Prisma.$VendorApplicationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    products<T extends VendorAccount$productsArgs<ExtArgs> = {}>(args?: Subset<T, VendorAccount$productsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    wholesaleItems<T extends VendorAccount$wholesaleItemsArgs<ExtArgs> = {}>(args?: Subset<T, VendorAccount$wholesaleItemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WholesaleItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -39485,6 +39683,54 @@ export namespace Prisma {
      * Limit how many VendorAccounts to delete.
      */
     limit?: number
+  }
+
+  /**
+   * VendorAccount.products
+   */
+  export type VendorAccount$productsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Product
+     */
+    select?: ProductSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Product
+     */
+    omit?: ProductOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProductInclude<ExtArgs> | null
+    where?: ProductWhereInput
+    orderBy?: ProductOrderByWithRelationInput | ProductOrderByWithRelationInput[]
+    cursor?: ProductWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ProductScalarFieldEnum | ProductScalarFieldEnum[]
+  }
+
+  /**
+   * VendorAccount.wholesaleItems
+   */
+  export type VendorAccount$wholesaleItemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WholesaleItem
+     */
+    select?: WholesaleItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WholesaleItem
+     */
+    omit?: WholesaleItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WholesaleItemInclude<ExtArgs> | null
+    where?: WholesaleItemWhereInput
+    orderBy?: WholesaleItemOrderByWithRelationInput | WholesaleItemOrderByWithRelationInput[]
+    cursor?: WholesaleItemWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: WholesaleItemScalarFieldEnum | WholesaleItemScalarFieldEnum[]
   }
 
   /**
@@ -68691,6 +68937,7 @@ export namespace Prisma {
     ratingDistribution: 'ratingDistribution',
     categoryId: 'categoryId',
     createdById: 'createdById',
+    vendorId: 'vendorId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -68733,6 +68980,7 @@ export namespace Prisma {
     id: 'id',
     name: 'name',
     slug: 'slug',
+    sku: 'sku',
     description: 'description',
     unitPrice: 'unitPrice',
     minQuantity: 'minQuantity',
@@ -68740,6 +68988,7 @@ export namespace Prisma {
     images: 'images',
     variants: 'variants',
     isActive: 'isActive',
+    vendorId: 'vendorId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -70686,10 +70935,12 @@ export namespace Prisma {
     ratingDistribution?: JsonNullableFilter<"Product">
     categoryId?: StringNullableFilter<"Product"> | string | null
     createdById?: StringNullableFilter<"Product"> | string | null
+    vendorId?: StringNullableFilter<"Product"> | string | null
     createdAt?: DateTimeFilter<"Product"> | Date | string
     updatedAt?: DateTimeFilter<"Product"> | Date | string
     category?: XOR<CategoryNullableScalarRelationFilter, CategoryWhereInput> | null
     createdBy?: XOR<AdminNullableScalarRelationFilter, AdminWhereInput> | null
+    vendor?: XOR<VendorAccountNullableScalarRelationFilter, VendorAccountWhereInput> | null
     orderItems?: OrderItemListRelationFilter
     reviews?: ReviewListRelationFilter
     views?: ProductViewListRelationFilter
@@ -70731,10 +70982,12 @@ export namespace Prisma {
     ratingDistribution?: SortOrderInput | SortOrder
     categoryId?: SortOrderInput | SortOrder
     createdById?: SortOrderInput | SortOrder
+    vendorId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     category?: CategoryOrderByWithRelationInput
     createdBy?: AdminOrderByWithRelationInput
+    vendor?: VendorAccountOrderByWithRelationInput
     orderItems?: OrderItemOrderByRelationAggregateInput
     reviews?: ReviewOrderByRelationAggregateInput
     views?: ProductViewOrderByRelationAggregateInput
@@ -70779,10 +71032,12 @@ export namespace Prisma {
     ratingDistribution?: JsonNullableFilter<"Product">
     categoryId?: StringNullableFilter<"Product"> | string | null
     createdById?: StringNullableFilter<"Product"> | string | null
+    vendorId?: StringNullableFilter<"Product"> | string | null
     createdAt?: DateTimeFilter<"Product"> | Date | string
     updatedAt?: DateTimeFilter<"Product"> | Date | string
     category?: XOR<CategoryNullableScalarRelationFilter, CategoryWhereInput> | null
     createdBy?: XOR<AdminNullableScalarRelationFilter, AdminWhereInput> | null
+    vendor?: XOR<VendorAccountNullableScalarRelationFilter, VendorAccountWhereInput> | null
     orderItems?: OrderItemListRelationFilter
     reviews?: ReviewListRelationFilter
     views?: ProductViewListRelationFilter
@@ -70824,6 +71079,7 @@ export namespace Prisma {
     ratingDistribution?: SortOrderInput | SortOrder
     categoryId?: SortOrderInput | SortOrder
     createdById?: SortOrderInput | SortOrder
+    vendorId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: ProductCountOrderByAggregateInput
@@ -70859,6 +71115,7 @@ export namespace Prisma {
     ratingDistribution?: JsonNullableWithAggregatesFilter<"Product">
     categoryId?: StringNullableWithAggregatesFilter<"Product"> | string | null
     createdById?: StringNullableWithAggregatesFilter<"Product"> | string | null
+    vendorId?: StringNullableWithAggregatesFilter<"Product"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Product"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Product"> | Date | string
   }
@@ -71023,6 +71280,7 @@ export namespace Prisma {
     id?: StringFilter<"WholesaleItem"> | string
     name?: StringFilter<"WholesaleItem"> | string
     slug?: StringNullableFilter<"WholesaleItem"> | string | null
+    sku?: StringNullableFilter<"WholesaleItem"> | string | null
     description?: StringNullableFilter<"WholesaleItem"> | string | null
     unitPrice?: DecimalFilter<"WholesaleItem"> | Decimal | DecimalJsLike | number | string
     minQuantity?: IntFilter<"WholesaleItem"> | number
@@ -71030,14 +71288,17 @@ export namespace Prisma {
     images?: StringNullableListFilter<"WholesaleItem">
     variants?: JsonFilter<"WholesaleItem">
     isActive?: BoolFilter<"WholesaleItem"> | boolean
+    vendorId?: StringNullableFilter<"WholesaleItem"> | string | null
     createdAt?: DateTimeFilter<"WholesaleItem"> | Date | string
     updatedAt?: DateTimeFilter<"WholesaleItem"> | Date | string
+    vendor?: XOR<VendorAccountNullableScalarRelationFilter, VendorAccountWhereInput> | null
   }
 
   export type WholesaleItemOrderByWithRelationInput = {
     id?: SortOrder
     name?: SortOrder
     slug?: SortOrderInput | SortOrder
+    sku?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
     unitPrice?: SortOrder
     minQuantity?: SortOrder
@@ -71045,13 +71306,16 @@ export namespace Prisma {
     images?: SortOrder
     variants?: SortOrder
     isActive?: SortOrder
+    vendorId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    vendor?: VendorAccountOrderByWithRelationInput
   }
 
   export type WholesaleItemWhereUniqueInput = Prisma.AtLeast<{
     id?: string
     slug?: string
+    sku?: string
     AND?: WholesaleItemWhereInput | WholesaleItemWhereInput[]
     OR?: WholesaleItemWhereInput[]
     NOT?: WholesaleItemWhereInput | WholesaleItemWhereInput[]
@@ -71063,14 +71327,17 @@ export namespace Prisma {
     images?: StringNullableListFilter<"WholesaleItem">
     variants?: JsonFilter<"WholesaleItem">
     isActive?: BoolFilter<"WholesaleItem"> | boolean
+    vendorId?: StringNullableFilter<"WholesaleItem"> | string | null
     createdAt?: DateTimeFilter<"WholesaleItem"> | Date | string
     updatedAt?: DateTimeFilter<"WholesaleItem"> | Date | string
-  }, "id" | "slug">
+    vendor?: XOR<VendorAccountNullableScalarRelationFilter, VendorAccountWhereInput> | null
+  }, "id" | "slug" | "sku">
 
   export type WholesaleItemOrderByWithAggregationInput = {
     id?: SortOrder
     name?: SortOrder
     slug?: SortOrderInput | SortOrder
+    sku?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
     unitPrice?: SortOrder
     minQuantity?: SortOrder
@@ -71078,6 +71345,7 @@ export namespace Prisma {
     images?: SortOrder
     variants?: SortOrder
     isActive?: SortOrder
+    vendorId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: WholesaleItemCountOrderByAggregateInput
@@ -71094,6 +71362,7 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"WholesaleItem"> | string
     name?: StringWithAggregatesFilter<"WholesaleItem"> | string
     slug?: StringNullableWithAggregatesFilter<"WholesaleItem"> | string | null
+    sku?: StringNullableWithAggregatesFilter<"WholesaleItem"> | string | null
     description?: StringNullableWithAggregatesFilter<"WholesaleItem"> | string | null
     unitPrice?: DecimalWithAggregatesFilter<"WholesaleItem"> | Decimal | DecimalJsLike | number | string
     minQuantity?: IntWithAggregatesFilter<"WholesaleItem"> | number
@@ -71101,6 +71370,7 @@ export namespace Prisma {
     images?: StringNullableListFilter<"WholesaleItem">
     variants?: JsonWithAggregatesFilter<"WholesaleItem">
     isActive?: BoolWithAggregatesFilter<"WholesaleItem"> | boolean
+    vendorId?: StringNullableWithAggregatesFilter<"WholesaleItem"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"WholesaleItem"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"WholesaleItem"> | Date | string
   }
@@ -72064,6 +72334,8 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"VendorAccount"> | Date | string
     updatedAt?: DateTimeFilter<"VendorAccount"> | Date | string
     application?: XOR<VendorApplicationScalarRelationFilter, VendorApplicationWhereInput>
+    products?: ProductListRelationFilter
+    wholesaleItems?: WholesaleItemListRelationFilter
   }
 
   export type VendorAccountOrderByWithRelationInput = {
@@ -72076,6 +72348,8 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     application?: VendorApplicationOrderByWithRelationInput
+    products?: ProductOrderByRelationAggregateInput
+    wholesaleItems?: WholesaleItemOrderByRelationAggregateInput
   }
 
   export type VendorAccountWhereUniqueInput = Prisma.AtLeast<{
@@ -72091,6 +72365,8 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"VendorAccount"> | Date | string
     updatedAt?: DateTimeFilter<"VendorAccount"> | Date | string
     application?: XOR<VendorApplicationScalarRelationFilter, VendorApplicationWhereInput>
+    products?: ProductListRelationFilter
+    wholesaleItems?: WholesaleItemListRelationFilter
   }, "id" | "email" | "applicationId">
 
   export type VendorAccountOrderByWithAggregationInput = {
@@ -75393,6 +75669,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
     createdBy?: AdminCreateNestedOneWithoutCreatedProductsInput
+    vendor?: VendorAccountCreateNestedOneWithoutProductsInput
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     reviews?: ReviewCreateNestedManyWithoutProductInput
     views?: ProductViewCreateNestedManyWithoutProductInput
@@ -75434,6 +75711,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
+    vendorId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
@@ -75479,6 +75757,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
     createdBy?: AdminUpdateOneWithoutCreatedProductsNestedInput
+    vendor?: VendorAccountUpdateOneWithoutProductsNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     reviews?: ReviewUpdateManyWithoutProductNestedInput
     views?: ProductViewUpdateManyWithoutProductNestedInput
@@ -75520,6 +75799,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
@@ -75563,6 +75843,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
+    vendorId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -75615,6 +75896,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -75798,6 +76080,7 @@ export namespace Prisma {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
     description?: string | null
     unitPrice: Decimal | DecimalJsLike | number | string
     minQuantity?: number
@@ -75807,12 +76090,14 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    vendor?: VendorAccountCreateNestedOneWithoutWholesaleItemsInput
   }
 
   export type WholesaleItemUncheckedCreateInput = {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
     description?: string | null
     unitPrice: Decimal | DecimalJsLike | number | string
     minQuantity?: number
@@ -75820,6 +76105,7 @@ export namespace Prisma {
     images?: WholesaleItemCreateimagesInput | string[]
     variants?: JsonNullValueInput | InputJsonValue
     isActive?: boolean
+    vendorId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -75828,6 +76114,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     unitPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     minQuantity?: IntFieldUpdateOperationsInput | number
@@ -75837,12 +76124,14 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    vendor?: VendorAccountUpdateOneWithoutWholesaleItemsNestedInput
   }
 
   export type WholesaleItemUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     unitPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     minQuantity?: IntFieldUpdateOperationsInput | number
@@ -75850,6 +76139,7 @@ export namespace Prisma {
     images?: WholesaleItemUpdateimagesInput | string[]
     variants?: JsonNullValueInput | InputJsonValue
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    vendorId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -75858,6 +76148,7 @@ export namespace Prisma {
     id?: string
     name: string
     slug?: string | null
+    sku?: string | null
     description?: string | null
     unitPrice: Decimal | DecimalJsLike | number | string
     minQuantity?: number
@@ -75865,6 +76156,7 @@ export namespace Prisma {
     images?: WholesaleItemCreateimagesInput | string[]
     variants?: JsonNullValueInput | InputJsonValue
     isActive?: boolean
+    vendorId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -75873,6 +76165,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     unitPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     minQuantity?: IntFieldUpdateOperationsInput | number
@@ -75888,6 +76181,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     unitPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     minQuantity?: IntFieldUpdateOperationsInput | number
@@ -75895,6 +76189,7 @@ export namespace Prisma {
     images?: WholesaleItemUpdateimagesInput | string[]
     variants?: JsonNullValueInput | InputJsonValue
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    vendorId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -76931,6 +77226,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     application: VendorApplicationCreateNestedOneWithoutAccountInput
+    products?: ProductCreateNestedManyWithoutVendorInput
+    wholesaleItems?: WholesaleItemCreateNestedManyWithoutVendorInput
   }
 
   export type VendorAccountUncheckedCreateInput = {
@@ -76942,6 +77239,8 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    products?: ProductUncheckedCreateNestedManyWithoutVendorInput
+    wholesaleItems?: WholesaleItemUncheckedCreateNestedManyWithoutVendorInput
   }
 
   export type VendorAccountUpdateInput = {
@@ -76953,6 +77252,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     application?: VendorApplicationUpdateOneRequiredWithoutAccountNestedInput
+    products?: ProductUpdateManyWithoutVendorNestedInput
+    wholesaleItems?: WholesaleItemUpdateManyWithoutVendorNestedInput
   }
 
   export type VendorAccountUncheckedUpdateInput = {
@@ -76964,6 +77265,8 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    products?: ProductUncheckedUpdateManyWithoutVendorNestedInput
+    wholesaleItems?: WholesaleItemUncheckedUpdateManyWithoutVendorNestedInput
   }
 
   export type VendorAccountCreateManyInput = {
@@ -80566,6 +80869,11 @@ export namespace Prisma {
     isNot?: CategoryWhereInput | null
   }
 
+  export type VendorAccountNullableScalarRelationFilter = {
+    is?: VendorAccountWhereInput | null
+    isNot?: VendorAccountWhereInput | null
+  }
+
   export type OrderItemListRelationFilter = {
     every?: OrderItemWhereInput
     some?: OrderItemWhereInput
@@ -80659,6 +80967,7 @@ export namespace Prisma {
     ratingDistribution?: SortOrder
     categoryId?: SortOrder
     createdById?: SortOrder
+    vendorId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -80693,6 +81002,7 @@ export namespace Prisma {
     ratingCount?: SortOrder
     categoryId?: SortOrder
     createdById?: SortOrder
+    vendorId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -80717,6 +81027,7 @@ export namespace Prisma {
     ratingCount?: SortOrder
     categoryId?: SortOrder
     createdById?: SortOrder
+    vendorId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -80868,6 +81179,7 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     slug?: SortOrder
+    sku?: SortOrder
     description?: SortOrder
     unitPrice?: SortOrder
     minQuantity?: SortOrder
@@ -80875,6 +81187,7 @@ export namespace Prisma {
     images?: SortOrder
     variants?: SortOrder
     isActive?: SortOrder
+    vendorId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -80889,11 +81202,13 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     slug?: SortOrder
+    sku?: SortOrder
     description?: SortOrder
     unitPrice?: SortOrder
     minQuantity?: SortOrder
     stock?: SortOrder
     isActive?: SortOrder
+    vendorId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -80902,11 +81217,13 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     slug?: SortOrder
+    sku?: SortOrder
     description?: SortOrder
     unitPrice?: SortOrder
     minQuantity?: SortOrder
     stock?: SortOrder
     isActive?: SortOrder
+    vendorId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -81571,11 +81888,6 @@ export namespace Prisma {
     not?: NestedEnumVendorApplicationStatusFilter<$PrismaModel> | $Enums.VendorApplicationStatus
   }
 
-  export type VendorAccountNullableScalarRelationFilter = {
-    is?: VendorAccountWhereInput | null
-    isNot?: VendorAccountWhereInput | null
-  }
-
   export type VendorInviteListRelationFilter = {
     every?: VendorInviteWhereInput
     some?: VendorInviteWhereInput
@@ -81638,6 +81950,16 @@ export namespace Prisma {
   export type VendorApplicationScalarRelationFilter = {
     is?: VendorApplicationWhereInput
     isNot?: VendorApplicationWhereInput
+  }
+
+  export type WholesaleItemListRelationFilter = {
+    every?: WholesaleItemWhereInput
+    some?: WholesaleItemWhereInput
+    none?: WholesaleItemWhereInput
+  }
+
+  export type WholesaleItemOrderByRelationAggregateInput = {
+    _count?: SortOrder
   }
 
   export type VendorAccountCountOrderByAggregateInput = {
@@ -84801,6 +85123,12 @@ export namespace Prisma {
     connect?: AdminWhereUniqueInput
   }
 
+  export type VendorAccountCreateNestedOneWithoutProductsInput = {
+    create?: XOR<VendorAccountCreateWithoutProductsInput, VendorAccountUncheckedCreateWithoutProductsInput>
+    connectOrCreate?: VendorAccountCreateOrConnectWithoutProductsInput
+    connect?: VendorAccountWhereUniqueInput
+  }
+
   export type OrderItemCreateNestedManyWithoutProductInput = {
     create?: XOR<OrderItemCreateWithoutProductInput, OrderItemUncheckedCreateWithoutProductInput> | OrderItemCreateWithoutProductInput[] | OrderItemUncheckedCreateWithoutProductInput[]
     connectOrCreate?: OrderItemCreateOrConnectWithoutProductInput | OrderItemCreateOrConnectWithoutProductInput[]
@@ -85056,6 +85384,16 @@ export namespace Prisma {
     delete?: AdminWhereInput | boolean
     connect?: AdminWhereUniqueInput
     update?: XOR<XOR<AdminUpdateToOneWithWhereWithoutCreatedProductsInput, AdminUpdateWithoutCreatedProductsInput>, AdminUncheckedUpdateWithoutCreatedProductsInput>
+  }
+
+  export type VendorAccountUpdateOneWithoutProductsNestedInput = {
+    create?: XOR<VendorAccountCreateWithoutProductsInput, VendorAccountUncheckedCreateWithoutProductsInput>
+    connectOrCreate?: VendorAccountCreateOrConnectWithoutProductsInput
+    upsert?: VendorAccountUpsertWithoutProductsInput
+    disconnect?: VendorAccountWhereInput | boolean
+    delete?: VendorAccountWhereInput | boolean
+    connect?: VendorAccountWhereUniqueInput
+    update?: XOR<XOR<VendorAccountUpdateToOneWithWhereWithoutProductsInput, VendorAccountUpdateWithoutProductsInput>, VendorAccountUncheckedUpdateWithoutProductsInput>
   }
 
   export type OrderItemUpdateManyWithoutProductNestedInput = {
@@ -85510,9 +85848,25 @@ export namespace Prisma {
     set: string[]
   }
 
+  export type VendorAccountCreateNestedOneWithoutWholesaleItemsInput = {
+    create?: XOR<VendorAccountCreateWithoutWholesaleItemsInput, VendorAccountUncheckedCreateWithoutWholesaleItemsInput>
+    connectOrCreate?: VendorAccountCreateOrConnectWithoutWholesaleItemsInput
+    connect?: VendorAccountWhereUniqueInput
+  }
+
   export type WholesaleItemUpdateimagesInput = {
     set?: string[]
     push?: string | string[]
+  }
+
+  export type VendorAccountUpdateOneWithoutWholesaleItemsNestedInput = {
+    create?: XOR<VendorAccountCreateWithoutWholesaleItemsInput, VendorAccountUncheckedCreateWithoutWholesaleItemsInput>
+    connectOrCreate?: VendorAccountCreateOrConnectWithoutWholesaleItemsInput
+    upsert?: VendorAccountUpsertWithoutWholesaleItemsInput
+    disconnect?: VendorAccountWhereInput | boolean
+    delete?: VendorAccountWhereInput | boolean
+    connect?: VendorAccountWhereUniqueInput
+    update?: XOR<XOR<VendorAccountUpdateToOneWithWhereWithoutWholesaleItemsInput, VendorAccountUpdateWithoutWholesaleItemsInput>, VendorAccountUncheckedUpdateWithoutWholesaleItemsInput>
   }
 
   export type UserCreateNestedOneWithoutOrdersInput = {
@@ -85952,12 +86306,96 @@ export namespace Prisma {
     connect?: VendorApplicationWhereUniqueInput
   }
 
+  export type ProductCreateNestedManyWithoutVendorInput = {
+    create?: XOR<ProductCreateWithoutVendorInput, ProductUncheckedCreateWithoutVendorInput> | ProductCreateWithoutVendorInput[] | ProductUncheckedCreateWithoutVendorInput[]
+    connectOrCreate?: ProductCreateOrConnectWithoutVendorInput | ProductCreateOrConnectWithoutVendorInput[]
+    createMany?: ProductCreateManyVendorInputEnvelope
+    connect?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+  }
+
+  export type WholesaleItemCreateNestedManyWithoutVendorInput = {
+    create?: XOR<WholesaleItemCreateWithoutVendorInput, WholesaleItemUncheckedCreateWithoutVendorInput> | WholesaleItemCreateWithoutVendorInput[] | WholesaleItemUncheckedCreateWithoutVendorInput[]
+    connectOrCreate?: WholesaleItemCreateOrConnectWithoutVendorInput | WholesaleItemCreateOrConnectWithoutVendorInput[]
+    createMany?: WholesaleItemCreateManyVendorInputEnvelope
+    connect?: WholesaleItemWhereUniqueInput | WholesaleItemWhereUniqueInput[]
+  }
+
+  export type ProductUncheckedCreateNestedManyWithoutVendorInput = {
+    create?: XOR<ProductCreateWithoutVendorInput, ProductUncheckedCreateWithoutVendorInput> | ProductCreateWithoutVendorInput[] | ProductUncheckedCreateWithoutVendorInput[]
+    connectOrCreate?: ProductCreateOrConnectWithoutVendorInput | ProductCreateOrConnectWithoutVendorInput[]
+    createMany?: ProductCreateManyVendorInputEnvelope
+    connect?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+  }
+
+  export type WholesaleItemUncheckedCreateNestedManyWithoutVendorInput = {
+    create?: XOR<WholesaleItemCreateWithoutVendorInput, WholesaleItemUncheckedCreateWithoutVendorInput> | WholesaleItemCreateWithoutVendorInput[] | WholesaleItemUncheckedCreateWithoutVendorInput[]
+    connectOrCreate?: WholesaleItemCreateOrConnectWithoutVendorInput | WholesaleItemCreateOrConnectWithoutVendorInput[]
+    createMany?: WholesaleItemCreateManyVendorInputEnvelope
+    connect?: WholesaleItemWhereUniqueInput | WholesaleItemWhereUniqueInput[]
+  }
+
   export type VendorApplicationUpdateOneRequiredWithoutAccountNestedInput = {
     create?: XOR<VendorApplicationCreateWithoutAccountInput, VendorApplicationUncheckedCreateWithoutAccountInput>
     connectOrCreate?: VendorApplicationCreateOrConnectWithoutAccountInput
     upsert?: VendorApplicationUpsertWithoutAccountInput
     connect?: VendorApplicationWhereUniqueInput
     update?: XOR<XOR<VendorApplicationUpdateToOneWithWhereWithoutAccountInput, VendorApplicationUpdateWithoutAccountInput>, VendorApplicationUncheckedUpdateWithoutAccountInput>
+  }
+
+  export type ProductUpdateManyWithoutVendorNestedInput = {
+    create?: XOR<ProductCreateWithoutVendorInput, ProductUncheckedCreateWithoutVendorInput> | ProductCreateWithoutVendorInput[] | ProductUncheckedCreateWithoutVendorInput[]
+    connectOrCreate?: ProductCreateOrConnectWithoutVendorInput | ProductCreateOrConnectWithoutVendorInput[]
+    upsert?: ProductUpsertWithWhereUniqueWithoutVendorInput | ProductUpsertWithWhereUniqueWithoutVendorInput[]
+    createMany?: ProductCreateManyVendorInputEnvelope
+    set?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+    disconnect?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+    delete?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+    connect?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+    update?: ProductUpdateWithWhereUniqueWithoutVendorInput | ProductUpdateWithWhereUniqueWithoutVendorInput[]
+    updateMany?: ProductUpdateManyWithWhereWithoutVendorInput | ProductUpdateManyWithWhereWithoutVendorInput[]
+    deleteMany?: ProductScalarWhereInput | ProductScalarWhereInput[]
+  }
+
+  export type WholesaleItemUpdateManyWithoutVendorNestedInput = {
+    create?: XOR<WholesaleItemCreateWithoutVendorInput, WholesaleItemUncheckedCreateWithoutVendorInput> | WholesaleItemCreateWithoutVendorInput[] | WholesaleItemUncheckedCreateWithoutVendorInput[]
+    connectOrCreate?: WholesaleItemCreateOrConnectWithoutVendorInput | WholesaleItemCreateOrConnectWithoutVendorInput[]
+    upsert?: WholesaleItemUpsertWithWhereUniqueWithoutVendorInput | WholesaleItemUpsertWithWhereUniqueWithoutVendorInput[]
+    createMany?: WholesaleItemCreateManyVendorInputEnvelope
+    set?: WholesaleItemWhereUniqueInput | WholesaleItemWhereUniqueInput[]
+    disconnect?: WholesaleItemWhereUniqueInput | WholesaleItemWhereUniqueInput[]
+    delete?: WholesaleItemWhereUniqueInput | WholesaleItemWhereUniqueInput[]
+    connect?: WholesaleItemWhereUniqueInput | WholesaleItemWhereUniqueInput[]
+    update?: WholesaleItemUpdateWithWhereUniqueWithoutVendorInput | WholesaleItemUpdateWithWhereUniqueWithoutVendorInput[]
+    updateMany?: WholesaleItemUpdateManyWithWhereWithoutVendorInput | WholesaleItemUpdateManyWithWhereWithoutVendorInput[]
+    deleteMany?: WholesaleItemScalarWhereInput | WholesaleItemScalarWhereInput[]
+  }
+
+  export type ProductUncheckedUpdateManyWithoutVendorNestedInput = {
+    create?: XOR<ProductCreateWithoutVendorInput, ProductUncheckedCreateWithoutVendorInput> | ProductCreateWithoutVendorInput[] | ProductUncheckedCreateWithoutVendorInput[]
+    connectOrCreate?: ProductCreateOrConnectWithoutVendorInput | ProductCreateOrConnectWithoutVendorInput[]
+    upsert?: ProductUpsertWithWhereUniqueWithoutVendorInput | ProductUpsertWithWhereUniqueWithoutVendorInput[]
+    createMany?: ProductCreateManyVendorInputEnvelope
+    set?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+    disconnect?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+    delete?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+    connect?: ProductWhereUniqueInput | ProductWhereUniqueInput[]
+    update?: ProductUpdateWithWhereUniqueWithoutVendorInput | ProductUpdateWithWhereUniqueWithoutVendorInput[]
+    updateMany?: ProductUpdateManyWithWhereWithoutVendorInput | ProductUpdateManyWithWhereWithoutVendorInput[]
+    deleteMany?: ProductScalarWhereInput | ProductScalarWhereInput[]
+  }
+
+  export type WholesaleItemUncheckedUpdateManyWithoutVendorNestedInput = {
+    create?: XOR<WholesaleItemCreateWithoutVendorInput, WholesaleItemUncheckedCreateWithoutVendorInput> | WholesaleItemCreateWithoutVendorInput[] | WholesaleItemUncheckedCreateWithoutVendorInput[]
+    connectOrCreate?: WholesaleItemCreateOrConnectWithoutVendorInput | WholesaleItemCreateOrConnectWithoutVendorInput[]
+    upsert?: WholesaleItemUpsertWithWhereUniqueWithoutVendorInput | WholesaleItemUpsertWithWhereUniqueWithoutVendorInput[]
+    createMany?: WholesaleItemCreateManyVendorInputEnvelope
+    set?: WholesaleItemWhereUniqueInput | WholesaleItemWhereUniqueInput[]
+    disconnect?: WholesaleItemWhereUniqueInput | WholesaleItemWhereUniqueInput[]
+    delete?: WholesaleItemWhereUniqueInput | WholesaleItemWhereUniqueInput[]
+    connect?: WholesaleItemWhereUniqueInput | WholesaleItemWhereUniqueInput[]
+    update?: WholesaleItemUpdateWithWhereUniqueWithoutVendorInput | WholesaleItemUpdateWithWhereUniqueWithoutVendorInput[]
+    updateMany?: WholesaleItemUpdateManyWithWhereWithoutVendorInput | WholesaleItemUpdateManyWithWhereWithoutVendorInput[]
+    deleteMany?: WholesaleItemScalarWhereInput | WholesaleItemScalarWhereInput[]
   }
 
   export type VendorApplicationCreateNestedOneWithoutVendorInvitesInput = {
@@ -90344,6 +90782,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
+    vendor?: VendorAccountCreateNestedOneWithoutProductsInput
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     reviews?: ReviewCreateNestedManyWithoutProductInput
     views?: ProductViewCreateNestedManyWithoutProductInput
@@ -90384,6 +90823,7 @@ export namespace Prisma {
     ratingCount?: number
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
+    vendorId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
@@ -90782,6 +91222,7 @@ export namespace Prisma {
     ratingDistribution?: JsonNullableFilter<"Product">
     categoryId?: StringNullableFilter<"Product"> | string | null
     createdById?: StringNullableFilter<"Product"> | string | null
+    vendorId?: StringNullableFilter<"Product"> | string | null
     createdAt?: DateTimeFilter<"Product"> | Date | string
     updatedAt?: DateTimeFilter<"Product"> | Date | string
   }
@@ -91214,6 +91655,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     createdBy?: AdminCreateNestedOneWithoutCreatedProductsInput
+    vendor?: VendorAccountCreateNestedOneWithoutProductsInput
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     reviews?: ReviewCreateNestedManyWithoutProductInput
     views?: ProductViewCreateNestedManyWithoutProductInput
@@ -91254,6 +91696,7 @@ export namespace Prisma {
     ratingCount?: number
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdById?: string | null
+    vendorId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
@@ -91368,6 +91811,35 @@ export namespace Prisma {
   export type AdminCreateOrConnectWithoutCreatedProductsInput = {
     where: AdminWhereUniqueInput
     create: XOR<AdminCreateWithoutCreatedProductsInput, AdminUncheckedCreateWithoutCreatedProductsInput>
+  }
+
+  export type VendorAccountCreateWithoutProductsInput = {
+    id?: string
+    email: string
+    passwordHash: string
+    name: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    application: VendorApplicationCreateNestedOneWithoutAccountInput
+    wholesaleItems?: WholesaleItemCreateNestedManyWithoutVendorInput
+  }
+
+  export type VendorAccountUncheckedCreateWithoutProductsInput = {
+    id?: string
+    email: string
+    passwordHash: string
+    name: string
+    applicationId: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    wholesaleItems?: WholesaleItemUncheckedCreateNestedManyWithoutVendorInput
+  }
+
+  export type VendorAccountCreateOrConnectWithoutProductsInput = {
+    where: VendorAccountWhereUniqueInput
+    create: XOR<VendorAccountCreateWithoutProductsInput, VendorAccountUncheckedCreateWithoutProductsInput>
   }
 
   export type OrderItemCreateWithoutProductInput = {
@@ -92034,6 +92506,41 @@ export namespace Prisma {
     spotlightPlacements?: SpotlightPlacementUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
+  export type VendorAccountUpsertWithoutProductsInput = {
+    update: XOR<VendorAccountUpdateWithoutProductsInput, VendorAccountUncheckedUpdateWithoutProductsInput>
+    create: XOR<VendorAccountCreateWithoutProductsInput, VendorAccountUncheckedCreateWithoutProductsInput>
+    where?: VendorAccountWhereInput
+  }
+
+  export type VendorAccountUpdateToOneWithWhereWithoutProductsInput = {
+    where?: VendorAccountWhereInput
+    data: XOR<VendorAccountUpdateWithoutProductsInput, VendorAccountUncheckedUpdateWithoutProductsInput>
+  }
+
+  export type VendorAccountUpdateWithoutProductsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    application?: VendorApplicationUpdateOneRequiredWithoutAccountNestedInput
+    wholesaleItems?: WholesaleItemUpdateManyWithoutVendorNestedInput
+  }
+
+  export type VendorAccountUncheckedUpdateWithoutProductsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    applicationId?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    wholesaleItems?: WholesaleItemUncheckedUpdateManyWithoutVendorNestedInput
+  }
+
   export type OrderItemUpsertWithWhereUniqueWithoutProductInput = {
     where: OrderItemWhereUniqueInput
     update: XOR<OrderItemUpdateWithoutProductInput, OrderItemUncheckedUpdateWithoutProductInput>
@@ -92408,6 +92915,70 @@ export namespace Prisma {
     data: XOR<WishlistItemUpdateManyMutationInput, WishlistItemUncheckedUpdateManyWithoutProductInput>
   }
 
+  export type VendorAccountCreateWithoutWholesaleItemsInput = {
+    id?: string
+    email: string
+    passwordHash: string
+    name: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    application: VendorApplicationCreateNestedOneWithoutAccountInput
+    products?: ProductCreateNestedManyWithoutVendorInput
+  }
+
+  export type VendorAccountUncheckedCreateWithoutWholesaleItemsInput = {
+    id?: string
+    email: string
+    passwordHash: string
+    name: string
+    applicationId: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    products?: ProductUncheckedCreateNestedManyWithoutVendorInput
+  }
+
+  export type VendorAccountCreateOrConnectWithoutWholesaleItemsInput = {
+    where: VendorAccountWhereUniqueInput
+    create: XOR<VendorAccountCreateWithoutWholesaleItemsInput, VendorAccountUncheckedCreateWithoutWholesaleItemsInput>
+  }
+
+  export type VendorAccountUpsertWithoutWholesaleItemsInput = {
+    update: XOR<VendorAccountUpdateWithoutWholesaleItemsInput, VendorAccountUncheckedUpdateWithoutWholesaleItemsInput>
+    create: XOR<VendorAccountCreateWithoutWholesaleItemsInput, VendorAccountUncheckedCreateWithoutWholesaleItemsInput>
+    where?: VendorAccountWhereInput
+  }
+
+  export type VendorAccountUpdateToOneWithWhereWithoutWholesaleItemsInput = {
+    where?: VendorAccountWhereInput
+    data: XOR<VendorAccountUpdateWithoutWholesaleItemsInput, VendorAccountUncheckedUpdateWithoutWholesaleItemsInput>
+  }
+
+  export type VendorAccountUpdateWithoutWholesaleItemsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    application?: VendorApplicationUpdateOneRequiredWithoutAccountNestedInput
+    products?: ProductUpdateManyWithoutVendorNestedInput
+  }
+
+  export type VendorAccountUncheckedUpdateWithoutWholesaleItemsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    applicationId?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    products?: ProductUncheckedUpdateManyWithoutVendorNestedInput
+  }
+
   export type UserCreateWithoutOrdersInput = {
     id?: string
     email: string
@@ -92742,6 +93313,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
     createdBy?: AdminCreateNestedOneWithoutCreatedProductsInput
+    vendor?: VendorAccountCreateNestedOneWithoutProductsInput
     reviews?: ReviewCreateNestedManyWithoutProductInput
     views?: ProductViewCreateNestedManyWithoutProductInput
     collectionMemberships?: CollectionMembershipCreateNestedManyWithoutProductInput
@@ -92782,6 +93354,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
+    vendorId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     reviews?: ReviewUncheckedCreateNestedManyWithoutProductInput
@@ -92891,6 +93464,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
     createdBy?: AdminUpdateOneWithoutCreatedProductsNestedInput
+    vendor?: VendorAccountUpdateOneWithoutProductsNestedInput
     reviews?: ReviewUpdateManyWithoutProductNestedInput
     views?: ProductViewUpdateManyWithoutProductNestedInput
     collectionMemberships?: CollectionMembershipUpdateManyWithoutProductNestedInput
@@ -92931,6 +93505,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     reviews?: ReviewUncheckedUpdateManyWithoutProductNestedInput
@@ -93058,6 +93633,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
     createdBy?: AdminCreateNestedOneWithoutCreatedProductsInput
+    vendor?: VendorAccountCreateNestedOneWithoutProductsInput
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     views?: ProductViewCreateNestedManyWithoutProductInput
     collectionMemberships?: CollectionMembershipCreateNestedManyWithoutProductInput
@@ -93098,6 +93674,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
+    vendorId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
@@ -93247,6 +93824,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
     createdBy?: AdminUpdateOneWithoutCreatedProductsNestedInput
+    vendor?: VendorAccountUpdateOneWithoutProductsNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     views?: ProductViewUpdateManyWithoutProductNestedInput
     collectionMemberships?: CollectionMembershipUpdateManyWithoutProductNestedInput
@@ -93287,6 +93865,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
@@ -93414,6 +93993,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
     createdBy?: AdminCreateNestedOneWithoutCreatedProductsInput
+    vendor?: VendorAccountCreateNestedOneWithoutProductsInput
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     reviews?: ReviewCreateNestedManyWithoutProductInput
     views?: ProductViewCreateNestedManyWithoutProductInput
@@ -93454,6 +94034,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
+    vendorId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
@@ -93603,6 +94184,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
     createdBy?: AdminUpdateOneWithoutCreatedProductsNestedInput
+    vendor?: VendorAccountUpdateOneWithoutProductsNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     reviews?: ReviewUpdateManyWithoutProductNestedInput
     views?: ProductViewUpdateManyWithoutProductNestedInput
@@ -93643,6 +94225,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
@@ -93687,6 +94270,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
     createdBy?: AdminCreateNestedOneWithoutCreatedProductsInput
+    vendor?: VendorAccountCreateNestedOneWithoutProductsInput
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     reviews?: ReviewCreateNestedManyWithoutProductInput
     collectionMemberships?: CollectionMembershipCreateNestedManyWithoutProductInput
@@ -93727,6 +94311,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
+    vendorId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
@@ -93870,6 +94455,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
     createdBy?: AdminUpdateOneWithoutCreatedProductsNestedInput
+    vendor?: VendorAccountUpdateOneWithoutProductsNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     reviews?: ReviewUpdateManyWithoutProductNestedInput
     collectionMemberships?: CollectionMembershipUpdateManyWithoutProductNestedInput
@@ -93910,6 +94496,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
@@ -94969,6 +95556,8 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    products?: ProductCreateNestedManyWithoutVendorInput
+    wholesaleItems?: WholesaleItemCreateNestedManyWithoutVendorInput
   }
 
   export type VendorAccountUncheckedCreateWithoutApplicationInput = {
@@ -94979,6 +95568,8 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    products?: ProductUncheckedCreateNestedManyWithoutVendorInput
+    wholesaleItems?: WholesaleItemUncheckedCreateNestedManyWithoutVendorInput
   }
 
   export type VendorAccountCreateOrConnectWithoutApplicationInput = {
@@ -95124,6 +95715,8 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    products?: ProductUpdateManyWithoutVendorNestedInput
+    wholesaleItems?: WholesaleItemUpdateManyWithoutVendorNestedInput
   }
 
   export type VendorAccountUncheckedUpdateWithoutApplicationInput = {
@@ -95134,6 +95727,8 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    products?: ProductUncheckedUpdateManyWithoutVendorNestedInput
+    wholesaleItems?: WholesaleItemUncheckedUpdateManyWithoutVendorNestedInput
   }
 
   export type VendorInviteUpsertWithWhereUniqueWithoutApplicationInput = {
@@ -95199,6 +95794,144 @@ export namespace Prisma {
     create: XOR<VendorApplicationCreateWithoutAccountInput, VendorApplicationUncheckedCreateWithoutAccountInput>
   }
 
+  export type ProductCreateWithoutVendorInput = {
+    id?: string
+    name: string
+    slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
+    description?: string | null
+    shortDescription?: string | null
+    price: Decimal | DecimalJsLike | number | string
+    originalPrice?: Decimal | DecimalJsLike | number | string | null
+    sellingPrice?: Decimal | DecimalJsLike | number | string | null
+    images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
+    stock?: number
+    lowStockThreshold?: number
+    isActive?: boolean
+    isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    category?: CategoryCreateNestedOneWithoutProductsInput
+    createdBy?: AdminCreateNestedOneWithoutCreatedProductsInput
+    orderItems?: OrderItemCreateNestedManyWithoutProductInput
+    reviews?: ReviewCreateNestedManyWithoutProductInput
+    views?: ProductViewCreateNestedManyWithoutProductInput
+    collectionMemberships?: CollectionMembershipCreateNestedManyWithoutProductInput
+    collectionOverrides?: CollectionOverrideCreateNestedManyWithoutProductInput
+    promotionProducts?: PromotionProductCreateNestedManyWithoutProductInput
+    bundleItems?: BundleItemCreateNestedManyWithoutProductInput
+    commerceEvents?: CommerceEventCreateNestedManyWithoutProductInput
+    hourlyMetrics?: ProductMetricHourlyCreateNestedManyWithoutProductInput
+    dailyMetrics?: ProductMetricDailyCreateNestedManyWithoutProductInput
+    rankings?: ProductRankingCreateNestedManyWithoutProductInput
+    userAffinities?: UserProductAffinityCreateNestedManyWithoutProductInput
+    retentionTriggers?: RetentionTriggerCreateNestedManyWithoutProductInput
+    promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutProductInput
+    retentionSubscriptions?: RetentionSubscriptionCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemCreateNestedManyWithoutProductInput
+  }
+
+  export type ProductUncheckedCreateWithoutVendorInput = {
+    id?: string
+    name: string
+    slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
+    description?: string | null
+    shortDescription?: string | null
+    price: Decimal | DecimalJsLike | number | string
+    originalPrice?: Decimal | DecimalJsLike | number | string | null
+    sellingPrice?: Decimal | DecimalJsLike | number | string | null
+    images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
+    stock?: number
+    lowStockThreshold?: number
+    isActive?: boolean
+    isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
+    categoryId?: string | null
+    createdById?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
+    reviews?: ReviewUncheckedCreateNestedManyWithoutProductInput
+    views?: ProductViewUncheckedCreateNestedManyWithoutProductInput
+    collectionMemberships?: CollectionMembershipUncheckedCreateNestedManyWithoutProductInput
+    collectionOverrides?: CollectionOverrideUncheckedCreateNestedManyWithoutProductInput
+    promotionProducts?: PromotionProductUncheckedCreateNestedManyWithoutProductInput
+    bundleItems?: BundleItemUncheckedCreateNestedManyWithoutProductInput
+    commerceEvents?: CommerceEventUncheckedCreateNestedManyWithoutProductInput
+    hourlyMetrics?: ProductMetricHourlyUncheckedCreateNestedManyWithoutProductInput
+    dailyMetrics?: ProductMetricDailyUncheckedCreateNestedManyWithoutProductInput
+    rankings?: ProductRankingUncheckedCreateNestedManyWithoutProductInput
+    userAffinities?: UserProductAffinityUncheckedCreateNestedManyWithoutProductInput
+    retentionTriggers?: RetentionTriggerUncheckedCreateNestedManyWithoutProductInput
+    promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutProductInput
+    retentionSubscriptions?: RetentionSubscriptionUncheckedCreateNestedManyWithoutProductInput
+    wishlistItems?: WishlistItemUncheckedCreateNestedManyWithoutProductInput
+  }
+
+  export type ProductCreateOrConnectWithoutVendorInput = {
+    where: ProductWhereUniqueInput
+    create: XOR<ProductCreateWithoutVendorInput, ProductUncheckedCreateWithoutVendorInput>
+  }
+
+  export type ProductCreateManyVendorInputEnvelope = {
+    data: ProductCreateManyVendorInput | ProductCreateManyVendorInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type WholesaleItemCreateWithoutVendorInput = {
+    id?: string
+    name: string
+    slug?: string | null
+    sku?: string | null
+    description?: string | null
+    unitPrice: Decimal | DecimalJsLike | number | string
+    minQuantity?: number
+    stock?: number
+    images?: WholesaleItemCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type WholesaleItemUncheckedCreateWithoutVendorInput = {
+    id?: string
+    name: string
+    slug?: string | null
+    sku?: string | null
+    description?: string | null
+    unitPrice: Decimal | DecimalJsLike | number | string
+    minQuantity?: number
+    stock?: number
+    images?: WholesaleItemCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type WholesaleItemCreateOrConnectWithoutVendorInput = {
+    where: WholesaleItemWhereUniqueInput
+    create: XOR<WholesaleItemCreateWithoutVendorInput, WholesaleItemUncheckedCreateWithoutVendorInput>
+  }
+
+  export type WholesaleItemCreateManyVendorInputEnvelope = {
+    data: WholesaleItemCreateManyVendorInput | WholesaleItemCreateManyVendorInput[]
+    skipDuplicates?: boolean
+  }
+
   export type VendorApplicationUpsertWithoutAccountInput = {
     update: XOR<VendorApplicationUpdateWithoutAccountInput, VendorApplicationUncheckedUpdateWithoutAccountInput>
     create: XOR<VendorApplicationCreateWithoutAccountInput, VendorApplicationUncheckedCreateWithoutAccountInput>
@@ -95236,6 +95969,58 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     vendorInvites?: VendorInviteUncheckedUpdateManyWithoutApplicationNestedInput
+  }
+
+  export type ProductUpsertWithWhereUniqueWithoutVendorInput = {
+    where: ProductWhereUniqueInput
+    update: XOR<ProductUpdateWithoutVendorInput, ProductUncheckedUpdateWithoutVendorInput>
+    create: XOR<ProductCreateWithoutVendorInput, ProductUncheckedCreateWithoutVendorInput>
+  }
+
+  export type ProductUpdateWithWhereUniqueWithoutVendorInput = {
+    where: ProductWhereUniqueInput
+    data: XOR<ProductUpdateWithoutVendorInput, ProductUncheckedUpdateWithoutVendorInput>
+  }
+
+  export type ProductUpdateManyWithWhereWithoutVendorInput = {
+    where: ProductScalarWhereInput
+    data: XOR<ProductUpdateManyMutationInput, ProductUncheckedUpdateManyWithoutVendorInput>
+  }
+
+  export type WholesaleItemUpsertWithWhereUniqueWithoutVendorInput = {
+    where: WholesaleItemWhereUniqueInput
+    update: XOR<WholesaleItemUpdateWithoutVendorInput, WholesaleItemUncheckedUpdateWithoutVendorInput>
+    create: XOR<WholesaleItemCreateWithoutVendorInput, WholesaleItemUncheckedCreateWithoutVendorInput>
+  }
+
+  export type WholesaleItemUpdateWithWhereUniqueWithoutVendorInput = {
+    where: WholesaleItemWhereUniqueInput
+    data: XOR<WholesaleItemUpdateWithoutVendorInput, WholesaleItemUncheckedUpdateWithoutVendorInput>
+  }
+
+  export type WholesaleItemUpdateManyWithWhereWithoutVendorInput = {
+    where: WholesaleItemScalarWhereInput
+    data: XOR<WholesaleItemUpdateManyMutationInput, WholesaleItemUncheckedUpdateManyWithoutVendorInput>
+  }
+
+  export type WholesaleItemScalarWhereInput = {
+    AND?: WholesaleItemScalarWhereInput | WholesaleItemScalarWhereInput[]
+    OR?: WholesaleItemScalarWhereInput[]
+    NOT?: WholesaleItemScalarWhereInput | WholesaleItemScalarWhereInput[]
+    id?: StringFilter<"WholesaleItem"> | string
+    name?: StringFilter<"WholesaleItem"> | string
+    slug?: StringNullableFilter<"WholesaleItem"> | string | null
+    sku?: StringNullableFilter<"WholesaleItem"> | string | null
+    description?: StringNullableFilter<"WholesaleItem"> | string | null
+    unitPrice?: DecimalFilter<"WholesaleItem"> | Decimal | DecimalJsLike | number | string
+    minQuantity?: IntFilter<"WholesaleItem"> | number
+    stock?: IntFilter<"WholesaleItem"> | number
+    images?: StringNullableListFilter<"WholesaleItem">
+    variants?: JsonFilter<"WholesaleItem">
+    isActive?: BoolFilter<"WholesaleItem"> | boolean
+    vendorId?: StringNullableFilter<"WholesaleItem"> | string | null
+    createdAt?: DateTimeFilter<"WholesaleItem"> | Date | string
+    updatedAt?: DateTimeFilter<"WholesaleItem"> | Date | string
   }
 
   export type VendorApplicationCreateWithoutVendorInvitesInput = {
@@ -95944,6 +96729,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
     createdBy?: AdminCreateNestedOneWithoutCreatedProductsInput
+    vendor?: VendorAccountCreateNestedOneWithoutProductsInput
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     reviews?: ReviewCreateNestedManyWithoutProductInput
     views?: ProductViewCreateNestedManyWithoutProductInput
@@ -95984,6 +96770,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
+    vendorId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
@@ -96127,6 +96914,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
     createdBy?: AdminUpdateOneWithoutCreatedProductsNestedInput
+    vendor?: VendorAccountUpdateOneWithoutProductsNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     reviews?: ReviewUpdateManyWithoutProductNestedInput
     views?: ProductViewUpdateManyWithoutProductNestedInput
@@ -96167,6 +96955,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
@@ -96288,6 +97077,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
     createdBy?: AdminCreateNestedOneWithoutCreatedProductsInput
+    vendor?: VendorAccountCreateNestedOneWithoutProductsInput
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     reviews?: ReviewCreateNestedManyWithoutProductInput
     views?: ProductViewCreateNestedManyWithoutProductInput
@@ -96328,6 +97118,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
+    vendorId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
@@ -96512,6 +97303,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
     createdBy?: AdminUpdateOneWithoutCreatedProductsNestedInput
+    vendor?: VendorAccountUpdateOneWithoutProductsNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     reviews?: ReviewUpdateManyWithoutProductNestedInput
     views?: ProductViewUpdateManyWithoutProductNestedInput
@@ -96552,6 +97344,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
@@ -97200,6 +97993,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
     createdBy?: AdminCreateNestedOneWithoutCreatedProductsInput
+    vendor?: VendorAccountCreateNestedOneWithoutProductsInput
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     reviews?: ReviewCreateNestedManyWithoutProductInput
     views?: ProductViewCreateNestedManyWithoutProductInput
@@ -97240,6 +98034,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
+    vendorId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
@@ -97389,6 +98184,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
     createdBy?: AdminUpdateOneWithoutCreatedProductsNestedInput
+    vendor?: VendorAccountUpdateOneWithoutProductsNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     reviews?: ReviewUpdateManyWithoutProductNestedInput
     views?: ProductViewUpdateManyWithoutProductNestedInput
@@ -97429,6 +98225,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
@@ -97567,6 +98364,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
     createdBy?: AdminCreateNestedOneWithoutCreatedProductsInput
+    vendor?: VendorAccountCreateNestedOneWithoutProductsInput
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     reviews?: ReviewCreateNestedManyWithoutProductInput
     views?: ProductViewCreateNestedManyWithoutProductInput
@@ -97607,6 +98405,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
+    vendorId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
@@ -97883,6 +98682,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
     createdBy?: AdminUpdateOneWithoutCreatedProductsNestedInput
+    vendor?: VendorAccountUpdateOneWithoutProductsNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     reviews?: ReviewUpdateManyWithoutProductNestedInput
     views?: ProductViewUpdateManyWithoutProductNestedInput
@@ -97923,6 +98723,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
@@ -98280,6 +99081,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
     createdBy?: AdminCreateNestedOneWithoutCreatedProductsInput
+    vendor?: VendorAccountCreateNestedOneWithoutProductsInput
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     reviews?: ReviewCreateNestedManyWithoutProductInput
     views?: ProductViewCreateNestedManyWithoutProductInput
@@ -98320,6 +99122,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
+    vendorId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
@@ -98429,6 +99232,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
     createdBy?: AdminUpdateOneWithoutCreatedProductsNestedInput
+    vendor?: VendorAccountUpdateOneWithoutProductsNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     reviews?: ReviewUpdateManyWithoutProductNestedInput
     views?: ProductViewUpdateManyWithoutProductNestedInput
@@ -98469,6 +99273,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
@@ -98684,6 +99489,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
     createdBy?: AdminCreateNestedOneWithoutCreatedProductsInput
+    vendor?: VendorAccountCreateNestedOneWithoutProductsInput
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     reviews?: ReviewCreateNestedManyWithoutProductInput
     views?: ProductViewCreateNestedManyWithoutProductInput
@@ -98724,6 +99530,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
+    vendorId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
@@ -98950,6 +99757,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
     createdBy?: AdminUpdateOneWithoutCreatedProductsNestedInput
+    vendor?: VendorAccountUpdateOneWithoutProductsNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     reviews?: ReviewUpdateManyWithoutProductNestedInput
     views?: ProductViewUpdateManyWithoutProductNestedInput
@@ -98990,6 +99798,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
@@ -99117,6 +99926,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
     createdBy?: AdminCreateNestedOneWithoutCreatedProductsInput
+    vendor?: VendorAccountCreateNestedOneWithoutProductsInput
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     reviews?: ReviewCreateNestedManyWithoutProductInput
     views?: ProductViewCreateNestedManyWithoutProductInput
@@ -99157,6 +99967,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
+    vendorId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
@@ -99217,6 +100028,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
     createdBy?: AdminUpdateOneWithoutCreatedProductsNestedInput
+    vendor?: VendorAccountUpdateOneWithoutProductsNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     reviews?: ReviewUpdateManyWithoutProductNestedInput
     views?: ProductViewUpdateManyWithoutProductNestedInput
@@ -99257,6 +100069,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
@@ -99301,6 +100114,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
     createdBy?: AdminCreateNestedOneWithoutCreatedProductsInput
+    vendor?: VendorAccountCreateNestedOneWithoutProductsInput
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     reviews?: ReviewCreateNestedManyWithoutProductInput
     views?: ProductViewCreateNestedManyWithoutProductInput
@@ -99341,6 +100155,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
+    vendorId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
@@ -99401,6 +100216,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
     createdBy?: AdminUpdateOneWithoutCreatedProductsNestedInput
+    vendor?: VendorAccountUpdateOneWithoutProductsNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     reviews?: ReviewUpdateManyWithoutProductNestedInput
     views?: ProductViewUpdateManyWithoutProductNestedInput
@@ -99441,6 +100257,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
@@ -99722,6 +100539,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
     createdBy?: AdminCreateNestedOneWithoutCreatedProductsInput
+    vendor?: VendorAccountCreateNestedOneWithoutProductsInput
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     reviews?: ReviewCreateNestedManyWithoutProductInput
     views?: ProductViewCreateNestedManyWithoutProductInput
@@ -99762,6 +100580,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
+    vendorId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
@@ -99905,6 +100724,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
     createdBy?: AdminUpdateOneWithoutCreatedProductsNestedInput
+    vendor?: VendorAccountUpdateOneWithoutProductsNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     reviews?: ReviewUpdateManyWithoutProductNestedInput
     views?: ProductViewUpdateManyWithoutProductNestedInput
@@ -99945,6 +100765,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
@@ -100072,6 +100893,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
     createdBy?: AdminCreateNestedOneWithoutCreatedProductsInput
+    vendor?: VendorAccountCreateNestedOneWithoutProductsInput
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     reviews?: ReviewCreateNestedManyWithoutProductInput
     views?: ProductViewCreateNestedManyWithoutProductInput
@@ -100112,6 +100934,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
+    vendorId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
@@ -100261,6 +101084,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
     createdBy?: AdminUpdateOneWithoutCreatedProductsNestedInput
+    vendor?: VendorAccountUpdateOneWithoutProductsNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     reviews?: ReviewUpdateManyWithoutProductNestedInput
     views?: ProductViewUpdateManyWithoutProductNestedInput
@@ -100301,6 +101125,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
@@ -100600,6 +101425,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
     createdBy?: AdminCreateNestedOneWithoutCreatedProductsInput
+    vendor?: VendorAccountCreateNestedOneWithoutProductsInput
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     reviews?: ReviewCreateNestedManyWithoutProductInput
     views?: ProductViewCreateNestedManyWithoutProductInput
@@ -100640,6 +101466,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
+    vendorId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
@@ -100789,6 +101616,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
     createdBy?: AdminUpdateOneWithoutCreatedProductsNestedInput
+    vendor?: VendorAccountUpdateOneWithoutProductsNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     reviews?: ReviewUpdateManyWithoutProductNestedInput
     views?: ProductViewUpdateManyWithoutProductNestedInput
@@ -100829,6 +101657,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
@@ -100956,6 +101785,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     category?: CategoryCreateNestedOneWithoutProductsInput
     createdBy?: AdminCreateNestedOneWithoutCreatedProductsInput
+    vendor?: VendorAccountCreateNestedOneWithoutProductsInput
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     reviews?: ReviewCreateNestedManyWithoutProductInput
     views?: ProductViewCreateNestedManyWithoutProductInput
@@ -100996,6 +101826,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
     createdById?: string | null
+    vendorId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
@@ -101145,6 +101976,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
     createdBy?: AdminUpdateOneWithoutCreatedProductsNestedInput
+    vendor?: VendorAccountUpdateOneWithoutProductsNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     reviews?: ReviewUpdateManyWithoutProductNestedInput
     views?: ProductViewUpdateManyWithoutProductNestedInput
@@ -101185,6 +102017,7 @@ export namespace Prisma {
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
@@ -102614,6 +103447,7 @@ export namespace Prisma {
     ratingCount?: number
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: string | null
+    vendorId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -102780,6 +103614,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneWithoutProductsNestedInput
+    vendor?: VendorAccountUpdateOneWithoutProductsNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     reviews?: ReviewUpdateManyWithoutProductNestedInput
     views?: ProductViewUpdateManyWithoutProductNestedInput
@@ -102820,6 +103655,7 @@ export namespace Prisma {
     ratingCount?: IntFieldUpdateOperationsInput | number
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
@@ -102862,6 +103698,7 @@ export namespace Prisma {
     ratingCount?: IntFieldUpdateOperationsInput | number
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     categoryId?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -103232,6 +104069,7 @@ export namespace Prisma {
     ratingCount?: number
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdById?: string | null
+    vendorId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -103260,6 +104098,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: AdminUpdateOneWithoutCreatedProductsNestedInput
+    vendor?: VendorAccountUpdateOneWithoutProductsNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     reviews?: ReviewUpdateManyWithoutProductNestedInput
     views?: ProductViewUpdateManyWithoutProductNestedInput
@@ -103300,6 +104139,7 @@ export namespace Prisma {
     ratingCount?: IntFieldUpdateOperationsInput | number
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
@@ -103342,6 +104182,7 @@ export namespace Prisma {
     ratingCount?: IntFieldUpdateOperationsInput | number
     ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    vendorId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -104310,6 +105151,210 @@ export namespace Prisma {
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
     acceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ProductCreateManyVendorInput = {
+    id?: string
+    name: string
+    slug?: string | null
+    sku?: string | null
+    brandName?: string | null
+    storeName?: string | null
+    description?: string | null
+    shortDescription?: string | null
+    price: Decimal | DecimalJsLike | number | string
+    originalPrice?: Decimal | DecimalJsLike | number | string | null
+    sellingPrice?: Decimal | DecimalJsLike | number | string | null
+    images?: ProductCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
+    stock?: number
+    lowStockThreshold?: number
+    isActive?: boolean
+    isFeatured?: boolean
+    ratingAverage?: Decimal | DecimalJsLike | number | string
+    ratingCount?: number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
+    categoryId?: string | null
+    createdById?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type WholesaleItemCreateManyVendorInput = {
+    id?: string
+    name: string
+    slug?: string | null
+    sku?: string | null
+    description?: string | null
+    unitPrice: Decimal | DecimalJsLike | number | string
+    minQuantity?: number
+    stock?: number
+    images?: WholesaleItemCreateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ProductUpdateWithoutVendorInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
+    stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    category?: CategoryUpdateOneWithoutProductsNestedInput
+    createdBy?: AdminUpdateOneWithoutCreatedProductsNestedInput
+    orderItems?: OrderItemUpdateManyWithoutProductNestedInput
+    reviews?: ReviewUpdateManyWithoutProductNestedInput
+    views?: ProductViewUpdateManyWithoutProductNestedInput
+    collectionMemberships?: CollectionMembershipUpdateManyWithoutProductNestedInput
+    collectionOverrides?: CollectionOverrideUpdateManyWithoutProductNestedInput
+    promotionProducts?: PromotionProductUpdateManyWithoutProductNestedInput
+    bundleItems?: BundleItemUpdateManyWithoutProductNestedInput
+    commerceEvents?: CommerceEventUpdateManyWithoutProductNestedInput
+    hourlyMetrics?: ProductMetricHourlyUpdateManyWithoutProductNestedInput
+    dailyMetrics?: ProductMetricDailyUpdateManyWithoutProductNestedInput
+    rankings?: ProductRankingUpdateManyWithoutProductNestedInput
+    userAffinities?: UserProductAffinityUpdateManyWithoutProductNestedInput
+    retentionTriggers?: RetentionTriggerUpdateManyWithoutProductNestedInput
+    promotionRedemptions?: PromotionRedemptionUpdateManyWithoutProductNestedInput
+    retentionSubscriptions?: RetentionSubscriptionUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUpdateManyWithoutProductNestedInput
+  }
+
+  export type ProductUncheckedUpdateWithoutVendorInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
+    stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
+    categoryId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
+    reviews?: ReviewUncheckedUpdateManyWithoutProductNestedInput
+    views?: ProductViewUncheckedUpdateManyWithoutProductNestedInput
+    collectionMemberships?: CollectionMembershipUncheckedUpdateManyWithoutProductNestedInput
+    collectionOverrides?: CollectionOverrideUncheckedUpdateManyWithoutProductNestedInput
+    promotionProducts?: PromotionProductUncheckedUpdateManyWithoutProductNestedInput
+    bundleItems?: BundleItemUncheckedUpdateManyWithoutProductNestedInput
+    commerceEvents?: CommerceEventUncheckedUpdateManyWithoutProductNestedInput
+    hourlyMetrics?: ProductMetricHourlyUncheckedUpdateManyWithoutProductNestedInput
+    dailyMetrics?: ProductMetricDailyUncheckedUpdateManyWithoutProductNestedInput
+    rankings?: ProductRankingUncheckedUpdateManyWithoutProductNestedInput
+    userAffinities?: UserProductAffinityUncheckedUpdateManyWithoutProductNestedInput
+    retentionTriggers?: RetentionTriggerUncheckedUpdateManyWithoutProductNestedInput
+    promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutProductNestedInput
+    retentionSubscriptions?: RetentionSubscriptionUncheckedUpdateManyWithoutProductNestedInput
+    wishlistItems?: WishlistItemUncheckedUpdateManyWithoutProductNestedInput
+  }
+
+  export type ProductUncheckedUpdateManyWithoutVendorInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    brandName?: NullableStringFieldUpdateOperationsInput | string | null
+    storeName?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    shortDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    originalPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    sellingPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    images?: ProductUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
+    stock?: IntFieldUpdateOperationsInput | number
+    lowStockThreshold?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    ratingAverage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ratingCount?: IntFieldUpdateOperationsInput | number
+    ratingDistribution?: NullableJsonNullValueInput | InputJsonValue
+    categoryId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WholesaleItemUpdateWithoutVendorInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    unitPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    minQuantity?: IntFieldUpdateOperationsInput | number
+    stock?: IntFieldUpdateOperationsInput | number
+    images?: WholesaleItemUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WholesaleItemUncheckedUpdateWithoutVendorInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    unitPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    minQuantity?: IntFieldUpdateOperationsInput | number
+    stock?: IntFieldUpdateOperationsInput | number
+    images?: WholesaleItemUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WholesaleItemUncheckedUpdateManyWithoutVendorInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: NullableStringFieldUpdateOperationsInput | string | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    unitPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    minQuantity?: IntFieldUpdateOperationsInput | number
+    stock?: IntFieldUpdateOperationsInput | number
+    images?: WholesaleItemUpdateimagesInput | string[]
+    variants?: JsonNullValueInput | InputJsonValue
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type CollectionMembershipCreateManyCollectionInput = {

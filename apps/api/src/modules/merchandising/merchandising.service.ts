@@ -1,13 +1,10 @@
 import { createHash } from "node:crypto";
-import {
-  prisma,
-  Prisma,
-  type MerchandisingCollection,
-  type Product,
-} from "@nuru/db";
+import { prisma, Prisma, type MerchandisingCollection, type Product } from "@nuru/db";
 import type {
   CollectionCreateInput,
   CollectionMembershipInput,
+  CollectionMembershipImportInput,
+  CollectionMembershipDTO,
   CollectionOverrideInput,
   CollectionProductsQuery,
   CollectionUpdateInput,
@@ -31,7 +28,7 @@ const publicProductInclude = { category: categorySelect } as const;
 
 function inputJson(value: Record<string, unknown> | null | undefined) {
   if (value === undefined) return undefined;
-  return value === null ? Prisma.JsonNull : value as Prisma.InputJsonValue;
+  return value === null ? Prisma.JsonNull : (value as Prisma.InputJsonValue);
 }
 
 function activeAt(now: Date): Prisma.MerchandisingCollectionWhereInput {
@@ -88,9 +85,16 @@ export async function createCollection(input: CollectionCreateInput, adminId: st
           createdById: adminId,
         },
       });
-      await audit(tx, adminId, "merchandising.collection.created", "merchandising_collection", created.id, {
-        key: created.key,
-      });
+      await audit(
+        tx,
+        adminId,
+        "merchandising.collection.created",
+        "merchandising_collection",
+        created.id,
+        {
+          key: created.key,
+        },
+      );
       return created;
     });
     return toCollectionDTO(row);
@@ -102,11 +106,7 @@ export async function createCollection(input: CollectionCreateInput, adminId: st
   }
 }
 
-export async function updateCollection(
-  id: string,
-  input: CollectionUpdateInput,
-  adminId: string,
-) {
+export async function updateCollection(id: string, input: CollectionUpdateInput, adminId: string) {
   const existing = await prisma.merchandisingCollection.findUnique({ where: { id } });
   if (!existing) throw Errors.notFound("Collection not found.");
 
@@ -115,8 +115,12 @@ export async function updateCollection(
       where: { id },
       data: {
         ...(input as unknown as Prisma.MerchandisingCollectionUpdateInput),
-        ...(input.eligibilityRules !== undefined ? { eligibilityRules: inputJson(input.eligibilityRules) } : {}),
-        ...(input.configuration !== undefined ? { configuration: inputJson(input.configuration) } : {}),
+        ...(input.eligibilityRules !== undefined
+          ? { eligibilityRules: inputJson(input.eligibilityRules) }
+          : {}),
+        ...(input.configuration !== undefined
+          ? { configuration: inputJson(input.configuration) }
+          : {}),
         cacheVersion: { increment: 1 },
       },
     });
@@ -134,24 +138,167 @@ export async function upsertMembership(
   input: CollectionMembershipInput,
   adminId: string,
 ) {
-  const product = await prisma.product.findUnique({ where: { id: input.productId }, select: { id: true } });
+  const product = await prisma.product.findUnique({
+    where: { id: input.productId },
+    select: { id: true },
+  });
   if (!product) throw Errors.badRequest("Product does not exist.");
   return prisma.$transaction(async (tx) => {
+    const rank = input.rank ?? (await nextMembershipRank(tx, collectionId));
     const membership = await tx.collectionMembership.upsert({
       where: { collectionId_productId: { collectionId, productId: input.productId } },
-      create: { collectionId, ...input, metadata: inputJson(input.metadata) } as Prisma.CollectionMembershipUncheckedCreateInput,
-      update: { ...input, metadata: inputJson(input.metadata) } as Prisma.CollectionMembershipUpdateInput,
+      create: {
+        collectionId,
+        ...input,
+        rank,
+        metadata: inputJson(input.metadata),
+      } as Prisma.CollectionMembershipUncheckedCreateInput,
+      update: {
+        ...input,
+        ...(input.rank !== undefined ? { rank } : {}),
+        metadata: inputJson(input.metadata),
+      } as Prisma.CollectionMembershipUpdateInput,
     });
     await tx.merchandisingCollection.update({
       where: { id: collectionId },
       data: { cacheVersion: { increment: 1 } },
     });
-    await audit(tx, adminId, "merchandising.membership.upserted", "collection_membership", membership.id, {
-      collectionId,
-      productId: input.productId,
-      source: input.source,
-    });
+    await audit(
+      tx,
+      adminId,
+      "merchandising.membership.upserted",
+      "collection_membership",
+      membership.id,
+      {
+        collectionId,
+        productId: input.productId,
+        source: input.source,
+      },
+    );
     return membership;
+  });
+}
+
+async function nextMembershipRank(
+  tx: Prisma.TransactionClient,
+  collectionId: string,
+): Promise<number> {
+  const aggregate = await tx.collectionMembership.aggregate({
+    where: { collectionId },
+    _max: { rank: true },
+  });
+  return (aggregate._max.rank ?? 0) + 1;
+}
+
+export async function listMemberships(
+  collectionId: string,
+  vendorId?: string,
+): Promise<CollectionMembershipDTO[]> {
+  await getCollection(collectionId, Boolean(vendorId));
+  const rows = await prisma.collectionMembership.findMany({
+    where: { collectionId, ...(vendorId ? { product: { vendorId } } : {}) },
+    orderBy: [{ rank: "asc" }, { createdAt: "asc" }],
+    include: { product: true },
+  });
+  return rows.map((row) => ({
+    id: row.id,
+    collectionId: row.collectionId,
+    productId: row.productId,
+    source: row.source,
+    score: row.score,
+    rank: row.rank,
+    startsAt: row.startsAt?.toISOString() ?? null,
+    expiresAt: row.expiresAt?.toISOString() ?? null,
+    product: {
+      id: row.product.id,
+      name: row.product.name,
+      sku: row.product.sku,
+      images: row.product.images,
+      stock: row.product.stock,
+      isActive: row.product.isActive,
+      vendorId: row.product.vendorId,
+    },
+  }));
+}
+
+export async function importMemberships(
+  collectionId: string,
+  input: CollectionMembershipImportInput,
+  actor: { adminId?: string; vendorId?: string },
+) {
+  const collection = await getCollection(collectionId, false);
+  if (actor.vendorId && !["ACTIVE", "SCHEDULED"].includes(collection.status)) {
+    throw Errors.forbidden("Vendors can only add products to available collections.");
+  }
+  const deduplicated = [...new Map(input.items.map((item) => [item.productId, item])).values()];
+  const productIds = deduplicated.map((item) => item.productId);
+  const products = await prisma.product.findMany({
+    where: { id: { in: productIds }, ...(actor.vendorId ? { vendorId: actor.vendorId } : {}) },
+    select: { id: true },
+  });
+  if (products.length !== productIds.length) {
+    if (actor.vendorId)
+      throw Errors.forbidden("One or more products do not exist or are not owned by this vendor.");
+    throw Errors.badRequest("One or more products do not exist.");
+  }
+
+  return prisma.$transaction(async (tx) => {
+    let rank = await nextMembershipRank(tx, collectionId);
+    for (const item of deduplicated) {
+      const assignedRank = item.rank ?? rank++;
+      await tx.collectionMembership.upsert({
+        where: { collectionId_productId: { collectionId, productId: item.productId } },
+        create: {
+          collectionId,
+          ...item,
+          rank: assignedRank,
+          metadata: inputJson(item.metadata),
+        } as Prisma.CollectionMembershipUncheckedCreateInput,
+        update: {
+          ...item,
+          ...(item.rank !== undefined ? { rank: assignedRank } : {}),
+          metadata: inputJson(item.metadata),
+        } as Prisma.CollectionMembershipUpdateInput,
+      });
+    }
+    await tx.merchandisingCollection.update({
+      where: { id: collectionId },
+      data: { cacheVersion: { increment: 1 } },
+    });
+    if (actor.adminId) {
+      await audit(
+        tx,
+        actor.adminId,
+        "merchandising.memberships.imported",
+        "merchandising_collection",
+        collectionId,
+        {
+          productIds,
+          immutableKey: collection.key,
+        },
+      );
+    }
+    return { imported: deduplicated.length, collectionKey: collection.key };
+  });
+}
+
+export async function removeVendorMembership(
+  collectionId: string,
+  productId: string,
+  vendorId: string,
+): Promise<void> {
+  await getCollection(collectionId, true);
+  const product = await prisma.product.findFirst({
+    where: { id: productId, vendorId },
+    select: { id: true },
+  });
+  if (!product) throw Errors.notFound("Product not found.");
+  await prisma.$transaction(async (tx) => {
+    await tx.collectionMembership.deleteMany({ where: { collectionId, productId } });
+    await tx.merchandisingCollection.update({
+      where: { id: collectionId },
+      data: { cacheVersion: { increment: 1 } },
+    });
   });
 }
 
@@ -162,9 +309,16 @@ export async function removeMembership(collectionId: string, productId: string, 
       where: { id: collectionId },
       data: { cacheVersion: { increment: 1 } },
     });
-    await audit(tx, adminId, "merchandising.membership.removed", "merchandising_collection", collectionId, {
-      productId,
-    });
+    await audit(
+      tx,
+      adminId,
+      "merchandising.membership.removed",
+      "merchandising_collection",
+      collectionId,
+      {
+        productId,
+      },
+    );
   });
 }
 
@@ -175,7 +329,11 @@ export async function createOverride(
 ) {
   return prisma.$transaction(async (tx) => {
     const override = await tx.collectionOverride.create({
-      data: { collectionId, ...input, createdById: adminId } as Prisma.CollectionOverrideUncheckedCreateInput,
+      data: {
+        collectionId,
+        ...input,
+        createdById: adminId,
+      } as Prisma.CollectionOverrideUncheckedCreateInput,
     });
     await tx.merchandisingCollection.update({
       where: { id: collectionId },
@@ -221,13 +379,18 @@ async function rankingCandidates(
 ): Promise<CandidateProduct[]> {
   const cursor = decodeCursor(query.cursor);
   const now = new Date();
-  const latest = cursor?.source === "ranking" && cursor.snapshotAt
-    ? { snapshotAt: new Date(cursor.snapshotAt) }
-    : await prisma.productRanking.findFirst({
-        where: { collectionId, segmentKey: query.segment, OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] },
-        orderBy: { snapshotAt: "desc" },
-        select: { snapshotAt: true },
-      });
+  const latest =
+    cursor?.source === "ranking" && cursor.snapshotAt
+      ? { snapshotAt: new Date(cursor.snapshotAt) }
+      : await prisma.productRanking.findFirst({
+          where: {
+            collectionId,
+            segmentKey: query.segment,
+            OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+          },
+          orderBy: { snapshotAt: "desc" },
+          select: { snapshotAt: true },
+        });
   if (!latest) return [];
 
   const rows = await prisma.productRanking.findMany({
@@ -235,9 +398,13 @@ async function rankingCandidates(
       collectionId,
       segmentKey: query.segment,
       snapshotAt: latest.snapshotAt,
-      OR: cursor?.source === "ranking"
-        ? [{ rank: { gt: cursor.rank } }, { rank: cursor.rank, productId: { gt: cursor.productId } }]
-        : undefined,
+      OR:
+        cursor?.source === "ranking"
+          ? [
+              { rank: { gt: cursor.rank } },
+              { rank: cursor.rank, productId: { gt: cursor.productId } },
+            ]
+          : undefined,
       product: productWhere(query),
     },
     orderBy: [{ rank: "asc" }, { productId: "asc" }],
@@ -262,17 +429,23 @@ async function membershipCandidates(
   const rows = await prisma.collectionMembership.findMany({
     where: {
       collectionId,
-      rank: { not: null },
       AND: [
         { OR: [{ startsAt: null }, { startsAt: { lte: now } }] },
         { OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] },
         ...(cursor?.source === "membership"
-          ? [{ OR: [{ rank: { gt: cursor.rank } }, { rank: cursor.rank, productId: { gt: cursor.productId } }] }]
+          ? [
+              {
+                OR: [
+                  { rank: { gt: cursor.rank } },
+                  { rank: cursor.rank, productId: { gt: cursor.productId } },
+                ],
+              },
+            ]
           : []),
       ],
       product: productWhere(query),
     },
-    orderBy: [{ rank: "asc" }, { productId: "asc" }],
+    orderBy: [{ rank: { sort: "asc", nulls: "last" } }, { productId: "asc" }],
     take: query.limit * 3 + 1,
     include: { product: { include: publicProductInclude } },
   });
@@ -361,19 +534,32 @@ export async function listCollectionProducts(
     if (override.type === "LOWER") adjustment.set(override.productId, -(override.value || 1000));
   }
 
-  const affinities = context.userId && collection.isPersonalized
-    ? await prisma.userProductAffinity.findMany({
-        where: { userId: context.userId, productId: { in: candidates.map((c) => c.id) }, OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] },
-        select: { productId: true, score: true },
-      })
-    : [];
+  const affinities =
+    context.userId && collection.isPersonalized
+      ? await prisma.userProductAffinity.findMany({
+          where: {
+            userId: context.userId,
+            productId: { in: candidates.map((c) => c.id) },
+            OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+          },
+          select: { productId: true, score: true },
+        })
+      : [];
   const affinity = new Map(affinities.map((a) => [a.productId, a.score]));
 
   candidates = candidates
     .filter((c) => !excluded.has(c.id))
     .sort((a, b) => {
-      const scoreA = (pinned.has(a.id) ? 1_000_000 : 0) + a.score + (adjustment.get(a.id) ?? 0) + (affinity.get(a.id) ?? 0);
-      const scoreB = (pinned.has(b.id) ? 1_000_000 : 0) + b.score + (adjustment.get(b.id) ?? 0) + (affinity.get(b.id) ?? 0);
+      const scoreA =
+        (pinned.has(a.id) ? 1_000_000 : 0) +
+        a.score +
+        (adjustment.get(a.id) ?? 0) +
+        (affinity.get(a.id) ?? 0);
+      const scoreB =
+        (pinned.has(b.id) ? 1_000_000 : 0) +
+        b.score +
+        (adjustment.get(b.id) ?? 0) +
+        (affinity.get(b.id) ?? 0);
       return scoreB - scoreA || a.rank - b.rank || a.id.localeCompare(b.id);
     });
 
@@ -405,14 +591,15 @@ export async function listCollectionProducts(
   return {
     items,
     hasMore,
-    nextCursor: hasMore && rawLast
-      ? encodeCursor({
-          rank: rawLast.rank,
-          productId: rawLast.id,
-          source: rawLast.source,
-          ...(rawLast.source === "ranking" ? { snapshotAt: rawLast.snapshotAt } : {}),
-        })
-      : null,
+    nextCursor:
+      hasMore && rawLast
+        ? encodeCursor({
+            rank: rawLast.rank,
+            productId: rawLast.id,
+            source: rawLast.source,
+            ...(rawLast.source === "ranking" ? { snapshotAt: rawLast.snapshotAt } : {}),
+          })
+        : null,
   };
 }
 
@@ -436,22 +623,24 @@ export async function getHomepage(context: {
     include: { collection: true },
   });
   const experimentVariants = await assignmentsFor(
-    sections.flatMap((section) => section.experimentKey ? [section.experimentKey] : []),
+    sections.flatMap((section) => (section.experimentKey ? [section.experimentKey] : [])),
     { userId: context.userId, anonymousId: context.anonymousId },
   );
 
   const attempts = await Promise.allSettled(
     sections.map(async (section) => {
-      const config = section.configuration && typeof section.configuration === "object"
-        ? section.configuration as Record<string, unknown>
-        : {};
+      const config =
+        section.configuration && typeof section.configuration === "object"
+          ? (section.configuration as Record<string, unknown>)
+          : {};
       const experimentConfig = section.experimentKey
-        ? experimentVariants.get(section.experimentKey)?.configuration ?? {}
+        ? (experimentVariants.get(section.experimentKey)?.configuration ?? {})
         : {};
       const mergedConfig = { ...config, ...experimentConfig };
-      const limit = typeof mergedConfig.productLimit === "number"
-        ? Math.min(Math.max(Math.trunc(mergedConfig.productLimit), 1), 100)
-        : section.collection.maxProducts;
+      const limit =
+        typeof mergedConfig.productLimit === "number"
+          ? Math.min(Math.max(Math.trunc(mergedConfig.productLimit), 1), 100)
+          : section.collection.maxProducts;
       let page;
       try {
         page = await listCollectionProducts(
@@ -463,10 +652,11 @@ export async function getHomepage(context: {
         if (!context.userId) throw error;
         // Personalization is optional: retry the independently-computed global
         // candidate set instead of taking down this section or the homepage.
-        page = await listCollectionProducts(
-          section.collection.id,
-          { limit, inStock: true, segment: "global" },
-        );
+        page = await listCollectionProducts(section.collection.id, {
+          limit,
+          inStock: true,
+          segment: "global",
+        });
       }
       return {
         id: section.id,
@@ -485,7 +675,8 @@ export async function getHomepage(context: {
 
   return {
     generatedAt: now.toISOString(),
-    personalization: context.userId && sections.some((s) => s.collection.isPersonalized) ? "user" : "global",
+    personalization:
+      context.userId && sections.some((s) => s.collection.isPersonalized) ? "user" : "global",
     experimentAssignments: Object.fromEntries(
       [...experimentVariants].map(([key, variant]) => [key, variant.key]),
     ),
@@ -494,7 +685,10 @@ export async function getHomepage(context: {
 }
 
 export async function listHomepageSections() {
-  return prisma.homepageSection.findMany({ orderBy: [{ position: "asc" }, { id: "asc" }], include: { collection: true } });
+  return prisma.homepageSection.findMany({
+    orderBy: [{ position: "asc" }, { id: "asc" }],
+    include: { collection: true },
+  });
 }
 
 export async function createHomepageSection(input: HomepageSectionCreateInput, adminId: string) {
@@ -515,14 +709,20 @@ export async function createHomepageSection(input: HomepageSectionCreateInput, a
   });
 }
 
-export async function updateHomepageSection(id: string, input: HomepageSectionUpdateInput, adminId: string) {
+export async function updateHomepageSection(
+  id: string,
+  input: HomepageSectionUpdateInput,
+  adminId: string,
+) {
   return prisma.$transaction(async (tx) => {
     const row = await tx.homepageSection.update({
       where: { id },
       data: {
         ...input,
         ...(input.audience !== undefined ? { audience: inputJson(input.audience) } : {}),
-        ...(input.configuration !== undefined ? { configuration: inputJson(input.configuration) } : {}),
+        ...(input.configuration !== undefined
+          ? { configuration: inputJson(input.configuration) }
+          : {}),
       } as Prisma.HomepageSectionUncheckedUpdateInput,
       include: { collection: true },
     });
@@ -576,9 +776,8 @@ export async function ingestEvents(
 ) {
   const now = Date.now();
   const seen = new Set<string>();
-  const hash = (value?: string) => value
-    ? createHash("sha256").update(`${env.JWT_ACCESS_SECRET}:${value}`).digest("hex")
-    : null;
+  const hash = (value?: string) =>
+    value ? createHash("sha256").update(`${env.JWT_ACCESS_SECRET}:${value}`).digest("hex") : null;
   const ipHash = hash(context.ip);
   const userAgentHash = hash(context.userAgent);
   const data = events.map((event) => {
@@ -587,7 +786,9 @@ export async function ingestEvents(
     const duplicateInBatch = seen.has(signature);
     seen.add(signature);
     const clockSkew = Math.abs(now - event.timestamp.getTime());
-    const protectedOutcome = ["purchase_completed", "order_cancelled", "product_returned"].includes(event.eventType);
+    const protectedOutcome = ["purchase_completed", "order_cancelled", "product_returned"].includes(
+      event.eventType,
+    );
     const suspicious = duplicateInBatch || clockSkew > 24 * 60 * 60 * 1000 || protectedOutcome;
     return {
       eventId: event.eventId,
@@ -663,22 +864,38 @@ export async function quoteBundle(bundleId: string, selectedProductIds: string[]
   }
   const selected = new Set(selectedProductIds);
   for (const item of bundle.items) {
-    if (item.required && !selected.has(item.productId)) throw Errors.badRequest("All required bundle items must be selected.");
-    if (selected.has(item.productId) && (!item.product.isActive || item.product.stock < item.quantity)) {
+    if (item.required && !selected.has(item.productId))
+      throw Errors.badRequest("All required bundle items must be selected.");
+    if (
+      selected.has(item.productId) &&
+      (!item.product.isActive || item.product.stock < item.quantity)
+    ) {
       throw Errors.conflict(`"${item.product.name}" is unavailable for this bundle.`);
     }
   }
   const chosen = bundle.items.filter((item) => selected.has(item.productId));
-  if (chosen.length !== selected.size) throw Errors.badRequest("Bundle contains an invalid product.");
+  if (chosen.length !== selected.size)
+    throw Errors.badRequest("Bundle contains an invalid product.");
   const base = chosen.reduce(
-    (sum, item) => sum.add(new Prisma.Decimal((item.product.sellingPrice ?? item.product.price).toString()).mul(item.quantity)),
+    (sum, item) =>
+      sum.add(
+        new Prisma.Decimal((item.product.sellingPrice ?? item.product.price).toString()).mul(
+          item.quantity,
+        ),
+      ),
     new Prisma.Decimal(0),
   );
   const value = new Prisma.Decimal(bundle.discountValue.toString());
   let total = base;
   if (bundle.discountType === "FIXED_PRICE") total = value;
-  if (bundle.discountType === "PERCENTAGE") total = base.mul(new Prisma.Decimal(100).sub(value)).div(100);
+  if (bundle.discountType === "PERCENTAGE")
+    total = base.mul(new Prisma.Decimal(100).sub(value)).div(100);
   if (bundle.discountType === "FIXED_AMOUNT") total = base.sub(value);
   if (total.lessThan(0)) total = new Prisma.Decimal(0);
-  return { bundleId: bundle.id, basePrice: base.toString(), total: total.toString(), expiresAt: bundle.endsAt?.toISOString() ?? null };
+  return {
+    bundleId: bundle.id,
+    basePrice: base.toString(),
+    total: total.toString(),
+    expiresAt: bundle.endsAt?.toISOString() ?? null,
+  };
 }

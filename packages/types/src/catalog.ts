@@ -166,6 +166,8 @@ export interface ProductDTO {
   stockStatus: "IN_STOCK" | "LOW_STOCK" | "OUT_OF_STOCK";
   isActive: boolean;
   isFeatured: boolean;
+  /** Present on management APIs; public clients may ignore inventory ownership. */
+  vendorId?: string | null;
   categoryId: string | null;
   category: Pick<CategoryDTO, "id" | "name" | "slug"> | null;
   ratingSummary: ReviewSummaryDTO;

@@ -51,3 +51,34 @@ export async function deleteItem(req: Request, res: Response): Promise<void> {
   await items.remove(idParam(req));
   sendOk(res, { success: true });
 }
+
+export async function vendorListItems(req: Request, res: Response): Promise<void> {
+  if (!req.vendor) throw Errors.unauthorized();
+  const query = wholesaleItemQuerySchema.parse(req.query);
+  sendOk(res, await items.list(query, { enforceActive: false, vendorId: req.vendor.sub }));
+}
+
+export async function vendorGetItem(req: Request, res: Response): Promise<void> {
+  if (!req.vendor) throw Errors.unauthorized();
+  sendOk(res, {
+    item: await items.getByIdOrSlug(idParam(req), { activeOnly: false, vendorId: req.vendor.sub }),
+  });
+}
+
+export async function vendorCreateItem(req: Request, res: Response): Promise<void> {
+  if (!req.vendor) throw Errors.unauthorized();
+  const input = wholesaleItemCreateSchema.parse(req.body);
+  sendOk(res, { item: await items.create(input, req.vendor.sub) }, 201);
+}
+
+export async function vendorUpdateItem(req: Request, res: Response): Promise<void> {
+  if (!req.vendor) throw Errors.unauthorized();
+  const input = wholesaleItemUpdateSchema.parse(req.body);
+  sendOk(res, { item: await items.update(idParam(req), input, req.vendor.sub) });
+}
+
+export async function vendorDeleteItem(req: Request, res: Response): Promise<void> {
+  if (!req.vendor) throw Errors.unauthorized();
+  await items.remove(idParam(req), req.vendor.sub);
+  sendOk(res, { success: true });
+}

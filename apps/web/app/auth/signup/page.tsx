@@ -9,17 +9,17 @@ import Link from "next/link";
 import { FcGoogle } from "react-icons/fc";
 import { AiOutlineEye, AiOutlineEyeInvisible, AiOutlineLock } from "react-icons/ai";
 
-import AuthHeader from "@/components/ui/auth/AuthHeader";
 import AuthCard from "@/components/ui/auth/AuthCard";
 import AuthHero from "@/components/ui/auth/AuthHero";
 import StatusMessage from "@/components/ui/auth/StatusMessage";
 import { authApi, ApiClientError } from "@/lib/api";
 import { useAppUser } from "@/context/UserContext";
+import { safeRedirectPath } from "@/lib/safeRedirect";
 
 function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("redirectTo") || "/";
+  const redirectTo = safeRedirectPath(searchParams.get("redirectTo"));
   const loginHref = redirectTo
     ? { pathname: "/auth/login", query: { redirectTo } }
     : { pathname: "/auth/login" };
@@ -63,7 +63,7 @@ function SignupForm() {
     try {
       const referralCode =
         typeof window !== "undefined"
-          ? localStorage.getItem("nurushop_referrer") ?? undefined
+          ? (localStorage.getItem("nurushop_referrer") ?? undefined)
           : undefined;
       const { user: authUser } = await authApi.signup({ email, password, referralCode });
       localStorage.removeItem("nurushop_referrer");
@@ -80,7 +80,7 @@ function SignupForm() {
   };
 
   const handleGoogleSignup = () => {
-    window.location.href = authApi.googleUrl();
+    window.location.href = authApi.googleUrl(redirectTo);
   };
 
   return (
@@ -107,7 +107,9 @@ function SignupForm() {
 
             <div className="my-6 flex items-center gap-3">
               <span className="h-px flex-1 bg-slate-200" />
-              <span className="text-xs uppercase tracking-wide text-slate-400">or continue with email</span>
+              <span className="text-xs uppercase tracking-wide text-slate-400">
+                or continue with email
+              </span>
               <span className="h-px flex-1 bg-slate-200" />
             </div>
 

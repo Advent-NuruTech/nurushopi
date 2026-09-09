@@ -326,7 +326,10 @@ exports.Prisma.OrderScalarFieldEnum = {
   pickupStationName: 'pickupStationName',
   pickupStationAddress: 'pickupStationAddress',
   deliveryFee: 'deliveryFee',
+  deliveryFeeStatus: 'deliveryFeeStatus',
   deliveryEta: 'deliveryEta',
+  deliveryOrigin: 'deliveryOrigin',
+  deliveryRateId: 'deliveryRateId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -338,6 +341,8 @@ exports.Prisma.FulfillmentConfigurationScalarFieldEnum = {
   doorstepEnabled: 'doorstepEnabled',
   doorstepFee: 'doorstepFee',
   doorstepEstimatedDeliveryTime: 'doorstepEstimatedDeliveryTime',
+  dispatchCounty: 'dispatchCounty',
+  dispatchArea: 'dispatchArea',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -358,6 +363,23 @@ exports.Prisma.PickupStationScalarFieldEnum = {
   isActive: 'isActive',
   archivedAt: 'archivedAt',
   displayOrder: 'displayOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.DeliveryRateScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  method: 'method',
+  originCounty: 'originCounty',
+  originArea: 'originArea',
+  destinationCounty: 'destinationCounty',
+  destinationArea: 'destinationArea',
+  fee: 'fee',
+  estimatedDeliveryTime: 'estimatedDeliveryTime',
+  priority: 'priority',
+  isActive: 'isActive',
+  archivedAt: 'archivedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -930,6 +952,11 @@ exports.FulfillmentMethod = exports.$Enums.FulfillmentMethod = {
   DOORSTEP: 'DOORSTEP'
 };
 
+exports.DeliveryFeeStatus = exports.$Enums.DeliveryFeeStatus = {
+  CONFIRMED: 'CONFIRMED',
+  PENDING_QUOTE: 'PENDING_QUOTE'
+};
+
 exports.ReviewStatus = exports.$Enums.ReviewStatus = {
   PENDING: 'PENDING',
   APPROVED: 'APPROVED',
@@ -1059,6 +1086,7 @@ exports.Prisma.ModelName = {
   Order: 'Order',
   FulfillmentConfiguration: 'FulfillmentConfiguration',
   PickupStation: 'PickupStation',
+  DeliveryRate: 'DeliveryRate',
   OrderItem: 'OrderItem',
   Review: 'Review',
   WishlistItem: 'WishlistItem',

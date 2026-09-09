@@ -2,7 +2,9 @@ import { createHash, randomUUID } from "node:crypto";
 import { prisma, Prisma } from "@nuru/db";
 import type {
   CheckoutInput,
+  DeliveryFeeStatus,
   FulfillmentMethod,
+  OrderDeliveryQuoteInput,
   OrderDTO,
   OrderQuery,
   OrderStatus,
@@ -10,6 +12,7 @@ import type {
   PaymentStatus,
 } from "@nuru/types";
 import { Errors } from "../../lib/errors.js";
+import { resolveDeliveryQuote } from "../fulfillment/fulfillment.service.js";
 import { creditWallet, debitWallet, rewardReferralOnFirstOrder } from "../wallet/ledger.js";
 import { toOrderDTO, type OrderWithItems } from "./serializers.js";
 import { loadEffectivePrices } from "../merchandising/pricing.service.js";
@@ -35,10 +38,7 @@ async function loadFulfillmentGate(): Promise<FulfillmentGate> {
       select: { featureEnabled: true, pickupEnabled: true, doorstepEnabled: true },
     });
     if (!configuration?.featureEnabled) return disabledGate;
-    const activeStationCount = configuration.pickupEnabled
-      ? await prisma.pickupStation.count({ where: { isActive: true, archivedAt: null } })
-      : 0;
-    const pickupEnabled = configuration.pickupEnabled && activeStationCount > 0;
+    const pickupEnabled = configuration.pickupEnabled;
     return {
       featureEnabled: pickupEnabled || configuration.doorstepEnabled,
       pickupEnabled,
@@ -60,7 +60,10 @@ type FulfillmentSnapshot = {
   pickupStationName: string | null;
   pickupStationAddress: string | null;
   deliveryFee: Prisma.Decimal;
+  deliveryFeeStatus: DeliveryFeeStatus;
   deliveryEta: string | null;
+  deliveryOrigin: string | null;
+  deliveryRateId: string | null;
   address: string;
 };
 
@@ -76,7 +79,10 @@ async function resolveFulfillment(
       pickupStationName: null,
       pickupStationAddress: null,
       deliveryFee: new Prisma.Decimal(0),
+      deliveryFeeStatus: "CONFIRMED",
       deliveryEta: null,
+      deliveryOrigin: null,
+      deliveryRateId: null,
       address: input.address,
     };
   }
@@ -97,35 +103,85 @@ async function resolveFulfillment(
     if (!configuration.doorstepEnabled) {
       throw Errors.conflict("Doorstep delivery is no longer available. Choose another method.");
     }
+    const destination = input.deliveryDestination;
+    const quote = destination
+      ? await resolveDeliveryQuote(tx, {
+          method: "DOORSTEP",
+          destinationCounty: destination.county,
+          destinationArea: destination.town,
+        })
+      : {
+          status: "PENDING_QUOTE" as const,
+          fee: null,
+          estimatedDeliveryTime: null,
+          rateId: null,
+          origin: null,
+        };
     return {
       fulfillmentMethod: "DOORSTEP",
       pickupStationId: null,
       pickupStationName: null,
       pickupStationAddress: null,
-      deliveryFee: new Prisma.Decimal(configuration.doorstepFee.toString()),
-      deliveryEta: configuration.doorstepEstimatedDeliveryTime,
-      address: input.address,
+      deliveryFee: new Prisma.Decimal(quote.fee ?? 0),
+      deliveryFeeStatus: quote.status,
+      deliveryEta: quote.estimatedDeliveryTime,
+      deliveryOrigin: quote.origin,
+      deliveryRateId: quote.rateId,
+      address: destination
+        ? [destination.address, destination.town, destination.county, destination.country]
+            .filter(Boolean)
+            .join(", ")
+        : input.address,
     };
   }
 
   if (!configuration.pickupEnabled) {
     throw Errors.conflict("Pickup delivery is no longer available. Choose another method.");
   }
-  if (!input.pickupStationId) throw Errors.badRequest("Choose a pickup station.");
-  const station = await tx.pickupStation.findFirst({
-    where: { id: input.pickupStationId, isActive: true, archivedAt: null },
-  });
-  if (!station) {
+  if (!input.pickupStationId && !input.manualPickupStation) {
+    throw Errors.badRequest("Choose a listed pickup station or enter your pickup location.");
+  }
+  const station = input.pickupStationId
+    ? await tx.pickupStation.findFirst({
+        where: { id: input.pickupStationId, isActive: true, archivedAt: null },
+      })
+    : null;
+  if (input.pickupStationId && !station) {
     throw Errors.conflict("The selected pickup station is no longer available.");
   }
+  const manual = input.manualPickupStation;
+  const pickupName = station?.name ?? manual?.name ?? "Requested pickup point";
+  const pickupAddress =
+    station?.address ??
+    (manual
+      ? [manual.address, manual.city, manual.region, "Kenya"].filter(Boolean).join(", ")
+      : input.address);
+  const destinationCounty = station?.region ?? manual?.region ?? "";
+  const destinationArea = station?.city ?? manual?.city ?? "";
+  const quote = destinationCounty
+    ? await resolveDeliveryQuote(tx, {
+        method: "PICKUP_STATION",
+        destinationCounty,
+        destinationArea,
+      })
+    : {
+        status: "PENDING_QUOTE" as const,
+        fee: null,
+        estimatedDeliveryTime: null,
+        rateId: null,
+        origin: null,
+      };
   return {
     fulfillmentMethod: "PICKUP_STATION",
-    pickupStationId: station.id,
-    pickupStationName: station.name,
-    pickupStationAddress: station.address,
-    deliveryFee: new Prisma.Decimal(station.deliveryFee.toString()),
-    deliveryEta: station.estimatedDeliveryTime,
-    address: station.address,
+    pickupStationId: station?.id ?? null,
+    pickupStationName: pickupName,
+    pickupStationAddress: pickupAddress,
+    deliveryFee: new Prisma.Decimal(quote.fee ?? 0),
+    deliveryFeeStatus: quote.status,
+    deliveryEta: quote.estimatedDeliveryTime,
+    deliveryOrigin: quote.origin,
+    deliveryRateId: quote.rateId,
+    address: pickupAddress,
   };
 }
 
@@ -343,7 +399,10 @@ export async function checkout(input: CheckoutInput, userId?: string): Promise<O
         pickupStationName: fulfillment.pickupStationName,
         pickupStationAddress: fulfillment.pickupStationAddress,
         deliveryFee: fulfillment.deliveryFee,
+        deliveryFeeStatus: fulfillment.deliveryFeeStatus,
         deliveryEta: fulfillment.deliveryEta,
+        deliveryOrigin: fulfillment.deliveryOrigin,
+        deliveryRateId: fulfillment.deliveryRateId,
         items: { create: orderItems },
       },
       include: { items: true },
@@ -458,9 +517,9 @@ export async function checkout(input: CheckoutInput, userId?: string): Promise<O
           name: input.contactName.trim() || undefined,
           phone: input.contactPhone.trim() || undefined,
           address:
-            fulfillment.fulfillmentMethod === "PICKUP_STATION"
+            fulfillment.fulfillmentMethod === "PICKUP_STATION" || !input.saveAddressAsDefault
               ? undefined
-              : input.address.trim() || undefined,
+              : fulfillment.address.trim() || undefined,
         },
       });
     }
@@ -481,6 +540,14 @@ export async function updateStatus(id: string, status: OrderStatus): Promise<Ord
   const order = await prisma.$transaction(async (tx) => {
     const current = await tx.order.findUnique({ where: { id }, include: { items: true } });
     if (!current) throw Errors.notFound("Order not found.");
+    if (
+      current.deliveryFeeStatus === "PENDING_QUOTE" &&
+      ["CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED"].includes(status)
+    ) {
+      throw Errors.conflict(
+        "Confirm the route-specific delivery quote before progressing this order.",
+      );
+    }
 
     const alreadyReleased = current.status === "CANCELLED" || current.status === "REFUNDED";
     if (status === "CANCELLED" && !alreadyReleased) {
@@ -554,13 +621,53 @@ export async function cancelOwnOrder(userId: string, orderNumber: string): Promi
 }
 
 export async function updatePayment(id: string, paymentStatus: PaymentStatus): Promise<OrderDTO> {
-  const current = await prisma.order.findUnique({ where: { id }, select: { id: true } });
+  const current = await prisma.order.findUnique({
+    where: { id },
+    select: { id: true, deliveryFeeStatus: true },
+  });
   if (!current) throw Errors.notFound("Order not found.");
+  if (paymentStatus === "PAID" && current.deliveryFeeStatus === "PENDING_QUOTE") {
+    throw Errors.conflict(
+      "Confirm the route-specific delivery quote before marking this order paid.",
+    );
+  }
 
   const order = await prisma.order.update({
     where: { id },
     data: { paymentStatus },
     include: { items: true },
+  });
+  return toOrderDTO(order as OrderWithItems);
+}
+
+/** Confirm a route-specific doorstep quote and recompute the payable total. */
+export async function updateDeliveryQuote(
+  id: string,
+  input: OrderDeliveryQuoteInput,
+): Promise<OrderDTO> {
+  const order = await prisma.$transaction(async (tx) => {
+    const current = await tx.order.findUnique({ where: { id }, include: { items: true } });
+    if (!current) throw Errors.notFound("Order not found.");
+    if (current.fulfillmentMethod === "LEGACY") {
+      throw Errors.badRequest("This order does not use route-based delivery.");
+    }
+    if (current.paymentStatus === "PAID") {
+      throw Errors.conflict("A paid order's delivery quote cannot be changed.");
+    }
+    const fee = new Prisma.Decimal(input.deliveryFee);
+    const total = new Prisma.Decimal(current.subtotal.toString())
+      .add(fee)
+      .sub(new Prisma.Decimal(current.walletApplied.toString()));
+    return tx.order.update({
+      where: { id },
+      data: {
+        deliveryFee: fee,
+        deliveryFeeStatus: "CONFIRMED",
+        deliveryEta: input.deliveryEta,
+        total,
+      },
+      include: { items: true },
+    });
   });
   return toOrderDTO(order as OrderWithItems);
 }

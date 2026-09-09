@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Search, ShoppingBag, Trash2 } from "lucide-react";
+import { Download, Search, ShoppingBag, Trash2 } from "lucide-react";
 import type { CollectionMembershipDTO, MerchandisingCollectionDTO, ProductDTO } from "@nuru/types";
 import { ApiClientError, catalogApi, merchandisingApi } from "@/lib/api";
 
@@ -93,6 +93,28 @@ export default function MerchandisingAssignments({
     }
   }
 
+  async function importCurrentProducts() {
+    if (!collectionId) return;
+    setLoading(true);
+    setMessage("");
+    try {
+      const result =
+        actor === "admin"
+          ? await merchandisingApi.admin.importCurrentProducts(collectionId)
+          : await merchandisingApi.vendor.importCurrentProducts(collectionId);
+      setMessage(
+        result.imported > 0
+          ? `Imported ${result.imported} current product${result.imported === 1 ? "" : "s"}. ${result.eligible} active products are now eligible for this collection.`
+          : `All ${result.eligible} current active products are already in this collection.`,
+      );
+      await load();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not import current products.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function remove(productId: string) {
     setLoading(true);
     try {
@@ -108,7 +130,13 @@ export default function MerchandisingAssignments({
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-      <div className="flex flex-wrap items-end gap-3">
+      <div>
+        <h3 className="font-bold">Collection products</h3>
+        <p className="mt-1 text-sm text-slate-500">
+          Import every current active product at once, or select individual products below.
+        </p>
+      </div>
+      <div className="mt-4 flex flex-wrap items-end gap-3">
         <div className="min-w-56 flex-1">
           <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
             Collection
@@ -140,14 +168,24 @@ export default function MerchandisingAssignments({
             className="mt-1 w-full rounded-xl border py-2 pl-9 pr-3 dark:border-slate-700 dark:bg-slate-950"
           />
         </div>
-        <button
-          type="button"
-          onClick={() => void addSelected()}
-          disabled={loading || selected.length === 0}
-          className="rounded-xl bg-brand px-4 py-2 font-semibold text-white hover:bg-brand-strong disabled:opacity-50"
-        >
-          Add selected ({selected.length})
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => void importCurrentProducts()}
+            disabled={loading || !collectionId}
+            className="inline-flex items-center gap-2 rounded-xl border border-brand-border bg-brand-surface px-4 py-2 font-semibold text-brand-ink hover:bg-brand-surface-strong disabled:opacity-50 dark:border-brand-strong dark:bg-[#063D1E] dark:text-brand-bright"
+          >
+            <Download size={16} /> Import current products
+          </button>
+          <button
+            type="button"
+            onClick={() => void addSelected()}
+            disabled={loading || selected.length === 0}
+            className="rounded-xl bg-brand px-4 py-2 font-semibold text-white hover:bg-brand-strong disabled:opacity-50"
+          >
+            Add selected ({selected.length})
+          </button>
+        </div>
       </div>
       {message && (
         <p className="mt-3 rounded-xl bg-emerald-50 px-3 py-2 text-sm text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-100">

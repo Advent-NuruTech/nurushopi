@@ -58,7 +58,13 @@ export type CollectionCreateInput = z.infer<typeof collectionCreateSchema>;
 
 // The immutable key is intentionally absent. Renaming presentation can never
 // break API routes, analytics joins, promotion rules or historical reports.
-export const collectionUpdateSchema = collectionFields.omit({ key: true }).partial();
+export const collectionUpdateSchema = collectionFields
+  .omit({ key: true })
+  .partial()
+  .refine((v) => !v.startAt || !v.endAt || v.endAt > v.startAt, {
+    message: "endAt must be after startAt.",
+    path: ["endAt"],
+  });
 export type CollectionUpdateInput = z.infer<typeof collectionUpdateSchema>;
 
 export const collectionMembershipSchema = z.object({
@@ -123,6 +129,37 @@ export const homepageSectionCreateSchema = homepageSectionFields.refine(
 export const homepageSectionUpdateSchema = homepageSectionFields.partial();
 export type HomepageSectionCreateInput = z.infer<typeof homepageSectionCreateSchema>;
 export type HomepageSectionUpdateInput = z.infer<typeof homepageSectionUpdateSchema>;
+
+export const homepageSectionReorderSchema = z.object({
+  sectionIds: z
+    .array(idSchema)
+    .min(1)
+    .max(100)
+    .refine((ids) => new Set(ids).size === ids.length, "Homepage section ids must be unique."),
+});
+export type HomepageSectionReorderInput = z.infer<typeof homepageSectionReorderSchema>;
+
+/**
+ * Creates the collection identity and its first homepage placement together.
+ * This keeps the guided admin workflow atomic: a draft can never be created
+ * without a place for an editor to preview and eventually publish it.
+ */
+export const merchandisingWorkspaceCreateSchema = z.object({
+  collection: collectionCreateSchema,
+  homepage: z.object({
+    position: z.coerce.number().int().min(0).max(10_000),
+    device: z.enum(["all", "desktop", "mobile"]).default("all"),
+    configuration: jsonObject,
+  }),
+});
+export type MerchandisingWorkspaceCreateInput = z.infer<typeof merchandisingWorkspaceCreateSchema>;
+
+/** One explicit lifecycle command drives both collection and homepage state. */
+export const merchandisingLifecycleSchema = z.object({
+  action: z.enum(["SAVE_DRAFT", "PUBLISH", "UNPUBLISH"]),
+  collection: collectionUpdateSchema.optional(),
+});
+export type MerchandisingLifecycleInput = z.infer<typeof merchandisingLifecycleSchema>;
 
 export const collectionProductsQuerySchema = z.object({
   cursor: z.string().trim().max(500).optional(),

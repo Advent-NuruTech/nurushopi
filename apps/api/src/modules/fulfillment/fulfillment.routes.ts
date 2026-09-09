@@ -5,6 +5,7 @@ import * as ctrl from "./fulfillment.controller.js";
 
 export const fulfillmentPublicRouter: Router = Router();
 fulfillmentPublicRouter.get("/", asyncHandler(ctrl.publicConfiguration));
+fulfillmentPublicRouter.post("/quote", asyncHandler(ctrl.publicQuote));
 
 export const fulfillmentAdminRouter: Router = Router();
 fulfillmentAdminRouter.use(requireAdmin());
@@ -25,4 +26,20 @@ fulfillmentAdminRouter.delete(
   "/stations/:id",
   requireAdmin("SENIOR"),
   asyncHandler(ctrl.archiveStation),
+);
+fulfillmentAdminRouter.get("/rates", asyncHandler(ctrl.listDeliveryRates));
+fulfillmentAdminRouter.post(
+  "/rates",
+  requireAdmin("SENIOR"),
+  asyncHandler(ctrl.createDeliveryRate),
+);
+fulfillmentAdminRouter.patch(
+  "/rates/:id",
+  requireAdmin("SENIOR"),
+  asyncHandler(ctrl.updateDeliveryRate),
+);
+fulfillmentAdminRouter.delete(
+  "/rates/:id",
+  requireAdmin("SENIOR"),
+  asyncHandler(ctrl.archiveDeliveryRate),
 );

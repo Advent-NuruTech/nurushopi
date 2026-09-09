@@ -17,6 +17,16 @@ import { clearSession, issueSession, rotateSession } from "./session.js";
 import { getGoogleAuthUrl, handleGoogleCallback } from "./google.js";
 
 const OAUTH_STATE_COOKIE = "nuru_oauth_state";
+const OAUTH_RETURN_COOKIE = "nuru_oauth_return";
+
+function safeWebReturnPath(value: unknown): string {
+  return typeof value === "string" &&
+    value.startsWith("/") &&
+    !value.startsWith("//") &&
+    !value.includes("\\")
+    ? value
+    : "/profile";
+}
 
 export async function signup(req: Request, res: Response): Promise<void> {
   const user = await authService.signup(req.body as SignupInput);
@@ -74,10 +84,17 @@ export async function resetPassword(req: Request, res: Response): Promise<void> 
 
 // ---- Google OAuth ----
 
-export function googleStart(_req: Request, res: Response): void {
+export function googleStart(req: Request, res: Response): void {
   if (!googleOAuthConfigured) throw Errors.badRequest("Google sign-in is not configured.");
   const state = generateOpaqueToken(16);
   res.cookie(OAUTH_STATE_COOKIE, state, {
+    httpOnly: true,
+    secure: env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 10 * 60 * 1000,
+    path: "/",
+  });
+  res.cookie(OAUTH_RETURN_COOKIE, safeWebReturnPath(req.query.redirectTo), {
     httpOnly: true,
     secure: env.NODE_ENV === "production",
     sameSite: "lax",
@@ -93,19 +110,27 @@ export async function googleCallback(req: Request, res: Response): Promise<void>
   const code = typeof req.query.code === "string" ? req.query.code : null;
   const state = typeof req.query.state === "string" ? req.query.state : null;
   const cookieState = (req.cookies as Record<string, string> | undefined)?.[OAUTH_STATE_COOKIE];
+  const returnPath = safeWebReturnPath(
+    (req.cookies as Record<string, string> | undefined)?.[OAUTH_RETURN_COOKIE],
+  );
 
   res.clearCookie(OAUTH_STATE_COOKIE, { path: "/" });
+  res.clearCookie(OAUTH_RETURN_COOKIE, { path: "/" });
 
   if (!code || !state || !cookieState || state !== cookieState) {
-    res.redirect(`${env.WEB_APP_URL}/auth/login?error=oauth_state`);
+    res.redirect(
+      `${env.WEB_APP_URL}/auth/login?error=oauth_state&redirectTo=${encodeURIComponent(returnPath)}`,
+    );
     return;
   }
 
   try {
     const user = await handleGoogleCallback(code);
     await issueSession(res, req, { id: user.id, email: user.email });
-    res.redirect(`${env.WEB_APP_URL}/profile`);
+    res.redirect(`${env.WEB_APP_URL}${returnPath}`);
   } catch {
-    res.redirect(`${env.WEB_APP_URL}/auth/login?error=oauth_failed`);
+    res.redirect(
+      `${env.WEB_APP_URL}/auth/login?error=oauth_failed&redirectTo=${encodeURIComponent(returnPath)}`,
+    );
   }
 }

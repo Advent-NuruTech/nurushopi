@@ -39,6 +39,7 @@ function StatusBadge({ status }: { status: OrderStatus }) {
 export default function OrdersTab({ role }: OrdersTabProps) {
   const [orders, setOrders] = useState<OrderDTO[]>([]);
   const [loading, setLoading] = useState(true);
+  const [quoteDrafts, setQuoteDrafts] = useState<Record<string, { fee: string; eta: string }>>({});
   const searchParams = useSearchParams();
   const highlightId = searchParams.get("orderId");
 
@@ -60,6 +61,21 @@ export default function OrdersTab({ role }: OrdersTabProps) {
     try {
       const { order } = await orderApi.admin.updateStatus(id, status);
       setOrders((current) => current.map((o) => (o.id === id ? order : o)));
+    } catch (err) {
+      if (err instanceof ApiClientError) alert(err.message);
+    }
+  };
+
+  const saveDeliveryQuote = async (order: OrderDTO) => {
+    const draft = quoteDrafts[order.id];
+    if (!draft?.fee.trim() || !draft.eta.trim()) return;
+    try {
+      const { order: updated } = await orderApi.admin.updateDeliveryQuote(
+        order.id,
+        Number(draft.fee),
+        draft.eta.trim(),
+      );
+      setOrders((current) => current.map((item) => (item.id === order.id ? updated : item)));
     } catch (err) {
       if (err instanceof ApiClientError) alert(err.message);
     }
@@ -137,13 +153,68 @@ export default function OrdersTab({ role }: OrdersTabProps) {
                 <p className="font-medium text-slate-900 dark:text-white">
                   {order.pickupStationAddress || order.address || "Location not provided"}
                 </p>
-                {Number(order.deliveryFee) > 0 && (
+                {order.deliveryFeeStatus === "PENDING_QUOTE" && (
+                  <p className="mt-1 inline-flex rounded-full bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-800">
+                    Route price required before payment
+                  </p>
+                )}
+                {order.deliveryFeeStatus === "CONFIRMED" && (
                   <p className="text-xs text-slate-500">
                     Delivery fee: {formatPrice(Number(order.deliveryFee))}
                     {order.deliveryEta ? ` · ${order.deliveryEta}` : ""}
                   </p>
                 )}
               </div>
+
+              {role === "senior" &&
+                order.deliveryFeeStatus === "PENDING_QUOTE" &&
+                order.fulfillmentMethod !== "LEGACY" && (
+                  <div className="rounded-xl border border-amber-200 bg-amber-50 p-3">
+                    <p className="text-xs font-bold text-amber-900">
+                      Confirm route-specific delivery quote
+                    </p>
+                    <div className="mt-2 grid gap-2">
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="Fee (KES)"
+                        value={quoteDrafts[order.id]?.fee ?? ""}
+                        onChange={(event) =>
+                          setQuoteDrafts((current) => ({
+                            ...current,
+                            [order.id]: {
+                              fee: event.target.value,
+                              eta: current[order.id]?.eta ?? "",
+                            },
+                          }))
+                        }
+                        className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"
+                      />
+                      <input
+                        placeholder="Delivery estimate, e.g. 1–2 working days"
+                        value={quoteDrafts[order.id]?.eta ?? ""}
+                        onChange={(event) =>
+                          setQuoteDrafts((current) => ({
+                            ...current,
+                            [order.id]: {
+                              fee: current[order.id]?.fee ?? "",
+                              eta: event.target.value,
+                            },
+                          }))
+                        }
+                        className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => void saveDeliveryQuote(order)}
+                        className="rounded-lg bg-brand px-3 py-2 text-sm font-bold text-white hover:bg-brand-strong"
+                      >
+                        Save quote
+                      </button>
+                    </div>
+                  </div>
+                )}
 
               <div>
                 <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">

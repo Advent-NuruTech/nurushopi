@@ -52,6 +52,11 @@ enum FulfillmentMethod {
   DOORSTEP
 }
 
+enum DeliveryFeeStatus {
+  CONFIRMED
+  PENDING_QUOTE
+}
+
 enum ReviewStatus {
   PENDING
   APPROVED
@@ -525,7 +530,11 @@ model Order {
   pickupStationName    String?
   pickupStationAddress String?
   deliveryFee          Decimal           @default(0) @db.Decimal(12, 2)
+  deliveryFeeStatus    DeliveryFeeStatus @default(CONFIRMED)
   deliveryEta          String?
+  deliveryOrigin       String?
+  deliveryRateId       String?
+  deliveryRate         DeliveryRate?     @relation(fields: [deliveryRateId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -536,6 +545,7 @@ model Order {
   @@index([userId])
   @@index([status])
   @@index([pickupStationId])
+  @@index([deliveryRateId])
   @@map("orders")
 }
 
@@ -548,6 +558,8 @@ model FulfillmentConfiguration {
   doorstepEnabled               Boolean  @default(true)
   doorstepFee                   Decimal  @default(0) @db.Decimal(12, 2)
   doorstepEstimatedDeliveryTime String?
+  dispatchCounty                String?
+  dispatchArea                  String?
   createdAt                     DateTime @default(now())
   updatedAt                     DateTime @updatedAt
 
@@ -579,6 +591,29 @@ model PickupStation {
   @@index([city])
   @@index([region])
   @@map("pickup_stations")
+}
+
+model DeliveryRate {
+  id                    String            @id @default(cuid())
+  name                  String
+  method                FulfillmentMethod
+  originCounty          String
+  originArea            String?
+  destinationCounty     String
+  destinationArea       String?
+  fee                   Decimal           @db.Decimal(12, 2)
+  estimatedDeliveryTime String
+  priority              Int               @default(0)
+  isActive              Boolean           @default(true)
+  archivedAt            DateTime?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  orders Order[]
+
+  @@index([method, isActive, archivedAt, priority])
+  @@index([originCounty, destinationCounty])
+  @@map("delivery_rates")
 }
 
 model OrderItem {

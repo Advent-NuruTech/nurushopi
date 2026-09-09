@@ -51,8 +51,8 @@ describe("public fulfillment configuration", () => {
       featureEnabled: false,
       pickupEnabled: false,
       doorstepEnabled: false,
-      doorstepFee: "0.00",
-      doorstepEstimatedDeliveryTime: null,
+      dispatchCounty: null,
+      dispatchArea: null,
       stations: [],
     });
     expect(p.pickupStation.findMany).not.toHaveBeenCalled();
@@ -65,6 +65,8 @@ describe("public fulfillment configuration", () => {
       doorstepEnabled: true,
       doorstepFee: decimal("250.00"),
       doorstepEstimatedDeliveryTime: "1-2 days",
+      dispatchCounty: "Nairobi",
+      dispatchArea: "CBD",
     });
     p.pickupStation.findMany.mockResolvedValue([station()]);
 

@@ -12,8 +12,8 @@ export const fulfillmentConfigurationUpdateSchema = z
     featureEnabled: z.boolean(),
     pickupEnabled: z.boolean(),
     doorstepEnabled: z.boolean(),
-    doorstepFee: moneySchema,
-    doorstepEstimatedDeliveryTime: z.string().trim().max(160).optional().nullable(),
+    dispatchCounty: z.string().trim().max(120).optional().nullable(),
+    dispatchArea: z.string().trim().max(160).optional().nullable(),
   })
   .strict()
   .superRefine((value, ctx) => {
@@ -33,8 +33,8 @@ export interface FulfillmentConfigurationDTO {
   featureEnabled: boolean;
   pickupEnabled: boolean;
   doorstepEnabled: boolean;
-  doorstepFee: string;
-  doorstepEstimatedDeliveryTime: string | null;
+  dispatchCounty: string | null;
+  dispatchArea: string | null;
 }
 
 const coordinateSchema = z.coerce.number().finite();
@@ -43,12 +43,12 @@ export const pickupStationCreateSchema = z
   .object({
     name: z.string().trim().min(1, "Station name is required.").max(160),
     address: z.string().trim().min(1, "Station address is required.").max(500),
-    city: z.string().trim().max(120).optional().nullable(),
-    region: z.string().trim().max(120).optional().nullable(),
+    city: z.string().trim().min(2, "Town or city is required.").max(120),
+    region: z.string().trim().min(2, "County is required.").max(120),
     latitude: coordinateSchema.min(-90).max(90).optional().nullable(),
     longitude: coordinateSchema.min(-180).max(180).optional().nullable(),
     contactPhone: z.string().trim().max(32).optional().nullable(),
-    operatingHours: z.string().trim().max(500).optional().nullable(),
+    operatingHours: z.string().trim().min(1, "Operating hours are required.").max(500),
     deliveryFee: moneySchema,
     estimatedDeliveryTime: z.string().trim().max(160).optional().nullable(),
     instructions: z.string().trim().max(1000).optional().nullable(),
@@ -87,8 +87,66 @@ export interface PickupStationDTO {
   displayOrder: number;
   createdAt: string;
   updatedAt: string;
+  quote?: DeliveryQuoteDTO;
 }
 
 export interface PublicFulfillmentDTO extends FulfillmentConfigurationDTO {
   stations: PickupStationDTO[];
+}
+
+export const DELIVERY_RATE_METHODS = ["PICKUP_STATION", "DOORSTEP"] as const;
+export type DeliveryRateMethod = (typeof DELIVERY_RATE_METHODS)[number];
+
+export const deliveryRateCreateSchema = z
+  .object({
+    name: z.string().trim().min(2, "Route name is required.").max(160),
+    method: z.enum(DELIVERY_RATE_METHODS),
+    originCounty: z.string().trim().min(2, "Origin county is required.").max(120),
+    originArea: z.string().trim().max(160).optional().nullable(),
+    destinationCounty: z.string().trim().min(2, "Destination county is required.").max(120),
+    destinationArea: z.string().trim().max(160).optional().nullable(),
+    fee: moneySchema,
+    estimatedDeliveryTime: z.string().trim().min(2, "Delivery estimate is required.").max(160),
+    priority: z.coerce.number().int().min(0).max(1_000_000).default(0),
+    isActive: z.boolean().default(true),
+  })
+  .strict();
+export type DeliveryRateCreateInput = z.infer<typeof deliveryRateCreateSchema>;
+
+export const deliveryRateUpdateSchema = deliveryRateCreateSchema.partial().strict();
+export type DeliveryRateUpdateInput = z.infer<typeof deliveryRateUpdateSchema>;
+
+export const deliveryRateQuerySchema = paginationQuerySchema.extend({
+  search: z.string().trim().max(120).optional(),
+  method: z.enum(DELIVERY_RATE_METHODS).optional(),
+  includeArchived: z
+    .union([z.boolean(), z.enum(["true", "false"]).transform((value) => value === "true")])
+    .default(false),
+});
+export type DeliveryRateQuery = z.infer<typeof deliveryRateQuerySchema>;
+
+export type DeliveryRateDTO = Omit<DeliveryRateCreateInput, "fee"> & {
+  id: string;
+  fee: string;
+  archivedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export const deliveryQuoteRequestSchema = z
+  .object({
+    method: z.enum(DELIVERY_RATE_METHODS),
+    destinationCounty: z.string().trim().min(2).max(120),
+    destinationArea: z.string().trim().max(160).optional().nullable(),
+  })
+  .strict();
+export type DeliveryQuoteRequest = z.infer<typeof deliveryQuoteRequestSchema>;
+
+export interface DeliveryQuoteDTO {
+  status: "CONFIRMED" | "PENDING_QUOTE";
+  fee: string | null;
+  estimatedDeliveryTime: string | null;
+  rateId: string | null;
+  origin: string | null;
+  destination: string;
 }

@@ -101,15 +101,31 @@ describe("orders.checkout", () => {
       doorstepEnabled: true,
       doorstepFee: decimal("250.00"),
       doorstepEstimatedDeliveryTime: "1 day",
+      dispatchCounty: "Nairobi",
+      dispatchArea: "CBD",
     });
     p.pickupStation.count.mockResolvedValue(1);
     p.pickupStation.findFirst.mockResolvedValue({
       id: "station1",
       name: "Nairobi CBD",
       address: "Market Street, Nairobi",
+      city: "Nairobi",
+      region: "Nairobi",
       deliveryFee: decimal("125.00"),
       estimatedDeliveryTime: "Next business day",
     });
+    p.deliveryRate.findMany.mockResolvedValue([
+      {
+        id: "rate1",
+        originCounty: "Nairobi",
+        originArea: "CBD",
+        destinationCounty: "Nairobi",
+        destinationArea: null,
+        fee: decimal("125.00"),
+        estimatedDeliveryTime: "Next business day",
+        priority: 0,
+      },
+    ]);
     p.product.findMany.mockResolvedValue([product()]);
     p.product.updateMany.mockResolvedValue({ count: 1 });
     p.order.create.mockResolvedValue(orderRow());
@@ -137,14 +153,37 @@ describe("orders.checkout", () => {
       featureEnabled: true,
       pickupEnabled: false,
       doorstepEnabled: true,
+      dispatchCounty: "Nairobi",
+      dispatchArea: "CBD",
       doorstepFee: decimal("250.00"),
       doorstepEstimatedDeliveryTime: "1–2 days",
     });
+    p.deliveryRate.findMany.mockResolvedValue([
+      {
+        id: "rate2",
+        originCounty: "Nairobi",
+        originArea: "CBD",
+        destinationCounty: "Kisumu",
+        destinationArea: null,
+        fee: decimal("250.00"),
+        estimatedDeliveryTime: "1–2 days",
+        priority: 0,
+      },
+    ]);
     p.product.findMany.mockResolvedValue([product()]);
     p.product.updateMany.mockResolvedValue({ count: 1 });
     p.order.create.mockResolvedValue(orderRow());
 
-    await orders.checkout({ ...validCheckout, deliveryMethod: "DOORSTEP" } as never);
+    await orders.checkout({
+      ...validCheckout,
+      deliveryMethod: "DOORSTEP",
+      deliveryDestination: {
+        country: "Kenya",
+        county: "Kisumu",
+        town: "Kisumu Central",
+        address: "Oginga Odinga Street",
+      },
+    } as never);
 
     const created = p.order.create.mock.calls[0][0].data;
     expect(created.fulfillmentMethod).toBe("DOORSTEP");

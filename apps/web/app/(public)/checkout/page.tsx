@@ -17,6 +17,7 @@ import {
   ShoppingBag,
   Trash2,
   Truck,
+  Clock3,
   XCircle,
 } from "lucide-react";
 import PhoneInput, { validatePhoneForSubmission } from "@/components/ui/PhoneInput";
@@ -24,7 +25,13 @@ import { useSabbathStatus } from "@/lib/useSabbathStatus";
 import { useAppUser } from "@/context/UserContext";
 import { catalogApi, fulfillmentApi, orderApi, ApiClientError } from "@/lib/api";
 import { formatPrice } from "@/lib/formatPrice";
-import type { CustomerFulfillmentMethod, ProductDTO, PublicFulfillmentDTO } from "@nuru/types";
+import type {
+  CustomerFulfillmentMethod,
+  DeliveryQuoteDTO,
+  ProductDTO,
+  PublicFulfillmentDTO,
+} from "@nuru/types";
+import { KENYA_COUNTIES, KENYA_REGIONS, kenyaRegionForCounty } from "@/lib/kenyaLocations";
 
 export const dynamic = "force-dynamic";
 
@@ -40,31 +47,12 @@ const disabledFulfillment: PublicFulfillmentDTO = {
   featureEnabled: false,
   pickupEnabled: false,
   doorstepEnabled: false,
-  doorstepFee: "0.00",
-  doorstepEstimatedDeliveryTime: null,
+  dispatchCounty: null,
+  dispatchArea: null,
   stations: [],
 };
 
-// -------------------- Common Countries --------------------
-const commonCountries = [
-  "Kenya",
-  "Uganda",
-  "Tanzania",
-  "Rwanda",
-  "Ethiopia",
-  "South Africa",
-  "Nigeria",
-  "Ghana",
-  "United States",
-  "United Kingdom",
-  "Canada",
-  "Australia",
-  "Germany",
-  "France",
-  "India",
-  "China",
-  "Japan",
-];
+const CHECKOUT_DRAFT_KEY = "nurushop-checkout-draft-v2";
 
 function toRelated(p: ProductDTO): RelatedProduct {
   return {
@@ -88,22 +76,35 @@ function CheckoutContent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [orderNumber, setOrderNumber] = useState<string | null>(null);
+  const [orderNeedsDeliveryQuote, setOrderNeedsDeliveryQuote] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [phoneValid, setPhoneValid] = useState(true);
-  const [showCountrySuggestions, setShowCountrySuggestions] = useState(false);
   const [useWallet, setUseWallet] = useState(false);
   const [fulfillment, setFulfillment] = useState<PublicFulfillmentDTO>(disabledFulfillment);
   const [deliveryMethod, setDeliveryMethod] = useState<CustomerFulfillmentMethod | null>(null);
   const [pickupStationId, setPickupStationId] = useState("");
   const [stationSearch, setStationSearch] = useState("");
+  const [stationLocationFilter, setStationLocationFilter] = useState("");
+  const [manualPickup, setManualPickup] = useState(false);
+  const [deliveryQuote, setDeliveryQuote] = useState<DeliveryQuoteDTO | null>(null);
+  const [quoteLoading, setQuoteLoading] = useState(false);
+  const [saveAddressAsDefault, setSaveAddressAsDefault] = useState(false);
+  const [draftRestored, setDraftRestored] = useState(false);
+  const [manualPickupData, setManualPickupData] = useState({
+    name: "",
+    address: "",
+    city: "",
+    region: "",
+  });
 
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
     email: "",
-    country: "",
+    country: "Kenya",
     county: "",
+    town: "",
     locality: "",
     message: "",
   });
@@ -115,39 +116,152 @@ function CheckoutContent() {
   const fulfillmentEnabled =
     fulfillment.featureEnabled && (fulfillment.pickupEnabled || fulfillment.doorstepEnabled);
   const selectedStation = fulfillment.stations.find((station) => station.id === pickupStationId);
-  const deliveryFee = fulfillmentEnabled
-    ? deliveryMethod === "PICKUP_STATION"
-      ? Number(selectedStation?.deliveryFee ?? 0)
-      : deliveryMethod === "DOORSTEP"
-        ? Number(fulfillment.doorstepFee)
-        : 0
-    : 0;
+  const deliveryFee = deliveryQuote?.status === "CONFIRMED" ? Number(deliveryQuote.fee ?? 0) : 0;
   const checkoutTotal = total + deliveryFee;
-  const filteredStations = fulfillment.stations.filter((station) => {
-    const query = stationSearch.trim().toLowerCase();
-    if (!query) return true;
-    return [station.name, station.address, station.city, station.region]
-      .filter(Boolean)
-      .some((value) => value!.toLowerCase().includes(query));
-  });
+  const filteredStations = fulfillment.stations
+    .filter((station) => {
+      const query = stationSearch.trim().toLowerCase();
+      const locationMatches = !stationLocationFilter
+        ? true
+        : stationLocationFilter.startsWith("region:")
+          ? kenyaRegionForCounty(station.region ?? "") === stationLocationFilter.slice(7)
+          : (station.region ?? "").toLowerCase() === stationLocationFilter.slice(7).toLowerCase();
+      if (!locationMatches) return false;
+      if (!query) return true;
+      return [station.name, station.address, station.city, station.region]
+        .filter(Boolean)
+        .some((value) => value!.toLowerCase().includes(query));
+    })
+    .sort((a, b) => {
+      const preferred = formData.county.trim().toLowerCase();
+      const aMatch = (a.region ?? "").toLowerCase() === preferred ? 1 : 0;
+      const bMatch = (b.region ?? "").toLowerCase() === preferred ? 1 : 0;
+      return bMatch - aMatch || a.displayOrder - b.displayOrder || a.name.localeCompare(b.name);
+    });
 
   // Prefill contact details from the signed-in user.
   useEffect(() => {
     if (!user) return;
-    const addressParts = (user.address ?? "")
-      .split(",")
-      .map((part) => part.trim())
-      .filter(Boolean);
     setFormData((prev) => ({
       ...prev,
       email: user.email ?? prev.email,
       name: prev.name || user.name || prev.name,
       phone: prev.phone || user.phone || prev.phone,
-      locality: prev.locality || addressParts.slice(0, -2).join(", ") || addressParts[0] || "",
-      county: prev.county || addressParts.at(-2) || "",
-      country: prev.country || addressParts.at(-1) || "",
     }));
   }, [user]);
+
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem(CHECKOUT_DRAFT_KEY);
+      if (stored) {
+        const draft = JSON.parse(stored) as {
+          formData?: typeof formData;
+          deliveryMethod?: CustomerFulfillmentMethod | null;
+          pickupStationId?: string;
+          stationSearch?: string;
+          stationLocationFilter?: string;
+          manualPickup?: boolean;
+          manualPickupData?: typeof manualPickupData;
+          saveAddressAsDefault?: boolean;
+        };
+        if (draft.formData) setFormData((current) => ({ ...current, ...draft.formData }));
+        if (draft.deliveryMethod) setDeliveryMethod(draft.deliveryMethod);
+        if (draft.pickupStationId) setPickupStationId(draft.pickupStationId);
+        if (draft.stationSearch) setStationSearch(draft.stationSearch);
+        if (draft.stationLocationFilter) setStationLocationFilter(draft.stationLocationFilter);
+        if (draft.manualPickup != null) setManualPickup(draft.manualPickup);
+        if (draft.manualPickupData) setManualPickupData(draft.manualPickupData);
+        if (draft.saveAddressAsDefault != null) setSaveAddressAsDefault(draft.saveAddressAsDefault);
+      }
+    } catch {
+      sessionStorage.removeItem(CHECKOUT_DRAFT_KEY);
+    } finally {
+      setDraftRestored(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!draftRestored) return;
+    sessionStorage.setItem(
+      CHECKOUT_DRAFT_KEY,
+      JSON.stringify({
+        formData,
+        deliveryMethod,
+        pickupStationId,
+        stationSearch,
+        stationLocationFilter,
+        manualPickup,
+        manualPickupData,
+        saveAddressAsDefault,
+      }),
+    );
+  }, [
+    draftRestored,
+    formData,
+    deliveryMethod,
+    pickupStationId,
+    stationSearch,
+    stationLocationFilter,
+    manualPickup,
+    manualPickupData,
+    saveAddressAsDefault,
+  ]);
+
+  useEffect(() => {
+    if (!fulfillmentEnabled || !deliveryMethod) {
+      setDeliveryQuote(null);
+      return;
+    }
+    const destinationCounty =
+      deliveryMethod === "DOORSTEP"
+        ? formData.county
+        : manualPickup
+          ? manualPickupData.region
+          : (selectedStation?.region ?? "");
+    const destinationArea =
+      deliveryMethod === "DOORSTEP"
+        ? formData.town
+        : manualPickup
+          ? manualPickupData.city
+          : (selectedStation?.city ?? "");
+    if (!destinationCounty.trim()) {
+      setDeliveryQuote(null);
+      return;
+    }
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      setQuoteLoading(true);
+      fulfillmentApi
+        .quote({
+          method: deliveryMethod,
+          destinationCounty,
+          destinationArea: destinationArea || null,
+        })
+        .then(({ quote }) => {
+          if (!cancelled) setDeliveryQuote(quote);
+        })
+        .catch(() => {
+          if (!cancelled) setDeliveryQuote(null);
+        })
+        .finally(() => {
+          if (!cancelled) setQuoteLoading(false);
+        });
+    }, 250);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [
+    fulfillmentEnabled,
+    deliveryMethod,
+    formData.county,
+    formData.town,
+    manualPickup,
+    manualPickupData.region,
+    manualPickupData.city,
+    selectedStation?.region,
+    selectedStation?.city,
+  ]);
 
   // Configuration failure intentionally preserves the existing checkout path.
   useEffect(() => {
@@ -180,7 +294,6 @@ function CheckoutContent() {
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
-      setShowForm(false);
       if (step === "details") {
         router.replace(`/auth/login?redirectTo=${encodeURIComponent("/checkout?step=details")}`);
       }
@@ -218,10 +331,6 @@ function CheckoutContent() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-
-    if (name === "country" && value.trim()) {
-      setShowCountrySuggestions(true);
-    }
   };
 
   const handlePhoneChange = (phone: string) => {
@@ -231,15 +340,6 @@ function CheckoutContent() {
   const handlePhoneValidationChange = (isValid: boolean) => {
     setPhoneValid(isValid);
   };
-
-  const handleCountrySelect = (country: string) => {
-    setFormData((prev) => ({ ...prev, country }));
-    setShowCountrySuggestions(false);
-  };
-
-  const filteredCountries = commonCountries.filter((country) =>
-    country.toLowerCase().includes(formData.country.toLowerCase()),
-  );
 
   const redirectToAuth = useCallback(() => {
     router.push(`/auth/login?redirectTo=${encodeURIComponent("/checkout?step=details")}`);
@@ -275,13 +375,25 @@ function CheckoutContent() {
     if (!phoneValidation.isValid) errors.push(phoneValidation.message);
 
     if (fulfillmentEnabled && !deliveryMethod) errors.push("Choose a delivery method");
-    if (fulfillmentEnabled && deliveryMethod === "PICKUP_STATION" && !selectedStation) {
-      errors.push("Choose an available pickup station");
+    if (
+      fulfillmentEnabled &&
+      deliveryMethod === "PICKUP_STATION" &&
+      !manualPickup &&
+      !selectedStation
+    ) {
+      errors.push("Choose an available pickup station or enter another pickup point");
+    }
+    if (fulfillmentEnabled && deliveryMethod === "PICKUP_STATION" && manualPickup) {
+      if (!manualPickupData.name.trim()) errors.push("Pickup point name is required");
+      if (!manualPickupData.address.trim()) errors.push("Pickup point address is required");
+      if (!manualPickupData.city.trim()) errors.push("Pickup town is required");
+      if (!manualPickupData.region.trim()) errors.push("Pickup county is required");
     }
     if (!fulfillmentEnabled || deliveryMethod === "DOORSTEP") {
       if (!country.trim()) errors.push("Country is required");
-      if (!county.trim()) errors.push("County/State/Province is required");
-      if (!locality.trim()) errors.push("Locality/Address is required");
+      if (!county.trim()) errors.push("Delivery county is required");
+      if (!formData.town.trim()) errors.push("Delivery town or area is required");
+      if (!locality.trim()) errors.push("Exact delivery address is required");
     }
 
     if (errors.length > 0) {
@@ -294,9 +406,13 @@ function CheckoutContent() {
     try {
       const normalizedPhone = phoneValidation.normalized || phone;
       const address =
-        fulfillmentEnabled && deliveryMethod === "PICKUP_STATION" && selectedStation
-          ? selectedStation.address
-          : [locality, county, country]
+        fulfillmentEnabled && deliveryMethod === "PICKUP_STATION"
+          ? manualPickup
+            ? [manualPickupData.address, manualPickupData.city, manualPickupData.region, "Kenya"]
+                .filter(Boolean)
+                .join(", ")
+            : (selectedStation?.address ?? "")
+          : [locality, formData.town, county, country]
               .map((p) => p.trim())
               .filter(Boolean)
               .join(", ");
@@ -308,7 +424,23 @@ function CheckoutContent() {
         contactEmail: email.trim() || user.email || null,
         address,
         ...(fulfillmentEnabled && deliveryMethod ? { deliveryMethod } : {}),
-        ...(fulfillmentEnabled && deliveryMethod === "PICKUP_STATION" ? { pickupStationId } : {}),
+        ...(fulfillmentEnabled && deliveryMethod === "PICKUP_STATION" && !manualPickup
+          ? { pickupStationId }
+          : {}),
+        ...(fulfillmentEnabled && deliveryMethod === "PICKUP_STATION" && manualPickup
+          ? { manualPickupStation: manualPickupData }
+          : {}),
+        ...(fulfillmentEnabled && deliveryMethod === "DOORSTEP"
+          ? {
+              deliveryDestination: {
+                country: country.trim(),
+                county: county.trim(),
+                town: formData.town.trim(),
+                address: locality.trim(),
+              },
+              saveAddressAsDefault,
+            }
+          : {}),
         note: message.trim() || null,
         useWallet,
       });
@@ -327,7 +459,11 @@ function CheckoutContent() {
           : order.fulfillmentMethod === "DOORSTEP"
             ? "Doorstep delivery"
             : "Standard delivery";
-      const whatsappMessage = `🛍️ *New Order ${order.orderNumber}*\n--------------------------------\n*Name:* ${name}\n*Phone:* ${normalizedPhone}\n*Method:* ${methodLabel}\n*Address:* ${address}\n--------------------------------\n${productList}\n--------------------------------\n*Total:* ${formatPrice(Number(order.total))}\nThank you!`;
+      const whatsappTotal =
+        order.deliveryFeeStatus === "PENDING_QUOTE"
+          ? `${formatPrice(Number(order.total))} + delivery quote pending`
+          : formatPrice(Number(order.total));
+      const whatsappMessage = `New Order ${order.orderNumber}\n--------------------------------\nName: ${name}\nPhone: ${normalizedPhone}\nMethod: ${methodLabel}\nAddress: ${address}\n--------------------------------\n${productList}\n--------------------------------\nTotal: ${whatsappTotal}\nThank you!`;
 
       const phoneNumber = "254142225233";
       window.open(
@@ -336,7 +472,9 @@ function CheckoutContent() {
       );
 
       setOrderNumber(order.orderNumber);
+      setOrderNeedsDeliveryQuote(order.deliveryFeeStatus === "PENDING_QUOTE");
       setSuccess(true);
+      sessionStorage.removeItem(CHECKOUT_DRAFT_KEY);
       clearCart();
     } catch (err) {
       console.error(err);
@@ -386,7 +524,9 @@ function CheckoutContent() {
           </p>
         )}
         <p className="text-gray-600 mt-3">
-          You&apos;ll receive a confirmation via WhatsApp or Email soon.
+          {orderNeedsDeliveryQuote
+            ? "Your items are reserved. We’ll confirm the route-specific delivery fee before payment or dispatch."
+            : "You’ll receive a confirmation via WhatsApp or email soon."}
         </p>
         <Link
           href="/profile?tab=orders"
@@ -542,14 +682,20 @@ function CheckoutContent() {
                 <div className="flex justify-between text-slate-600 dark:text-slate-300">
                   <span>Delivery</span>
                   <span>
-                    {fulfillmentEnabled && deliveryMethod
-                      ? formatPrice(deliveryFee)
-                      : "Confirmed after order"}
+                    {quoteLoading
+                      ? "Checking..."
+                      : deliveryQuote?.status === "CONFIRMED"
+                        ? formatPrice(deliveryFee)
+                        : fulfillmentEnabled && deliveryMethod
+                          ? "Quote required"
+                          : "Choose delivery"}
                   </span>
                 </div>
               </div>
               <div className="mt-4 flex items-center justify-between">
-                <span className="text-base font-bold text-slate-900 dark:text-white">Total</span>
+                <span className="text-base font-bold text-slate-900 dark:text-white">
+                  {deliveryQuote?.status === "PENDING_QUOTE" ? "Items total" : "Total"}
+                </span>
                 <span className="text-2xl font-black text-brand-strong">
                   {formatPrice(checkoutTotal)}
                 </span>
@@ -563,14 +709,10 @@ function CheckoutContent() {
                     );
                     return;
                   }
-                  if (!user) {
-                    redirectToAuth();
-                    return;
-                  }
                   setShowForm(true);
                 }}
                 disabled={sabbathClosed}
-                className="mt-5 flex w-full items-center justify-center gap-2 rounded-md bg-orange-500 px-8 py-3 font-bold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+                className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-brand px-8 py-3 font-bold text-white transition hover:bg-brand-strong disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Place order
                 <CreditCard size={18} />
@@ -619,10 +761,15 @@ function CheckoutContent() {
       )}
 
       {/* Order Form Modal */}
-      {showForm && user && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md shadow-lg max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-semibold mb-4 text-blue-700">Complete Your Order</h2>
+      {showForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-3">
+          <div className="max-h-[94vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-5 shadow-2xl dark:bg-gray-900 sm:p-6">
+            <h2 className="text-xl font-bold text-brand-ink dark:text-brand-bright">
+              Delivery details
+            </h2>
+            <p className="mb-5 mt-1 text-sm text-slate-500">
+              Choose the destination for this order. It can be different from your saved address.
+            </p>
 
             <div className="space-y-3">
               <input
@@ -649,10 +796,10 @@ function CheckoutContent() {
                 placeholder="Email (optional)"
                 value={formData.email}
                 onChange={handleChange}
-                readOnly={Boolean(user.email)}
+                readOnly={Boolean(user?.email)}
                 className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               />
-              {user.email && <p className="text-xs text-gray-500">Signed in as {user.email}</p>}
+              {user?.email && <p className="text-xs text-gray-500">Signed in as {user.email}</p>}
 
               {fulfillmentEnabled && (
                 <fieldset className="space-y-3 rounded-2xl border border-brand-border bg-brand-surface p-4">
@@ -692,10 +839,7 @@ function CheckoutContent() {
                           <Truck size={17} /> Doorstep
                         </span>
                         <span className="mt-1 block text-xs text-slate-500">
-                          {formatPrice(Number(fulfillment.doorstepFee))}
-                          {fulfillment.doorstepEstimatedDeliveryTime
-                            ? ` · ${fulfillment.doorstepEstimatedDeliveryTime}`
-                            : ""}
+                          Priced for the exact route
                         </span>
                       </button>
                     )}
@@ -709,6 +853,28 @@ function CheckoutContent() {
                       >
                         Find a pickup station
                       </label>
+                      <select
+                        value={stationLocationFilter}
+                        onChange={(event) => setStationLocationFilter(event.target.value)}
+                        className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+                        aria-label="Filter pickup stations by county or region"
+                      >
+                        <option value="">All counties and regions</option>
+                        <optgroup label="Regions">
+                          {Object.keys(KENYA_REGIONS).map((region) => (
+                            <option key={region} value={`region:${region}`}>
+                              {region} region
+                            </option>
+                          ))}
+                        </optgroup>
+                        <optgroup label="Counties">
+                          {KENYA_COUNTIES.map((county) => (
+                            <option key={county} value={`county:${county}`}>
+                              {county}
+                            </option>
+                          ))}
+                        </optgroup>
+                      </select>
                       <input
                         id="station-search"
                         value={stationSearch}
@@ -731,7 +897,10 @@ function CheckoutContent() {
                               name="pickupStation"
                               value={station.id}
                               checked={pickupStationId === station.id}
-                              onChange={() => setPickupStationId(station.id)}
+                              onChange={() => {
+                                setPickupStationId(station.id);
+                                setManualPickup(false);
+                              }}
                               className="mt-1 accent-brand"
                             />
                             <span className="min-w-0 text-sm">
@@ -741,11 +910,14 @@ function CheckoutContent() {
                               <span className="block text-xs text-slate-600">
                                 {station.address}
                               </span>
-                              <span className="mt-1 block text-xs font-medium text-brand-strong">
+                              <span className="hidden">
                                 {formatPrice(Number(station.deliveryFee))}
                                 {station.estimatedDeliveryTime
                                   ? ` · ${station.estimatedDeliveryTime}`
                                   : ""}
+                              </span>
+                              <span className="mt-1 block text-xs font-medium text-brand-strong">
+                                {[station.city, station.region].filter(Boolean).join(", ")}
                               </span>
                               {station.operatingHours && (
                                 <span className="block text-xs text-slate-500">
@@ -766,6 +938,105 @@ function CheckoutContent() {
                           </p>
                         )}
                       </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setManualPickup((current) => !current);
+                          setPickupStationId("");
+                        }}
+                        className="text-left text-sm font-semibold text-brand-strong hover:underline"
+                      >
+                        {manualPickup
+                          ? "Choose from the station list"
+                          : "My pickup point is not listed"}
+                      </button>
+                      {manualPickup && (
+                        <div className="grid gap-2 rounded-xl border border-slate-200 bg-white p-3 sm:grid-cols-2">
+                          <label className="text-xs font-medium sm:col-span-2">
+                            Pickup point name
+                            <input
+                              value={manualPickupData.name}
+                              onChange={(event) =>
+                                setManualPickupData((current) => ({
+                                  ...current,
+                                  name: event.target.value,
+                                }))
+                              }
+                              placeholder="e.g. Courier office or landmark"
+                              className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+                            />
+                          </label>
+                          <label className="text-xs font-medium">
+                            County
+                            <select
+                              value={manualPickupData.region}
+                              onChange={(event) =>
+                                setManualPickupData((current) => ({
+                                  ...current,
+                                  region: event.target.value,
+                                }))
+                              }
+                              className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand"
+                            >
+                              <option value="">Choose county</option>
+                              {KENYA_COUNTIES.map((county) => (
+                                <option key={county}>{county}</option>
+                              ))}
+                            </select>
+                          </label>
+                          <label className="text-xs font-medium">
+                            Town or area
+                            <input
+                              value={manualPickupData.city}
+                              onChange={(event) =>
+                                setManualPickupData((current) => ({
+                                  ...current,
+                                  city: event.target.value,
+                                }))
+                              }
+                              className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand"
+                            />
+                          </label>
+                          <label className="text-xs font-medium sm:col-span-2">
+                            Exact address or directions
+                            <input
+                              value={manualPickupData.address}
+                              onChange={(event) =>
+                                setManualPickupData((current) => ({
+                                  ...current,
+                                  address: event.target.value,
+                                }))
+                              }
+                              placeholder="Building, road and nearby landmark"
+                              className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand"
+                            />
+                          </label>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {deliveryMethod && (
+                    <div className="rounded-xl border border-brand-border bg-white p-3 text-sm">
+                      {quoteLoading ? (
+                        <span className="text-slate-500">Checking this route...</span>
+                      ) : deliveryQuote?.status === "CONFIRMED" ? (
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <span className="font-semibold text-brand-strong">
+                            {formatPrice(Number(deliveryQuote.fee))}
+                          </span>
+                          {deliveryQuote.estimatedDeliveryTime && (
+                            <span className="flex items-center gap-1 text-xs text-slate-600">
+                              <Clock3 size={14} /> {deliveryQuote.estimatedDeliveryTime}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-slate-600">
+                          No route price is published for this exact destination yet. You can still
+                          place the order; the team will confirm the fee before payment or dispatch.
+                        </p>
+                      )}
                     </div>
                   )}
                 </fieldset>
@@ -774,51 +1045,88 @@ function CheckoutContent() {
               {/* Country with suggestions */}
               {(!fulfillmentEnabled || deliveryMethod === "DOORSTEP") && (
                 <>
-                  <div className="relative">
-                    <input
-                      name="country"
-                      placeholder="Country *"
-                      value={formData.country}
-                      onChange={handleChange}
-                      onFocus={() => formData.country.trim() && setShowCountrySuggestions(true)}
-                      onBlur={() => setTimeout(() => setShowCountrySuggestions(false), 200)}
-                      className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                      required
-                    />
-                    {showCountrySuggestions && filteredCountries.length > 0 && (
-                      <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                        {filteredCountries.map((country) => (
-                          <button
-                            key={country}
-                            type="button"
-                            onClick={() => handleCountrySelect(country)}
-                            onMouseDown={(e) => e.preventDefault()}
-                            className="w-full text-left px-4 py-2 hover:bg-blue-50 dark:hover:bg-gray-600 transition-colors first:rounded-t-lg last:rounded-b-lg"
-                          >
-                            {country}
-                          </button>
-                        ))}
+                  <div className="rounded-2xl border border-slate-200 p-4 dark:border-slate-700">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div>
+                        <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                          Deliver this order to
+                        </h3>
+                        <p className="text-xs text-slate-500">
+                          Your current location does not limit the delivery destination.
+                        </p>
                       </div>
+                      {user?.address && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setFormData((current) => ({
+                              ...current,
+                              country: "Kenya",
+                              locality: user.address ?? "",
+                            }))
+                          }
+                          className="text-xs font-semibold text-brand-strong hover:underline"
+                        >
+                          Use saved address
+                        </button>
+                      )}
+                    </div>
+                    <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                      <label className="text-xs font-medium">
+                        Country
+                        <input
+                          value="Kenya"
+                          readOnly
+                          className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-600"
+                        />
+                      </label>
+                      <label className="text-xs font-medium">
+                        Delivery county
+                        <select
+                          name="county"
+                          value={formData.county}
+                          onChange={handleChange}
+                          className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+                        >
+                          <option value="">Choose county</option>
+                          {KENYA_COUNTIES.map((county) => (
+                            <option key={county}>{county}</option>
+                          ))}
+                        </select>
+                      </label>
+                      <label className="text-xs font-medium sm:col-span-2">
+                        Town, estate or area
+                        <input
+                          name="town"
+                          value={formData.town}
+                          onChange={handleChange}
+                          placeholder="e.g. Kisumu Central, Milimani"
+                          className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+                        />
+                      </label>
+                      <label className="text-xs font-medium sm:col-span-2">
+                        Exact address and landmark
+                        <input
+                          name="locality"
+                          value={formData.locality}
+                          onChange={handleChange}
+                          placeholder="Building, road, house number and nearest landmark"
+                          className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+                        />
+                      </label>
+                    </div>
+                    {user && (
+                      <label className="mt-3 flex items-start gap-2 text-xs text-slate-600">
+                        <input
+                          type="checkbox"
+                          checked={saveAddressAsDefault}
+                          onChange={(event) => setSaveAddressAsDefault(event.target.checked)}
+                          className="mt-0.5 h-4 w-4 accent-brand"
+                        />
+                        Save this delivery destination as my default address
+                      </label>
                     )}
                   </div>
-
-                  <input
-                    name="county"
-                    placeholder="County/State/Province *"
-                    value={formData.county}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                    required
-                  />
-
-                  <input
-                    name="locality"
-                    placeholder="Exact Locality/Address * (e.g., Street, City, ZIP Code)"
-                    value={formData.locality}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                    required
-                  />
                 </>
               )}
 
@@ -869,15 +1177,17 @@ function CheckoutContent() {
               <button
                 onClick={handleSubmitOrder}
                 disabled={isSubmitting || !phoneValid || sabbathClosed}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                className="rounded-xl bg-brand px-4 py-2.5 font-semibold text-white transition-colors hover:bg-brand-strong disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isSubmitting ? (
                   <span className="flex items-center justify-center gap-2">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                     Submitting...
                   </span>
+                ) : user ? (
+                  "Place order"
                 ) : (
-                  "Finish Submission"
+                  "Sign in & continue"
                 )}
               </button>
             </div>

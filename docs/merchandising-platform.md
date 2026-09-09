@@ -71,6 +71,19 @@ Admin control plane (authenticated, writes require senior role):
 - `/api/v1/admin/merchandising/homepage-sections`
 - `/api/v1/admin/merchandising/promotions`
 
+The admin workspace uses three higher-level, audited operations for the full
+draft-to-live workflow:
+
+- `POST /api/v1/admin/merchandising/workspaces` creates a draft collection and
+  its first draft homepage placement atomically.
+- `POST /api/v1/admin/merchandising/collections/:id/lifecycle` saves a draft,
+  publishes/schedules it, or unpublishes it while keeping collection and
+  homepage status in sync. Publishing requires an active, in-stock product.
+- `POST /api/v1/admin/merchandising/collections/:id/memberships/import-current`
+  imports all current active retail products without duplicating memberships.
+- `POST /api/v1/admin/merchandising/homepage-sections/reorder` persists the
+  complete homepage collection-card order atomically.
+
 Inventory import and vendor control plane:
 
 - `POST /api/v1/admin/catalog/products/import`

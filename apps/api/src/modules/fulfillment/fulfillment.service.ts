@@ -1,5 +1,11 @@
-import { prisma, Prisma, type PickupStation } from "@nuru/db";
+import { prisma, Prisma, type DeliveryRate, type PickupStation } from "@nuru/db";
 import type {
+  DeliveryQuoteDTO,
+  DeliveryQuoteRequest,
+  DeliveryRateCreateInput,
+  DeliveryRateDTO,
+  DeliveryRateQuery,
+  DeliveryRateUpdateInput,
   FulfillmentConfigurationDTO,
   FulfillmentConfigurationUpdateInput,
   Paginated,
@@ -15,16 +21,16 @@ export const DISABLED_FULFILLMENT_CONFIGURATION: FulfillmentConfigurationDTO = {
   featureEnabled: false,
   pickupEnabled: false,
   doorstepEnabled: false,
-  doorstepFee: "0.00",
-  doorstepEstimatedDeliveryTime: null,
+  dispatchCounty: null,
+  dispatchArea: null,
 };
 
 const DEFAULT_ADMIN_CONFIGURATION: FulfillmentConfigurationDTO = {
   featureEnabled: false,
   pickupEnabled: true,
   doorstepEnabled: true,
-  doorstepFee: "0.00",
-  doorstepEstimatedDeliveryTime: null,
+  dispatchCounty: null,
+  dispatchArea: null,
 };
 
 function isMissingFulfillmentTable(error: unknown): boolean {
@@ -58,8 +64,8 @@ function toConfigurationDTO(
     featureEnabled: boolean;
     pickupEnabled: boolean;
     doorstepEnabled: boolean;
-    doorstepFee: { toString(): string };
-    doorstepEstimatedDeliveryTime: string | null;
+    dispatchCounty: string | null;
+    dispatchArea: string | null;
   } | null,
 ): FulfillmentConfigurationDTO {
   if (!row) return DISABLED_FULFILLMENT_CONFIGURATION;
@@ -67,8 +73,8 @@ function toConfigurationDTO(
     featureEnabled: row.featureEnabled,
     pickupEnabled: row.pickupEnabled,
     doorstepEnabled: row.doorstepEnabled,
-    doorstepFee: row.doorstepFee.toString(),
-    doorstepEstimatedDeliveryTime: row.doorstepEstimatedDeliveryTime,
+    dispatchCounty: row.dispatchCounty,
+    dispatchArea: row.dispatchArea,
   };
 }
 
@@ -91,7 +97,9 @@ export async function getPublicConfiguration(): Promise<PublicFulfillmentDTO> {
           orderBy: [{ displayOrder: "asc" }, { name: "asc" }, { id: "asc" }],
         })
       : [];
-    const pickupEnabled = dto.pickupEnabled && stations.length > 0;
+    // Manual pickup details remain available when a customer's preferred
+    // station has not been added to the directory yet.
+    const pickupEnabled = dto.pickupEnabled;
     const featureEnabled = dto.featureEnabled && (pickupEnabled || dto.doorstepEnabled);
     if (!featureEnabled) return { ...DISABLED_FULFILLMENT_CONFIGURATION, stations: [] };
     return { ...dto, featureEnabled, pickupEnabled, stations: stations.map(toPickupStationDTO) };
@@ -112,14 +120,6 @@ export async function updateConfiguration(
   input: FulfillmentConfigurationUpdateInput,
   adminId: string,
 ): Promise<FulfillmentConfigurationDTO> {
-  if (input.featureEnabled && input.pickupEnabled && !input.doorstepEnabled) {
-    const activeStations = await prisma.pickupStation.count({
-      where: { isActive: true, archivedAt: null },
-    });
-    if (activeStations === 0) {
-      throw Errors.badRequest("Add an active pickup station before enabling pickup-only delivery.");
-    }
-  }
   const row = await prisma.$transaction(async (tx) => {
     const configuration = await tx.fulfillmentConfiguration.upsert({
       where: { id: "default" },
@@ -142,39 +142,6 @@ export async function updateConfiguration(
     return configuration;
   });
   return toConfigurationDTO(row);
-}
-
-async function disableUnavailablePickupOnlyFeature(
-  tx: Prisma.TransactionClient,
-  adminId: string,
-): Promise<void> {
-  const configuration = await tx.fulfillmentConfiguration.findUnique({
-    where: { id: "default" },
-  });
-  if (
-    !configuration?.featureEnabled ||
-    !configuration.pickupEnabled ||
-    configuration.doorstepEnabled
-  ) {
-    return;
-  }
-  const activeStations = await tx.pickupStation.count({
-    where: { isActive: true, archivedAt: null },
-  });
-  if (activeStations > 0) return;
-  await tx.fulfillmentConfiguration.update({
-    where: { id: "default" },
-    data: { featureEnabled: false },
-  });
-  await tx.adminLog.create({
-    data: {
-      adminId,
-      action: "fulfillment.configuration.auto_disabled",
-      entity: "fulfillment_configuration",
-      entityId: "default",
-      metadata: { reason: "no_active_pickup_stations" },
-    },
-  });
 }
 
 function stationWhere(query: PickupStationQuery): Prisma.PickupStationWhereInput {
@@ -255,9 +222,6 @@ export async function updateStation(
         metadata: { changedFields: Object.keys(input) },
       },
     });
-    if (input.isActive === false) {
-      await disableUnavailablePickupOnlyFeature(tx, adminId);
-    }
     return updated;
   });
   return toPickupStationDTO(station);
@@ -282,6 +246,200 @@ export async function archiveStation(id: string, adminId: string): Promise<void>
         metadata: { name: existing.name },
       },
     });
-    await disableUnavailablePickupOnlyFeature(tx, adminId);
+  });
+}
+
+function toDeliveryRateDTO(rate: DeliveryRate): DeliveryRateDTO {
+  return {
+    id: rate.id,
+    name: rate.name,
+    method: rate.method as DeliveryRateDTO["method"],
+    originCounty: rate.originCounty,
+    originArea: rate.originArea,
+    destinationCounty: rate.destinationCounty,
+    destinationArea: rate.destinationArea,
+    fee: rate.fee.toString(),
+    estimatedDeliveryTime: rate.estimatedDeliveryTime,
+    priority: rate.priority,
+    isActive: rate.isActive,
+    archivedAt: rate.archivedAt?.toISOString() ?? null,
+    createdAt: rate.createdAt.toISOString(),
+    updatedAt: rate.updatedAt.toISOString(),
+  };
+}
+
+const normalized = (value: string | null | undefined): string => value?.trim().toLowerCase() ?? "";
+const locationLabel = (area: string | null | undefined, county: string): string =>
+  [area?.trim(), county.trim()].filter(Boolean).join(", ");
+
+/**
+ * Find the most specific active route for the configured dispatch origin.
+ * Area-to-area beats county-wide, then admins can resolve overlaps by priority.
+ */
+export async function resolveDeliveryQuote(
+  client: Prisma.TransactionClient | typeof prisma,
+  request: DeliveryQuoteRequest,
+): Promise<DeliveryQuoteDTO> {
+  const configuration = await client.fulfillmentConfiguration.findUnique({
+    where: { id: "default" },
+    select: { dispatchCounty: true, dispatchArea: true },
+  });
+  const destination = locationLabel(request.destinationArea, request.destinationCounty);
+  if (!configuration?.dispatchCounty) {
+    return {
+      status: "PENDING_QUOTE",
+      fee: null,
+      estimatedDeliveryTime: null,
+      rateId: null,
+      origin: null,
+      destination,
+    };
+  }
+  const candidates = await client.deliveryRate.findMany({
+    where: {
+      method: request.method,
+      isActive: true,
+      archivedAt: null,
+      originCounty: { equals: configuration.dispatchCounty, mode: "insensitive" },
+      destinationCounty: { equals: request.destinationCounty, mode: "insensitive" },
+    },
+    orderBy: [{ priority: "desc" }, { updatedAt: "desc" }, { id: "asc" }],
+  });
+  const originArea = normalized(configuration.dispatchArea);
+  const destinationArea = normalized(request.destinationArea);
+  const compatible = candidates
+    .filter((rate) => !rate.originArea || normalized(rate.originArea) === originArea)
+    .filter((rate) => !rate.destinationArea || normalized(rate.destinationArea) === destinationArea)
+    .sort((a, b) => {
+      const specificity = (rate: DeliveryRate) =>
+        Number(Boolean(rate.originArea)) + Number(Boolean(rate.destinationArea));
+      return specificity(b) - specificity(a) || b.priority - a.priority;
+    })[0];
+  if (!compatible) {
+    return {
+      status: "PENDING_QUOTE",
+      fee: null,
+      estimatedDeliveryTime: null,
+      rateId: null,
+      origin: locationLabel(configuration.dispatchArea, configuration.dispatchCounty),
+      destination,
+    };
+  }
+  return {
+    status: "CONFIRMED",
+    fee: compatible.fee.toString(),
+    estimatedDeliveryTime: compatible.estimatedDeliveryTime,
+    rateId: compatible.id,
+    origin: locationLabel(compatible.originArea, compatible.originCounty),
+    destination,
+  };
+}
+
+export function getDeliveryQuote(request: DeliveryQuoteRequest): Promise<DeliveryQuoteDTO> {
+  return resolveDeliveryQuote(prisma, request);
+}
+
+function rateWhere(query: DeliveryRateQuery): Prisma.DeliveryRateWhereInput {
+  return {
+    ...(query.includeArchived ? {} : { archivedAt: null }),
+    ...(query.method ? { method: query.method } : {}),
+    ...(query.search
+      ? {
+          OR: [
+            { name: { contains: query.search, mode: "insensitive" as const } },
+            { originCounty: { contains: query.search, mode: "insensitive" as const } },
+            { originArea: { contains: query.search, mode: "insensitive" as const } },
+            { destinationCounty: { contains: query.search, mode: "insensitive" as const } },
+            { destinationArea: { contains: query.search, mode: "insensitive" as const } },
+          ],
+        }
+      : {}),
+  };
+}
+
+export async function listDeliveryRates(
+  query: DeliveryRateQuery,
+): Promise<Paginated<DeliveryRateDTO>> {
+  const where = rateWhere(query);
+  const [total, rows] = await prisma.$transaction([
+    prisma.deliveryRate.count({ where }),
+    prisma.deliveryRate.findMany({
+      where,
+      orderBy: [{ archivedAt: "asc" }, { priority: "desc" }, { name: "asc" }],
+      skip: (query.page - 1) * query.pageSize,
+      take: query.pageSize,
+    }),
+  ]);
+  return {
+    items: rows.map(toDeliveryRateDTO),
+    page: query.page,
+    pageSize: query.pageSize,
+    total,
+    totalPages: Math.max(1, Math.ceil(total / query.pageSize)),
+  };
+}
+
+export async function createDeliveryRate(
+  input: DeliveryRateCreateInput,
+  adminId: string,
+): Promise<DeliveryRateDTO> {
+  const rate = await prisma.$transaction(async (tx) => {
+    const created = await tx.deliveryRate.create({ data: input });
+    await tx.adminLog.create({
+      data: {
+        adminId,
+        action: "fulfillment.delivery_rate.created",
+        entity: "delivery_rate",
+        entityId: created.id,
+        metadata: { name: created.name, method: created.method },
+      },
+    });
+    return created;
+  });
+  return toDeliveryRateDTO(rate);
+}
+
+export async function updateDeliveryRate(
+  id: string,
+  input: DeliveryRateUpdateInput,
+  adminId: string,
+): Promise<DeliveryRateDTO> {
+  const existing = await prisma.deliveryRate.findUnique({ where: { id } });
+  if (!existing) throw Errors.notFound("Delivery route not found.");
+  if (existing.archivedAt) throw Errors.badRequest("Archived delivery routes cannot be edited.");
+  const rate = await prisma.$transaction(async (tx) => {
+    const updated = await tx.deliveryRate.update({ where: { id }, data: input });
+    await tx.adminLog.create({
+      data: {
+        adminId,
+        action: "fulfillment.delivery_rate.updated",
+        entity: "delivery_rate",
+        entityId: id,
+        metadata: { changedFields: Object.keys(input) },
+      },
+    });
+    return updated;
+  });
+  return toDeliveryRateDTO(rate);
+}
+
+export async function archiveDeliveryRate(id: string, adminId: string): Promise<void> {
+  const existing = await prisma.deliveryRate.findUnique({ where: { id } });
+  if (!existing) throw Errors.notFound("Delivery route not found.");
+  if (existing.archivedAt) return;
+  await prisma.$transaction(async (tx) => {
+    await tx.deliveryRate.update({
+      where: { id },
+      data: { archivedAt: new Date(), isActive: false },
+    });
+    await tx.adminLog.create({
+      data: {
+        adminId,
+        action: "fulfillment.delivery_rate.archived",
+        entity: "delivery_rate",
+        entityId: id,
+        metadata: { name: existing.name },
+      },
+    });
   });
 }

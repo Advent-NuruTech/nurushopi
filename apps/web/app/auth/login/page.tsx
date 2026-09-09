@@ -9,19 +9,19 @@ import Link from "next/link";
 import { FcGoogle } from "react-icons/fc";
 import { AiOutlineEye, AiOutlineEyeInvisible, AiOutlineMail, AiOutlineLock } from "react-icons/ai";
 
-import AuthHeader from "@/components/ui/auth/AuthHeader";
 import AuthCard from "@/components/ui/auth/AuthCard";
 import AuthHero from "@/components/ui/auth/AuthHero";
 import StatusMessage from "@/components/ui/auth/StatusMessage";
 import { authApi, ApiClientError } from "@/lib/api";
 import { useAppUser } from "@/context/UserContext";
+import { safeRedirectPath } from "@/lib/safeRedirect";
 
 // Login form component
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, setUserFromAuth } = useAppUser();
-  const redirectTo = searchParams.get("redirectTo") || "/";
+  const redirectTo = safeRedirectPath(searchParams.get("redirectTo"));
   const oauthError = searchParams.get("error");
   const signupHref = redirectTo
     ? { pathname: "/auth/signup", query: { redirectTo } }
@@ -66,7 +66,7 @@ function LoginForm() {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = authApi.googleUrl();
+    window.location.href = authApi.googleUrl(redirectTo);
   };
 
   return (
@@ -93,7 +93,9 @@ function LoginForm() {
 
             <div className="my-6 flex items-center gap-3">
               <span className="h-px flex-1 bg-slate-200" />
-              <span className="text-xs uppercase tracking-wide text-slate-400">or continue with email</span>
+              <span className="text-xs uppercase tracking-wide text-slate-400">
+                or continue with email
+              </span>
               <span className="h-px flex-1 bg-slate-200" />
             </div>
 
@@ -185,14 +187,16 @@ function LoginForm() {
 // Main component with Suspense boundary
 export default function LoginPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-[#EFFCF3] p-4">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-[#009933] border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">Loading...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-[#EFFCF3] p-4">
+          <div className="text-center">
+            <div className="w-8 h-8 border-2 border-[#009933] border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p className="mt-2 text-gray-600 dark:text-gray-400">Loading...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <LoginForm />
     </Suspense>
   );

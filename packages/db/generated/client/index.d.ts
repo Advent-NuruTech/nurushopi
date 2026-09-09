@@ -104,6 +104,11 @@ export type FulfillmentConfiguration = $Result.DefaultSelection<Prisma.$Fulfillm
  */
 export type PickupStation = $Result.DefaultSelection<Prisma.$PickupStationPayload>
 /**
+ * Model DeliveryRate
+ * 
+ */
+export type DeliveryRate = $Result.DefaultSelection<Prisma.$DeliveryRatePayload>
+/**
  * Model OrderItem
  * 
  */
@@ -342,6 +347,14 @@ export const FulfillmentMethod: {
 export type FulfillmentMethod = (typeof FulfillmentMethod)[keyof typeof FulfillmentMethod]
 
 
+export const DeliveryFeeStatus: {
+  CONFIRMED: 'CONFIRMED',
+  PENDING_QUOTE: 'PENDING_QUOTE'
+};
+
+export type DeliveryFeeStatus = (typeof DeliveryFeeStatus)[keyof typeof DeliveryFeeStatus]
+
+
 export const ReviewStatus: {
   PENDING: 'PENDING',
   APPROVED: 'APPROVED',
@@ -523,6 +536,10 @@ export const PaymentStatus: typeof $Enums.PaymentStatus
 export type FulfillmentMethod = $Enums.FulfillmentMethod
 
 export const FulfillmentMethod: typeof $Enums.FulfillmentMethod
+
+export type DeliveryFeeStatus = $Enums.DeliveryFeeStatus
+
+export const DeliveryFeeStatus: typeof $Enums.DeliveryFeeStatus
 
 export type ReviewStatus = $Enums.ReviewStatus
 
@@ -889,6 +906,16 @@ export class PrismaClient<
     * ```
     */
   get pickupStation(): Prisma.PickupStationDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.deliveryRate`: Exposes CRUD operations for the **DeliveryRate** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more DeliveryRates
+    * const deliveryRates = await prisma.deliveryRate.findMany()
+    * ```
+    */
+  get deliveryRate(): Prisma.DeliveryRateDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.orderItem`: Exposes CRUD operations for the **OrderItem** model.
@@ -1708,6 +1735,7 @@ export namespace Prisma {
     Order: 'Order',
     FulfillmentConfiguration: 'FulfillmentConfiguration',
     PickupStation: 'PickupStation',
+    DeliveryRate: 'DeliveryRate',
     OrderItem: 'OrderItem',
     Review: 'Review',
     WishlistItem: 'WishlistItem',
@@ -1762,7 +1790,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "oAuthAccount" | "refreshToken" | "emailVerificationToken" | "passwordResetToken" | "legacyPasswordImport" | "loginAttempt" | "admin" | "adminInvite" | "adminLog" | "category" | "product" | "banner" | "heroAnnouncement" | "wholesaleItem" | "order" | "fulfillmentConfiguration" | "pickupStation" | "orderItem" | "review" | "wishlistItem" | "productView" | "walletTransaction" | "walletRedemption" | "referral" | "notification" | "message" | "contact" | "vendorApplication" | "vendorAccount" | "vendorInvite" | "pwaInstall" | "sabbathMessage" | "merchandisingCollection" | "collectionMembership" | "collectionOverride" | "homepageSection" | "promotion" | "promotionProduct" | "promotionRedemption" | "bundle" | "bundleItem" | "spotlightPlacement" | "commerceEvent" | "productMetricHourly" | "productMetricDaily" | "collectionMetricDaily" | "productRanking" | "userProductAffinity" | "notificationPreference" | "retentionSubscription" | "retentionTrigger" | "experiment" | "experimentAssignment"
+      modelProps: "user" | "oAuthAccount" | "refreshToken" | "emailVerificationToken" | "passwordResetToken" | "legacyPasswordImport" | "loginAttempt" | "admin" | "adminInvite" | "adminLog" | "category" | "product" | "banner" | "heroAnnouncement" | "wholesaleItem" | "order" | "fulfillmentConfiguration" | "pickupStation" | "deliveryRate" | "orderItem" | "review" | "wishlistItem" | "productView" | "walletTransaction" | "walletRedemption" | "referral" | "notification" | "message" | "contact" | "vendorApplication" | "vendorAccount" | "vendorInvite" | "pwaInstall" | "sabbathMessage" | "merchandisingCollection" | "collectionMembership" | "collectionOverride" | "homepageSection" | "promotion" | "promotionProduct" | "promotionRedemption" | "bundle" | "bundleItem" | "spotlightPlacement" | "commerceEvent" | "productMetricHourly" | "productMetricDaily" | "collectionMetricDaily" | "productRanking" | "userProductAffinity" | "notificationPreference" | "retentionSubscription" | "retentionTrigger" | "experiment" | "experimentAssignment"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -3095,6 +3123,80 @@ export namespace Prisma {
           count: {
             args: Prisma.PickupStationCountArgs<ExtArgs>
             result: $Utils.Optional<PickupStationCountAggregateOutputType> | number
+          }
+        }
+      }
+      DeliveryRate: {
+        payload: Prisma.$DeliveryRatePayload<ExtArgs>
+        fields: Prisma.DeliveryRateFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.DeliveryRateFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeliveryRatePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.DeliveryRateFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeliveryRatePayload>
+          }
+          findFirst: {
+            args: Prisma.DeliveryRateFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeliveryRatePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.DeliveryRateFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeliveryRatePayload>
+          }
+          findMany: {
+            args: Prisma.DeliveryRateFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeliveryRatePayload>[]
+          }
+          create: {
+            args: Prisma.DeliveryRateCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeliveryRatePayload>
+          }
+          createMany: {
+            args: Prisma.DeliveryRateCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.DeliveryRateCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeliveryRatePayload>[]
+          }
+          delete: {
+            args: Prisma.DeliveryRateDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeliveryRatePayload>
+          }
+          update: {
+            args: Prisma.DeliveryRateUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeliveryRatePayload>
+          }
+          deleteMany: {
+            args: Prisma.DeliveryRateDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.DeliveryRateUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.DeliveryRateUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeliveryRatePayload>[]
+          }
+          upsert: {
+            args: Prisma.DeliveryRateUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DeliveryRatePayload>
+          }
+          aggregate: {
+            args: Prisma.DeliveryRateAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateDeliveryRate>
+          }
+          groupBy: {
+            args: Prisma.DeliveryRateGroupByArgs<ExtArgs>
+            result: $Utils.Optional<DeliveryRateGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.DeliveryRateCountArgs<ExtArgs>
+            result: $Utils.Optional<DeliveryRateCountAggregateOutputType> | number
           }
         }
       }
@@ -5876,6 +5978,7 @@ export namespace Prisma {
     order?: OrderOmit
     fulfillmentConfiguration?: FulfillmentConfigurationOmit
     pickupStation?: PickupStationOmit
+    deliveryRate?: DeliveryRateOmit
     orderItem?: OrderItemOmit
     review?: ReviewOmit
     wishlistItem?: WishlistItemOmit
@@ -6565,6 +6668,37 @@ export namespace Prisma {
    * PickupStationCountOutputType without action
    */
   export type PickupStationCountOutputTypeCountOrdersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: OrderWhereInput
+  }
+
+
+  /**
+   * Count Type DeliveryRateCountOutputType
+   */
+
+  export type DeliveryRateCountOutputType = {
+    orders: number
+  }
+
+  export type DeliveryRateCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    orders?: boolean | DeliveryRateCountOutputTypeCountOrdersArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * DeliveryRateCountOutputType without action
+   */
+  export type DeliveryRateCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeliveryRateCountOutputType
+     */
+    select?: DeliveryRateCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * DeliveryRateCountOutputType without action
+   */
+  export type DeliveryRateCountOutputTypeCountOrdersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: OrderWhereInput
   }
 
@@ -25160,7 +25294,10 @@ export namespace Prisma {
     pickupStationName: string | null
     pickupStationAddress: string | null
     deliveryFee: Decimal | null
+    deliveryFeeStatus: $Enums.DeliveryFeeStatus | null
     deliveryEta: string | null
+    deliveryOrigin: string | null
+    deliveryRateId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -25184,7 +25321,10 @@ export namespace Prisma {
     pickupStationName: string | null
     pickupStationAddress: string | null
     deliveryFee: Decimal | null
+    deliveryFeeStatus: $Enums.DeliveryFeeStatus | null
     deliveryEta: string | null
+    deliveryOrigin: string | null
+    deliveryRateId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -25208,7 +25348,10 @@ export namespace Prisma {
     pickupStationName: number
     pickupStationAddress: number
     deliveryFee: number
+    deliveryFeeStatus: number
     deliveryEta: number
+    deliveryOrigin: number
+    deliveryRateId: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -25248,7 +25391,10 @@ export namespace Prisma {
     pickupStationName?: true
     pickupStationAddress?: true
     deliveryFee?: true
+    deliveryFeeStatus?: true
     deliveryEta?: true
+    deliveryOrigin?: true
+    deliveryRateId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -25272,7 +25418,10 @@ export namespace Prisma {
     pickupStationName?: true
     pickupStationAddress?: true
     deliveryFee?: true
+    deliveryFeeStatus?: true
     deliveryEta?: true
+    deliveryOrigin?: true
+    deliveryRateId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -25296,7 +25445,10 @@ export namespace Prisma {
     pickupStationName?: true
     pickupStationAddress?: true
     deliveryFee?: true
+    deliveryFeeStatus?: true
     deliveryEta?: true
+    deliveryOrigin?: true
+    deliveryRateId?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -25407,7 +25559,10 @@ export namespace Prisma {
     pickupStationName: string | null
     pickupStationAddress: string | null
     deliveryFee: Decimal
+    deliveryFeeStatus: $Enums.DeliveryFeeStatus
     deliveryEta: string | null
+    deliveryOrigin: string | null
+    deliveryRateId: string | null
     createdAt: Date
     updatedAt: Date
     _count: OrderCountAggregateOutputType | null
@@ -25450,11 +25605,15 @@ export namespace Prisma {
     pickupStationName?: boolean
     pickupStationAddress?: boolean
     deliveryFee?: boolean
+    deliveryFeeStatus?: boolean
     deliveryEta?: boolean
+    deliveryOrigin?: boolean
+    deliveryRateId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | Order$userArgs<ExtArgs>
     pickupStation?: boolean | Order$pickupStationArgs<ExtArgs>
+    deliveryRate?: boolean | Order$deliveryRateArgs<ExtArgs>
     items?: boolean | Order$itemsArgs<ExtArgs>
     promotionRedemptions?: boolean | Order$promotionRedemptionsArgs<ExtArgs>
     _count?: boolean | OrderCountOutputTypeDefaultArgs<ExtArgs>
@@ -25479,11 +25638,15 @@ export namespace Prisma {
     pickupStationName?: boolean
     pickupStationAddress?: boolean
     deliveryFee?: boolean
+    deliveryFeeStatus?: boolean
     deliveryEta?: boolean
+    deliveryOrigin?: boolean
+    deliveryRateId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | Order$userArgs<ExtArgs>
     pickupStation?: boolean | Order$pickupStationArgs<ExtArgs>
+    deliveryRate?: boolean | Order$deliveryRateArgs<ExtArgs>
   }, ExtArgs["result"]["order"]>
 
   export type OrderSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -25505,11 +25668,15 @@ export namespace Prisma {
     pickupStationName?: boolean
     pickupStationAddress?: boolean
     deliveryFee?: boolean
+    deliveryFeeStatus?: boolean
     deliveryEta?: boolean
+    deliveryOrigin?: boolean
+    deliveryRateId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | Order$userArgs<ExtArgs>
     pickupStation?: boolean | Order$pickupStationArgs<ExtArgs>
+    deliveryRate?: boolean | Order$deliveryRateArgs<ExtArgs>
   }, ExtArgs["result"]["order"]>
 
   export type OrderSelectScalar = {
@@ -25531,15 +25698,19 @@ export namespace Prisma {
     pickupStationName?: boolean
     pickupStationAddress?: boolean
     deliveryFee?: boolean
+    deliveryFeeStatus?: boolean
     deliveryEta?: boolean
+    deliveryOrigin?: boolean
+    deliveryRateId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type OrderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "orderNumber" | "userId" | "status" | "paymentStatus" | "subtotal" | "walletApplied" | "total" | "contactName" | "contactPhone" | "contactEmail" | "address" | "note" | "fulfillmentMethod" | "pickupStationId" | "pickupStationName" | "pickupStationAddress" | "deliveryFee" | "deliveryEta" | "createdAt" | "updatedAt", ExtArgs["result"]["order"]>
+  export type OrderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "orderNumber" | "userId" | "status" | "paymentStatus" | "subtotal" | "walletApplied" | "total" | "contactName" | "contactPhone" | "contactEmail" | "address" | "note" | "fulfillmentMethod" | "pickupStationId" | "pickupStationName" | "pickupStationAddress" | "deliveryFee" | "deliveryFeeStatus" | "deliveryEta" | "deliveryOrigin" | "deliveryRateId" | "createdAt" | "updatedAt", ExtArgs["result"]["order"]>
   export type OrderInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | Order$userArgs<ExtArgs>
     pickupStation?: boolean | Order$pickupStationArgs<ExtArgs>
+    deliveryRate?: boolean | Order$deliveryRateArgs<ExtArgs>
     items?: boolean | Order$itemsArgs<ExtArgs>
     promotionRedemptions?: boolean | Order$promotionRedemptionsArgs<ExtArgs>
     _count?: boolean | OrderCountOutputTypeDefaultArgs<ExtArgs>
@@ -25547,10 +25718,12 @@ export namespace Prisma {
   export type OrderIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | Order$userArgs<ExtArgs>
     pickupStation?: boolean | Order$pickupStationArgs<ExtArgs>
+    deliveryRate?: boolean | Order$deliveryRateArgs<ExtArgs>
   }
   export type OrderIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | Order$userArgs<ExtArgs>
     pickupStation?: boolean | Order$pickupStationArgs<ExtArgs>
+    deliveryRate?: boolean | Order$deliveryRateArgs<ExtArgs>
   }
 
   export type $OrderPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -25558,6 +25731,7 @@ export namespace Prisma {
     objects: {
       user: Prisma.$UserPayload<ExtArgs> | null
       pickupStation: Prisma.$PickupStationPayload<ExtArgs> | null
+      deliveryRate: Prisma.$DeliveryRatePayload<ExtArgs> | null
       items: Prisma.$OrderItemPayload<ExtArgs>[]
       promotionRedemptions: Prisma.$PromotionRedemptionPayload<ExtArgs>[]
     }
@@ -25580,7 +25754,10 @@ export namespace Prisma {
       pickupStationName: string | null
       pickupStationAddress: string | null
       deliveryFee: Prisma.Decimal
+      deliveryFeeStatus: $Enums.DeliveryFeeStatus
       deliveryEta: string | null
+      deliveryOrigin: string | null
+      deliveryRateId: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["order"]>
@@ -25979,6 +26156,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends Order$userArgs<ExtArgs> = {}>(args?: Subset<T, Order$userArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     pickupStation<T extends Order$pickupStationArgs<ExtArgs> = {}>(args?: Subset<T, Order$pickupStationArgs<ExtArgs>>): Prisma__PickupStationClient<$Result.GetResult<Prisma.$PickupStationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    deliveryRate<T extends Order$deliveryRateArgs<ExtArgs> = {}>(args?: Subset<T, Order$deliveryRateArgs<ExtArgs>>): Prisma__DeliveryRateClient<$Result.GetResult<Prisma.$DeliveryRatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     items<T extends Order$itemsArgs<ExtArgs> = {}>(args?: Subset<T, Order$itemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OrderItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     promotionRedemptions<T extends Order$promotionRedemptionsArgs<ExtArgs> = {}>(args?: Subset<T, Order$promotionRedemptionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PromotionRedemptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
@@ -26028,7 +26206,10 @@ export namespace Prisma {
     readonly pickupStationName: FieldRef<"Order", 'String'>
     readonly pickupStationAddress: FieldRef<"Order", 'String'>
     readonly deliveryFee: FieldRef<"Order", 'Decimal'>
+    readonly deliveryFeeStatus: FieldRef<"Order", 'DeliveryFeeStatus'>
     readonly deliveryEta: FieldRef<"Order", 'String'>
+    readonly deliveryOrigin: FieldRef<"Order", 'String'>
+    readonly deliveryRateId: FieldRef<"Order", 'String'>
     readonly createdAt: FieldRef<"Order", 'DateTime'>
     readonly updatedAt: FieldRef<"Order", 'DateTime'>
   }
@@ -26465,6 +26646,25 @@ export namespace Prisma {
   }
 
   /**
+   * Order.deliveryRate
+   */
+  export type Order$deliveryRateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeliveryRate
+     */
+    select?: DeliveryRateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DeliveryRate
+     */
+    omit?: DeliveryRateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DeliveryRateInclude<ExtArgs> | null
+    where?: DeliveryRateWhereInput
+  }
+
+  /**
    * Order.items
    */
   export type Order$itemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -26558,6 +26758,8 @@ export namespace Prisma {
     doorstepEnabled: boolean | null
     doorstepFee: Decimal | null
     doorstepEstimatedDeliveryTime: string | null
+    dispatchCounty: string | null
+    dispatchArea: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -26569,6 +26771,8 @@ export namespace Prisma {
     doorstepEnabled: boolean | null
     doorstepFee: Decimal | null
     doorstepEstimatedDeliveryTime: string | null
+    dispatchCounty: string | null
+    dispatchArea: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -26580,6 +26784,8 @@ export namespace Prisma {
     doorstepEnabled: number
     doorstepFee: number
     doorstepEstimatedDeliveryTime: number
+    dispatchCounty: number
+    dispatchArea: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -26601,6 +26807,8 @@ export namespace Prisma {
     doorstepEnabled?: true
     doorstepFee?: true
     doorstepEstimatedDeliveryTime?: true
+    dispatchCounty?: true
+    dispatchArea?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -26612,6 +26820,8 @@ export namespace Prisma {
     doorstepEnabled?: true
     doorstepFee?: true
     doorstepEstimatedDeliveryTime?: true
+    dispatchCounty?: true
+    dispatchArea?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -26623,6 +26833,8 @@ export namespace Prisma {
     doorstepEnabled?: true
     doorstepFee?: true
     doorstepEstimatedDeliveryTime?: true
+    dispatchCounty?: true
+    dispatchArea?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -26721,6 +26933,8 @@ export namespace Prisma {
     doorstepEnabled: boolean
     doorstepFee: Decimal
     doorstepEstimatedDeliveryTime: string | null
+    dispatchCounty: string | null
+    dispatchArea: string | null
     createdAt: Date
     updatedAt: Date
     _count: FulfillmentConfigurationCountAggregateOutputType | null
@@ -26751,6 +26965,8 @@ export namespace Prisma {
     doorstepEnabled?: boolean
     doorstepFee?: boolean
     doorstepEstimatedDeliveryTime?: boolean
+    dispatchCounty?: boolean
+    dispatchArea?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["fulfillmentConfiguration"]>
@@ -26762,6 +26978,8 @@ export namespace Prisma {
     doorstepEnabled?: boolean
     doorstepFee?: boolean
     doorstepEstimatedDeliveryTime?: boolean
+    dispatchCounty?: boolean
+    dispatchArea?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["fulfillmentConfiguration"]>
@@ -26773,6 +26991,8 @@ export namespace Prisma {
     doorstepEnabled?: boolean
     doorstepFee?: boolean
     doorstepEstimatedDeliveryTime?: boolean
+    dispatchCounty?: boolean
+    dispatchArea?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["fulfillmentConfiguration"]>
@@ -26784,11 +27004,13 @@ export namespace Prisma {
     doorstepEnabled?: boolean
     doorstepFee?: boolean
     doorstepEstimatedDeliveryTime?: boolean
+    dispatchCounty?: boolean
+    dispatchArea?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type FulfillmentConfigurationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "featureEnabled" | "pickupEnabled" | "doorstepEnabled" | "doorstepFee" | "doorstepEstimatedDeliveryTime" | "createdAt" | "updatedAt", ExtArgs["result"]["fulfillmentConfiguration"]>
+  export type FulfillmentConfigurationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "featureEnabled" | "pickupEnabled" | "doorstepEnabled" | "doorstepFee" | "doorstepEstimatedDeliveryTime" | "dispatchCounty" | "dispatchArea" | "createdAt" | "updatedAt", ExtArgs["result"]["fulfillmentConfiguration"]>
 
   export type $FulfillmentConfigurationPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "FulfillmentConfiguration"
@@ -26800,6 +27022,8 @@ export namespace Prisma {
       doorstepEnabled: boolean
       doorstepFee: Prisma.Decimal
       doorstepEstimatedDeliveryTime: string | null
+      dispatchCounty: string | null
+      dispatchArea: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["fulfillmentConfiguration"]>
@@ -27231,6 +27455,8 @@ export namespace Prisma {
     readonly doorstepEnabled: FieldRef<"FulfillmentConfiguration", 'Boolean'>
     readonly doorstepFee: FieldRef<"FulfillmentConfiguration", 'Decimal'>
     readonly doorstepEstimatedDeliveryTime: FieldRef<"FulfillmentConfiguration", 'String'>
+    readonly dispatchCounty: FieldRef<"FulfillmentConfiguration", 'String'>
+    readonly dispatchArea: FieldRef<"FulfillmentConfiguration", 'String'>
     readonly createdAt: FieldRef<"FulfillmentConfiguration", 'DateTime'>
     readonly updatedAt: FieldRef<"FulfillmentConfiguration", 'DateTime'>
   }
@@ -28868,6 +29094,1231 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: PickupStationInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model DeliveryRate
+   */
+
+  export type AggregateDeliveryRate = {
+    _count: DeliveryRateCountAggregateOutputType | null
+    _avg: DeliveryRateAvgAggregateOutputType | null
+    _sum: DeliveryRateSumAggregateOutputType | null
+    _min: DeliveryRateMinAggregateOutputType | null
+    _max: DeliveryRateMaxAggregateOutputType | null
+  }
+
+  export type DeliveryRateAvgAggregateOutputType = {
+    fee: Decimal | null
+    priority: number | null
+  }
+
+  export type DeliveryRateSumAggregateOutputType = {
+    fee: Decimal | null
+    priority: number | null
+  }
+
+  export type DeliveryRateMinAggregateOutputType = {
+    id: string | null
+    name: string | null
+    method: $Enums.FulfillmentMethod | null
+    originCounty: string | null
+    originArea: string | null
+    destinationCounty: string | null
+    destinationArea: string | null
+    fee: Decimal | null
+    estimatedDeliveryTime: string | null
+    priority: number | null
+    isActive: boolean | null
+    archivedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type DeliveryRateMaxAggregateOutputType = {
+    id: string | null
+    name: string | null
+    method: $Enums.FulfillmentMethod | null
+    originCounty: string | null
+    originArea: string | null
+    destinationCounty: string | null
+    destinationArea: string | null
+    fee: Decimal | null
+    estimatedDeliveryTime: string | null
+    priority: number | null
+    isActive: boolean | null
+    archivedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type DeliveryRateCountAggregateOutputType = {
+    id: number
+    name: number
+    method: number
+    originCounty: number
+    originArea: number
+    destinationCounty: number
+    destinationArea: number
+    fee: number
+    estimatedDeliveryTime: number
+    priority: number
+    isActive: number
+    archivedAt: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type DeliveryRateAvgAggregateInputType = {
+    fee?: true
+    priority?: true
+  }
+
+  export type DeliveryRateSumAggregateInputType = {
+    fee?: true
+    priority?: true
+  }
+
+  export type DeliveryRateMinAggregateInputType = {
+    id?: true
+    name?: true
+    method?: true
+    originCounty?: true
+    originArea?: true
+    destinationCounty?: true
+    destinationArea?: true
+    fee?: true
+    estimatedDeliveryTime?: true
+    priority?: true
+    isActive?: true
+    archivedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type DeliveryRateMaxAggregateInputType = {
+    id?: true
+    name?: true
+    method?: true
+    originCounty?: true
+    originArea?: true
+    destinationCounty?: true
+    destinationArea?: true
+    fee?: true
+    estimatedDeliveryTime?: true
+    priority?: true
+    isActive?: true
+    archivedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type DeliveryRateCountAggregateInputType = {
+    id?: true
+    name?: true
+    method?: true
+    originCounty?: true
+    originArea?: true
+    destinationCounty?: true
+    destinationArea?: true
+    fee?: true
+    estimatedDeliveryTime?: true
+    priority?: true
+    isActive?: true
+    archivedAt?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type DeliveryRateAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which DeliveryRate to aggregate.
+     */
+    where?: DeliveryRateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DeliveryRates to fetch.
+     */
+    orderBy?: DeliveryRateOrderByWithRelationInput | DeliveryRateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: DeliveryRateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DeliveryRates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DeliveryRates.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned DeliveryRates
+    **/
+    _count?: true | DeliveryRateCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: DeliveryRateAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: DeliveryRateSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: DeliveryRateMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: DeliveryRateMaxAggregateInputType
+  }
+
+  export type GetDeliveryRateAggregateType<T extends DeliveryRateAggregateArgs> = {
+        [P in keyof T & keyof AggregateDeliveryRate]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateDeliveryRate[P]>
+      : GetScalarType<T[P], AggregateDeliveryRate[P]>
+  }
+
+
+
+
+  export type DeliveryRateGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DeliveryRateWhereInput
+    orderBy?: DeliveryRateOrderByWithAggregationInput | DeliveryRateOrderByWithAggregationInput[]
+    by: DeliveryRateScalarFieldEnum[] | DeliveryRateScalarFieldEnum
+    having?: DeliveryRateScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: DeliveryRateCountAggregateInputType | true
+    _avg?: DeliveryRateAvgAggregateInputType
+    _sum?: DeliveryRateSumAggregateInputType
+    _min?: DeliveryRateMinAggregateInputType
+    _max?: DeliveryRateMaxAggregateInputType
+  }
+
+  export type DeliveryRateGroupByOutputType = {
+    id: string
+    name: string
+    method: $Enums.FulfillmentMethod
+    originCounty: string
+    originArea: string | null
+    destinationCounty: string
+    destinationArea: string | null
+    fee: Decimal
+    estimatedDeliveryTime: string
+    priority: number
+    isActive: boolean
+    archivedAt: Date | null
+    createdAt: Date
+    updatedAt: Date
+    _count: DeliveryRateCountAggregateOutputType | null
+    _avg: DeliveryRateAvgAggregateOutputType | null
+    _sum: DeliveryRateSumAggregateOutputType | null
+    _min: DeliveryRateMinAggregateOutputType | null
+    _max: DeliveryRateMaxAggregateOutputType | null
+  }
+
+  type GetDeliveryRateGroupByPayload<T extends DeliveryRateGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<DeliveryRateGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof DeliveryRateGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], DeliveryRateGroupByOutputType[P]>
+            : GetScalarType<T[P], DeliveryRateGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type DeliveryRateSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    method?: boolean
+    originCounty?: boolean
+    originArea?: boolean
+    destinationCounty?: boolean
+    destinationArea?: boolean
+    fee?: boolean
+    estimatedDeliveryTime?: boolean
+    priority?: boolean
+    isActive?: boolean
+    archivedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    orders?: boolean | DeliveryRate$ordersArgs<ExtArgs>
+    _count?: boolean | DeliveryRateCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["deliveryRate"]>
+
+  export type DeliveryRateSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    method?: boolean
+    originCounty?: boolean
+    originArea?: boolean
+    destinationCounty?: boolean
+    destinationArea?: boolean
+    fee?: boolean
+    estimatedDeliveryTime?: boolean
+    priority?: boolean
+    isActive?: boolean
+    archivedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["deliveryRate"]>
+
+  export type DeliveryRateSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    method?: boolean
+    originCounty?: boolean
+    originArea?: boolean
+    destinationCounty?: boolean
+    destinationArea?: boolean
+    fee?: boolean
+    estimatedDeliveryTime?: boolean
+    priority?: boolean
+    isActive?: boolean
+    archivedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["deliveryRate"]>
+
+  export type DeliveryRateSelectScalar = {
+    id?: boolean
+    name?: boolean
+    method?: boolean
+    originCounty?: boolean
+    originArea?: boolean
+    destinationCounty?: boolean
+    destinationArea?: boolean
+    fee?: boolean
+    estimatedDeliveryTime?: boolean
+    priority?: boolean
+    isActive?: boolean
+    archivedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type DeliveryRateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "method" | "originCounty" | "originArea" | "destinationCounty" | "destinationArea" | "fee" | "estimatedDeliveryTime" | "priority" | "isActive" | "archivedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["deliveryRate"]>
+  export type DeliveryRateInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    orders?: boolean | DeliveryRate$ordersArgs<ExtArgs>
+    _count?: boolean | DeliveryRateCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type DeliveryRateIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type DeliveryRateIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $DeliveryRatePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "DeliveryRate"
+    objects: {
+      orders: Prisma.$OrderPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      name: string
+      method: $Enums.FulfillmentMethod
+      originCounty: string
+      originArea: string | null
+      destinationCounty: string
+      destinationArea: string | null
+      fee: Prisma.Decimal
+      estimatedDeliveryTime: string
+      priority: number
+      isActive: boolean
+      archivedAt: Date | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["deliveryRate"]>
+    composites: {}
+  }
+
+  type DeliveryRateGetPayload<S extends boolean | null | undefined | DeliveryRateDefaultArgs> = $Result.GetResult<Prisma.$DeliveryRatePayload, S>
+
+  type DeliveryRateCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<DeliveryRateFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: DeliveryRateCountAggregateInputType | true
+    }
+
+  export interface DeliveryRateDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['DeliveryRate'], meta: { name: 'DeliveryRate' } }
+    /**
+     * Find zero or one DeliveryRate that matches the filter.
+     * @param {DeliveryRateFindUniqueArgs} args - Arguments to find a DeliveryRate
+     * @example
+     * // Get one DeliveryRate
+     * const deliveryRate = await prisma.deliveryRate.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends DeliveryRateFindUniqueArgs>(args: SelectSubset<T, DeliveryRateFindUniqueArgs<ExtArgs>>): Prisma__DeliveryRateClient<$Result.GetResult<Prisma.$DeliveryRatePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one DeliveryRate that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {DeliveryRateFindUniqueOrThrowArgs} args - Arguments to find a DeliveryRate
+     * @example
+     * // Get one DeliveryRate
+     * const deliveryRate = await prisma.deliveryRate.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends DeliveryRateFindUniqueOrThrowArgs>(args: SelectSubset<T, DeliveryRateFindUniqueOrThrowArgs<ExtArgs>>): Prisma__DeliveryRateClient<$Result.GetResult<Prisma.$DeliveryRatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first DeliveryRate that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DeliveryRateFindFirstArgs} args - Arguments to find a DeliveryRate
+     * @example
+     * // Get one DeliveryRate
+     * const deliveryRate = await prisma.deliveryRate.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends DeliveryRateFindFirstArgs>(args?: SelectSubset<T, DeliveryRateFindFirstArgs<ExtArgs>>): Prisma__DeliveryRateClient<$Result.GetResult<Prisma.$DeliveryRatePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first DeliveryRate that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DeliveryRateFindFirstOrThrowArgs} args - Arguments to find a DeliveryRate
+     * @example
+     * // Get one DeliveryRate
+     * const deliveryRate = await prisma.deliveryRate.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends DeliveryRateFindFirstOrThrowArgs>(args?: SelectSubset<T, DeliveryRateFindFirstOrThrowArgs<ExtArgs>>): Prisma__DeliveryRateClient<$Result.GetResult<Prisma.$DeliveryRatePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more DeliveryRates that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DeliveryRateFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all DeliveryRates
+     * const deliveryRates = await prisma.deliveryRate.findMany()
+     * 
+     * // Get first 10 DeliveryRates
+     * const deliveryRates = await prisma.deliveryRate.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const deliveryRateWithIdOnly = await prisma.deliveryRate.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends DeliveryRateFindManyArgs>(args?: SelectSubset<T, DeliveryRateFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DeliveryRatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a DeliveryRate.
+     * @param {DeliveryRateCreateArgs} args - Arguments to create a DeliveryRate.
+     * @example
+     * // Create one DeliveryRate
+     * const DeliveryRate = await prisma.deliveryRate.create({
+     *   data: {
+     *     // ... data to create a DeliveryRate
+     *   }
+     * })
+     * 
+     */
+    create<T extends DeliveryRateCreateArgs>(args: SelectSubset<T, DeliveryRateCreateArgs<ExtArgs>>): Prisma__DeliveryRateClient<$Result.GetResult<Prisma.$DeliveryRatePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many DeliveryRates.
+     * @param {DeliveryRateCreateManyArgs} args - Arguments to create many DeliveryRates.
+     * @example
+     * // Create many DeliveryRates
+     * const deliveryRate = await prisma.deliveryRate.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends DeliveryRateCreateManyArgs>(args?: SelectSubset<T, DeliveryRateCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many DeliveryRates and returns the data saved in the database.
+     * @param {DeliveryRateCreateManyAndReturnArgs} args - Arguments to create many DeliveryRates.
+     * @example
+     * // Create many DeliveryRates
+     * const deliveryRate = await prisma.deliveryRate.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many DeliveryRates and only return the `id`
+     * const deliveryRateWithIdOnly = await prisma.deliveryRate.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends DeliveryRateCreateManyAndReturnArgs>(args?: SelectSubset<T, DeliveryRateCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DeliveryRatePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a DeliveryRate.
+     * @param {DeliveryRateDeleteArgs} args - Arguments to delete one DeliveryRate.
+     * @example
+     * // Delete one DeliveryRate
+     * const DeliveryRate = await prisma.deliveryRate.delete({
+     *   where: {
+     *     // ... filter to delete one DeliveryRate
+     *   }
+     * })
+     * 
+     */
+    delete<T extends DeliveryRateDeleteArgs>(args: SelectSubset<T, DeliveryRateDeleteArgs<ExtArgs>>): Prisma__DeliveryRateClient<$Result.GetResult<Prisma.$DeliveryRatePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one DeliveryRate.
+     * @param {DeliveryRateUpdateArgs} args - Arguments to update one DeliveryRate.
+     * @example
+     * // Update one DeliveryRate
+     * const deliveryRate = await prisma.deliveryRate.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends DeliveryRateUpdateArgs>(args: SelectSubset<T, DeliveryRateUpdateArgs<ExtArgs>>): Prisma__DeliveryRateClient<$Result.GetResult<Prisma.$DeliveryRatePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more DeliveryRates.
+     * @param {DeliveryRateDeleteManyArgs} args - Arguments to filter DeliveryRates to delete.
+     * @example
+     * // Delete a few DeliveryRates
+     * const { count } = await prisma.deliveryRate.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends DeliveryRateDeleteManyArgs>(args?: SelectSubset<T, DeliveryRateDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more DeliveryRates.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DeliveryRateUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many DeliveryRates
+     * const deliveryRate = await prisma.deliveryRate.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends DeliveryRateUpdateManyArgs>(args: SelectSubset<T, DeliveryRateUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more DeliveryRates and returns the data updated in the database.
+     * @param {DeliveryRateUpdateManyAndReturnArgs} args - Arguments to update many DeliveryRates.
+     * @example
+     * // Update many DeliveryRates
+     * const deliveryRate = await prisma.deliveryRate.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more DeliveryRates and only return the `id`
+     * const deliveryRateWithIdOnly = await prisma.deliveryRate.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends DeliveryRateUpdateManyAndReturnArgs>(args: SelectSubset<T, DeliveryRateUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DeliveryRatePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one DeliveryRate.
+     * @param {DeliveryRateUpsertArgs} args - Arguments to update or create a DeliveryRate.
+     * @example
+     * // Update or create a DeliveryRate
+     * const deliveryRate = await prisma.deliveryRate.upsert({
+     *   create: {
+     *     // ... data to create a DeliveryRate
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the DeliveryRate we want to update
+     *   }
+     * })
+     */
+    upsert<T extends DeliveryRateUpsertArgs>(args: SelectSubset<T, DeliveryRateUpsertArgs<ExtArgs>>): Prisma__DeliveryRateClient<$Result.GetResult<Prisma.$DeliveryRatePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of DeliveryRates.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DeliveryRateCountArgs} args - Arguments to filter DeliveryRates to count.
+     * @example
+     * // Count the number of DeliveryRates
+     * const count = await prisma.deliveryRate.count({
+     *   where: {
+     *     // ... the filter for the DeliveryRates we want to count
+     *   }
+     * })
+    **/
+    count<T extends DeliveryRateCountArgs>(
+      args?: Subset<T, DeliveryRateCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], DeliveryRateCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a DeliveryRate.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DeliveryRateAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends DeliveryRateAggregateArgs>(args: Subset<T, DeliveryRateAggregateArgs>): Prisma.PrismaPromise<GetDeliveryRateAggregateType<T>>
+
+    /**
+     * Group by DeliveryRate.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DeliveryRateGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends DeliveryRateGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: DeliveryRateGroupByArgs['orderBy'] }
+        : { orderBy?: DeliveryRateGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, DeliveryRateGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetDeliveryRateGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the DeliveryRate model
+   */
+  readonly fields: DeliveryRateFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for DeliveryRate.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__DeliveryRateClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    orders<T extends DeliveryRate$ordersArgs<ExtArgs> = {}>(args?: Subset<T, DeliveryRate$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the DeliveryRate model
+   */
+  interface DeliveryRateFieldRefs {
+    readonly id: FieldRef<"DeliveryRate", 'String'>
+    readonly name: FieldRef<"DeliveryRate", 'String'>
+    readonly method: FieldRef<"DeliveryRate", 'FulfillmentMethod'>
+    readonly originCounty: FieldRef<"DeliveryRate", 'String'>
+    readonly originArea: FieldRef<"DeliveryRate", 'String'>
+    readonly destinationCounty: FieldRef<"DeliveryRate", 'String'>
+    readonly destinationArea: FieldRef<"DeliveryRate", 'String'>
+    readonly fee: FieldRef<"DeliveryRate", 'Decimal'>
+    readonly estimatedDeliveryTime: FieldRef<"DeliveryRate", 'String'>
+    readonly priority: FieldRef<"DeliveryRate", 'Int'>
+    readonly isActive: FieldRef<"DeliveryRate", 'Boolean'>
+    readonly archivedAt: FieldRef<"DeliveryRate", 'DateTime'>
+    readonly createdAt: FieldRef<"DeliveryRate", 'DateTime'>
+    readonly updatedAt: FieldRef<"DeliveryRate", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * DeliveryRate findUnique
+   */
+  export type DeliveryRateFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeliveryRate
+     */
+    select?: DeliveryRateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DeliveryRate
+     */
+    omit?: DeliveryRateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DeliveryRateInclude<ExtArgs> | null
+    /**
+     * Filter, which DeliveryRate to fetch.
+     */
+    where: DeliveryRateWhereUniqueInput
+  }
+
+  /**
+   * DeliveryRate findUniqueOrThrow
+   */
+  export type DeliveryRateFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeliveryRate
+     */
+    select?: DeliveryRateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DeliveryRate
+     */
+    omit?: DeliveryRateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DeliveryRateInclude<ExtArgs> | null
+    /**
+     * Filter, which DeliveryRate to fetch.
+     */
+    where: DeliveryRateWhereUniqueInput
+  }
+
+  /**
+   * DeliveryRate findFirst
+   */
+  export type DeliveryRateFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeliveryRate
+     */
+    select?: DeliveryRateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DeliveryRate
+     */
+    omit?: DeliveryRateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DeliveryRateInclude<ExtArgs> | null
+    /**
+     * Filter, which DeliveryRate to fetch.
+     */
+    where?: DeliveryRateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DeliveryRates to fetch.
+     */
+    orderBy?: DeliveryRateOrderByWithRelationInput | DeliveryRateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for DeliveryRates.
+     */
+    cursor?: DeliveryRateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DeliveryRates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DeliveryRates.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of DeliveryRates.
+     */
+    distinct?: DeliveryRateScalarFieldEnum | DeliveryRateScalarFieldEnum[]
+  }
+
+  /**
+   * DeliveryRate findFirstOrThrow
+   */
+  export type DeliveryRateFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeliveryRate
+     */
+    select?: DeliveryRateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DeliveryRate
+     */
+    omit?: DeliveryRateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DeliveryRateInclude<ExtArgs> | null
+    /**
+     * Filter, which DeliveryRate to fetch.
+     */
+    where?: DeliveryRateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DeliveryRates to fetch.
+     */
+    orderBy?: DeliveryRateOrderByWithRelationInput | DeliveryRateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for DeliveryRates.
+     */
+    cursor?: DeliveryRateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DeliveryRates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DeliveryRates.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of DeliveryRates.
+     */
+    distinct?: DeliveryRateScalarFieldEnum | DeliveryRateScalarFieldEnum[]
+  }
+
+  /**
+   * DeliveryRate findMany
+   */
+  export type DeliveryRateFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeliveryRate
+     */
+    select?: DeliveryRateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DeliveryRate
+     */
+    omit?: DeliveryRateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DeliveryRateInclude<ExtArgs> | null
+    /**
+     * Filter, which DeliveryRates to fetch.
+     */
+    where?: DeliveryRateWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DeliveryRates to fetch.
+     */
+    orderBy?: DeliveryRateOrderByWithRelationInput | DeliveryRateOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing DeliveryRates.
+     */
+    cursor?: DeliveryRateWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DeliveryRates from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DeliveryRates.
+     */
+    skip?: number
+    distinct?: DeliveryRateScalarFieldEnum | DeliveryRateScalarFieldEnum[]
+  }
+
+  /**
+   * DeliveryRate create
+   */
+  export type DeliveryRateCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeliveryRate
+     */
+    select?: DeliveryRateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DeliveryRate
+     */
+    omit?: DeliveryRateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DeliveryRateInclude<ExtArgs> | null
+    /**
+     * The data needed to create a DeliveryRate.
+     */
+    data: XOR<DeliveryRateCreateInput, DeliveryRateUncheckedCreateInput>
+  }
+
+  /**
+   * DeliveryRate createMany
+   */
+  export type DeliveryRateCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many DeliveryRates.
+     */
+    data: DeliveryRateCreateManyInput | DeliveryRateCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * DeliveryRate createManyAndReturn
+   */
+  export type DeliveryRateCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeliveryRate
+     */
+    select?: DeliveryRateSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the DeliveryRate
+     */
+    omit?: DeliveryRateOmit<ExtArgs> | null
+    /**
+     * The data used to create many DeliveryRates.
+     */
+    data: DeliveryRateCreateManyInput | DeliveryRateCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * DeliveryRate update
+   */
+  export type DeliveryRateUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeliveryRate
+     */
+    select?: DeliveryRateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DeliveryRate
+     */
+    omit?: DeliveryRateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DeliveryRateInclude<ExtArgs> | null
+    /**
+     * The data needed to update a DeliveryRate.
+     */
+    data: XOR<DeliveryRateUpdateInput, DeliveryRateUncheckedUpdateInput>
+    /**
+     * Choose, which DeliveryRate to update.
+     */
+    where: DeliveryRateWhereUniqueInput
+  }
+
+  /**
+   * DeliveryRate updateMany
+   */
+  export type DeliveryRateUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update DeliveryRates.
+     */
+    data: XOR<DeliveryRateUpdateManyMutationInput, DeliveryRateUncheckedUpdateManyInput>
+    /**
+     * Filter which DeliveryRates to update
+     */
+    where?: DeliveryRateWhereInput
+    /**
+     * Limit how many DeliveryRates to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * DeliveryRate updateManyAndReturn
+   */
+  export type DeliveryRateUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeliveryRate
+     */
+    select?: DeliveryRateSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the DeliveryRate
+     */
+    omit?: DeliveryRateOmit<ExtArgs> | null
+    /**
+     * The data used to update DeliveryRates.
+     */
+    data: XOR<DeliveryRateUpdateManyMutationInput, DeliveryRateUncheckedUpdateManyInput>
+    /**
+     * Filter which DeliveryRates to update
+     */
+    where?: DeliveryRateWhereInput
+    /**
+     * Limit how many DeliveryRates to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * DeliveryRate upsert
+   */
+  export type DeliveryRateUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeliveryRate
+     */
+    select?: DeliveryRateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DeliveryRate
+     */
+    omit?: DeliveryRateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DeliveryRateInclude<ExtArgs> | null
+    /**
+     * The filter to search for the DeliveryRate to update in case it exists.
+     */
+    where: DeliveryRateWhereUniqueInput
+    /**
+     * In case the DeliveryRate found by the `where` argument doesn't exist, create a new DeliveryRate with this data.
+     */
+    create: XOR<DeliveryRateCreateInput, DeliveryRateUncheckedCreateInput>
+    /**
+     * In case the DeliveryRate was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<DeliveryRateUpdateInput, DeliveryRateUncheckedUpdateInput>
+  }
+
+  /**
+   * DeliveryRate delete
+   */
+  export type DeliveryRateDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeliveryRate
+     */
+    select?: DeliveryRateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DeliveryRate
+     */
+    omit?: DeliveryRateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DeliveryRateInclude<ExtArgs> | null
+    /**
+     * Filter which DeliveryRate to delete.
+     */
+    where: DeliveryRateWhereUniqueInput
+  }
+
+  /**
+   * DeliveryRate deleteMany
+   */
+  export type DeliveryRateDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which DeliveryRates to delete
+     */
+    where?: DeliveryRateWhereInput
+    /**
+     * Limit how many DeliveryRates to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * DeliveryRate.orders
+   */
+  export type DeliveryRate$ordersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Order
+     */
+    select?: OrderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Order
+     */
+    omit?: OrderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: OrderInclude<ExtArgs> | null
+    where?: OrderWhereInput
+    orderBy?: OrderOrderByWithRelationInput | OrderOrderByWithRelationInput[]
+    cursor?: OrderWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: OrderScalarFieldEnum | OrderScalarFieldEnum[]
+  }
+
+  /**
+   * DeliveryRate without action
+   */
+  export type DeliveryRateDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DeliveryRate
+     */
+    select?: DeliveryRateSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DeliveryRate
+     */
+    omit?: DeliveryRateOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DeliveryRateInclude<ExtArgs> | null
   }
 
 
@@ -71690,7 +73141,10 @@ export namespace Prisma {
     pickupStationName: 'pickupStationName',
     pickupStationAddress: 'pickupStationAddress',
     deliveryFee: 'deliveryFee',
+    deliveryFeeStatus: 'deliveryFeeStatus',
     deliveryEta: 'deliveryEta',
+    deliveryOrigin: 'deliveryOrigin',
+    deliveryRateId: 'deliveryRateId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -71705,6 +73159,8 @@ export namespace Prisma {
     doorstepEnabled: 'doorstepEnabled',
     doorstepFee: 'doorstepFee',
     doorstepEstimatedDeliveryTime: 'doorstepEstimatedDeliveryTime',
+    dispatchCounty: 'dispatchCounty',
+    dispatchArea: 'dispatchArea',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -71733,6 +73189,26 @@ export namespace Prisma {
   };
 
   export type PickupStationScalarFieldEnum = (typeof PickupStationScalarFieldEnum)[keyof typeof PickupStationScalarFieldEnum]
+
+
+  export const DeliveryRateScalarFieldEnum: {
+    id: 'id',
+    name: 'name',
+    method: 'method',
+    originCounty: 'originCounty',
+    originArea: 'originArea',
+    destinationCounty: 'destinationCounty',
+    destinationArea: 'destinationArea',
+    fee: 'fee',
+    estimatedDeliveryTime: 'estimatedDeliveryTime',
+    priority: 'priority',
+    isActive: 'isActive',
+    archivedAt: 'archivedAt',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type DeliveryRateScalarFieldEnum = (typeof DeliveryRateScalarFieldEnum)[keyof typeof DeliveryRateScalarFieldEnum]
 
 
   export const OrderItemScalarFieldEnum: {
@@ -72544,6 +74020,20 @@ export namespace Prisma {
    * Reference to a field of type 'FulfillmentMethod[]'
    */
   export type ListEnumFulfillmentMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FulfillmentMethod[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'DeliveryFeeStatus'
+   */
+  export type EnumDeliveryFeeStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DeliveryFeeStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'DeliveryFeeStatus[]'
+   */
+  export type ListEnumDeliveryFeeStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DeliveryFeeStatus[]'>
     
 
 
@@ -74129,11 +75619,15 @@ export namespace Prisma {
     pickupStationName?: StringNullableFilter<"Order"> | string | null
     pickupStationAddress?: StringNullableFilter<"Order"> | string | null
     deliveryFee?: DecimalFilter<"Order"> | Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: EnumDeliveryFeeStatusFilter<"Order"> | $Enums.DeliveryFeeStatus
     deliveryEta?: StringNullableFilter<"Order"> | string | null
+    deliveryOrigin?: StringNullableFilter<"Order"> | string | null
+    deliveryRateId?: StringNullableFilter<"Order"> | string | null
     createdAt?: DateTimeFilter<"Order"> | Date | string
     updatedAt?: DateTimeFilter<"Order"> | Date | string
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     pickupStation?: XOR<PickupStationNullableScalarRelationFilter, PickupStationWhereInput> | null
+    deliveryRate?: XOR<DeliveryRateNullableScalarRelationFilter, DeliveryRateWhereInput> | null
     items?: OrderItemListRelationFilter
     promotionRedemptions?: PromotionRedemptionListRelationFilter
   }
@@ -74157,11 +75651,15 @@ export namespace Prisma {
     pickupStationName?: SortOrderInput | SortOrder
     pickupStationAddress?: SortOrderInput | SortOrder
     deliveryFee?: SortOrder
+    deliveryFeeStatus?: SortOrder
     deliveryEta?: SortOrderInput | SortOrder
+    deliveryOrigin?: SortOrderInput | SortOrder
+    deliveryRateId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
     pickupStation?: PickupStationOrderByWithRelationInput
+    deliveryRate?: DeliveryRateOrderByWithRelationInput
     items?: OrderItemOrderByRelationAggregateInput
     promotionRedemptions?: PromotionRedemptionOrderByRelationAggregateInput
   }
@@ -74188,11 +75686,15 @@ export namespace Prisma {
     pickupStationName?: StringNullableFilter<"Order"> | string | null
     pickupStationAddress?: StringNullableFilter<"Order"> | string | null
     deliveryFee?: DecimalFilter<"Order"> | Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: EnumDeliveryFeeStatusFilter<"Order"> | $Enums.DeliveryFeeStatus
     deliveryEta?: StringNullableFilter<"Order"> | string | null
+    deliveryOrigin?: StringNullableFilter<"Order"> | string | null
+    deliveryRateId?: StringNullableFilter<"Order"> | string | null
     createdAt?: DateTimeFilter<"Order"> | Date | string
     updatedAt?: DateTimeFilter<"Order"> | Date | string
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     pickupStation?: XOR<PickupStationNullableScalarRelationFilter, PickupStationWhereInput> | null
+    deliveryRate?: XOR<DeliveryRateNullableScalarRelationFilter, DeliveryRateWhereInput> | null
     items?: OrderItemListRelationFilter
     promotionRedemptions?: PromotionRedemptionListRelationFilter
   }, "id" | "orderNumber">
@@ -74216,7 +75718,10 @@ export namespace Prisma {
     pickupStationName?: SortOrderInput | SortOrder
     pickupStationAddress?: SortOrderInput | SortOrder
     deliveryFee?: SortOrder
+    deliveryFeeStatus?: SortOrder
     deliveryEta?: SortOrderInput | SortOrder
+    deliveryOrigin?: SortOrderInput | SortOrder
+    deliveryRateId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: OrderCountOrderByAggregateInput
@@ -74248,7 +75753,10 @@ export namespace Prisma {
     pickupStationName?: StringNullableWithAggregatesFilter<"Order"> | string | null
     pickupStationAddress?: StringNullableWithAggregatesFilter<"Order"> | string | null
     deliveryFee?: DecimalWithAggregatesFilter<"Order"> | Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: EnumDeliveryFeeStatusWithAggregatesFilter<"Order"> | $Enums.DeliveryFeeStatus
     deliveryEta?: StringNullableWithAggregatesFilter<"Order"> | string | null
+    deliveryOrigin?: StringNullableWithAggregatesFilter<"Order"> | string | null
+    deliveryRateId?: StringNullableWithAggregatesFilter<"Order"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Order"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Order"> | Date | string
   }
@@ -74263,6 +75771,8 @@ export namespace Prisma {
     doorstepEnabled?: BoolFilter<"FulfillmentConfiguration"> | boolean
     doorstepFee?: DecimalFilter<"FulfillmentConfiguration"> | Decimal | DecimalJsLike | number | string
     doorstepEstimatedDeliveryTime?: StringNullableFilter<"FulfillmentConfiguration"> | string | null
+    dispatchCounty?: StringNullableFilter<"FulfillmentConfiguration"> | string | null
+    dispatchArea?: StringNullableFilter<"FulfillmentConfiguration"> | string | null
     createdAt?: DateTimeFilter<"FulfillmentConfiguration"> | Date | string
     updatedAt?: DateTimeFilter<"FulfillmentConfiguration"> | Date | string
   }
@@ -74274,6 +75784,8 @@ export namespace Prisma {
     doorstepEnabled?: SortOrder
     doorstepFee?: SortOrder
     doorstepEstimatedDeliveryTime?: SortOrderInput | SortOrder
+    dispatchCounty?: SortOrderInput | SortOrder
+    dispatchArea?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -74288,6 +75800,8 @@ export namespace Prisma {
     doorstepEnabled?: BoolFilter<"FulfillmentConfiguration"> | boolean
     doorstepFee?: DecimalFilter<"FulfillmentConfiguration"> | Decimal | DecimalJsLike | number | string
     doorstepEstimatedDeliveryTime?: StringNullableFilter<"FulfillmentConfiguration"> | string | null
+    dispatchCounty?: StringNullableFilter<"FulfillmentConfiguration"> | string | null
+    dispatchArea?: StringNullableFilter<"FulfillmentConfiguration"> | string | null
     createdAt?: DateTimeFilter<"FulfillmentConfiguration"> | Date | string
     updatedAt?: DateTimeFilter<"FulfillmentConfiguration"> | Date | string
   }, "id">
@@ -74299,6 +75813,8 @@ export namespace Prisma {
     doorstepEnabled?: SortOrder
     doorstepFee?: SortOrder
     doorstepEstimatedDeliveryTime?: SortOrderInput | SortOrder
+    dispatchCounty?: SortOrderInput | SortOrder
+    dispatchArea?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: FulfillmentConfigurationCountOrderByAggregateInput
@@ -74318,6 +75834,8 @@ export namespace Prisma {
     doorstepEnabled?: BoolWithAggregatesFilter<"FulfillmentConfiguration"> | boolean
     doorstepFee?: DecimalWithAggregatesFilter<"FulfillmentConfiguration"> | Decimal | DecimalJsLike | number | string
     doorstepEstimatedDeliveryTime?: StringNullableWithAggregatesFilter<"FulfillmentConfiguration"> | string | null
+    dispatchCounty?: StringNullableWithAggregatesFilter<"FulfillmentConfiguration"> | string | null
+    dispatchArea?: StringNullableWithAggregatesFilter<"FulfillmentConfiguration"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"FulfillmentConfiguration"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"FulfillmentConfiguration"> | Date | string
   }
@@ -74437,6 +75955,108 @@ export namespace Prisma {
     displayOrder?: IntWithAggregatesFilter<"PickupStation"> | number
     createdAt?: DateTimeWithAggregatesFilter<"PickupStation"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"PickupStation"> | Date | string
+  }
+
+  export type DeliveryRateWhereInput = {
+    AND?: DeliveryRateWhereInput | DeliveryRateWhereInput[]
+    OR?: DeliveryRateWhereInput[]
+    NOT?: DeliveryRateWhereInput | DeliveryRateWhereInput[]
+    id?: StringFilter<"DeliveryRate"> | string
+    name?: StringFilter<"DeliveryRate"> | string
+    method?: EnumFulfillmentMethodFilter<"DeliveryRate"> | $Enums.FulfillmentMethod
+    originCounty?: StringFilter<"DeliveryRate"> | string
+    originArea?: StringNullableFilter<"DeliveryRate"> | string | null
+    destinationCounty?: StringFilter<"DeliveryRate"> | string
+    destinationArea?: StringNullableFilter<"DeliveryRate"> | string | null
+    fee?: DecimalFilter<"DeliveryRate"> | Decimal | DecimalJsLike | number | string
+    estimatedDeliveryTime?: StringFilter<"DeliveryRate"> | string
+    priority?: IntFilter<"DeliveryRate"> | number
+    isActive?: BoolFilter<"DeliveryRate"> | boolean
+    archivedAt?: DateTimeNullableFilter<"DeliveryRate"> | Date | string | null
+    createdAt?: DateTimeFilter<"DeliveryRate"> | Date | string
+    updatedAt?: DateTimeFilter<"DeliveryRate"> | Date | string
+    orders?: OrderListRelationFilter
+  }
+
+  export type DeliveryRateOrderByWithRelationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    method?: SortOrder
+    originCounty?: SortOrder
+    originArea?: SortOrderInput | SortOrder
+    destinationCounty?: SortOrder
+    destinationArea?: SortOrderInput | SortOrder
+    fee?: SortOrder
+    estimatedDeliveryTime?: SortOrder
+    priority?: SortOrder
+    isActive?: SortOrder
+    archivedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    orders?: OrderOrderByRelationAggregateInput
+  }
+
+  export type DeliveryRateWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: DeliveryRateWhereInput | DeliveryRateWhereInput[]
+    OR?: DeliveryRateWhereInput[]
+    NOT?: DeliveryRateWhereInput | DeliveryRateWhereInput[]
+    name?: StringFilter<"DeliveryRate"> | string
+    method?: EnumFulfillmentMethodFilter<"DeliveryRate"> | $Enums.FulfillmentMethod
+    originCounty?: StringFilter<"DeliveryRate"> | string
+    originArea?: StringNullableFilter<"DeliveryRate"> | string | null
+    destinationCounty?: StringFilter<"DeliveryRate"> | string
+    destinationArea?: StringNullableFilter<"DeliveryRate"> | string | null
+    fee?: DecimalFilter<"DeliveryRate"> | Decimal | DecimalJsLike | number | string
+    estimatedDeliveryTime?: StringFilter<"DeliveryRate"> | string
+    priority?: IntFilter<"DeliveryRate"> | number
+    isActive?: BoolFilter<"DeliveryRate"> | boolean
+    archivedAt?: DateTimeNullableFilter<"DeliveryRate"> | Date | string | null
+    createdAt?: DateTimeFilter<"DeliveryRate"> | Date | string
+    updatedAt?: DateTimeFilter<"DeliveryRate"> | Date | string
+    orders?: OrderListRelationFilter
+  }, "id">
+
+  export type DeliveryRateOrderByWithAggregationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    method?: SortOrder
+    originCounty?: SortOrder
+    originArea?: SortOrderInput | SortOrder
+    destinationCounty?: SortOrder
+    destinationArea?: SortOrderInput | SortOrder
+    fee?: SortOrder
+    estimatedDeliveryTime?: SortOrder
+    priority?: SortOrder
+    isActive?: SortOrder
+    archivedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: DeliveryRateCountOrderByAggregateInput
+    _avg?: DeliveryRateAvgOrderByAggregateInput
+    _max?: DeliveryRateMaxOrderByAggregateInput
+    _min?: DeliveryRateMinOrderByAggregateInput
+    _sum?: DeliveryRateSumOrderByAggregateInput
+  }
+
+  export type DeliveryRateScalarWhereWithAggregatesInput = {
+    AND?: DeliveryRateScalarWhereWithAggregatesInput | DeliveryRateScalarWhereWithAggregatesInput[]
+    OR?: DeliveryRateScalarWhereWithAggregatesInput[]
+    NOT?: DeliveryRateScalarWhereWithAggregatesInput | DeliveryRateScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"DeliveryRate"> | string
+    name?: StringWithAggregatesFilter<"DeliveryRate"> | string
+    method?: EnumFulfillmentMethodWithAggregatesFilter<"DeliveryRate"> | $Enums.FulfillmentMethod
+    originCounty?: StringWithAggregatesFilter<"DeliveryRate"> | string
+    originArea?: StringNullableWithAggregatesFilter<"DeliveryRate"> | string | null
+    destinationCounty?: StringWithAggregatesFilter<"DeliveryRate"> | string
+    destinationArea?: StringNullableWithAggregatesFilter<"DeliveryRate"> | string | null
+    fee?: DecimalWithAggregatesFilter<"DeliveryRate"> | Decimal | DecimalJsLike | number | string
+    estimatedDeliveryTime?: StringWithAggregatesFilter<"DeliveryRate"> | string
+    priority?: IntWithAggregatesFilter<"DeliveryRate"> | number
+    isActive?: BoolWithAggregatesFilter<"DeliveryRate"> | boolean
+    archivedAt?: DateTimeNullableWithAggregatesFilter<"DeliveryRate"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"DeliveryRate"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"DeliveryRate"> | Date | string
   }
 
   export type OrderItemWhereInput = {
@@ -79162,11 +80782,14 @@ export namespace Prisma {
     pickupStationName?: string | null
     pickupStationAddress?: string | null
     deliveryFee?: Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: $Enums.DeliveryFeeStatus
     deliveryEta?: string | null
+    deliveryOrigin?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user?: UserCreateNestedOneWithoutOrdersInput
     pickupStation?: PickupStationCreateNestedOneWithoutOrdersInput
+    deliveryRate?: DeliveryRateCreateNestedOneWithoutOrdersInput
     items?: OrderItemCreateNestedManyWithoutOrderInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutOrderInput
   }
@@ -79190,7 +80813,10 @@ export namespace Prisma {
     pickupStationName?: string | null
     pickupStationAddress?: string | null
     deliveryFee?: Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: $Enums.DeliveryFeeStatus
     deliveryEta?: string | null
+    deliveryOrigin?: string | null
+    deliveryRateId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     items?: OrderItemUncheckedCreateNestedManyWithoutOrderInput
@@ -79214,11 +80840,14 @@ export namespace Prisma {
     pickupStationName?: NullableStringFieldUpdateOperationsInput | string | null
     pickupStationAddress?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: EnumDeliveryFeeStatusFieldUpdateOperationsInput | $Enums.DeliveryFeeStatus
     deliveryEta?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryOrigin?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutOrdersNestedInput
     pickupStation?: PickupStationUpdateOneWithoutOrdersNestedInput
+    deliveryRate?: DeliveryRateUpdateOneWithoutOrdersNestedInput
     items?: OrderItemUpdateManyWithoutOrderNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutOrderNestedInput
   }
@@ -79242,7 +80871,10 @@ export namespace Prisma {
     pickupStationName?: NullableStringFieldUpdateOperationsInput | string | null
     pickupStationAddress?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: EnumDeliveryFeeStatusFieldUpdateOperationsInput | $Enums.DeliveryFeeStatus
     deliveryEta?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryOrigin?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryRateId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     items?: OrderItemUncheckedUpdateManyWithoutOrderNestedInput
@@ -79268,7 +80900,10 @@ export namespace Prisma {
     pickupStationName?: string | null
     pickupStationAddress?: string | null
     deliveryFee?: Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: $Enums.DeliveryFeeStatus
     deliveryEta?: string | null
+    deliveryOrigin?: string | null
+    deliveryRateId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -79290,7 +80925,9 @@ export namespace Prisma {
     pickupStationName?: NullableStringFieldUpdateOperationsInput | string | null
     pickupStationAddress?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: EnumDeliveryFeeStatusFieldUpdateOperationsInput | $Enums.DeliveryFeeStatus
     deliveryEta?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryOrigin?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -79314,7 +80951,10 @@ export namespace Prisma {
     pickupStationName?: NullableStringFieldUpdateOperationsInput | string | null
     pickupStationAddress?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: EnumDeliveryFeeStatusFieldUpdateOperationsInput | $Enums.DeliveryFeeStatus
     deliveryEta?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryOrigin?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryRateId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -79326,6 +80966,8 @@ export namespace Prisma {
     doorstepEnabled?: boolean
     doorstepFee?: Decimal | DecimalJsLike | number | string
     doorstepEstimatedDeliveryTime?: string | null
+    dispatchCounty?: string | null
+    dispatchArea?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -79337,6 +80979,8 @@ export namespace Prisma {
     doorstepEnabled?: boolean
     doorstepFee?: Decimal | DecimalJsLike | number | string
     doorstepEstimatedDeliveryTime?: string | null
+    dispatchCounty?: string | null
+    dispatchArea?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -79348,6 +80992,8 @@ export namespace Prisma {
     doorstepEnabled?: BoolFieldUpdateOperationsInput | boolean
     doorstepFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     doorstepEstimatedDeliveryTime?: NullableStringFieldUpdateOperationsInput | string | null
+    dispatchCounty?: NullableStringFieldUpdateOperationsInput | string | null
+    dispatchArea?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -79359,6 +81005,8 @@ export namespace Prisma {
     doorstepEnabled?: BoolFieldUpdateOperationsInput | boolean
     doorstepFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     doorstepEstimatedDeliveryTime?: NullableStringFieldUpdateOperationsInput | string | null
+    dispatchCounty?: NullableStringFieldUpdateOperationsInput | string | null
+    dispatchArea?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -79370,6 +81018,8 @@ export namespace Prisma {
     doorstepEnabled?: boolean
     doorstepFee?: Decimal | DecimalJsLike | number | string
     doorstepEstimatedDeliveryTime?: string | null
+    dispatchCounty?: string | null
+    dispatchArea?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -79381,6 +81031,8 @@ export namespace Prisma {
     doorstepEnabled?: BoolFieldUpdateOperationsInput | boolean
     doorstepFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     doorstepEstimatedDeliveryTime?: NullableStringFieldUpdateOperationsInput | string | null
+    dispatchCounty?: NullableStringFieldUpdateOperationsInput | string | null
+    dispatchArea?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -79392,6 +81044,8 @@ export namespace Prisma {
     doorstepEnabled?: BoolFieldUpdateOperationsInput | boolean
     doorstepFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     doorstepEstimatedDeliveryTime?: NullableStringFieldUpdateOperationsInput | string | null
+    dispatchCounty?: NullableStringFieldUpdateOperationsInput | string | null
+    dispatchArea?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -79536,6 +81190,129 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     displayOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DeliveryRateCreateInput = {
+    id?: string
+    name: string
+    method: $Enums.FulfillmentMethod
+    originCounty: string
+    originArea?: string | null
+    destinationCounty: string
+    destinationArea?: string | null
+    fee: Decimal | DecimalJsLike | number | string
+    estimatedDeliveryTime: string
+    priority?: number
+    isActive?: boolean
+    archivedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    orders?: OrderCreateNestedManyWithoutDeliveryRateInput
+  }
+
+  export type DeliveryRateUncheckedCreateInput = {
+    id?: string
+    name: string
+    method: $Enums.FulfillmentMethod
+    originCounty: string
+    originArea?: string | null
+    destinationCounty: string
+    destinationArea?: string | null
+    fee: Decimal | DecimalJsLike | number | string
+    estimatedDeliveryTime: string
+    priority?: number
+    isActive?: boolean
+    archivedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    orders?: OrderUncheckedCreateNestedManyWithoutDeliveryRateInput
+  }
+
+  export type DeliveryRateUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    method?: EnumFulfillmentMethodFieldUpdateOperationsInput | $Enums.FulfillmentMethod
+    originCounty?: StringFieldUpdateOperationsInput | string
+    originArea?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationCounty?: StringFieldUpdateOperationsInput | string
+    destinationArea?: NullableStringFieldUpdateOperationsInput | string | null
+    fee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    estimatedDeliveryTime?: StringFieldUpdateOperationsInput | string
+    priority?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    orders?: OrderUpdateManyWithoutDeliveryRateNestedInput
+  }
+
+  export type DeliveryRateUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    method?: EnumFulfillmentMethodFieldUpdateOperationsInput | $Enums.FulfillmentMethod
+    originCounty?: StringFieldUpdateOperationsInput | string
+    originArea?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationCounty?: StringFieldUpdateOperationsInput | string
+    destinationArea?: NullableStringFieldUpdateOperationsInput | string | null
+    fee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    estimatedDeliveryTime?: StringFieldUpdateOperationsInput | string
+    priority?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    orders?: OrderUncheckedUpdateManyWithoutDeliveryRateNestedInput
+  }
+
+  export type DeliveryRateCreateManyInput = {
+    id?: string
+    name: string
+    method: $Enums.FulfillmentMethod
+    originCounty: string
+    originArea?: string | null
+    destinationCounty: string
+    destinationArea?: string | null
+    fee: Decimal | DecimalJsLike | number | string
+    estimatedDeliveryTime: string
+    priority?: number
+    isActive?: boolean
+    archivedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DeliveryRateUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    method?: EnumFulfillmentMethodFieldUpdateOperationsInput | $Enums.FulfillmentMethod
+    originCounty?: StringFieldUpdateOperationsInput | string
+    originArea?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationCounty?: StringFieldUpdateOperationsInput | string
+    destinationArea?: NullableStringFieldUpdateOperationsInput | string | null
+    fee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    estimatedDeliveryTime?: StringFieldUpdateOperationsInput | string
+    priority?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DeliveryRateUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    method?: EnumFulfillmentMethodFieldUpdateOperationsInput | $Enums.FulfillmentMethod
+    originCounty?: StringFieldUpdateOperationsInput | string
+    originArea?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationCounty?: StringFieldUpdateOperationsInput | string
+    destinationArea?: NullableStringFieldUpdateOperationsInput | string | null
+    fee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    estimatedDeliveryTime?: StringFieldUpdateOperationsInput | string
+    priority?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -84468,9 +86245,21 @@ export namespace Prisma {
     not?: NestedEnumFulfillmentMethodFilter<$PrismaModel> | $Enums.FulfillmentMethod
   }
 
+  export type EnumDeliveryFeeStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.DeliveryFeeStatus | EnumDeliveryFeeStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.DeliveryFeeStatus[] | ListEnumDeliveryFeeStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.DeliveryFeeStatus[] | ListEnumDeliveryFeeStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumDeliveryFeeStatusFilter<$PrismaModel> | $Enums.DeliveryFeeStatus
+  }
+
   export type PickupStationNullableScalarRelationFilter = {
     is?: PickupStationWhereInput | null
     isNot?: PickupStationWhereInput | null
+  }
+
+  export type DeliveryRateNullableScalarRelationFilter = {
+    is?: DeliveryRateWhereInput | null
+    isNot?: DeliveryRateWhereInput | null
   }
 
   export type OrderCountOrderByAggregateInput = {
@@ -84492,7 +86281,10 @@ export namespace Prisma {
     pickupStationName?: SortOrder
     pickupStationAddress?: SortOrder
     deliveryFee?: SortOrder
+    deliveryFeeStatus?: SortOrder
     deliveryEta?: SortOrder
+    deliveryOrigin?: SortOrder
+    deliveryRateId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -84523,7 +86315,10 @@ export namespace Prisma {
     pickupStationName?: SortOrder
     pickupStationAddress?: SortOrder
     deliveryFee?: SortOrder
+    deliveryFeeStatus?: SortOrder
     deliveryEta?: SortOrder
+    deliveryOrigin?: SortOrder
+    deliveryRateId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -84547,7 +86342,10 @@ export namespace Prisma {
     pickupStationName?: SortOrder
     pickupStationAddress?: SortOrder
     deliveryFee?: SortOrder
+    deliveryFeeStatus?: SortOrder
     deliveryEta?: SortOrder
+    deliveryOrigin?: SortOrder
+    deliveryRateId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -84589,6 +86387,16 @@ export namespace Prisma {
     _max?: NestedEnumFulfillmentMethodFilter<$PrismaModel>
   }
 
+  export type EnumDeliveryFeeStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.DeliveryFeeStatus | EnumDeliveryFeeStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.DeliveryFeeStatus[] | ListEnumDeliveryFeeStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.DeliveryFeeStatus[] | ListEnumDeliveryFeeStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumDeliveryFeeStatusWithAggregatesFilter<$PrismaModel> | $Enums.DeliveryFeeStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumDeliveryFeeStatusFilter<$PrismaModel>
+    _max?: NestedEnumDeliveryFeeStatusFilter<$PrismaModel>
+  }
+
   export type FulfillmentConfigurationCountOrderByAggregateInput = {
     id?: SortOrder
     featureEnabled?: SortOrder
@@ -84596,6 +86404,8 @@ export namespace Prisma {
     doorstepEnabled?: SortOrder
     doorstepFee?: SortOrder
     doorstepEstimatedDeliveryTime?: SortOrder
+    dispatchCounty?: SortOrder
+    dispatchArea?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -84611,6 +86421,8 @@ export namespace Prisma {
     doorstepEnabled?: SortOrder
     doorstepFee?: SortOrder
     doorstepEstimatedDeliveryTime?: SortOrder
+    dispatchCounty?: SortOrder
+    dispatchArea?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -84622,6 +86434,8 @@ export namespace Prisma {
     doorstepEnabled?: SortOrder
     doorstepFee?: SortOrder
     doorstepEstimatedDeliveryTime?: SortOrder
+    dispatchCounty?: SortOrder
+    dispatchArea?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -84702,6 +86516,67 @@ export namespace Prisma {
     longitude?: SortOrder
     deliveryFee?: SortOrder
     displayOrder?: SortOrder
+  }
+
+  export type DeliveryRateCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    method?: SortOrder
+    originCounty?: SortOrder
+    originArea?: SortOrder
+    destinationCounty?: SortOrder
+    destinationArea?: SortOrder
+    fee?: SortOrder
+    estimatedDeliveryTime?: SortOrder
+    priority?: SortOrder
+    isActive?: SortOrder
+    archivedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DeliveryRateAvgOrderByAggregateInput = {
+    fee?: SortOrder
+    priority?: SortOrder
+  }
+
+  export type DeliveryRateMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    method?: SortOrder
+    originCounty?: SortOrder
+    originArea?: SortOrder
+    destinationCounty?: SortOrder
+    destinationArea?: SortOrder
+    fee?: SortOrder
+    estimatedDeliveryTime?: SortOrder
+    priority?: SortOrder
+    isActive?: SortOrder
+    archivedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DeliveryRateMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    method?: SortOrder
+    originCounty?: SortOrder
+    originArea?: SortOrder
+    destinationCounty?: SortOrder
+    destinationArea?: SortOrder
+    fee?: SortOrder
+    estimatedDeliveryTime?: SortOrder
+    priority?: SortOrder
+    isActive?: SortOrder
+    archivedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DeliveryRateSumOrderByAggregateInput = {
+    fee?: SortOrder
+    priority?: SortOrder
   }
 
   export type OrderScalarRelationFilter = {
@@ -89251,6 +91126,12 @@ export namespace Prisma {
     connect?: PickupStationWhereUniqueInput
   }
 
+  export type DeliveryRateCreateNestedOneWithoutOrdersInput = {
+    create?: XOR<DeliveryRateCreateWithoutOrdersInput, DeliveryRateUncheckedCreateWithoutOrdersInput>
+    connectOrCreate?: DeliveryRateCreateOrConnectWithoutOrdersInput
+    connect?: DeliveryRateWhereUniqueInput
+  }
+
   export type OrderItemCreateNestedManyWithoutOrderInput = {
     create?: XOR<OrderItemCreateWithoutOrderInput, OrderItemUncheckedCreateWithoutOrderInput> | OrderItemCreateWithoutOrderInput[] | OrderItemUncheckedCreateWithoutOrderInput[]
     connectOrCreate?: OrderItemCreateOrConnectWithoutOrderInput | OrderItemCreateOrConnectWithoutOrderInput[]
@@ -89291,6 +91172,10 @@ export namespace Prisma {
     set?: $Enums.FulfillmentMethod
   }
 
+  export type EnumDeliveryFeeStatusFieldUpdateOperationsInput = {
+    set?: $Enums.DeliveryFeeStatus
+  }
+
   export type UserUpdateOneWithoutOrdersNestedInput = {
     create?: XOR<UserCreateWithoutOrdersInput, UserUncheckedCreateWithoutOrdersInput>
     connectOrCreate?: UserCreateOrConnectWithoutOrdersInput
@@ -89309,6 +91194,16 @@ export namespace Prisma {
     delete?: PickupStationWhereInput | boolean
     connect?: PickupStationWhereUniqueInput
     update?: XOR<XOR<PickupStationUpdateToOneWithWhereWithoutOrdersInput, PickupStationUpdateWithoutOrdersInput>, PickupStationUncheckedUpdateWithoutOrdersInput>
+  }
+
+  export type DeliveryRateUpdateOneWithoutOrdersNestedInput = {
+    create?: XOR<DeliveryRateCreateWithoutOrdersInput, DeliveryRateUncheckedCreateWithoutOrdersInput>
+    connectOrCreate?: DeliveryRateCreateOrConnectWithoutOrdersInput
+    upsert?: DeliveryRateUpsertWithoutOrdersInput
+    disconnect?: DeliveryRateWhereInput | boolean
+    delete?: DeliveryRateWhereInput | boolean
+    connect?: DeliveryRateWhereUniqueInput
+    update?: XOR<XOR<DeliveryRateUpdateToOneWithWhereWithoutOrdersInput, DeliveryRateUpdateWithoutOrdersInput>, DeliveryRateUncheckedUpdateWithoutOrdersInput>
   }
 
   export type OrderItemUpdateManyWithoutOrderNestedInput = {
@@ -89406,6 +91301,48 @@ export namespace Prisma {
     connect?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
     update?: OrderUpdateWithWhereUniqueWithoutPickupStationInput | OrderUpdateWithWhereUniqueWithoutPickupStationInput[]
     updateMany?: OrderUpdateManyWithWhereWithoutPickupStationInput | OrderUpdateManyWithWhereWithoutPickupStationInput[]
+    deleteMany?: OrderScalarWhereInput | OrderScalarWhereInput[]
+  }
+
+  export type OrderCreateNestedManyWithoutDeliveryRateInput = {
+    create?: XOR<OrderCreateWithoutDeliveryRateInput, OrderUncheckedCreateWithoutDeliveryRateInput> | OrderCreateWithoutDeliveryRateInput[] | OrderUncheckedCreateWithoutDeliveryRateInput[]
+    connectOrCreate?: OrderCreateOrConnectWithoutDeliveryRateInput | OrderCreateOrConnectWithoutDeliveryRateInput[]
+    createMany?: OrderCreateManyDeliveryRateInputEnvelope
+    connect?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+  }
+
+  export type OrderUncheckedCreateNestedManyWithoutDeliveryRateInput = {
+    create?: XOR<OrderCreateWithoutDeliveryRateInput, OrderUncheckedCreateWithoutDeliveryRateInput> | OrderCreateWithoutDeliveryRateInput[] | OrderUncheckedCreateWithoutDeliveryRateInput[]
+    connectOrCreate?: OrderCreateOrConnectWithoutDeliveryRateInput | OrderCreateOrConnectWithoutDeliveryRateInput[]
+    createMany?: OrderCreateManyDeliveryRateInputEnvelope
+    connect?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+  }
+
+  export type OrderUpdateManyWithoutDeliveryRateNestedInput = {
+    create?: XOR<OrderCreateWithoutDeliveryRateInput, OrderUncheckedCreateWithoutDeliveryRateInput> | OrderCreateWithoutDeliveryRateInput[] | OrderUncheckedCreateWithoutDeliveryRateInput[]
+    connectOrCreate?: OrderCreateOrConnectWithoutDeliveryRateInput | OrderCreateOrConnectWithoutDeliveryRateInput[]
+    upsert?: OrderUpsertWithWhereUniqueWithoutDeliveryRateInput | OrderUpsertWithWhereUniqueWithoutDeliveryRateInput[]
+    createMany?: OrderCreateManyDeliveryRateInputEnvelope
+    set?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+    disconnect?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+    delete?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+    connect?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+    update?: OrderUpdateWithWhereUniqueWithoutDeliveryRateInput | OrderUpdateWithWhereUniqueWithoutDeliveryRateInput[]
+    updateMany?: OrderUpdateManyWithWhereWithoutDeliveryRateInput | OrderUpdateManyWithWhereWithoutDeliveryRateInput[]
+    deleteMany?: OrderScalarWhereInput | OrderScalarWhereInput[]
+  }
+
+  export type OrderUncheckedUpdateManyWithoutDeliveryRateNestedInput = {
+    create?: XOR<OrderCreateWithoutDeliveryRateInput, OrderUncheckedCreateWithoutDeliveryRateInput> | OrderCreateWithoutDeliveryRateInput[] | OrderUncheckedCreateWithoutDeliveryRateInput[]
+    connectOrCreate?: OrderCreateOrConnectWithoutDeliveryRateInput | OrderCreateOrConnectWithoutDeliveryRateInput[]
+    upsert?: OrderUpsertWithWhereUniqueWithoutDeliveryRateInput | OrderUpsertWithWhereUniqueWithoutDeliveryRateInput[]
+    createMany?: OrderCreateManyDeliveryRateInputEnvelope
+    set?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+    disconnect?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+    delete?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+    connect?: OrderWhereUniqueInput | OrderWhereUniqueInput[]
+    update?: OrderUpdateWithWhereUniqueWithoutDeliveryRateInput | OrderUpdateWithWhereUniqueWithoutDeliveryRateInput[]
+    updateMany?: OrderUpdateManyWithWhereWithoutDeliveryRateInput | OrderUpdateManyWithWhereWithoutDeliveryRateInput[]
     deleteMany?: OrderScalarWhereInput | OrderScalarWhereInput[]
   }
 
@@ -91267,6 +93204,13 @@ export namespace Prisma {
     not?: NestedEnumFulfillmentMethodFilter<$PrismaModel> | $Enums.FulfillmentMethod
   }
 
+  export type NestedEnumDeliveryFeeStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.DeliveryFeeStatus | EnumDeliveryFeeStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.DeliveryFeeStatus[] | ListEnumDeliveryFeeStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.DeliveryFeeStatus[] | ListEnumDeliveryFeeStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumDeliveryFeeStatusFilter<$PrismaModel> | $Enums.DeliveryFeeStatus
+  }
+
   export type NestedEnumOrderStatusWithAggregatesFilter<$PrismaModel = never> = {
     equals?: $Enums.OrderStatus | EnumOrderStatusFieldRefInput<$PrismaModel>
     in?: $Enums.OrderStatus[] | ListEnumOrderStatusFieldRefInput<$PrismaModel>
@@ -91295,6 +93239,16 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumFulfillmentMethodFilter<$PrismaModel>
     _max?: NestedEnumFulfillmentMethodFilter<$PrismaModel>
+  }
+
+  export type NestedEnumDeliveryFeeStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.DeliveryFeeStatus | EnumDeliveryFeeStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.DeliveryFeeStatus[] | ListEnumDeliveryFeeStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.DeliveryFeeStatus[] | ListEnumDeliveryFeeStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumDeliveryFeeStatusWithAggregatesFilter<$PrismaModel> | $Enums.DeliveryFeeStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumDeliveryFeeStatusFilter<$PrismaModel>
+    _max?: NestedEnumDeliveryFeeStatusFilter<$PrismaModel>
   }
 
   export type NestedEnumReviewStatusFilter<$PrismaModel = never> = {
@@ -91942,10 +93896,13 @@ export namespace Prisma {
     pickupStationName?: string | null
     pickupStationAddress?: string | null
     deliveryFee?: Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: $Enums.DeliveryFeeStatus
     deliveryEta?: string | null
+    deliveryOrigin?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     pickupStation?: PickupStationCreateNestedOneWithoutOrdersInput
+    deliveryRate?: DeliveryRateCreateNestedOneWithoutOrdersInput
     items?: OrderItemCreateNestedManyWithoutOrderInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutOrderInput
   }
@@ -91968,7 +93925,10 @@ export namespace Prisma {
     pickupStationName?: string | null
     pickupStationAddress?: string | null
     deliveryFee?: Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: $Enums.DeliveryFeeStatus
     deliveryEta?: string | null
+    deliveryOrigin?: string | null
+    deliveryRateId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     items?: OrderItemUncheckedCreateNestedManyWithoutOrderInput
@@ -92831,7 +94791,10 @@ export namespace Prisma {
     pickupStationName?: StringNullableFilter<"Order"> | string | null
     pickupStationAddress?: StringNullableFilter<"Order"> | string | null
     deliveryFee?: DecimalFilter<"Order"> | Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: EnumDeliveryFeeStatusFilter<"Order"> | $Enums.DeliveryFeeStatus
     deliveryEta?: StringNullableFilter<"Order"> | string | null
+    deliveryOrigin?: StringNullableFilter<"Order"> | string | null
+    deliveryRateId?: StringNullableFilter<"Order"> | string | null
     createdAt?: DateTimeFilter<"Order"> | Date | string
     updatedAt?: DateTimeFilter<"Order"> | Date | string
   }
@@ -96574,6 +98537,45 @@ export namespace Prisma {
     create: XOR<PickupStationCreateWithoutOrdersInput, PickupStationUncheckedCreateWithoutOrdersInput>
   }
 
+  export type DeliveryRateCreateWithoutOrdersInput = {
+    id?: string
+    name: string
+    method: $Enums.FulfillmentMethod
+    originCounty: string
+    originArea?: string | null
+    destinationCounty: string
+    destinationArea?: string | null
+    fee: Decimal | DecimalJsLike | number | string
+    estimatedDeliveryTime: string
+    priority?: number
+    isActive?: boolean
+    archivedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DeliveryRateUncheckedCreateWithoutOrdersInput = {
+    id?: string
+    name: string
+    method: $Enums.FulfillmentMethod
+    originCounty: string
+    originArea?: string | null
+    destinationCounty: string
+    destinationArea?: string | null
+    fee: Decimal | DecimalJsLike | number | string
+    estimatedDeliveryTime: string
+    priority?: number
+    isActive?: boolean
+    archivedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DeliveryRateCreateOrConnectWithoutOrdersInput = {
+    where: DeliveryRateWhereUniqueInput
+    create: XOR<DeliveryRateCreateWithoutOrdersInput, DeliveryRateUncheckedCreateWithoutOrdersInput>
+  }
+
   export type OrderItemCreateWithoutOrderInput = {
     id?: string
     productName: string
@@ -96776,6 +98778,51 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type DeliveryRateUpsertWithoutOrdersInput = {
+    update: XOR<DeliveryRateUpdateWithoutOrdersInput, DeliveryRateUncheckedUpdateWithoutOrdersInput>
+    create: XOR<DeliveryRateCreateWithoutOrdersInput, DeliveryRateUncheckedCreateWithoutOrdersInput>
+    where?: DeliveryRateWhereInput
+  }
+
+  export type DeliveryRateUpdateToOneWithWhereWithoutOrdersInput = {
+    where?: DeliveryRateWhereInput
+    data: XOR<DeliveryRateUpdateWithoutOrdersInput, DeliveryRateUncheckedUpdateWithoutOrdersInput>
+  }
+
+  export type DeliveryRateUpdateWithoutOrdersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    method?: EnumFulfillmentMethodFieldUpdateOperationsInput | $Enums.FulfillmentMethod
+    originCounty?: StringFieldUpdateOperationsInput | string
+    originArea?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationCounty?: StringFieldUpdateOperationsInput | string
+    destinationArea?: NullableStringFieldUpdateOperationsInput | string | null
+    fee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    estimatedDeliveryTime?: StringFieldUpdateOperationsInput | string
+    priority?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DeliveryRateUncheckedUpdateWithoutOrdersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    method?: EnumFulfillmentMethodFieldUpdateOperationsInput | $Enums.FulfillmentMethod
+    originCounty?: StringFieldUpdateOperationsInput | string
+    originArea?: NullableStringFieldUpdateOperationsInput | string | null
+    destinationCounty?: StringFieldUpdateOperationsInput | string
+    destinationArea?: NullableStringFieldUpdateOperationsInput | string | null
+    fee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    estimatedDeliveryTime?: StringFieldUpdateOperationsInput | string
+    priority?: IntFieldUpdateOperationsInput | number
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type OrderItemUpsertWithWhereUniqueWithoutOrderInput = {
     where: OrderItemWhereUniqueInput
     update: XOR<OrderItemUpdateWithoutOrderInput, OrderItemUncheckedUpdateWithoutOrderInput>
@@ -96825,10 +98872,13 @@ export namespace Prisma {
     pickupStationName?: string | null
     pickupStationAddress?: string | null
     deliveryFee?: Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: $Enums.DeliveryFeeStatus
     deliveryEta?: string | null
+    deliveryOrigin?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user?: UserCreateNestedOneWithoutOrdersInput
+    deliveryRate?: DeliveryRateCreateNestedOneWithoutOrdersInput
     items?: OrderItemCreateNestedManyWithoutOrderInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutOrderInput
   }
@@ -96851,7 +98901,10 @@ export namespace Prisma {
     pickupStationName?: string | null
     pickupStationAddress?: string | null
     deliveryFee?: Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: $Enums.DeliveryFeeStatus
     deliveryEta?: string | null
+    deliveryOrigin?: string | null
+    deliveryRateId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     items?: OrderItemUncheckedCreateNestedManyWithoutOrderInput
@@ -96884,6 +98937,88 @@ export namespace Prisma {
     data: XOR<OrderUpdateManyMutationInput, OrderUncheckedUpdateManyWithoutPickupStationInput>
   }
 
+  export type OrderCreateWithoutDeliveryRateInput = {
+    id?: string
+    orderNumber?: string
+    status?: $Enums.OrderStatus
+    paymentStatus?: $Enums.PaymentStatus
+    subtotal: Decimal | DecimalJsLike | number | string
+    walletApplied?: Decimal | DecimalJsLike | number | string
+    total: Decimal | DecimalJsLike | number | string
+    contactName?: string | null
+    contactPhone?: string | null
+    contactEmail?: string | null
+    address?: string | null
+    note?: string | null
+    fulfillmentMethod?: $Enums.FulfillmentMethod
+    pickupStationName?: string | null
+    pickupStationAddress?: string | null
+    deliveryFee?: Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: $Enums.DeliveryFeeStatus
+    deliveryEta?: string | null
+    deliveryOrigin?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user?: UserCreateNestedOneWithoutOrdersInput
+    pickupStation?: PickupStationCreateNestedOneWithoutOrdersInput
+    items?: OrderItemCreateNestedManyWithoutOrderInput
+    promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutOrderInput
+  }
+
+  export type OrderUncheckedCreateWithoutDeliveryRateInput = {
+    id?: string
+    orderNumber?: string
+    userId?: string | null
+    status?: $Enums.OrderStatus
+    paymentStatus?: $Enums.PaymentStatus
+    subtotal: Decimal | DecimalJsLike | number | string
+    walletApplied?: Decimal | DecimalJsLike | number | string
+    total: Decimal | DecimalJsLike | number | string
+    contactName?: string | null
+    contactPhone?: string | null
+    contactEmail?: string | null
+    address?: string | null
+    note?: string | null
+    fulfillmentMethod?: $Enums.FulfillmentMethod
+    pickupStationId?: string | null
+    pickupStationName?: string | null
+    pickupStationAddress?: string | null
+    deliveryFee?: Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: $Enums.DeliveryFeeStatus
+    deliveryEta?: string | null
+    deliveryOrigin?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    items?: OrderItemUncheckedCreateNestedManyWithoutOrderInput
+    promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutOrderInput
+  }
+
+  export type OrderCreateOrConnectWithoutDeliveryRateInput = {
+    where: OrderWhereUniqueInput
+    create: XOR<OrderCreateWithoutDeliveryRateInput, OrderUncheckedCreateWithoutDeliveryRateInput>
+  }
+
+  export type OrderCreateManyDeliveryRateInputEnvelope = {
+    data: OrderCreateManyDeliveryRateInput | OrderCreateManyDeliveryRateInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type OrderUpsertWithWhereUniqueWithoutDeliveryRateInput = {
+    where: OrderWhereUniqueInput
+    update: XOR<OrderUpdateWithoutDeliveryRateInput, OrderUncheckedUpdateWithoutDeliveryRateInput>
+    create: XOR<OrderCreateWithoutDeliveryRateInput, OrderUncheckedCreateWithoutDeliveryRateInput>
+  }
+
+  export type OrderUpdateWithWhereUniqueWithoutDeliveryRateInput = {
+    where: OrderWhereUniqueInput
+    data: XOR<OrderUpdateWithoutDeliveryRateInput, OrderUncheckedUpdateWithoutDeliveryRateInput>
+  }
+
+  export type OrderUpdateManyWithWhereWithoutDeliveryRateInput = {
+    where: OrderScalarWhereInput
+    data: XOR<OrderUpdateManyMutationInput, OrderUncheckedUpdateManyWithoutDeliveryRateInput>
+  }
+
   export type OrderCreateWithoutItemsInput = {
     id?: string
     orderNumber?: string
@@ -96901,11 +99036,14 @@ export namespace Prisma {
     pickupStationName?: string | null
     pickupStationAddress?: string | null
     deliveryFee?: Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: $Enums.DeliveryFeeStatus
     deliveryEta?: string | null
+    deliveryOrigin?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user?: UserCreateNestedOneWithoutOrdersInput
     pickupStation?: PickupStationCreateNestedOneWithoutOrdersInput
+    deliveryRate?: DeliveryRateCreateNestedOneWithoutOrdersInput
     promotionRedemptions?: PromotionRedemptionCreateNestedManyWithoutOrderInput
   }
 
@@ -96928,7 +99066,10 @@ export namespace Prisma {
     pickupStationName?: string | null
     pickupStationAddress?: string | null
     deliveryFee?: Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: $Enums.DeliveryFeeStatus
     deliveryEta?: string | null
+    deliveryOrigin?: string | null
+    deliveryRateId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     promotionRedemptions?: PromotionRedemptionUncheckedCreateNestedManyWithoutOrderInput
@@ -97058,11 +99199,14 @@ export namespace Prisma {
     pickupStationName?: NullableStringFieldUpdateOperationsInput | string | null
     pickupStationAddress?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: EnumDeliveryFeeStatusFieldUpdateOperationsInput | $Enums.DeliveryFeeStatus
     deliveryEta?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryOrigin?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutOrdersNestedInput
     pickupStation?: PickupStationUpdateOneWithoutOrdersNestedInput
+    deliveryRate?: DeliveryRateUpdateOneWithoutOrdersNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutOrderNestedInput
   }
 
@@ -97085,7 +99229,10 @@ export namespace Prisma {
     pickupStationName?: NullableStringFieldUpdateOperationsInput | string | null
     pickupStationAddress?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: EnumDeliveryFeeStatusFieldUpdateOperationsInput | $Enums.DeliveryFeeStatus
     deliveryEta?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryOrigin?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryRateId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutOrderNestedInput
@@ -102110,11 +104257,14 @@ export namespace Prisma {
     pickupStationName?: string | null
     pickupStationAddress?: string | null
     deliveryFee?: Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: $Enums.DeliveryFeeStatus
     deliveryEta?: string | null
+    deliveryOrigin?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user?: UserCreateNestedOneWithoutOrdersInput
     pickupStation?: PickupStationCreateNestedOneWithoutOrdersInput
+    deliveryRate?: DeliveryRateCreateNestedOneWithoutOrdersInput
     items?: OrderItemCreateNestedManyWithoutOrderInput
   }
 
@@ -102137,7 +104287,10 @@ export namespace Prisma {
     pickupStationName?: string | null
     pickupStationAddress?: string | null
     deliveryFee?: Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: $Enums.DeliveryFeeStatus
     deliveryEta?: string | null
+    deliveryOrigin?: string | null
+    deliveryRateId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     items?: OrderItemUncheckedCreateNestedManyWithoutOrderInput
@@ -102446,11 +104599,14 @@ export namespace Prisma {
     pickupStationName?: NullableStringFieldUpdateOperationsInput | string | null
     pickupStationAddress?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: EnumDeliveryFeeStatusFieldUpdateOperationsInput | $Enums.DeliveryFeeStatus
     deliveryEta?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryOrigin?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutOrdersNestedInput
     pickupStation?: PickupStationUpdateOneWithoutOrdersNestedInput
+    deliveryRate?: DeliveryRateUpdateOneWithoutOrdersNestedInput
     items?: OrderItemUpdateManyWithoutOrderNestedInput
   }
 
@@ -102473,7 +104629,10 @@ export namespace Prisma {
     pickupStationName?: NullableStringFieldUpdateOperationsInput | string | null
     pickupStationAddress?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: EnumDeliveryFeeStatusFieldUpdateOperationsInput | $Enums.DeliveryFeeStatus
     deliveryEta?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryOrigin?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryRateId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     items?: OrderItemUncheckedUpdateManyWithoutOrderNestedInput
@@ -106084,7 +108243,10 @@ export namespace Prisma {
     pickupStationName?: string | null
     pickupStationAddress?: string | null
     deliveryFee?: Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: $Enums.DeliveryFeeStatus
     deliveryEta?: string | null
+    deliveryOrigin?: string | null
+    deliveryRateId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -106493,10 +108655,13 @@ export namespace Prisma {
     pickupStationName?: NullableStringFieldUpdateOperationsInput | string | null
     pickupStationAddress?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: EnumDeliveryFeeStatusFieldUpdateOperationsInput | $Enums.DeliveryFeeStatus
     deliveryEta?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryOrigin?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     pickupStation?: PickupStationUpdateOneWithoutOrdersNestedInput
+    deliveryRate?: DeliveryRateUpdateOneWithoutOrdersNestedInput
     items?: OrderItemUpdateManyWithoutOrderNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutOrderNestedInput
   }
@@ -106519,7 +108684,10 @@ export namespace Prisma {
     pickupStationName?: NullableStringFieldUpdateOperationsInput | string | null
     pickupStationAddress?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: EnumDeliveryFeeStatusFieldUpdateOperationsInput | $Enums.DeliveryFeeStatus
     deliveryEta?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryOrigin?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryRateId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     items?: OrderItemUncheckedUpdateManyWithoutOrderNestedInput
@@ -106544,7 +108712,10 @@ export namespace Prisma {
     pickupStationName?: NullableStringFieldUpdateOperationsInput | string | null
     pickupStationAddress?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: EnumDeliveryFeeStatusFieldUpdateOperationsInput | $Enums.DeliveryFeeStatus
     deliveryEta?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryOrigin?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryRateId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -108842,7 +111013,10 @@ export namespace Prisma {
     pickupStationName?: string | null
     pickupStationAddress?: string | null
     deliveryFee?: Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: $Enums.DeliveryFeeStatus
     deliveryEta?: string | null
+    deliveryOrigin?: string | null
+    deliveryRateId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -108864,10 +111038,13 @@ export namespace Prisma {
     pickupStationName?: NullableStringFieldUpdateOperationsInput | string | null
     pickupStationAddress?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: EnumDeliveryFeeStatusFieldUpdateOperationsInput | $Enums.DeliveryFeeStatus
     deliveryEta?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryOrigin?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutOrdersNestedInput
+    deliveryRate?: DeliveryRateUpdateOneWithoutOrdersNestedInput
     items?: OrderItemUpdateManyWithoutOrderNestedInput
     promotionRedemptions?: PromotionRedemptionUpdateManyWithoutOrderNestedInput
   }
@@ -108890,7 +111067,10 @@ export namespace Prisma {
     pickupStationName?: NullableStringFieldUpdateOperationsInput | string | null
     pickupStationAddress?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: EnumDeliveryFeeStatusFieldUpdateOperationsInput | $Enums.DeliveryFeeStatus
     deliveryEta?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryOrigin?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryRateId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     items?: OrderItemUncheckedUpdateManyWithoutOrderNestedInput
@@ -108915,7 +111095,118 @@ export namespace Prisma {
     pickupStationName?: NullableStringFieldUpdateOperationsInput | string | null
     pickupStationAddress?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: EnumDeliveryFeeStatusFieldUpdateOperationsInput | $Enums.DeliveryFeeStatus
     deliveryEta?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryOrigin?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryRateId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type OrderCreateManyDeliveryRateInput = {
+    id?: string
+    orderNumber?: string
+    userId?: string | null
+    status?: $Enums.OrderStatus
+    paymentStatus?: $Enums.PaymentStatus
+    subtotal: Decimal | DecimalJsLike | number | string
+    walletApplied?: Decimal | DecimalJsLike | number | string
+    total: Decimal | DecimalJsLike | number | string
+    contactName?: string | null
+    contactPhone?: string | null
+    contactEmail?: string | null
+    address?: string | null
+    note?: string | null
+    fulfillmentMethod?: $Enums.FulfillmentMethod
+    pickupStationId?: string | null
+    pickupStationName?: string | null
+    pickupStationAddress?: string | null
+    deliveryFee?: Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: $Enums.DeliveryFeeStatus
+    deliveryEta?: string | null
+    deliveryOrigin?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type OrderUpdateWithoutDeliveryRateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderNumber?: StringFieldUpdateOperationsInput | string
+    status?: EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+    paymentStatus?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+    subtotal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    walletApplied?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    total?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    contactName?: NullableStringFieldUpdateOperationsInput | string | null
+    contactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    fulfillmentMethod?: EnumFulfillmentMethodFieldUpdateOperationsInput | $Enums.FulfillmentMethod
+    pickupStationName?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupStationAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: EnumDeliveryFeeStatusFieldUpdateOperationsInput | $Enums.DeliveryFeeStatus
+    deliveryEta?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryOrigin?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneWithoutOrdersNestedInput
+    pickupStation?: PickupStationUpdateOneWithoutOrdersNestedInput
+    items?: OrderItemUpdateManyWithoutOrderNestedInput
+    promotionRedemptions?: PromotionRedemptionUpdateManyWithoutOrderNestedInput
+  }
+
+  export type OrderUncheckedUpdateWithoutDeliveryRateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderNumber?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+    paymentStatus?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+    subtotal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    walletApplied?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    total?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    contactName?: NullableStringFieldUpdateOperationsInput | string | null
+    contactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    fulfillmentMethod?: EnumFulfillmentMethodFieldUpdateOperationsInput | $Enums.FulfillmentMethod
+    pickupStationId?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupStationName?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupStationAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: EnumDeliveryFeeStatusFieldUpdateOperationsInput | $Enums.DeliveryFeeStatus
+    deliveryEta?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryOrigin?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    items?: OrderItemUncheckedUpdateManyWithoutOrderNestedInput
+    promotionRedemptions?: PromotionRedemptionUncheckedUpdateManyWithoutOrderNestedInput
+  }
+
+  export type OrderUncheckedUpdateManyWithoutDeliveryRateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderNumber?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+    paymentStatus?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+    subtotal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    walletApplied?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    total?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    contactName?: NullableStringFieldUpdateOperationsInput | string | null
+    contactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    contactEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    fulfillmentMethod?: EnumFulfillmentMethodFieldUpdateOperationsInput | $Enums.FulfillmentMethod
+    pickupStationId?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupStationName?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupStationAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryFee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    deliveryFeeStatus?: EnumDeliveryFeeStatusFieldUpdateOperationsInput | $Enums.DeliveryFeeStatus
+    deliveryEta?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryOrigin?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

@@ -134,8 +134,8 @@ describe("fulfillment routes", () => {
       featureEnabled: false,
       pickupEnabled: true,
       doorstepEnabled: true,
-      doorstepFee: 0,
-      doorstepEstimatedDeliveryTime: null,
+      dispatchCounty: "Nairobi",
+      dispatchArea: "CBD",
     });
     expect(res.status).toBe(401);
     expect(p.fulfillmentConfiguration.upsert).not.toHaveBeenCalled();

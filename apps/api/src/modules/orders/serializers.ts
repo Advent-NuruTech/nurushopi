@@ -1,5 +1,6 @@
 import type { Order, OrderItem } from "@nuru/db";
 import type {
+  DeliveryFeeStatus,
   FulfillmentMethod,
   OrderDTO,
   OrderItemDTO,
@@ -54,7 +55,10 @@ export function toOrderDTO(o: OrderWithItems): OrderDTO {
     pickupStationName: o.pickupStationName ?? null,
     pickupStationAddress: o.pickupStationAddress ?? null,
     deliveryFee: o.deliveryFee?.toString() ?? "0.00",
+    deliveryFeeStatus: (o.deliveryFeeStatus ?? "CONFIRMED") as DeliveryFeeStatus,
     deliveryEta: o.deliveryEta ?? null,
+    deliveryOrigin: o.deliveryOrigin ?? null,
+    deliveryRateId: o.deliveryRateId ?? null,
     items,
     itemCount: o.items.reduce((sum, i) => sum + i.quantity, 0),
     createdAt: toIso(o.createdAt),

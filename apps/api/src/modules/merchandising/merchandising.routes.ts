@@ -62,10 +62,20 @@ merchandisingAdminRouter.post(
   requireAdmin("SENIOR"),
   asyncHandler(ctrl.adminCreateCollection),
 );
+merchandisingAdminRouter.post(
+  "/workspaces",
+  requireAdmin("SENIOR"),
+  asyncHandler(ctrl.adminCreateWorkspace),
+);
 merchandisingAdminRouter.patch(
   "/collections/:id",
   requireAdmin("SENIOR"),
   asyncHandler(ctrl.adminUpdateCollection),
+);
+merchandisingAdminRouter.post(
+  "/collections/:id/lifecycle",
+  requireAdmin("SENIOR"),
+  asyncHandler(ctrl.adminCollectionLifecycle),
 );
 merchandisingAdminRouter.put(
   "/collections/:id/memberships",
@@ -76,6 +86,11 @@ merchandisingAdminRouter.post(
   "/collections/:id/memberships/import",
   requireAdmin("SENIOR"),
   asyncHandler(ctrl.adminImportMemberships),
+);
+merchandisingAdminRouter.post(
+  "/collections/:id/memberships/import-current",
+  requireAdmin("SENIOR"),
+  asyncHandler(ctrl.adminImportCurrentProducts),
 );
 merchandisingAdminRouter.delete(
   "/collections/:id/memberships/:productId",
@@ -91,6 +106,11 @@ merchandisingAdminRouter.post(
   "/homepage-sections",
   requireAdmin("SENIOR"),
   asyncHandler(ctrl.adminCreateHomepageSection),
+);
+merchandisingAdminRouter.post(
+  "/homepage-sections/reorder",
+  requireAdmin("SENIOR"),
+  asyncHandler(ctrl.adminReorderHomepageSections),
 );
 merchandisingAdminRouter.patch(
   "/homepage-sections/:id",
@@ -111,6 +131,10 @@ merchandisingVendorRouter.get("/collections/:id/memberships", asyncHandler(ctrl.
 merchandisingVendorRouter.post(
   "/collections/:id/memberships/import",
   asyncHandler(ctrl.vendorImportMemberships),
+);
+merchandisingVendorRouter.post(
+  "/collections/:id/memberships/import-current",
+  asyncHandler(ctrl.vendorImportCurrentProducts),
 );
 merchandisingVendorRouter.delete(
   "/collections/:id/memberships/:productId",

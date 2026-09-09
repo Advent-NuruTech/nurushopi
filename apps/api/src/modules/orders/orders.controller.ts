@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import {
   checkoutSchema,
   orderPaymentUpdateSchema,
+  orderDeliveryQuoteSchema,
   orderQuerySchema,
   orderStatusUpdateSchema,
 } from "@nuru/types";
@@ -59,4 +60,9 @@ export async function updateOrderStatus(req: Request, res: Response): Promise<vo
 export async function updateOrderPayment(req: Request, res: Response): Promise<void> {
   const { paymentStatus } = orderPaymentUpdateSchema.parse(req.body);
   sendOk(res, { order: await orders.updatePayment(param(req, "id"), paymentStatus) });
+}
+
+export async function updateOrderDeliveryQuote(req: Request, res: Response): Promise<void> {
+  const input = orderDeliveryQuoteSchema.parse(req.body);
+  sendOk(res, { order: await orders.updateDeliveryQuote(param(req, "id"), input) });
 }

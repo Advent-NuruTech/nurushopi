@@ -76,6 +76,7 @@ import type {
   CollectionCreateInput,
   CollectionUpdateInput,
   HomepageSectionCreateInput,
+  HomepageSectionReorderInput,
   HomepageSectionUpdateInput,
   FulfillmentConfigurationDTO,
   FulfillmentConfigurationUpdateInput,
@@ -83,9 +84,17 @@ import type {
   PickupStationDTO,
   PickupStationUpdateInput,
   PublicFulfillmentDTO,
+  DeliveryQuoteDTO,
+  DeliveryQuoteRequest,
+  DeliveryRateCreateInput,
+  DeliveryRateDTO,
+  DeliveryRateUpdateInput,
+  DeliveryRateMethod,
   MerchandisingCollectionDTO,
   CollectionMembershipDTO,
   CollectionMembershipImportInput,
+  MerchandisingLifecycleInput,
+  MerchandisingWorkspaceCreateInput,
   WishlistItemDTO,
   WishlistQuery,
   WishlistUpsertInput,
@@ -237,7 +246,7 @@ export const authApi = {
   resetPassword: (token: string, password: string) =>
     api.post<{ success: boolean }>("/auth/reset-password", { token, password }),
   verifyEmail: (token: string) => api.post<{ success: boolean }>("/auth/verify-email", { token }),
-  googleUrl: () => apiUrl("/auth/google"),
+  googleUrl: (redirectTo?: string) => apiUrl(`/auth/google${qs({ redirectTo })}`),
 };
 
 // ---- Admin authentication ----
@@ -403,6 +412,11 @@ export const orderApi = {
       api.patch<{ order: OrderDTO }>(`/admin/orders/${id}/status`, { status }),
     updatePayment: (id: string, paymentStatus: PaymentStatus) =>
       api.patch<{ order: OrderDTO }>(`/admin/orders/${id}/payment`, { paymentStatus }),
+    updateDeliveryQuote: (id: string, deliveryFee: number, deliveryEta: string) =>
+      api.patch<{ order: OrderDTO }>(`/admin/orders/${id}/delivery-quote`, {
+        deliveryFee,
+        deliveryEta,
+      }),
   },
 };
 
@@ -410,6 +424,8 @@ export const orderApi = {
 
 export const fulfillmentApi = {
   get: () => api.get<{ fulfillment: PublicFulfillmentDTO }>("/fulfillment"),
+  quote: (input: DeliveryQuoteRequest) =>
+    api.post<{ quote: DeliveryQuoteDTO }>("/fulfillment/quote", input),
   admin: {
     getConfiguration: () =>
       api.get<{ configuration: FulfillmentConfigurationDTO }>("/admin/fulfillment/configuration"),
@@ -435,6 +451,24 @@ export const fulfillmentApi = {
       ),
     archiveStation: (id: string) =>
       api.del<{ success: boolean }>(`/admin/fulfillment/stations/${encodeURIComponent(id)}`),
+    listRates: (
+      query: Partial<{
+        page: number;
+        pageSize: number;
+        search: string;
+        method: DeliveryRateMethod;
+        includeArchived: boolean;
+      }> = {},
+    ) => api.get<Paginated<DeliveryRateDTO>>(`/admin/fulfillment/rates${qs(query)}`),
+    createRate: (input: DeliveryRateCreateInput) =>
+      api.post<{ rate: DeliveryRateDTO }>("/admin/fulfillment/rates", input),
+    updateRate: (id: string, input: DeliveryRateUpdateInput) =>
+      api.patch<{ rate: DeliveryRateDTO }>(
+        `/admin/fulfillment/rates/${encodeURIComponent(id)}`,
+        input,
+      ),
+    archiveRate: (id: string) =>
+      api.del<{ success: boolean }>(`/admin/fulfillment/rates/${encodeURIComponent(id)}`),
   },
 };
 
@@ -697,9 +731,19 @@ export const merchandisingApi = {
         "/admin/merchandising/collections",
         input,
       ),
+    createWorkspace: (input: MerchandisingWorkspaceCreateInput) =>
+      api.post<{ collection: MerchandisingCollectionDTO; section: AdminHomepageSection }>(
+        "/admin/merchandising/workspaces",
+        input,
+      ),
     updateCollection: (id: string, input: CollectionUpdateInput) =>
       api.patch<{ collection: MerchandisingCollectionDTO }>(
         `/admin/merchandising/collections/${encodeURIComponent(id)}`,
+        input,
+      ),
+    lifecycle: (id: string, input: MerchandisingLifecycleInput) =>
+      api.post<{ collection: MerchandisingCollectionDTO; status: string }>(
+        `/admin/merchandising/collections/${encodeURIComponent(id)}/lifecycle`,
         input,
       ),
     memberships: (id: string) =>
@@ -711,6 +755,11 @@ export const merchandisingApi = {
         `/admin/merchandising/collections/${encodeURIComponent(id)}/memberships/import`,
         input,
       ),
+    importCurrentProducts: (id: string) =>
+      api.post<{ imported: number; eligible: number; collectionKey: string }>(
+        `/admin/merchandising/collections/${encodeURIComponent(id)}/memberships/import-current`,
+        {},
+      ),
     removeMembership: (id: string, productId: string) =>
       api.del<{ success: boolean }>(
         `/admin/merchandising/collections/${encodeURIComponent(id)}/memberships/${encodeURIComponent(productId)}`,
@@ -719,6 +768,11 @@ export const merchandisingApi = {
       api.get<{ sections: AdminHomepageSection[] }>("/admin/merchandising/homepage-sections"),
     createSection: (input: HomepageSectionCreateInput) =>
       api.post<{ section: AdminHomepageSection }>("/admin/merchandising/homepage-sections", input),
+    reorderSections: (input: HomepageSectionReorderInput) =>
+      api.post<{ sections: AdminHomepageSection[] }>(
+        "/admin/merchandising/homepage-sections/reorder",
+        input,
+      ),
     updateSection: (id: string, input: HomepageSectionUpdateInput) =>
       api.patch<{ section: AdminHomepageSection }>(
         `/admin/merchandising/homepage-sections/${encodeURIComponent(id)}`,
@@ -740,6 +794,11 @@ export const merchandisingApi = {
       api.post<{ imported: number; collectionKey: string }>(
         `/vendor/merchandising/collections/${encodeURIComponent(id)}/memberships/import`,
         input,
+      ),
+    importCurrentProducts: (id: string) =>
+      api.post<{ imported: number; eligible: number; collectionKey: string }>(
+        `/vendor/merchandising/collections/${encodeURIComponent(id)}/memberships/import-current`,
+        {},
       ),
     removeMembership: (id: string, productId: string) =>
       api.del<{ success: boolean }>(

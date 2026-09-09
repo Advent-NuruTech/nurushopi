@@ -34,6 +34,29 @@ export type OrderStatus = (typeof ORDER_STATUSES)[number];
 export const PAYMENT_STATUSES = ["UNPAID", "PAID", "REFUNDED", "FAILED"] as const;
 export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
 
+export const DELIVERY_FEE_STATUSES = ["CONFIRMED", "PENDING_QUOTE"] as const;
+export type DeliveryFeeStatus = (typeof DELIVERY_FEE_STATUSES)[number];
+
+export const manualPickupStationSchema = z
+  .object({
+    name: z.string().trim().min(2, "Enter the pickup point name.").max(160),
+    address: z.string().trim().min(5, "Enter the pickup point address.").max(500),
+    city: z.string().trim().min(2, "Enter the town or city.").max(120),
+    region: z.string().trim().min(2, "Choose the county.").max(120),
+  })
+  .strict();
+export type ManualPickupStationInput = z.infer<typeof manualPickupStationSchema>;
+
+export const deliveryDestinationSchema = z
+  .object({
+    country: z.string().trim().min(2).max(120),
+    county: z.string().trim().min(2).max(120),
+    town: z.string().trim().min(2).max(160),
+    address: z.string().trim().min(5).max(500),
+  })
+  .strict();
+export type DeliveryDestinationInput = z.infer<typeof deliveryDestinationSchema>;
+
 /** A single line in a checkout request: a product reference + quantity. */
 export const checkoutItemSchema = z
   .object({
@@ -60,6 +83,9 @@ export const checkoutSchema = z
     address: z.string().trim().min(1, "Delivery address is required.").max(500),
     deliveryMethod: z.enum(CUSTOMER_FULFILLMENT_METHODS).optional(),
     pickupStationId: idSchema.optional().nullable(),
+    manualPickupStation: manualPickupStationSchema.optional().nullable(),
+    deliveryDestination: deliveryDestinationSchema.optional().nullable(),
+    saveAddressAsDefault: z.coerce.boolean().optional().default(false),
     note: z.string().trim().max(1000).optional().nullable(),
     /** Stable guest id used only for server-side promotion/frequency limits. */
     anonymousId: z.string().trim().min(8).max(191).optional().nullable(),
@@ -68,7 +94,37 @@ export const checkoutSchema = z
     // from the client — and only takes effect for an authenticated user.
     useWallet: z.coerce.boolean().optional().default(false),
   })
-  .strict();
+  .strict()
+  .superRefine((value, ctx) => {
+    if (value.deliveryMethod === "PICKUP_STATION") {
+      const choices =
+        Number(Boolean(value.pickupStationId)) + Number(Boolean(value.manualPickupStation));
+      if (choices !== 1) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Choose a listed pickup station or enter one pickup location.",
+          path: ["pickupStationId"],
+        });
+      }
+    }
+    if (
+      value.deliveryMethod === "DOORSTEP" &&
+      (value.pickupStationId || value.manualPickupStation)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Pickup details cannot be used for doorstep delivery.",
+        path: ["deliveryMethod"],
+      });
+    }
+    if (value.deliveryMethod === "DOORSTEP" && !value.deliveryDestination) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Enter the complete delivery destination.",
+        path: ["deliveryDestination"],
+      });
+    }
+  });
 export type CheckoutInput = z.infer<typeof checkoutSchema>;
 
 export const orderSortSchema = z
@@ -95,6 +151,14 @@ export const orderPaymentUpdateSchema = z
   .object({ paymentStatus: z.enum(PAYMENT_STATUSES) })
   .strict();
 export type OrderPaymentUpdateInput = z.infer<typeof orderPaymentUpdateSchema>;
+
+export const orderDeliveryQuoteSchema = z
+  .object({
+    deliveryFee: z.coerce.number().finite().min(0).max(1_000_000),
+    deliveryEta: z.string().trim().min(1).max(160),
+  })
+  .strict();
+export type OrderDeliveryQuoteInput = z.infer<typeof orderDeliveryQuoteSchema>;
 
 export interface OrderItemDTO {
   id: string;
@@ -127,7 +191,10 @@ export interface OrderDTO {
   pickupStationName: string | null;
   pickupStationAddress: string | null;
   deliveryFee: string;
+  deliveryFeeStatus: DeliveryFeeStatus;
   deliveryEta: string | null;
+  deliveryOrigin: string | null;
+  deliveryRateId: string | null;
   items: OrderItemDTO[];
   /** Sum of line quantities. */
   itemCount: number;

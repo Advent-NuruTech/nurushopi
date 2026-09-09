@@ -8,15 +8,16 @@ import type {
   PickupStationDTO,
 } from "@nuru/types";
 import { ApiClientError, fulfillmentApi } from "@/lib/api";
-import { formatPrice } from "@/lib/formatPrice";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import DeliveryRatesManager from "./DeliveryRatesManager";
+import { KENYA_COUNTIES } from "@/lib/kenyaLocations";
 
 const defaultConfiguration: FulfillmentConfigurationDTO = {
   featureEnabled: false,
   pickupEnabled: true,
   doorstepEnabled: true,
-  doorstepFee: "0.00",
-  doorstepEstimatedDeliveryTime: null,
+  dispatchCounty: null,
+  dispatchArea: null,
 };
 
 type StationDraft = {
@@ -43,7 +44,7 @@ const emptyStation: StationDraft = {
   latitude: "",
   longitude: "",
   contactPhone: "",
-  operatingHours: "",
+  operatingHours: "Monday–Saturday, 8:00 AM–6:00 PM",
   deliveryFee: "0",
   estimatedDeliveryTime: "",
   instructions: "",
@@ -68,8 +69,8 @@ function toDraft(station: PickupStationDTO): StationDraft {
     longitude: station.longitude ?? "",
     contactPhone: station.contactPhone ?? "",
     operatingHours: station.operatingHours ?? "",
-    deliveryFee: station.deliveryFee,
-    estimatedDeliveryTime: station.estimatedDeliveryTime ?? "",
+    deliveryFee: "0",
+    estimatedDeliveryTime: "",
     instructions: station.instructions ?? "",
     isActive: station.isActive,
     displayOrder: String(station.displayOrder),
@@ -80,14 +81,14 @@ function toInput(draft: StationDraft): PickupStationCreateInput {
   return {
     name: draft.name.trim(),
     address: draft.address.trim(),
-    city: nullable(draft.city),
-    region: nullable(draft.region),
+    city: draft.city.trim(),
+    region: draft.region.trim(),
     latitude: draft.latitude.trim() ? Number(draft.latitude) : null,
     longitude: draft.longitude.trim() ? Number(draft.longitude) : null,
     contactPhone: nullable(draft.contactPhone),
-    operatingHours: nullable(draft.operatingHours),
-    deliveryFee: Number(draft.deliveryFee),
-    estimatedDeliveryTime: nullable(draft.estimatedDeliveryTime),
+    operatingHours: draft.operatingHours.trim(),
+    deliveryFee: 0,
+    estimatedDeliveryTime: null,
     instructions: nullable(draft.instructions),
     isActive: draft.isActive,
     displayOrder: Number(draft.displayOrder),
@@ -146,10 +147,8 @@ export default function FulfillmentTab() {
     setMessage("");
     setSavingConfiguration(true);
     try {
-      const { configuration: saved } = await fulfillmentApi.admin.updateConfiguration({
-        ...configuration,
-        doorstepFee: Number(configuration.doorstepFee),
-      });
+      const { configuration: saved } =
+        await fulfillmentApi.admin.updateConfiguration(configuration);
       setConfiguration(saved);
       setMessage("Delivery settings saved.");
     } catch (caught) {
@@ -270,31 +269,40 @@ export default function FulfillmentTab() {
                 </span>
               </span>
             </label>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                Delivery fee
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={configuration.doorstepFee}
-                  onChange={(event) => updateConfig("doorstepFee", event.target.value)}
-                  className={inputClass}
-                />
-              </label>
-              <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                Estimated delivery time
-                <input
-                  value={configuration.doorstepEstimatedDeliveryTime ?? ""}
-                  onChange={(event) =>
-                    updateConfig("doorstepEstimatedDeliveryTime", event.target.value || null)
-                  }
-                  placeholder="e.g. 1–2 business days"
-                  className={inputClass}
-                />
-              </label>
-            </div>
+            <p className="mt-2 text-xs text-slate-500">
+              Price and timing come from the matching route below. An unmatched destination is held
+              for a manual quote.
+            </p>
           </div>
+        </div>
+
+        <div className="mt-5 grid gap-4 rounded-2xl border border-slate-200 p-4 dark:border-slate-700 sm:grid-cols-2">
+          <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
+            Main dispatch county
+            <select
+              value={configuration.dispatchCounty ?? ""}
+              onChange={(event) => updateConfig("dispatchCounty", event.target.value || null)}
+              className={inputClass}
+            >
+              <option value="">Choose county</option>
+              {KENYA_COUNTIES.map((county) => (
+                <option key={county}>{county}</option>
+              ))}
+            </select>
+          </label>
+          <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
+            Main dispatch area
+            <input
+              value={configuration.dispatchArea ?? ""}
+              onChange={(event) => updateConfig("dispatchArea", event.target.value || null)}
+              placeholder="e.g. Nairobi CBD"
+              className={inputClass}
+            />
+          </label>
+          <p className="text-xs text-slate-500 sm:col-span-2">
+            Checkout matches every route from this dispatch origin to the customer&apos;s chosen
+            destination.
+          </p>
         </div>
 
         <button
@@ -306,6 +314,11 @@ export default function FulfillmentTab() {
           <Save size={17} /> {savingConfiguration ? "Saving..." : "Save settings"}
         </button>
       </div>
+
+      <DeliveryRatesManager
+        dispatchCounty={configuration.dispatchCounty ?? ""}
+        dispatchArea={configuration.dispatchArea ?? ""}
+      />
 
       {(error || message) && (
         <div
@@ -383,10 +396,11 @@ export default function FulfillmentTab() {
                   </span>
                 </div>
                 <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{station.address}</p>
-                <p className="mt-2 text-sm font-semibold text-brand-strong">
-                  {formatPrice(Number(station.deliveryFee))}
-                  {station.estimatedDeliveryTime ? ` · ${station.estimatedDeliveryTime}` : ""}
-                </p>
+                {(station.city || station.region) && (
+                  <p className="mt-1 text-xs font-semibold text-brand-strong">
+                    {[station.city, station.region].filter(Boolean).join(", ")}
+                  </p>
+                )}
                 {station.operatingHours && (
                   <p className="text-xs text-slate-500">Hours: {station.operatingHours}</p>
                 )}
@@ -468,12 +482,10 @@ export default function FulfillmentTab() {
                 [
                   ["name", "Station name *"],
                   ["address", "Full address *"],
-                  ["city", "City"],
-                  ["region", "County / region"],
+                  ["city", "Town / city *"],
+                  ["region", "County *"],
                   ["contactPhone", "Contact phone"],
-                  ["operatingHours", "Operating hours"],
-                  ["deliveryFee", "Delivery fee"],
-                  ["estimatedDeliveryTime", "Estimated delivery time"],
+                  ["operatingHours", "Operating hours *"],
                   ["latitude", "Latitude"],
                   ["longitude", "Longitude"],
                   ["displayOrder", "Display order"],
@@ -484,20 +496,33 @@ export default function FulfillmentTab() {
                   className={key === "address" ? "text-sm sm:col-span-2" : "text-sm"}
                 >
                   <span className="font-medium text-slate-700 dark:text-slate-300">{label}</span>
-                  <input
-                    type={
-                      ["deliveryFee", "latitude", "longitude", "displayOrder"].includes(key)
-                        ? "number"
-                        : "text"
-                    }
-                    step={key === "deliveryFee" ? "0.01" : key === "displayOrder" ? "1" : "any"}
-                    min={["deliveryFee", "displayOrder"].includes(key) ? "0" : undefined}
-                    value={draft[key]}
-                    onChange={(event) =>
-                      setDraft((current) => ({ ...current, [key]: event.target.value }))
-                    }
-                    className={inputClass}
-                  />
+                  {key === "region" ? (
+                    <select
+                      value={draft.region}
+                      onChange={(event) =>
+                        setDraft((current) => ({ ...current, region: event.target.value }))
+                      }
+                      className={inputClass}
+                    >
+                      <option value="">Choose county</option>
+                      {KENYA_COUNTIES.map((county) => (
+                        <option key={county}>{county}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type={
+                        ["latitude", "longitude", "displayOrder"].includes(key) ? "number" : "text"
+                      }
+                      step={key === "displayOrder" ? "1" : "any"}
+                      min={key === "displayOrder" ? "0" : undefined}
+                      value={draft[key]}
+                      onChange={(event) =>
+                        setDraft((current) => ({ ...current, [key]: event.target.value }))
+                      }
+                      className={inputClass}
+                    />
+                  )}
                 </label>
               ))}
               <label className="text-sm sm:col-span-2">

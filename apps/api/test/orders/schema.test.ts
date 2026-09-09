@@ -103,14 +103,21 @@ describe("fulfillment schemas", () => {
         featureEnabled: true,
         pickupEnabled: false,
         doorstepEnabled: false,
-        doorstepFee: 0,
-        doorstepEstimatedDeliveryTime: null,
+        dispatchCounty: null,
+        dispatchArea: null,
       }).success,
     ).toBe(false);
   });
 
   it("validates station coordinates and non-negative delivery fees", () => {
-    const base = { name: "CBD", address: "Market Street", deliveryFee: 100 };
+    const base = {
+      name: "CBD",
+      address: "Market Street",
+      city: "Nairobi",
+      region: "Nairobi",
+      operatingHours: "Mon–Sat, 8am–6pm",
+      deliveryFee: 100,
+    };
     expect(pickupStationCreateSchema.safeParse(base).success).toBe(true);
     expect(pickupStationCreateSchema.safeParse({ ...base, latitude: 91 }).success).toBe(false);
     expect(pickupStationCreateSchema.safeParse({ ...base, deliveryFee: -1 }).success).toBe(false);

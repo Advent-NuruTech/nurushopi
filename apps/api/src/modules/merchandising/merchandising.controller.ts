@@ -9,7 +9,10 @@ import {
   collectionUpdateSchema,
   commerceEventBatchSchema,
   homepageSectionCreateSchema,
+  homepageSectionReorderSchema,
   homepageSectionUpdateSchema,
+  merchandisingLifecycleSchema,
+  merchandisingWorkspaceCreateSchema,
   promotionCreateSchema,
   notificationPreferenceSchema,
   retentionSubscriptionSchema,
@@ -110,6 +113,16 @@ export async function adminCreateCollection(req: Request, res: Response): Promis
   sendOk(res, { collection: await merchandising.createCollection(input, adminId(req)) }, 201);
 }
 
+export async function adminCreateWorkspace(req: Request, res: Response): Promise<void> {
+  const input = merchandisingWorkspaceCreateSchema.parse(req.body);
+  sendOk(res, await merchandising.createMerchandisingWorkspace(input, adminId(req)), 201);
+}
+
+export async function adminCollectionLifecycle(req: Request, res: Response): Promise<void> {
+  const input = merchandisingLifecycleSchema.parse(req.body);
+  sendOk(res, await merchandising.changeCollectionLifecycle(param(req, "id"), input, adminId(req)));
+}
+
 export async function adminUpdateCollection(req: Request, res: Response): Promise<void> {
   const input = collectionUpdateSchema.parse(req.body);
   sendOk(res, {
@@ -133,6 +146,13 @@ export async function adminImportMemberships(req: Request, res: Response): Promi
   sendOk(
     res,
     await merchandising.importMemberships(param(req, "id"), input, { adminId: adminId(req) }),
+  );
+}
+
+export async function adminImportCurrentProducts(req: Request, res: Response): Promise<void> {
+  sendOk(
+    res,
+    await merchandising.importCurrentProducts(param(req, "id"), { adminId: adminId(req) }),
   );
 }
 
@@ -166,6 +186,13 @@ export async function adminUpdateHomepageSection(req: Request, res: Response): P
   });
 }
 
+export async function adminReorderHomepageSections(req: Request, res: Response): Promise<void> {
+  const input = homepageSectionReorderSchema.parse(req.body);
+  sendOk(res, {
+    sections: await merchandising.reorderHomepageSections(input, adminId(req)),
+  });
+}
+
 export async function adminCreatePromotion(req: Request, res: Response): Promise<void> {
   const input = promotionCreateSchema.parse(req.body);
   sendOk(res, { promotion: await merchandising.createPromotion(input, adminId(req)) }, 201);
@@ -193,6 +220,14 @@ export async function vendorImportMemberships(req: Request, res: Response): Prom
   sendOk(
     res,
     await merchandising.importMemberships(param(req, "id"), input, { vendorId: req.vendor.sub }),
+  );
+}
+
+export async function vendorImportCurrentProducts(req: Request, res: Response): Promise<void> {
+  if (!req.vendor) throw Errors.unauthorized();
+  sendOk(
+    res,
+    await merchandising.importCurrentProducts(param(req, "id"), { vendorId: req.vendor.sub }),
   );
 }
 

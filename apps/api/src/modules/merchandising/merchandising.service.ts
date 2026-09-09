@@ -12,7 +12,10 @@ import type {
   CursorPage,
   HomepageDTO,
   HomepageSectionCreateInput,
+  HomepageSectionReorderInput,
   HomepageSectionUpdateInput,
+  MerchandisingLifecycleInput,
+  MerchandisingWorkspaceCreateInput,
   MerchandisingProductDTO,
   PromotionCreateInput,
 } from "@nuru/types";
@@ -104,6 +107,142 @@ export async function createCollection(input: CollectionCreateInput, adminId: st
     }
     throw error;
   }
+}
+
+export async function createMerchandisingWorkspace(
+  input: MerchandisingWorkspaceCreateInput,
+  adminId: string,
+) {
+  try {
+    return await prisma.$transaction(async (tx) => {
+      const collection = await tx.merchandisingCollection.create({
+        data: {
+          ...(input.collection as unknown as Prisma.MerchandisingCollectionUncheckedCreateInput),
+          status: "DRAFT",
+          eligibilityRules: inputJson(input.collection.eligibilityRules),
+          configuration: inputJson(input.collection.configuration),
+          createdById: adminId,
+        },
+      });
+      const occupiedPosition = await tx.homepageSection.findFirst({
+        where: { position: input.homepage.position },
+        select: { id: true },
+      });
+      if (occupiedPosition) {
+        await tx.homepageSection.updateMany({
+          where: { position: { gte: input.homepage.position } },
+          data: { position: { increment: 1 } },
+        });
+      }
+      const section = await tx.homepageSection.create({
+        data: {
+          collectionId: collection.id,
+          position: input.homepage.position,
+          status: "DRAFT",
+          device: input.homepage.device,
+          startAt: input.collection.startAt,
+          endAt: input.collection.endAt,
+          configuration: inputJson(input.homepage.configuration),
+        },
+        include: { collection: true },
+      });
+      await audit(
+        tx,
+        adminId,
+        "merchandising.workspace.created",
+        "merchandising_collection",
+        collection.id,
+        { key: collection.key, homepageSectionId: section.id, position: section.position },
+      );
+      return { collection: toCollectionDTO(collection), section };
+    });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      throw Errors.conflict("That immutable collection key already exists.");
+    }
+    throw error;
+  }
+}
+
+export async function changeCollectionLifecycle(
+  id: string,
+  input: MerchandisingLifecycleInput,
+  adminId: string,
+) {
+  return prisma.$transaction(async (tx) => {
+    const existing = await tx.merchandisingCollection.findUnique({ where: { id } });
+    if (!existing) throw Errors.notFound("Collection not found.");
+
+    const changes = input.collection ?? {};
+    const effectiveStart = changes.startAt === undefined ? existing.startAt : changes.startAt;
+    const effectiveEnd = changes.endAt === undefined ? existing.endAt : changes.endAt;
+    if (
+      input.action !== "UNPUBLISH" &&
+      effectiveStart &&
+      effectiveEnd &&
+      effectiveEnd <= effectiveStart
+    ) {
+      throw Errors.badRequest("Collection end time must be after its start time.");
+    }
+    if (input.action === "PUBLISH" && effectiveEnd && effectiveEnd <= new Date()) {
+      throw Errors.badRequest("Choose a future end time before publishing this collection.");
+    }
+
+    const sectionCount = await tx.homepageSection.count({ where: { collectionId: id } });
+    if (input.action === "PUBLISH" && sectionCount === 0) {
+      throw Errors.badRequest("Add this collection to a homepage slot before publishing it.");
+    }
+
+    if (input.action === "PUBLISH") {
+      const productCount = await tx.collectionMembership.count({
+        where: { collectionId: id, product: { isActive: true, stock: { gt: 0 } } },
+      });
+      if (productCount === 0) {
+        throw Errors.badRequest("Import at least one active, in-stock product before publishing.");
+      }
+    }
+
+    const futureStart = effectiveStart && effectiveStart > new Date();
+    const status =
+      input.action === "SAVE_DRAFT"
+        ? "DRAFT"
+        : input.action === "UNPUBLISH"
+          ? "PAUSED"
+          : futureStart
+            ? "SCHEDULED"
+            : "ACTIVE";
+    const collection = await tx.merchandisingCollection.update({
+      where: { id },
+      data: {
+        ...(changes as unknown as Prisma.MerchandisingCollectionUpdateInput),
+        status,
+        ...(changes.eligibilityRules !== undefined
+          ? { eligibilityRules: inputJson(changes.eligibilityRules) }
+          : {}),
+        ...(changes.configuration !== undefined
+          ? { configuration: inputJson(changes.configuration) }
+          : {}),
+        cacheVersion: { increment: 1 },
+      },
+    });
+    await tx.homepageSection.updateMany({
+      where: { collectionId: id },
+      data: {
+        status,
+        ...(changes.startAt !== undefined ? { startAt: changes.startAt } : {}),
+        ...(changes.endAt !== undefined ? { endAt: changes.endAt } : {}),
+      },
+    });
+    await audit(
+      tx,
+      adminId,
+      `merchandising.collection.${input.action.toLowerCase()}`,
+      "merchandising_collection",
+      id,
+      { immutableKey: existing.key, status, changedFields: Object.keys(changes) },
+    );
+    return { collection: toCollectionDTO(collection), status };
+  });
 }
 
 export async function updateCollection(id: string, input: CollectionUpdateInput, adminId: string) {
@@ -279,6 +418,70 @@ export async function importMemberships(
       );
     }
     return { imported: deduplicated.length, collectionKey: collection.key };
+  });
+}
+
+export async function importCurrentProducts(
+  collectionId: string,
+  actor: { adminId?: string; vendorId?: string },
+) {
+  const collection = await getCollection(collectionId, false);
+  if (actor.vendorId && !["ACTIVE", "SCHEDULED"].includes(collection.status)) {
+    throw Errors.forbidden("Vendors can only add products to available collections.");
+  }
+
+  const products = await prisma.product.findMany({
+    where: { isActive: true, ...(actor.vendorId ? { vendorId: actor.vendorId } : {}) },
+    orderBy: [{ createdAt: "desc" }, { id: "asc" }],
+    select: { id: true },
+  });
+  const existing = await prisma.collectionMembership.findMany({
+    where: { collectionId },
+    select: { productId: true },
+  });
+  const assigned = new Set(existing.map((membership) => membership.productId));
+  const productIds = products.map((product) => product.id).filter((id) => !assigned.has(id));
+
+  if (productIds.length === 0) {
+    return { imported: 0, eligible: products.length, collectionKey: collection.key };
+  }
+
+  return prisma.$transaction(async (tx) => {
+    let rank = await nextMembershipRank(tx, collectionId);
+    let imported = 0;
+    for (let offset = 0; offset < productIds.length; offset += 500) {
+      const chunk = productIds.slice(offset, offset + 500);
+      const result = await tx.collectionMembership.createMany({
+        data: chunk.map((productId) => ({
+          collectionId,
+          productId,
+          source: "MANUAL",
+          score: 0,
+          rank: rank++,
+        })),
+        skipDuplicates: true,
+      });
+      imported += result.count;
+    }
+    await tx.merchandisingCollection.update({
+      where: { id: collectionId },
+      data: { cacheVersion: { increment: 1 } },
+    });
+    if (actor.adminId) {
+      await audit(
+        tx,
+        actor.adminId,
+        "merchandising.current_products.imported",
+        "merchandising_collection",
+        collectionId,
+        { imported, eligible: products.length },
+      );
+    }
+    return {
+      imported,
+      eligible: products.length,
+      collectionKey: collection.key,
+    };
   });
 }
 
@@ -693,6 +896,21 @@ export async function listHomepageSections() {
 
 export async function createHomepageSection(input: HomepageSectionCreateInput, adminId: string) {
   return prisma.$transaction(async (tx) => {
+    const existing = await tx.homepageSection.findFirst({
+      where: { collectionId: input.collectionId },
+      select: { id: true },
+    });
+    if (existing) throw Errors.conflict("That collection already has a homepage placement.");
+    const occupiedPosition = await tx.homepageSection.findFirst({
+      where: { position: input.position },
+      select: { id: true },
+    });
+    if (occupiedPosition) {
+      await tx.homepageSection.updateMany({
+        where: { position: { gte: input.position } },
+        data: { position: { increment: 1 } },
+      });
+    }
     const row = await tx.homepageSection.create({
       data: {
         ...input,
@@ -730,6 +948,34 @@ export async function updateHomepageSection(
       changedFields: Object.keys(input),
     });
     return row;
+  });
+}
+
+export async function reorderHomepageSections(input: HomepageSectionReorderInput, adminId: string) {
+  return prisma.$transaction(async (tx) => {
+    const existing = await tx.homepageSection.findMany({
+      where: { id: { in: input.sectionIds } },
+      select: { id: true },
+    });
+    const total = await tx.homepageSection.count();
+    if (existing.length !== input.sectionIds.length || total !== input.sectionIds.length) {
+      throw Errors.badRequest("The homepage order changed. Refresh before reordering it again.");
+    }
+    for (const [position, id] of input.sectionIds.entries()) {
+      await tx.homepageSection.update({ where: { id }, data: { position } });
+    }
+    await audit(
+      tx,
+      adminId,
+      "merchandising.homepage_sections.reordered",
+      "homepage_layout",
+      "homepage",
+      { sectionIds: input.sectionIds },
+    );
+    return tx.homepageSection.findMany({
+      orderBy: [{ position: "asc" }, { id: "asc" }],
+      include: { collection: true },
+    });
   });
 }
 

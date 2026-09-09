@@ -1,7 +1,10 @@
 import Image from "next/image";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import FeaturedSection from "@/components/ui/FeaturedSection";
+import ShareButton from "@/components/ui/ShareButton";
 import { getBanner, listProducts } from "@/lib/data/catalog";
+import { shareDescription } from "@/lib/share";
 
 function formatText(text: string): string {
   if (!text) return "";
@@ -16,6 +19,29 @@ function formatText(text: string): string {
 
 interface PageProps {
   params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params;
+  const banner = await getBanner(id);
+  if (!banner) return { title: "Offer not found – NuruShop" };
+
+  const title = banner.title || "NuruShop offer";
+  const description = shareDescription(banner.subtitle, "Discover this special offer at NuruShop.");
+  const images = banner.image ? [{ url: banner.image, alt: title }] : undefined;
+
+  return {
+    title: `${title} – NuruShop`,
+    description,
+    alternates: { canonical: banner.href },
+    openGraph: { title, description, url: banner.href, type: "website", images },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: banner.image ? [banner.image] : undefined,
+    },
+  };
 }
 
 export default async function BannerDetails({ params }: PageProps) {
@@ -72,9 +98,16 @@ export default async function BannerDetails({ params }: PageProps) {
               <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-[#006B2C] dark:text-[#00C83A]">
                 Special offer
               </p>
-              <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-4xl">
-                {banner.title}
-              </h1>
+              <div className="mt-3 flex items-start justify-between gap-4">
+                <h1 className="text-3xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-4xl">
+                  {banner.title}
+                </h1>
+                <ShareButton
+                  title={banner.title || "NuruShop offer"}
+                  description={banner.subtitle}
+                  href={banner.href}
+                />
+              </div>
               {banner.subtitle && (
                 <div
                   className="mt-5 text-sm leading-7 text-slate-600 dark:text-slate-300"

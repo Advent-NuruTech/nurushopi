@@ -31,6 +31,7 @@ import { toProductCardVM, type ProductCardVM, type ProductDetailVM } from "@/lib
 import RatingStars from "@/components/ui/RatingStars";
 import RatingBreakdown from "@/components/ui/RatingBreakdown";
 import WishlistPlanner from "@/components/ui/WishlistPlanner";
+import ShareButton from "@/components/ui/ShareButton";
 
 interface Review {
   id: string;
@@ -244,6 +245,12 @@ export default function ProductDetailView({
                   </span>
                 )}
               </div>
+              <ShareButton
+                title={product.name}
+                description={product.shortDescription || product.description}
+                href={product.href}
+                className="absolute right-4 top-4 z-20"
+              />
             </div>
 
             {product.images.length > 1 && (

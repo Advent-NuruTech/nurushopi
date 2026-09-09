@@ -8,6 +8,7 @@ import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/formatPrice";
 import { useSabbathStatus } from "@/lib/useSabbathStatus";
 import type { WholesaleCardVM } from "@/lib/view/catalog";
+import ShareButton from "@/components/ui/ShareButton";
 
 export default function WholesaleCard({ product }: { product: WholesaleCardVM }) {
   const { addToCart } = useCart();
@@ -31,7 +32,13 @@ export default function WholesaleCard({ product }: { product: WholesaleCardVM })
   };
 
   return (
-    <article className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-brand-border hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+    <article className="group relative flex min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-brand-border hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+      <ShareButton
+        title={product.name}
+        description={product.description}
+        href={product.href}
+        className="absolute right-2 top-2 z-20 sm:right-3 sm:top-3"
+      />
       <Link
         href={product.href}
         className="relative block aspect-square overflow-hidden bg-white dark:bg-slate-950"

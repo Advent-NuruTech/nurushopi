@@ -8,6 +8,7 @@ import { getDiscountPercent, getOriginalPrice, getSellingPrice } from "@/lib/pri
 import type { ProductCardVM } from "@/lib/view/catalog";
 import SectionHeader from "@/components/ui/SectionHeader";
 import RatingStars from "@/components/ui/RatingStars";
+import ShareButton from "@/components/ui/ShareButton";
 
 export default function NewArrivals({ products }: { products: ProductCardVM[] }) {
   if (products.length === 0) return null;
@@ -35,14 +36,14 @@ export default function NewArrivals({ products }: { products: ProductCardVM[] })
                 key={product.id}
                 whileHover={{ y: -3 }}
                 transition={{ duration: 0.2 }}
-                className="min-w-[140px] w-[140px] sm:min-w-[160px] sm:w-[160px] lg:min-w-[200px] lg:w-[200px] flex-shrink-0"
+                className="relative min-w-[140px] w-[140px] sm:min-w-[160px] sm:w-[160px] lg:min-w-[200px] lg:w-[200px] flex-shrink-0"
               >
                 <Link
                   href={product.href}
                   className="group relative block rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-900 overflow-hidden h-full"
                 >
                   {discountPercent && (
-                    <div className="absolute top-1 right-1 z-10 bg-red-600 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full">
+                    <div className="absolute right-1 top-11 z-10 bg-red-600 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full">
                       {discountPercent}% OFF
                     </div>
                   )}
@@ -87,6 +88,12 @@ export default function NewArrivals({ products }: { products: ProductCardVM[] })
                     </div>
                   </div>
                 </Link>
+                <ShareButton
+                  title={product.name}
+                  description={product.shortDescription}
+                  href={product.href}
+                  className="absolute right-1 top-1 z-20 h-8 w-8"
+                />
               </motion.div>
             );
           })}

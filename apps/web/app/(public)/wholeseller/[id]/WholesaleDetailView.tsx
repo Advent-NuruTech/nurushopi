@@ -28,6 +28,7 @@ import { formatPrice } from "@/lib/formatPrice";
 import { getDiscountPercent, getOriginalPrice, getSellingPrice } from "@/lib/pricing";
 import { useSabbathStatus } from "@/lib/useSabbathStatus";
 import type { ProductCardVM, WholesaleCardVM } from "@/lib/view/catalog";
+import ShareButton from "@/components/ui/ShareButton";
 
 export default function WholesaleDetailView({
   product,
@@ -124,6 +125,12 @@ export default function WholesaleDetailView({
               <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-brand px-3 py-1.5 text-xs font-extrabold uppercase tracking-wide text-white shadow-sm">
                 <Boxes size={14} /> Wholesale
               </span>
+              <ShareButton
+                title={product.name}
+                description={product.description}
+                href={product.href}
+                className="absolute right-4 top-4 z-20"
+              />
             </div>
             {product.images.length > 1 && (
               <div className="mt-3 flex gap-2 overflow-x-auto pb-1 sm:mt-4 sm:gap-3">

@@ -4,6 +4,7 @@ import type { Route } from "next";
 import { ArrowRight, BadgeCheck, Leaf, ShoppingBasket, Sparkles } from "lucide-react";
 
 import FeaturedSection from "@/components/ui/FeaturedSection";
+import ShareButton from "@/components/ui/ShareButton";
 import { listBanners, listCategories, listProducts } from "@/lib/data/catalog";
 import type { BannerVM, ProductCardVM } from "@/lib/view/catalog";
 
@@ -47,7 +48,7 @@ function BannerOfferCard({ banner }: { banner: BannerVM }) {
   const title = banner.title || "NuruShop offer";
 
   return (
-    <article className="grid min-h-[190px] grid-cols-[minmax(0,0.94fr)_minmax(0,1.06fr)] overflow-hidden rounded-[1.35rem] border border-slate-200 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.07)] dark:border-slate-800 dark:bg-slate-900 sm:min-h-[220px]">
+    <article className="relative grid min-h-[190px] grid-cols-[minmax(0,0.94fr)_minmax(0,1.06fr)] overflow-hidden rounded-[1.35rem] border border-slate-200 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.07)] dark:border-slate-800 dark:bg-slate-900 sm:min-h-[220px]">
       <Link
         href={banner.href}
         className="relative m-1.5 mr-0 min-w-0 overflow-hidden rounded-[1.05rem] bg-brand-surface dark:bg-[#063D1E] sm:m-3 sm:mr-0"
@@ -71,7 +72,7 @@ function BannerOfferCard({ banner }: { banner: BannerVM }) {
         </span>
       </Link>
 
-      <div className="flex min-w-0 flex-col p-2.5 sm:p-5">
+      <div className="flex min-w-0 flex-col p-2.5 pr-12 sm:p-5 sm:pr-14">
         <p className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-brand-strong dark:text-brand-bright sm:text-[11px]">
           Featured promotion
         </p>
@@ -93,6 +94,12 @@ function BannerOfferCard({ banner }: { banner: BannerVM }) {
           View offer <ArrowRight size={16} />
         </Link>
       </div>
+      <ShareButton
+        title={title}
+        description={banner.subtitle}
+        href={banner.href}
+        className="absolute right-2 top-2 z-20 sm:right-3 sm:top-3"
+      />
     </article>
   );
 }

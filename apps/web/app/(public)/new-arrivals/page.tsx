@@ -4,6 +4,7 @@ import SectionHeader from "@/components/ui/SectionHeader";
 import { formatPrice } from "@/lib/formatPrice";
 import { getDiscountPercent, getOriginalPrice, getSellingPrice } from "@/lib/pricing";
 import { listProducts } from "@/lib/data/catalog";
+import ShareButton from "@/components/ui/ShareButton";
 
 export const metadata = {
   title: "New Arrivals – NuruShop",
@@ -49,48 +50,55 @@ export default async function NewArrivalsPage() {
               const sellingPrice = getSellingPrice(product);
 
               return (
-                <Link
+                <div
                   key={product.id}
-                  href={product.href}
                   className="group relative block rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-gray-900 overflow-hidden"
                 >
-                  {discountPercent && (
-                    <div className="absolute top-1 right-1 z-10 bg-red-600 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full">
-                      {discountPercent}% OFF
-                    </div>
-                  )}
-                  {showingArrivals && (
-                    <div className="absolute top-1 left-1 z-10 bg-green-600 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full">
-                      NEW
-                    </div>
-                  )}
+                  <Link href={product.href} className="block h-full">
+                    {discountPercent && (
+                      <div className="absolute right-1 top-11 z-10 bg-red-600 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full">
+                        {discountPercent}% OFF
+                      </div>
+                    )}
+                    {showingArrivals && (
+                      <div className="absolute top-1 left-1 z-10 bg-green-600 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full">
+                        NEW
+                      </div>
+                    )}
 
-                  <div className="relative aspect-square bg-white dark:bg-gray-800">
-                    <Image
-                      src={product.image}
-                      alt={product.name}
-                      fill
-                      className="object-contain p-1"
-                      sizes="(max-width: 640px) 33vw, (max-width: 1024px) 25vw, 16vw"
-                    />
-                  </div>
+                    <div className="relative aspect-square bg-white dark:bg-gray-800">
+                      <Image
+                        src={product.image}
+                        alt={product.name}
+                        fill
+                        className="object-contain p-1"
+                        sizes="(max-width: 640px) 33vw, (max-width: 1024px) 25vw, 16vw"
+                      />
+                    </div>
 
-                  <div className="p-1.5">
-                    <h3 className="text-[11px] sm:text-xs font-semibold line-clamp-2 leading-tight text-slate-800 dark:text-slate-100">
-                      {product.name}
-                    </h3>
-                    <div className="mt-1">
-                      {discountPercent && originalPrice && (
-                        <p className="text-[10px] text-slate-400 line-through leading-none">
-                          {formatPrice(originalPrice)}
+                    <div className="p-1.5">
+                      <h3 className="text-[11px] sm:text-xs font-semibold line-clamp-2 leading-tight text-slate-800 dark:text-slate-100">
+                        {product.name}
+                      </h3>
+                      <div className="mt-1">
+                        {discountPercent && originalPrice && (
+                          <p className="text-[10px] text-slate-400 line-through leading-none">
+                            {formatPrice(originalPrice)}
+                          </p>
+                        )}
+                        <p className="text-[11px] sm:text-xs font-bold text-blue-600 dark:text-blue-400 leading-none">
+                          {formatPrice(sellingPrice)}
                         </p>
-                      )}
-                      <p className="text-[11px] sm:text-xs font-bold text-blue-600 dark:text-blue-400 leading-none">
-                        {formatPrice(sellingPrice)}
-                      </p>
+                      </div>
                     </div>
-                  </div>
-                </Link>
+                  </Link>
+                  <ShareButton
+                    title={product.name}
+                    description={product.shortDescription}
+                    href={product.href}
+                    className="absolute right-1 top-1 z-20 h-8 w-8"
+                  />
+                </div>
               );
             })}
           </div>

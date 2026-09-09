@@ -13,6 +13,7 @@ import { formatPrice } from "@/lib/formatPrice";
 import { getDiscountPercent, getOriginalPrice, getSellingPrice } from "@/lib/pricing";
 import { useSabbathStatus } from "@/lib/useSabbathStatus";
 import RatingStars from "@/components/ui/RatingStars";
+import ShareButton from "@/components/ui/ShareButton";
 import type { BannerVM, WholesaleCardVM } from "@/lib/view/catalog";
 
 interface Product {
@@ -202,7 +203,10 @@ export default function FeaturedSection({
                 </h2>
                 {promotions[0].subtitle && (
                   <p className="mt-3 max-w-lg text-sm leading-6 text-slate-200 sm:text-base">
-                    {promotions[0].subtitle.replace(/\*\*|__/g, " ").replace(/\s+/g, " ").trim()}
+                    {promotions[0].subtitle
+                      .replace(/\*\*|__/g, " ")
+                      .replace(/\s+/g, " ")
+                      .trim()}
                   </p>
                 )}
                 <span className="mt-6 inline-flex w-fit items-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-bold text-[#006B2C] transition group-hover:bg-[#EFFCF3]">
@@ -210,6 +214,12 @@ export default function FeaturedSection({
                 </span>
               </div>
             </Link>
+            <ShareButton
+              title={promotions[0].title || "NuruShop offer"}
+              description={promotions[0].subtitle}
+              href={promotions[0].href}
+              className="absolute right-4 top-4 z-20"
+            />
           </motion.aside>
         )}
 
@@ -287,7 +297,7 @@ export default function FeaturedSection({
                           )}
                         </div>
                         {discountPercent && (
-                          <span className="rounded-full bg-rose-600 px-2 py-1 text-[9px] font-bold text-white sm:text-[10px]">
+                          <span className="mr-10 rounded-full bg-rose-600 px-2 py-1 text-[9px] font-bold text-white sm:text-[10px]">
                             -{discountPercent}%
                           </span>
                         )}
@@ -311,6 +321,12 @@ export default function FeaturedSection({
                       )}
                     </div>
                   </Link>
+                  <ShareButton
+                    title={item.name}
+                    description={item.shortDescription || item.description}
+                    href={`/products/${item.slug ?? item.id}`}
+                    className="absolute right-2 top-2 z-20"
+                  />
 
                   <div className="mt-auto flex items-end justify-between gap-2 px-3 pb-3 sm:px-4 sm:pb-4">
                     <div className="min-w-0">
@@ -429,7 +445,7 @@ export default function FeaturedSection({
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-70px" }}
                     transition={{ duration: 0.45 }}
-                    className="group flex min-h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-brand-border bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-brand dark:border-brand-strong dark:bg-slate-900"
+                    className="group relative flex min-h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-brand-border bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-brand dark:border-brand-strong dark:bg-slate-900"
                     aria-label={`Wholesale pick: ${wholesaleItem.name}`}
                   >
                     <Link href={wholesaleItem.href} className="flex h-full flex-1 flex-col">
@@ -467,6 +483,12 @@ export default function FeaturedSection({
                         </div>
                       </div>
                     </Link>
+                    <ShareButton
+                      title={wholesaleItem.name}
+                      description={wholesaleItem.description}
+                      href={wholesaleItem.href}
+                      className="absolute right-2 top-2 z-20"
+                    />
                   </motion.aside>
                 )}
               </div>

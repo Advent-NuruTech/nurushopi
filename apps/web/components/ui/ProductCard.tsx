@@ -12,6 +12,7 @@ import { formatPrice } from "@/lib/formatPrice";
 import { getDiscountPercent, getOriginalPrice, getSellingPrice } from "@/lib/pricing";
 import { useSabbathStatus } from "@/lib/useSabbathStatus";
 import RatingStars from "./RatingStars";
+import ShareButton from "./ShareButton";
 
 export default function ProductCard({ product }: { product: Product }) {
   const [mainImage, setMainImage] = useState<string>("");
@@ -68,10 +69,16 @@ export default function ProductCard({ product }: { product: Product }) {
       className="relative bg-white dark:bg-gray-900 rounded-xl shadow-sm hover:shadow-md flex flex-col overflow-hidden transition-all duration-300 w-full h-full"
     >
       {discountPercent && (
-        <div className="absolute top-2 right-2 z-10 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded-full">
+        <div className="absolute right-12 top-2 z-10 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded-full">
           {discountPercent}% OFF
         </div>
       )}
+      <ShareButton
+        title={product.name}
+        description={product.shortDescription || product.description}
+        href={`/products/${product.slug ?? product.id}`}
+        className="absolute right-2 top-2 z-20"
+      />
       {isNew && (
         <div className="absolute top-2 left-2 z-10 bg-green-600 text-white text-xs font-semibold px-2 py-1 rounded-full">
           NEW

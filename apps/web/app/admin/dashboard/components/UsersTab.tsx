@@ -8,10 +8,32 @@ import { ADMIN_DASHBOARD_PATH, adminRoute } from "@/lib/adminPaths";
 import { usersApi, ApiClientError } from "@/lib/api";
 import type { AdminUserSummaryDTO } from "@nuru/types";
 
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+] as const;
+
+function formatCreatedDate(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  return `${date.getUTCDate()} ${MONTHS[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
+}
+
 export default function UsersTab({ role }: { role: "senior" | "sub" }) {
   const [users, setUsers] = useState<AdminUserSummaryDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
+  const [updatingEmailId, setUpdatingEmailId] = useState<string | null>(null);
 
   useEffect(() => {
     usersApi.admin
@@ -25,7 +47,11 @@ export default function UsersTab({ role }: { role: "senior" | "sub" }) {
     const q = query.trim().toLowerCase();
     if (!q) return users;
     return users.filter((u) =>
-      [u.name, u.email, u.phone].some((v) => String(v ?? "").toLowerCase().includes(q))
+      [u.name, u.email, u.phone].some((v) =>
+        String(v ?? "")
+          .toLowerCase()
+          .includes(q),
+      ),
     );
   }, [query, users]);
 
@@ -60,6 +86,7 @@ export default function UsersTab({ role }: { role: "senior" | "sub" }) {
               <th className="px-4 py-3 text-left">Orders</th>
               <th className="px-4 py-3 text-left">Total Spend</th>
               <th className="px-4 py-3 text-left">Wallet</th>
+              <th className="px-4 py-3 text-left">Email updates</th>
               <th className="px-4 py-3 text-left">Created</th>
               <th className="px-4 py-3 text-left">Actions</th>
             </tr>
@@ -73,7 +100,14 @@ export default function UsersTab({ role }: { role: "senior" | "sub" }) {
                 <td className="px-4 py-3">{u.totalOrders}</td>
                 <td className="px-4 py-3">{formatPrice(Number(u.totalSpend))}</td>
                 <td className="px-4 py-3">{formatPrice(Number(u.walletBalance))}</td>
-                <td className="px-4 py-3">{new Date(u.createdAt).toLocaleDateString()}</td>
+                <td className="px-4 py-3">
+                  <span
+                    className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${u.marketingEmailOptIn ? "bg-[#DDFBE5] text-[#006B2C]" : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"}`}
+                  >
+                    {u.marketingEmailOptIn ? "Opted in" : "Opted out"}
+                  </span>
+                </td>
+                <td className="px-4 py-3">{formatCreatedDate(u.createdAt)}</td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
                     <Link
@@ -83,20 +117,57 @@ export default function UsersTab({ role }: { role: "senior" | "sub" }) {
                       View
                     </Link>
                     {role === "senior" && (
-                      <button
-                        onClick={async () => {
-                          if (!confirm(`Delete ${u.name ?? u.email}? This cannot be undone.`)) return;
-                          try {
-                            await usersApi.admin.remove(u.id);
-                            setUsers((prev) => prev.filter((x) => x.id !== u.id));
-                          } catch (err) {
-                            if (err instanceof ApiClientError) alert(err.message);
-                          }
-                        }}
-                        className="text-red-600 hover:underline"
-                      >
-                        Delete
-                      </button>
+                      <>
+                        {u.marketingEmailOptIn && (
+                          <button
+                            type="button"
+                            disabled={updatingEmailId === u.id}
+                            onClick={async () => {
+                              if (
+                                !confirm(`Opt ${u.name ?? u.email} out of monthly product emails?`)
+                              )
+                                return;
+                              setUpdatingEmailId(u.id);
+                              try {
+                                await usersApi.admin.optOutMarketingEmail(u.id);
+                                setUsers((prev) =>
+                                  prev.map((item) =>
+                                    item.id === u.id
+                                      ? {
+                                          ...item,
+                                          marketingEmailOptIn: false,
+                                          marketingEmailConsentedAt: null,
+                                        }
+                                      : item,
+                                  ),
+                                );
+                              } catch (err) {
+                                if (err instanceof ApiClientError) alert(err.message);
+                              } finally {
+                                setUpdatingEmailId(null);
+                              }
+                            }}
+                            className="whitespace-nowrap font-medium text-[#006B2C] hover:underline disabled:opacity-60 dark:text-[#00C83A]"
+                          >
+                            {updatingEmailId === u.id ? "Opting out…" : "Opt out"}
+                          </button>
+                        )}
+                        <button
+                          onClick={async () => {
+                            if (!confirm(`Delete ${u.name ?? u.email}? This cannot be undone.`))
+                              return;
+                            try {
+                              await usersApi.admin.remove(u.id);
+                              setUsers((prev) => prev.filter((x) => x.id !== u.id));
+                            } catch (err) {
+                              if (err instanceof ApiClientError) alert(err.message);
+                            }
+                          }}
+                          className="text-red-600 hover:underline"
+                        >
+                          Delete
+                        </button>
+                      </>
                     )}
                   </div>
                 </td>

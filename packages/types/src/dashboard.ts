@@ -45,7 +45,11 @@ export interface DashboardStatsDTO {
   revenue: DashboardRevenue;
   orders: DashboardOrders;
   catalog: DashboardCatalog;
-  customers: { total: number };
+  customers: {
+    total: number;
+    /** Customers currently opted in to the monthly product email. */
+    marketingEmailOptIns: number;
+  };
   wallet: DashboardWallet;
   /** Most recent orders for the activity feed. */
   recentOrders: OrderDTO[];

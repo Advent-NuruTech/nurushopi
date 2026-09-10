@@ -93,7 +93,7 @@ export async function retentionPreferences(req: Request, res: Response): Promise
 export async function saveRetentionPreference(req: Request, res: Response): Promise<void> {
   if (!req.user) throw Errors.unauthorized();
   const input = notificationPreferenceSchema.parse(req.body);
-  sendOk(res, { preference: await retention.savePreference(req.user.sub, input) });
+  sendOk(res, await retention.savePreference(req.user.sub, input));
 }
 
 export async function subscribeRetention(req: Request, res: Response): Promise<void> {

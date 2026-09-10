@@ -11,12 +11,17 @@ import {
   TrendingUp,
   XCircle,
   MessageSquare,
+  MailCheck,
 } from "lucide-react";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { formatPrice } from "@/lib/formatPrice";
 import { dashboardApi } from "@/lib/api";
 import type { AdminRole } from "./types";
 import type { DashboardStatsDTO } from "@nuru/types";
+
+function formatCount(value: number): string {
+  return String(Math.trunc(value)).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
 
 export default function DashboardOverviewTab({ role }: { role: AdminRole }) {
   const [stats, setStats] = useState<DashboardStatsDTO | null>(null);
@@ -54,11 +59,28 @@ export default function DashboardOverviewTab({ role }: { role: AdminRole }) {
     if (role === "senior") {
       return [
         { label: "Customers", value: stats.customers.total, icon: Users },
-        { label: "Paid Revenue", value: formatPrice(Number(stats.revenue.paidTotal)), icon: TrendingUp },
+        {
+          label: "Email Opt-ins",
+          value: stats.customers.marketingEmailOptIns,
+          icon: MailCheck,
+        },
+        {
+          label: "Paid Revenue",
+          value: formatPrice(Number(stats.revenue.paidTotal)),
+          icon: TrendingUp,
+        },
         { label: "Paid Orders", value: stats.revenue.paidOrders, icon: ShieldCheck },
         ...base,
-        { label: "Pending Redemptions", value: stats.wallet.pendingRedemptions, icon: MessageSquare },
-        { label: "Wallet Liability", value: formatPrice(Number(stats.wallet.outstandingBalance)), icon: TrendingUp },
+        {
+          label: "Pending Redemptions",
+          value: stats.wallet.pendingRedemptions,
+          icon: MessageSquare,
+        },
+        {
+          label: "Wallet Liability",
+          value: formatPrice(Number(stats.wallet.outstandingBalance)),
+          icon: TrendingUp,
+        },
       ];
     }
 
@@ -70,7 +92,9 @@ export default function DashboardOverviewTab({ role }: { role: AdminRole }) {
   return (
     <section className="space-y-5">
       <div className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Dashboard Overview</h2>
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+          Dashboard Overview
+        </h2>
         <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
           {role === "senior"
             ? "Live totals across users, products, orders, and moderation."
@@ -87,11 +111,13 @@ export default function DashboardOverviewTab({ role }: { role: AdminRole }) {
               className="min-w-0 rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md sm:p-5 dark:border-slate-700 dark:bg-slate-900"
             >
               <div className="flex items-center justify-between gap-3">
-                <p className="min-w-0 text-sm font-medium text-slate-500 dark:text-slate-400">{card.label}</p>
-                <Icon className="h-5 w-5 shrink-0 text-sky-600 dark:text-sky-400" />
+                <p className="min-w-0 text-sm font-medium text-slate-500 dark:text-slate-400">
+                  {card.label}
+                </p>
+                <Icon className="h-5 w-5 shrink-0 text-[#009933] dark:text-[#00C83A]" />
               </div>
               <p className="mt-3 break-words text-lg font-bold text-slate-900 sm:text-xl md:text-2xl dark:text-slate-100">
-                {typeof card.value === "number" ? card.value.toLocaleString() : card.value}
+                {typeof card.value === "number" ? formatCount(card.value) : card.value}
               </p>
             </article>
           );
@@ -100,4 +126,3 @@ export default function DashboardOverviewTab({ role }: { role: AdminRole }) {
     </section>
   );
 }
-

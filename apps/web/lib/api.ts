@@ -249,8 +249,7 @@ export const authApi = {
     name?: string;
     referralCode?: string;
     marketingOptIn?: boolean;
-  }) =>
-    api.post<AuthUserResponse>("/auth/signup", input),
+  }) => api.post<AuthUserResponse>("/auth/signup", input),
   logout: () => api.post<{ success: boolean }>("/auth/logout"),
   refresh: () => api.post<{ success: boolean }>("/auth/refresh"),
   forgotPassword: (email: string) =>
@@ -663,6 +662,10 @@ export const usersApi = {
     list: (query: AdminUserFilter = {}) =>
       api.get<{ users: AdminUserSummaryDTO[] }>(`/admin/users${qs(query)}`),
     get: (id: string) => api.get<AdminUserBundleDTO>(`/admin/users/${encodeURIComponent(id)}`),
+    optOutMarketingEmail: (id: string) =>
+      api.patch<{ success: boolean }>(
+        `/admin/users/${encodeURIComponent(id)}/marketing-email/opt-out`,
+      ),
     remove: (id: string) => api.del<{ success: boolean }>(`/admin/users/${encodeURIComponent(id)}`),
   },
 };
@@ -738,7 +741,11 @@ export const merchandisingApi = {
   preferences: {
     list: () => api.get<{ preferences: NotificationPreferenceDTO[] }>("/retention/preferences"),
     save: (input: NotificationPreferenceInput) =>
-      api.put<{ preference: NotificationPreferenceDTO }>("/retention/preferences", input),
+      api.put<{
+        preference: NotificationPreferenceDTO;
+        nextDeliveryAt: string | null;
+        nextDeliveryLabel: string | null;
+      }>("/retention/preferences", input),
   },
   admin: {
     collections: () =>

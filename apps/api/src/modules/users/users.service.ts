@@ -8,20 +8,33 @@ import type {
 } from "@nuru/types";
 import { Errors } from "../../lib/errors.js";
 import { toOrderDTO, type OrderWithItems } from "../orders/serializers.js";
-import {
-  toWalletRedemptionDTO,
-  toWalletTransactionDTO,
-} from "../wallet/serializers.js";
+import { toWalletRedemptionDTO, toWalletTransactionDTO } from "../wallet/serializers.js";
 
 /** Orders in these states are excluded from lifetime spend/order counts. */
 const SPEND_EXCLUDED: OrderStatus[] = ["CANCELLED", "REFUNDED"];
 const DETAIL_TAKE = 50;
 
+type UserWithMarketingPreference = User & {
+  notificationPreferences?: Array<{ enabled: boolean; consentedAt: Date | null }>;
+};
+
 function money(value: Prisma.Decimal | null | undefined): string {
   return (value ?? new Prisma.Decimal(0)).toString();
 }
 
-function toDetailDTO(user: User, totalOrders: number, totalSpend: string): AdminUserDetailDTO {
+function marketingPreference(user: UserWithMarketingPreference) {
+  const preference = user.notificationPreferences?.[0];
+  return {
+    marketingEmailOptIn: Boolean(preference?.enabled && preference.consentedAt),
+    marketingEmailConsentedAt: preference?.consentedAt?.toISOString() ?? null,
+  };
+}
+
+function toDetailDTO(
+  user: UserWithMarketingPreference,
+  totalOrders: number,
+  totalSpend: string,
+): AdminUserDetailDTO {
   return {
     id: user.id,
     name: user.name,
@@ -32,6 +45,7 @@ function toDetailDTO(user: User, totalOrders: number, totalSpend: string): Admin
     totalOrders,
     totalSpend,
     isActive: user.isActive,
+    ...marketingPreference(user),
     createdAt: user.createdAt.toISOString(),
   };
 }
@@ -54,6 +68,13 @@ export async function list(query: AdminUserListQuery): Promise<AdminUserSummaryD
 
   const users = await prisma.user.findMany({
     where,
+    include: {
+      notificationPreferences: {
+        where: { channel: "email", topic: "monthly_promotion" },
+        select: { enabled: true, consentedAt: true },
+        take: 1,
+      },
+    },
     orderBy: { createdAt: "desc" },
     take: query.limit,
   });
@@ -80,6 +101,7 @@ export async function list(query: AdminUserListQuery): Promise<AdminUserSummaryD
       totalOrders: stat?.count ?? 0,
       totalSpend: stat?.sum ?? "0",
       isActive: u.isActive,
+      ...marketingPreference(u),
       createdAt: u.createdAt.toISOString(),
     };
   });
@@ -87,7 +109,16 @@ export async function list(query: AdminUserListQuery): Promise<AdminUserSummaryD
 
 /** Full customer profile: recent orders, wallet ledger and redemptions. */
 export async function getBundle(id: string): Promise<AdminUserBundleDTO> {
-  const user = await prisma.user.findUnique({ where: { id } });
+  const user = await prisma.user.findUnique({
+    where: { id },
+    include: {
+      notificationPreferences: {
+        where: { channel: "email", topic: "monthly_promotion" },
+        select: { enabled: true, consentedAt: true },
+        take: 1,
+      },
+    },
+  });
   if (!user) throw Errors.notFound("User not found.");
 
   const [orders, transactions, redemptions, agg] = await prisma.$transaction([
@@ -120,6 +151,55 @@ export async function getBundle(id: string): Promise<AdminUserBundleDTO> {
     transactions: transactions.map(toWalletTransactionDTO),
     redemptions: redemptions.map(toWalletRedemptionDTO),
   };
+}
+
+/** Senior-admin opt-out. Essential account and order emails are unaffected. */
+export async function optOutMarketingEmail(id: string, adminId: string): Promise<void> {
+  const user = await prisma.user.findUnique({
+    where: { id },
+    select: { id: true, email: true },
+  });
+  if (!user) throw Errors.notFound("User not found.");
+
+  await prisma.$transaction([
+    prisma.notificationPreference.upsert({
+      where: {
+        userId_channel_topic: {
+          userId: id,
+          channel: "email",
+          topic: "monthly_promotion",
+        },
+      },
+      create: {
+        userId: id,
+        channel: "email",
+        topic: "monthly_promotion",
+        enabled: false,
+        consentedAt: null,
+        maxPerDay: 1,
+        maxPerWeek: 1,
+      },
+      update: { enabled: false },
+    }),
+    prisma.retentionTrigger.updateMany({
+      where: {
+        userId: id,
+        triggerType: "monthly_promotion",
+        channel: "email",
+        status: "PENDING",
+      },
+      data: { status: "SKIPPED", lastError: "Customer opted out by senior admin" },
+    }),
+    prisma.adminLog.create({
+      data: {
+        adminId,
+        action: "CUSTOMER_MARKETING_EMAIL_OPT_OUT",
+        entity: "User",
+        entityId: id,
+        metadata: { email: user.email },
+      },
+    }),
+  ]);
 }
 
 /** Hard-delete a customer account. Blocked by FK when order history exists. */

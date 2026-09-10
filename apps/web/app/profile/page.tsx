@@ -19,6 +19,7 @@ import {
   LogOut,
   Menu,
   X,
+  Mail,
 } from "lucide-react";
 
 import ProfileOverview from "./components/ProfileOverview";
@@ -138,6 +139,7 @@ function ProfilePageContent() {
         "wishlist",
         "wallet",
         "profile",
+        "email",
         "invite",
       ].includes(tab)
     ) {
@@ -184,6 +186,7 @@ function ProfilePageContent() {
       //{ id: "reorder", label: "Quick Reorder", icon: ShoppingBag },
       { id: "wallet", label: "Wallet", icon: ShoppingBag },
       { id: "profile", label: "Profile", icon: Settings },
+      { id: "email", label: "Email subscription", icon: Mail },
       { id: "invite", label: "Invite", icon: Gift },
       { id: "shop", label: "Shop", icon: Store },
     ],
@@ -459,20 +462,19 @@ function ProfilePageContent() {
 */}
 
             {activeTab === "profile" && (
-              <>
-                <UpdateProfile
-                  editFullName={editFullName}
-                  editPhone={editPhone}
-                  editAddress={editAddress}
-                  onFullNameChange={setEditFullName}
-                  onPhoneChange={setEditPhone}
-                  onAddressChange={setEditAddress}
-                  onSave={() => setShowConfirmModal(true)}
-                  saving={saving}
-                />
-                <MarketingEmailPreference />
-              </>
+              <UpdateProfile
+                editFullName={editFullName}
+                editPhone={editPhone}
+                editAddress={editAddress}
+                onFullNameChange={setEditFullName}
+                onPhoneChange={setEditPhone}
+                onAddressChange={setEditAddress}
+                onSave={() => setShowConfirmModal(true)}
+                saving={saving}
+              />
             )}
+
+            {activeTab === "email" && <MarketingEmailPreference />}
 
             {activeTab === "invite" && (
               <InviteSection uid={uid} inviteCount={inviteCount} onError={setMessage} />

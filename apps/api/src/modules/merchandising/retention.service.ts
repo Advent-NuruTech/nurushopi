@@ -1,6 +1,11 @@
 import { prisma, Prisma, type NotificationPreference, type RetentionSubscription } from "@nuru/db";
 import type { NotificationPreferenceInput, RetentionSubscriptionInput } from "@nuru/types";
 import { Errors } from "../../lib/errors.js";
+import { sendMarketingOptInConfirmationEmail } from "../auth/email.js";
+import {
+  formatKenyaDeliveryDate,
+  getNextMonthlyPromotionDelivery,
+} from "./monthly-email.service.js";
 
 function inputJson(value: Record<string, unknown> | null | undefined) {
   if (value === undefined) return undefined;
@@ -14,11 +19,15 @@ export function listPreferences(userId: string): Promise<NotificationPreference[
   });
 }
 
-export function savePreference(
+export async function savePreference(
   userId: string,
   input: NotificationPreferenceInput,
-): Promise<NotificationPreference> {
-  return prisma.notificationPreference.upsert({
+): Promise<{
+  preference: NotificationPreference;
+  nextDeliveryAt: string | null;
+  nextDeliveryLabel: string | null;
+}> {
+  const preference = await prisma.notificationPreference.upsert({
     where: { userId_channel_topic: { userId, channel: input.channel, topic: input.topic } },
     create: {
       userId,
@@ -34,6 +43,25 @@ export function savePreference(
       ...(input.enabled ? { consentedAt: new Date() } : {}),
     },
   });
+
+  if (input.channel !== "email" || input.topic !== "monthly_promotion" || !input.enabled) {
+    return { preference, nextDeliveryAt: null, nextDeliveryLabel: null };
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { email: true },
+  });
+  if (!user) throw Errors.unauthorized();
+  const nextDelivery = await getNextMonthlyPromotionDelivery(userId);
+  const nextDeliveryLabel = formatKenyaDeliveryDate(nextDelivery);
+  await sendMarketingOptInConfirmationEmail(user.email, nextDeliveryLabel);
+
+  return {
+    preference,
+    nextDeliveryAt: nextDelivery.toISOString(),
+    nextDeliveryLabel,
+  };
 }
 
 export async function subscribe(

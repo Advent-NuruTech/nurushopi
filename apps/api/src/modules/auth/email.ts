@@ -150,3 +150,38 @@ export function sendPasswordResetEmail(to: string, token: string): Promise<SendE
   );
   return sendEmail({ to, subject: "Reset your NuruShop password", ...content });
 }
+
+export function renderMarketingOptInConfirmation(nextDeliveryLabel: string) {
+  const subject = "Thank you for subscribing to NuruShop emails";
+  const intro = `Thank you for opting in. Your next monthly NuruShop product email is scheduled for ${nextDeliveryLabel}.`;
+  const html = `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
+<body style="margin:0;background:#f8fafc;color:#0f172a;font-family:Arial,sans-serif">
+  <div style="display:none;max-height:0;overflow:hidden">${intro}</div>
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f8fafc;padding:32px 12px">
+    <tr><td align="center"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background:#fff;border:1px solid #e2e8f0;border-radius:20px;overflow:hidden">
+      <tr><td style="background:#004D20;padding:22px 28px;color:#fff;font-size:24px;font-weight:700">Nuru<span style="color:#00C83A">Shop</span></td></tr>
+      <tr><td style="padding:32px 28px">
+        <h1 style="font-size:24px;line-height:1.3;margin:0 0 14px">Thank you for subscribing</h1>
+        <p style="font-size:16px;line-height:1.6;color:#475569;margin:0 0 18px">${intro}</p>
+        <p style="font-size:14px;line-height:1.6;color:#64748b;margin:0">You will receive at most one product email each month. You can opt out at any time from your NuruShop profile or from an email.</p>
+      </td></tr>
+    </table></td></tr>
+  </table>
+</body></html>`;
+  const text = `${subject}\n\n${intro}\n\nYou will receive at most one product email each month. You can opt out at any time from your NuruShop profile or from an email.`;
+  return { subject, html, text };
+}
+
+/** Transactional confirmation sent after every affirmative marketing opt-in. */
+export function sendMarketingOptInConfirmationEmail(
+  to: string,
+  nextDeliveryLabel: string,
+): Promise<SendEmailResult> {
+  const content = renderMarketingOptInConfirmation(nextDeliveryLabel);
+  return sendEmail({
+    to,
+    ...content,
+    tags: [{ name: "category", value: "marketing-opt-in" }],
+  });
+}

@@ -58,14 +58,21 @@ function primeStats() {
     .mockResolvedValueOnce(5)
     .mockResolvedValueOnce(3);
   p.user.count.mockResolvedValue(120);
+  p.notificationPreference.count.mockResolvedValue(42);
   p.order.count.mockResolvedValue(200);
   p.order.groupBy.mockResolvedValue([
     { status: "PENDING", _count: { _all: 10 } },
     { status: "PROCESSING", _count: { _all: 5 } },
     { status: "DELIVERED", _count: { _all: 150 } },
   ]);
-  p.order.aggregate.mockResolvedValue({ _sum: { total: decimal("99999.00") }, _count: { _all: 150 } });
-  p.walletRedemption.aggregate.mockResolvedValue({ _sum: { amount: decimal("500.00") }, _count: { _all: 2 } });
+  p.order.aggregate.mockResolvedValue({
+    _sum: { total: decimal("99999.00") },
+    _count: { _all: 150 },
+  });
+  p.walletRedemption.aggregate.mockResolvedValue({
+    _sum: { amount: decimal("500.00") },
+    _count: { _all: 2 },
+  });
   p.user.aggregate.mockResolvedValue({ _sum: { walletBalance: decimal("3000.00") } });
   p.order.findMany.mockResolvedValue([orderRow]);
 }
@@ -77,7 +84,7 @@ describe("dashboard.getStats", () => {
 
     expect(stats.revenue).toEqual({ paidTotal: "99999.00", paidOrders: 150 });
     expect(stats.catalog).toEqual({ products: 50, activeProducts: 45, lowStock: 5, outOfStock: 3 });
-    expect(stats.customers).toEqual({ total: 120 });
+    expect(stats.customers).toEqual({ total: 120, marketingEmailOptIns: 42 });
     expect(stats.wallet).toEqual({
       pendingRedemptions: 2,
       pendingRedemptionAmount: "500.00",
@@ -111,6 +118,7 @@ describe("dashboard.getStats", () => {
   it("defaults null money aggregates to zero", async () => {
     p.product.count.mockResolvedValue(0);
     p.user.count.mockResolvedValue(0);
+    p.notificationPreference.count.mockResolvedValue(0);
     p.order.count.mockResolvedValue(0);
     p.order.groupBy.mockResolvedValue([]);
     p.order.aggregate.mockResolvedValue({ _sum: { total: null }, _count: { _all: 0 } });

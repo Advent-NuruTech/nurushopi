@@ -37,6 +37,49 @@ function nextKenyaMorning(now: Date): Date {
   return now < today ? today : new Date(today.getTime() + 86_400_000);
 }
 
+function firstKenyaMorningOfNextMonth(now: Date): Date {
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 5, 0, 0));
+}
+
+export function formatKenyaDeliveryDate(date: Date): string {
+  const day = new Intl.DateTimeFormat("en-KE", {
+    timeZone: "Africa/Nairobi",
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+  return `${day} at 8:00 AM EAT`;
+}
+
+/**
+ * Returns the customer's next real monthly-email delivery window. A customer
+ * added before this month's fan-out gets the next Kenya morning; once that
+ * fan-out exists, a new/re-subscribing customer joins the next month's send.
+ */
+export async function getNextMonthlyPromotionDelivery(
+  userId: string,
+  now = new Date(),
+): Promise<Date> {
+  const periodPrefix = `${TOPIC}:${monthKey(now)}:`;
+  const customerTrigger = await prisma.retentionTrigger.findFirst({
+    where: {
+      userId,
+      deduplicationKey: { startsWith: periodPrefix },
+      status: { in: ["PENDING", "CLAIMED"] },
+      scheduledAt: { gte: now },
+    },
+    select: { scheduledAt: true },
+  });
+  if (customerTrigger) return customerTrigger.scheduledAt;
+
+  const currentMonthWasScheduled = await prisma.retentionTrigger.findFirst({
+    where: { deduplicationKey: { startsWith: periodPrefix } },
+    select: { id: true },
+  });
+  return currentMonthWasScheduled ? firstKenyaMorningOfNextMonth(now) : nextKenyaMorning(now);
+}
+
 function payloadProductIds(payload: Prisma.JsonValue | null): string[] {
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) return [];
   const value = (payload as Record<string, unknown>).productIds;

@@ -23,3 +23,9 @@ export async function remove(req: Request, res: Response): Promise<void> {
   await usersService.remove(param(req, "id"));
   sendOk(res, { success: true });
 }
+
+export async function optOutMarketingEmail(req: Request, res: Response): Promise<void> {
+  if (!req.admin) throw Errors.unauthorized();
+  await usersService.optOutMarketingEmail(param(req, "id"), req.admin.sub);
+  sendOk(res, { success: true });
+}

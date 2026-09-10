@@ -37,7 +37,12 @@ beforeEach(() => {
 
 describe("users.list", () => {
   it("merges per-user order aggregates and excludes cancelled/refunded", async () => {
-    p.user.findMany.mockResolvedValue([userRow(), userRow({ id: "u2", name: "Bob" })]);
+    p.user.findMany.mockResolvedValue([
+      userRow({
+        notificationPreferences: [{ enabled: true, consentedAt: new Date("2026-01-02T00:00:00Z") }],
+      }),
+      userRow({ id: "u2", name: "Bob", notificationPreferences: [] }),
+    ]);
     p.order.groupBy.mockResolvedValue([
       { userId: "u1", _count: { _all: 3 }, _sum: { total: new Prisma.Decimal(900) } },
     ]);
@@ -50,10 +55,18 @@ describe("users.list", () => {
       totalOrders: 3,
       totalSpend: "900.00",
       walletBalance: "150.00",
+      marketingEmailOptIn: true,
     });
     // No orders → zeroed.
-    expect(res[1]).toMatchObject({ id: "u2", totalOrders: 0, totalSpend: "0" });
-    expect(p.order.groupBy.mock.calls[0][0].where.status).toEqual({ notIn: ["CANCELLED", "REFUNDED"] });
+    expect(res[1]).toMatchObject({
+      id: "u2",
+      totalOrders: 0,
+      totalSpend: "0",
+      marketingEmailOptIn: false,
+    });
+    expect(p.order.groupBy.mock.calls[0][0].where.status).toEqual({
+      notIn: ["CANCELLED", "REFUNDED"],
+    });
   });
 
   it("applies a case-insensitive search across name/email/phone", async () => {
@@ -83,7 +96,10 @@ describe("users.getBundle", () => {
     p.order.findMany.mockResolvedValue([]);
     p.walletTransaction.findMany.mockResolvedValue([]);
     p.walletRedemption.findMany.mockResolvedValue([]);
-    p.order.aggregate.mockResolvedValue({ _count: { _all: 2 }, _sum: { total: new Prisma.Decimal(500) } });
+    p.order.aggregate.mockResolvedValue({
+      _count: { _all: 2 },
+      _sum: { total: new Prisma.Decimal(500) },
+    });
 
     const bundle = await users.getBundle("u1");
 
@@ -112,7 +128,32 @@ describe("users.remove", () => {
 
   it("409s when FK history blocks deletion", async () => {
     p.user.findUnique.mockResolvedValue({ id: "u1" });
-    p.user.delete.mockRejectedValue(new Prisma.PrismaClientKnownRequestError("fk", { code: "P2003" }));
+    p.user.delete.mockRejectedValue(
+      new Prisma.PrismaClientKnownRequestError("fk", { code: "P2003" }),
+    );
     await expect(users.remove("u1")).rejects.toMatchObject({ status: 409 });
+  });
+});
+
+describe("users.optOutMarketingEmail", () => {
+  it("disables the preference, skips pending sends and audits the senior action", async () => {
+    p.user.findUnique.mockResolvedValue({ id: "u1", email: "a@b.com" });
+    p.notificationPreference.upsert.mockResolvedValue({});
+    p.retentionTrigger.updateMany.mockResolvedValue({ count: 1 });
+    p.adminLog.create.mockResolvedValue({});
+
+    await users.optOutMarketingEmail("u1", "admin-1");
+
+    expect(p.notificationPreference.upsert.mock.calls[0][0].update).toEqual({ enabled: false });
+    expect(p.retentionTrigger.updateMany.mock.calls[0][0].where).toMatchObject({
+      userId: "u1",
+      triggerType: "monthly_promotion",
+      status: "PENDING",
+    });
+    expect(p.adminLog.create.mock.calls[0][0].data).toMatchObject({
+      adminId: "admin-1",
+      action: "CUSTOMER_MARKETING_EMAIL_OPT_OUT",
+      entityId: "u1",
+    });
   });
 });

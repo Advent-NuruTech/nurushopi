@@ -4,7 +4,15 @@ import { generateOpaqueToken, hashToken, generateCode } from "@nuru/auth/crypto"
 import type { AuthUser, ProfileUpdateInput, SignupInput } from "@nuru/types";
 import { Errors } from "../../lib/errors.js";
 import { legacyPasswordLoginEnabled, firebaseScryptParams } from "../../env.js";
-import { sendPasswordResetEmail, sendVerificationEmail } from "./email.js";
+import {
+  sendMarketingOptInConfirmationEmail,
+  sendPasswordResetEmail,
+  sendVerificationEmail,
+} from "./email.js";
+import {
+  formatKenyaDeliveryDate,
+  getNextMonthlyPromotionDelivery,
+} from "../merchandising/monthly-email.service.js";
 
 const LOCKOUT = { maxFailedAttempts: 5, lockMs: 15 * 60 * 1000 };
 const RESET_TTL_MS = 60 * 60 * 1000; // 1h
@@ -102,6 +110,10 @@ export async function signup(input: SignupInput): Promise<User> {
   });
 
   await createAndSendVerification(user.id, user.email);
+  if (input.marketingOptIn) {
+    const nextDelivery = await getNextMonthlyPromotionDelivery(user.id);
+    await sendMarketingOptInConfirmationEmail(user.email, formatKenyaDeliveryDate(nextDelivery));
+  }
   return user;
 }
 
@@ -120,13 +132,13 @@ export async function createAndSendVerification(userId: string, email: string): 
 export async function login(email: string, password: string): Promise<User> {
   const attempt = await prisma.loginAttempt.findUnique({ where: { identifier: email } });
   if (attempt?.lockedUntil && attempt.lockedUntil > new Date()) {
-    throw Errors.locked("Account locked due to failed attempts. Try again later or reset your password.");
+    throw Errors.locked(
+      "Account locked due to failed attempts. Try again later or reset your password.",
+    );
   }
 
   let user = await prisma.user.findUnique({ where: { email } });
-  let valid = user?.passwordHash
-    ? await verifyPassword(password, user.passwordHash)
-    : false;
+  let valid = user?.passwordHash ? await verifyPassword(password, user.passwordHash) : false;
 
   // Migration fallback: a user imported from Firebase has no bcrypt hash (or it
   // doesn't match). Verify once against their Firebase scrypt hash and, on
@@ -161,12 +173,7 @@ async function tryLegacyLogin(user: User, password: string): Promise<User | null
   });
   if (!legacy) return null;
 
-  const ok = await verifyFirebaseScrypt(
-    password,
-    legacy.salt,
-    legacy.hash,
-    firebaseScryptParams,
-  );
+  const ok = await verifyFirebaseScrypt(password, legacy.salt, legacy.hash, firebaseScryptParams);
   if (!ok) return null;
 
   const passwordHash = await hashPassword(password);

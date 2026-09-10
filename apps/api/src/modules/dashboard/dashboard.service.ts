@@ -1,9 +1,5 @@
 import { prisma, Prisma } from "@nuru/db";
-import {
-  ORDER_STATUSES,
-  type DashboardStatsDTO,
-  type OrderStatus,
-} from "@nuru/types";
+import { ORDER_STATUSES, type DashboardStatsDTO, type OrderStatus } from "@nuru/types";
 import { toOrderDTO, type OrderWithItems } from "../orders/serializers.js";
 
 /** In-stock products at/below this level are flagged "low stock". */
@@ -27,6 +23,7 @@ export async function getStats(): Promise<DashboardStatsDTO> {
     lowStock,
     outOfStock,
     customers,
+    marketingEmailOptIns,
     orderTotal,
     ordersByStatus,
     paidAgg,
@@ -39,12 +36,32 @@ export async function getStats(): Promise<DashboardStatsDTO> {
     prisma.product.count({ where: { stock: { gt: 0, lte: LOW_STOCK_THRESHOLD } } }),
     prisma.product.count({ where: { stock: { lte: 0 } } }),
     prisma.user.count(),
+    prisma.notificationPreference.count({
+      where: {
+        channel: "email",
+        topic: "monthly_promotion",
+        enabled: true,
+        consentedAt: { not: null },
+      },
+    }),
     prisma.order.count(),
     prisma.order.groupBy({ by: ["status"], orderBy: { status: "asc" }, _count: { _all: true } }),
-    prisma.order.aggregate({ _sum: { total: true }, _count: { _all: true }, where: { paymentStatus: "PAID" } }),
-    prisma.walletRedemption.aggregate({ _sum: { amount: true }, _count: { _all: true }, where: { status: "PENDING" } }),
+    prisma.order.aggregate({
+      _sum: { total: true },
+      _count: { _all: true },
+      where: { paymentStatus: "PAID" },
+    }),
+    prisma.walletRedemption.aggregate({
+      _sum: { amount: true },
+      _count: { _all: true },
+      where: { status: "PENDING" },
+    }),
     prisma.user.aggregate({ _sum: { walletBalance: true } }),
-    prisma.order.findMany({ orderBy: { createdAt: "desc" }, take: RECENT_ORDERS, include: { items: true } }),
+    prisma.order.findMany({
+      orderBy: { createdAt: "desc" },
+      take: RECENT_ORDERS,
+      include: { items: true },
+    }),
   ]);
 
   // Zero-fill every status, then overlay the grouped counts.
@@ -68,7 +85,7 @@ export async function getStats(): Promise<DashboardStatsDTO> {
       pendingFulfilment,
     },
     catalog: { products, activeProducts, lowStock, outOfStock },
-    customers: { total: customers },
+    customers: { total: customers, marketingEmailOptIns },
     wallet: {
       pendingRedemptions: pendingRedemptionAgg._count._all,
       pendingRedemptionAmount: moneyOf(pendingRedemptionAgg._sum.amount),

@@ -30,6 +30,8 @@ export interface AdminUserSummaryDTO {
   totalOrders: number;
   totalSpend: string;
   isActive: boolean;
+  marketingEmailOptIn: boolean;
+  marketingEmailConsentedAt: string | null;
   createdAt: string;
 }
 
@@ -43,6 +45,8 @@ export interface AdminUserDetailDTO {
   totalOrders: number;
   totalSpend: string;
   isActive: boolean;
+  marketingEmailOptIn: boolean;
+  marketingEmailConsentedAt: string | null;
   createdAt: string;
 }
 

@@ -162,3 +162,29 @@ describe("POST /api/v1/admin/auth/signup (invite redemption)", () => {
     expect(res.status).toBe(400);
   });
 });
+
+describe("PATCH /api/v1/admin/users/:id/marketing-email/opt-out", () => {
+  it("rejects a SUB admin", async () => {
+    const res = await request(app)
+      .patch("/api/v1/admin/users/u1/marketing-email/opt-out")
+      .set("Authorization", subAuth);
+
+    expect(res.status).toBe(403);
+    expect(p.notificationPreference.upsert).not.toHaveBeenCalled();
+  });
+
+  it("allows a SENIOR admin to opt a customer out", async () => {
+    p.user.findUnique.mockResolvedValue({ id: "u1", email: "customer@example.com" });
+    p.notificationPreference.upsert.mockResolvedValue({});
+    p.retentionTrigger.updateMany.mockResolvedValue({ count: 1 });
+    p.adminLog.create.mockResolvedValue({});
+
+    const res = await request(app)
+      .patch("/api/v1/admin/users/u1/marketing-email/opt-out")
+      .set("Authorization", seniorAuth);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.success).toBe(true);
+    expect(p.notificationPreference.upsert).toHaveBeenCalledOnce();
+  });
+});

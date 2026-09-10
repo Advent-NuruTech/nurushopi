@@ -7,4 +7,9 @@ import * as ctrl from "./users.controller.js";
 export const usersAdminRouter: Router = Router();
 usersAdminRouter.get("/", requireAdmin(), asyncHandler(ctrl.list));
 usersAdminRouter.get("/:id", requireAdmin(), asyncHandler(ctrl.getOne));
+usersAdminRouter.patch(
+  "/:id/marketing-email/opt-out",
+  requireAdmin("SENIOR"),
+  asyncHandler(ctrl.optOutMarketingEmail),
+);
 usersAdminRouter.delete("/:id", requireAdmin("SENIOR"), asyncHandler(ctrl.remove));

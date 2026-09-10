@@ -12,6 +12,7 @@
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
+    "check:secrets": "node scripts/check-secrets.mjs",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "db:generate": "pnpm --filter @nuru/db run db:generate",
     "db:migrate": "pnpm --filter @nuru/db run db:migrate",

@@ -4,6 +4,9 @@ import { logger } from "../../lib/logger.js";
 
 const smtpConfigured = Boolean(env.SMTP_HOST && env.SMTP_USER && env.SMTP_PASSWORD);
 
+/** Safe to expose in readiness checks: this never includes credentials. */
+export const emailTransportConfigured = Boolean(env.RESEND_API_KEY || smtpConfigured);
+
 const transporter = smtpConfigured
   ? nodemailer.createTransport({
       host: env.SMTP_HOST,
@@ -42,6 +45,40 @@ export class EmailSendError extends Error {
   }
 }
 
+export function assertEmailTransportReady(): void {
+  if (!emailTransportConfigured) {
+    throw new EmailSendError(
+      "Email delivery is not configured. Set RESEND_API_KEY or the complete SMTP configuration.",
+      503,
+      "email_transport_unavailable",
+    );
+  }
+}
+
+async function sendWithSmtp(input: SendEmailInput): Promise<SendEmailResult> {
+  if (!transporter) {
+    throw new EmailSendError(
+      "SMTP email delivery is not configured.",
+      503,
+      "email_transport_unavailable",
+    );
+  }
+  try {
+    const info = await transporter.sendMail({
+      from: env.EMAIL_FROM,
+      to: input.to,
+      subject: input.subject,
+      html: input.html,
+      text: input.text,
+      replyTo: env.EMAIL_REPLY_TO,
+      headers: input.headers,
+    });
+    return { id: info.messageId, provider: "smtp" };
+  } catch (error) {
+    throw new EmailSendError(error instanceof Error ? error.message : "SMTP delivery failed");
+  }
+}
+
 function authTemplate(title: string, intro: string, action: string, href: string, note: string) {
   const html = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
@@ -62,9 +99,8 @@ function authTemplate(title: string, intro: string, action: string, href: string
 
 export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult> {
   if (env.RESEND_API_KEY) {
-    let response: Response;
     try {
-      response = await fetch("https://api.resend.com/emails", {
+      const response = await fetch("https://api.resend.com/emails", {
         method: "POST",
         signal: AbortSignal.timeout(15_000),
         headers: {
@@ -84,44 +120,43 @@ export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult>
           tags: input.tags,
         }),
       });
+      const body = (await response.json().catch(() => ({}))) as {
+        id?: string;
+        name?: string;
+        message?: string;
+      };
+      if (!response.ok || !body.id) {
+        const retryAfter = Number(response.headers.get("retry-after"));
+        throw new EmailSendError(
+          body.message ?? "Email provider rejected the request",
+          response.status,
+          body.name,
+          Number.isFinite(retryAfter) ? retryAfter : undefined,
+        );
+      }
+      return {
+        id: body.id,
+        provider: "resend",
+        dailyQuota: response.headers.get("x-resend-daily-quota") ?? undefined,
+        monthlyQuota: response.headers.get("x-resend-monthly-quota") ?? undefined,
+      };
     } catch (error) {
-      throw new EmailSendError(error instanceof Error ? error.message : "Email request failed");
-    }
-
-    const body = (await response.json().catch(() => ({}))) as {
-      id?: string;
-      name?: string;
-      message?: string;
-    };
-    if (!response.ok || !body.id) {
-      const retryAfter = Number(response.headers.get("retry-after"));
-      throw new EmailSendError(
-        body.message ?? "Email provider rejected the request",
-        response.status,
-        body.name,
-        Number.isFinite(retryAfter) ? retryAfter : undefined,
+      const resendError =
+        error instanceof EmailSendError
+          ? error
+          : new EmailSendError(error instanceof Error ? error.message : "Email request failed");
+      if (!transporter) throw resendError;
+      logger.warn(
+        { code: resendError.code, status: resendError.status },
+        "Resend delivery failed; trying SMTP fallback",
       );
+      return sendWithSmtp(input);
     }
-    return {
-      id: body.id,
-      provider: "resend",
-      dailyQuota: response.headers.get("x-resend-daily-quota") ?? undefined,
-      monthlyQuota: response.headers.get("x-resend-monthly-quota") ?? undefined,
-    };
   }
 
-  if (transporter) {
-    const info = await transporter.sendMail({
-      from: env.EMAIL_FROM,
-      to: input.to,
-      subject: input.subject,
-      html: input.html,
-      text: input.text,
-      replyTo: env.EMAIL_REPLY_TO,
-      headers: input.headers,
-    });
-    return { id: info.messageId, provider: "smtp" };
-  }
+  if (transporter) return sendWithSmtp(input);
+
+  if (env.NODE_ENV === "production") assertEmailTransportReady();
 
   logger.info({ to: input.to, subject: input.subject }, "Email skipped: no transport configured");
   return { id: "development", provider: "development" };
@@ -177,11 +212,13 @@ export function renderMarketingOptInConfirmation(nextDeliveryLabel: string) {
 export function sendMarketingOptInConfirmationEmail(
   to: string,
   nextDeliveryLabel: string,
+  idempotencyKey?: string,
 ): Promise<SendEmailResult> {
   const content = renderMarketingOptInConfirmation(nextDeliveryLabel);
   return sendEmail({
     to,
     ...content,
+    idempotencyKey,
     tags: [{ name: "category", value: "marketing-opt-in" }],
   });
 }

@@ -49,6 +49,7 @@ describe("retention.savePreference", () => {
     expect(sendConfirmation).toHaveBeenCalledWith(
       "customer@example.com",
       expect.stringMatching(/at 8:00 AM EAT$/),
+      expect.stringMatching(/^marketing-opt-in:u1:/),
     );
     expect(first.nextDeliveryAt).toBeTruthy();
     expect(first.nextDeliveryLabel).toMatch(/at 8:00 AM EAT$/);

@@ -6,6 +6,11 @@ import {
   dispatchMonthlyPromotionEmails,
   scheduleMonthlyPromotionEmails,
 } from "./modules/merchandising/monthly-email.service.js";
+import { assertEmailTransportReady } from "./modules/auth/email.js";
+
+// Never let production accept signups or opt-ins while silently discarding
+// verification, reset, or subscription-confirmation emails.
+if (env.NODE_ENV === "production") assertEmailTransportReady();
 
 const app = createApp();
 

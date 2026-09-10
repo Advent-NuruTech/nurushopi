@@ -11,6 +11,7 @@ import { apiRouter } from "./routes.js";
 import { apiLimiter } from "./middleware/rateLimit.js";
 import { errorHandler, notFoundHandler } from "./middleware/error.js";
 import { resendWebhookRouter } from "./modules/email-webhooks/resend-webhook.routes.js";
+import { emailTransportConfigured } from "./modules/auth/email.js";
 
 export function createApp(): Express {
   const app = express();
@@ -44,7 +45,13 @@ export function createApp(): Express {
   app.use(cookieParser());
 
   // Health check (unauthenticated, unthrottled)
-  app.get("/health", (_req, res) => sendOk(res, { status: "ok", uptime: process.uptime() }));
+  app.get("/health", (_req, res) =>
+    sendOk(res, {
+      status: "ok",
+      uptime: process.uptime(),
+      emailDelivery: emailTransportConfigured ? "ready" : "unconfigured",
+    }),
+  );
 
   // Versioned API
   app.use("/api/v1", apiLimiter, apiRouter);

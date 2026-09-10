@@ -45,3 +45,13 @@ These rules apply to all work in this repository.
 - Check browser console output for hydration errors and check `document.documentElement.scrollWidth` against the viewport width.
 
 - See `docs/brand-system.md` for the design reference and implementation examples.
+
+## Secret hygiene and email delivery
+
+- Never commit a real credential or a provider-shaped fake credential. Build
+  webhook-signing test values at runtime from clearly fake fragments.
+- Run `pnpm check:secrets` before committing changes that touch configuration,
+  authentication, payments, email, CI, or test setup.
+- Production email must never degrade to the development no-op transport. Keep
+  `RESEND_API_KEY` or the complete SMTP fallback configured, and verify that
+  `/health` reports `emailDelivery: "ready"` after every deployment.

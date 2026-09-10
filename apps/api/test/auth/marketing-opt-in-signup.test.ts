@@ -73,6 +73,7 @@ describe("auth.signup marketing consent", () => {
     expect(sendConfirmation).toHaveBeenCalledWith(
       "customer@example.com",
       "Thursday, 1 October 2026 at 8:00 AM EAT",
+      expect.stringMatching(/^marketing-opt-in:u1:/),
     );
   });
 

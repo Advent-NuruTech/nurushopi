@@ -55,7 +55,11 @@ export async function savePreference(
   if (!user) throw Errors.unauthorized();
   const nextDelivery = await getNextMonthlyPromotionDelivery(userId);
   const nextDeliveryLabel = formatKenyaDeliveryDate(nextDelivery);
-  await sendMarketingOptInConfirmationEmail(user.email, nextDeliveryLabel);
+  await sendMarketingOptInConfirmationEmail(
+    user.email,
+    nextDeliveryLabel,
+    `marketing-opt-in:${userId}:${preference.consentedAt?.toISOString() ?? preference.updatedAt.toISOString()}`,
+  );
 
   return {
     preference,

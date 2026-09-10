@@ -43,6 +43,9 @@ jobs:
           node-version: 20
           cache: pnpm
 
+      - name: Reject committed credentials
+        run: pnpm check:secrets
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 

@@ -67,6 +67,7 @@ export async function signup(input: SignupInput): Promise<User> {
 
   const passwordHash = await hashPassword(input.password);
   const referralCode = await uniqueReferralCode();
+  const marketingConsentedAt = input.marketingOptIn ? new Date() : null;
 
   let referredById: string | null = null;
   if (input.referralCode) {
@@ -100,7 +101,7 @@ export async function signup(input: SignupInput): Promise<User> {
           channel: "email",
           topic: "monthly_promotion",
           enabled: true,
-          consentedAt: new Date(),
+          consentedAt: marketingConsentedAt,
           maxPerDay: 1,
           maxPerWeek: 1,
         },
@@ -112,7 +113,11 @@ export async function signup(input: SignupInput): Promise<User> {
   await createAndSendVerification(user.id, user.email);
   if (input.marketingOptIn) {
     const nextDelivery = await getNextMonthlyPromotionDelivery(user.id);
-    await sendMarketingOptInConfirmationEmail(user.email, formatKenyaDeliveryDate(nextDelivery));
+    await sendMarketingOptInConfirmationEmail(
+      user.email,
+      formatKenyaDeliveryDate(nextDelivery),
+      `marketing-opt-in:${user.id}:${marketingConsentedAt!.toISOString()}`,
+    );
   }
   return user;
 }

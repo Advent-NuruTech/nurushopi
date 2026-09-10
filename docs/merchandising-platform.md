@@ -153,6 +153,21 @@ New email/password registrations expose a separate, unchecked monthly-email
 consent control. Existing customers can opt in from Profile; do not bulk-enable
 them without auditable prior marketing consent.
 
+### Production email readiness
+
+The API refuses to start in production unless either `RESEND_API_KEY` or the
+complete SMTP fallback (`SMTP_HOST`, `SMTP_USER`, and `SMTP_PASSWORD`) is set.
+This is intentional: an unconfigured service must not tell customers that a
+confirmation was sent while silently discarding it. `GET /health` exposes only
+the non-sensitive readiness value `emailDelivery`; it must be `ready` after a
+deployment.
+
+For Render deployments, configure `RESEND_API_KEY`, `EMAIL_FROM`, and
+`EMAIL_REPLY_TO` on the API service itself, then redeploy. Confirm the sender
+domain in Resend, perform one real opt-in, and verify that the message appears
+in Resend's sent-email log. Configure the signed delivery webhook as described
+above so bounces and complaints remain auditable.
+
 | Work                                     | Target cadence   | Reason                                                 |
 | ---------------------------------------- | ---------------- | ------------------------------------------------------ |
 | promotion status and expired memberships | every minute     | operational correctness; reads also enforce timestamps |

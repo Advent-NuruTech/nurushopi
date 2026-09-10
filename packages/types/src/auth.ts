@@ -20,6 +20,8 @@ export const signupSchema = z.object({
   name: z.string().trim().min(1, "Name is required.").max(120).optional(),
   phone: z.string().trim().max(32).optional(),
   referralCode: z.string().trim().max(64).optional(),
+  // Marketing consent must be a separate, optional, affirmative action.
+  marketingOptIn: z.boolean().optional().default(false),
 });
 export type SignupInput = z.infer<typeof signupSchema>;
 

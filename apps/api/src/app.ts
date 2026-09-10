@@ -10,6 +10,7 @@ import { sendOk } from "./lib/response.js";
 import { apiRouter } from "./routes.js";
 import { apiLimiter } from "./middleware/rateLimit.js";
 import { errorHandler, notFoundHandler } from "./middleware/error.js";
+import { resendWebhookRouter } from "./modules/email-webhooks/resend-webhook.routes.js";
 
 export function createApp(): Express {
   const app = express();
@@ -30,6 +31,13 @@ export function createApp(): Express {
       origin: allowedOrigins,
       credentials: true,
     }),
+  );
+  // Signature verification requires the exact bytes Resend sent. This route
+  // must stay above express.json(), which would consume and transform the body.
+  app.use(
+    "/api/v1/webhooks/resend",
+    express.raw({ type: "application/json", limit: "256kb" }),
+    resendWebhookRouter,
   );
   app.use(express.json({ limit: "1mb" }));
   app.use(express.urlencoded({ extended: true }));

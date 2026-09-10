@@ -121,6 +121,38 @@ bundle discount.
 Run `pnpm --filter api worker:merchandising` from a scheduler. The job is
 idempotent and safe to retry.
 
+The same worker also creates and drains the opted-in monthly product-email
+campaign. Resend delivery is paced at one request per second by default and is
+hard-capped at 80 promotional messages per UTC day and 2,400 per UTC month.
+Those conservative defaults reserve part of the free-plan allowance for
+verification and password-reset email. Campaign recipients are limited to
+active, email-verified customers who explicitly enable **Monthly product
+email** in Profile. Every delivery has a stable idempotency key and both a
+visible unsubscribe link and RFC 8058 one-click unsubscribe headers. Set
+`MARKETING_EMAIL_ENABLED=false` for an immediate campaign kill switch.
+The production API also polls this lightweight email queue every 15 minutes, so
+monthly delivery does not depend on an external cron service. Messages begin at
+08:00 East Africa Time and are spread across days when the audience is larger
+than the daily allowance. Development never sends unless
+`MARKETING_EMAIL_ALLOW_DEVELOPMENT=true` is explicitly set.
+
+### Resend delivery webhook
+
+Set `RESEND_WEBHOOK_SECRET` to the signing secret for a Resend webhook at
+`https://<your-api-host>/api/v1/webhooks/resend`.
+
+Subscribe it to `email.bounced`, `email.complained`, `email.suppressed`, and
+`email.failed`. The route verifies the Svix signature against the untouched
+request body, stores an idempotent receipt, and adds bounced, complained, or
+suppressed recipients to the local do-not-send list. Their optional email
+preferences and pending promotional emails are disabled automatically. Failed
+events are recorded for operations but are not permanently suppressed because
+failures can be transient.
+
+New email/password registrations expose a separate, unchecked monthly-email
+consent control. Existing customers can opt in from Profile; do not bulk-enable
+them without auditable prior marketing consent.
+
 | Work                                     | Target cadence   | Reason                                                 |
 | ---------------------------------------- | ---------------- | ------------------------------------------------------ |
 | promotion status and expired memberships | every minute     | operational correctness; reads also enforce timestamps |
@@ -168,8 +200,9 @@ authoritative optional `products.vendorId` relation.
 Customers explicitly opt into a channel/topic and can follow a product for
 back-in-stock or price-drop events. Catalog writes create deduplicated outbox
 triggers transactionally. The dispatcher verifies consent again and enforces
-daily/weekly caps before creating an in-app notification. Email/SMS/push remain
-disabled until their channel transport and consent evidence are configured.
+daily/weekly caps before creating an in-app notification. Monthly product email
+uses the same consent model plus signed unsubscribe links; SMS and push remain
+disabled until their transports and consent evidence are configured.
 
 ## Observability and alerts
 

@@ -1329,6 +1329,38 @@ model RetentionTrigger {
   @@map("retention_triggers")
 }
 
+/// Local do-not-send list populated from authenticated Resend delivery events.
+/// Keeping this in our database prevents a provider change or API mistake from
+/// re-mailing an address that has bounced, complained, or been suppressed.
+model EmailSuppression {
+  id                String   @id @default(cuid())
+  email             String   @unique
+  reason            String
+  sourceEventId     String?
+  providerMessageId String?
+  active            Boolean  @default(true)
+  details           Json?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([active, email])
+  @@map("email_suppressions")
+}
+
+/// Minimal webhook receipt ledger. The Svix message id is the primary key so
+/// Resend retries are idempotent without storing the full customer payload.
+model EmailWebhookEvent {
+  id                String    @id
+  eventType         String
+  providerMessageId String?
+  recipientEmail    String?
+  receivedAt        DateTime  @default(now())
+  processedAt       DateTime?
+
+  @@index([eventType, receivedAt])
+  @@map("email_webhook_events")
+}
+
 model Experiment {
   id               String           @id @default(cuid())
   key              String           @unique

@@ -14,10 +14,12 @@ import type {
   HomepageSectionCreateInput,
   HomepageSectionReorderInput,
   HomepageSectionUpdateInput,
+  AdminPromotionDTO,
   MerchandisingLifecycleInput,
   MerchandisingWorkspaceCreateInput,
   MerchandisingProductDTO,
   PromotionCreateInput,
+  PromotionStatusUpdateInput,
 } from "@nuru/types";
 import { Errors } from "../../lib/errors.js";
 import { env } from "../../env.js";
@@ -353,6 +355,8 @@ export async function listMemberships(
       name: row.product.name,
       sku: row.product.sku,
       images: row.product.images,
+      price: row.product.price.toString(),
+      sellingPrice: row.product.sellingPrice?.toString() ?? null,
       stock: row.product.stock,
       isActive: row.product.isActive,
       vendorId: row.product.vendorId,
@@ -981,6 +985,33 @@ export async function reorderHomepageSections(input: HomepageSectionReorderInput
 
 export async function createPromotion(input: PromotionCreateInput, adminId: string) {
   return prisma.$transaction(async (tx) => {
+    const productIds = input.products.map((product) => product.productId);
+    const products = await tx.product.findMany({
+      where: { id: { in: productIds }, isActive: true },
+      select: { id: true, name: true, price: true, sellingPrice: true },
+    });
+    if (products.length !== productIds.length) {
+      throw Errors.badRequest("Every promotion product must exist and be active.");
+    }
+    if (input.collectionId) {
+      const membershipCount = await tx.collectionMembership.count({
+        where: { collectionId: input.collectionId, productId: { in: productIds } },
+      });
+      if (membershipCount !== productIds.length) {
+        throw Errors.badRequest("Add every promotion product to this collection first.");
+      }
+    }
+    const byId = new Map(products.map((product) => [product.id, product]));
+    for (const item of input.products) {
+      if (item.promotionalPrice == null) continue;
+      const product = byId.get(item.productId);
+      const basePrice = product?.sellingPrice ?? product?.price;
+      if (!basePrice || new Prisma.Decimal(item.promotionalPrice).gte(basePrice)) {
+        throw Errors.badRequest(
+          `Customer price for ${product?.name ?? "a product"} must be lower than its current price.`,
+        );
+      }
+    }
     const promotion = await tx.promotion.create({
       data: {
         key: input.key,
@@ -1006,13 +1037,132 @@ export async function createPromotion(input: PromotionCreateInput, adminId: stri
           })),
         },
       },
-      include: { products: true },
+      include: {
+        products: {
+          orderBy: { createdAt: "asc" },
+          include: {
+            product: {
+              select: { id: true, name: true, sku: true, price: true, sellingPrice: true },
+            },
+          },
+        },
+      },
     });
+    if (promotion.collectionId) {
+      await tx.merchandisingCollection.update({
+        where: { id: promotion.collectionId },
+        data: { cacheVersion: { increment: 1 } },
+      });
+    }
     await audit(tx, adminId, "merchandising.promotion.created", "promotion", promotion.id, {
       key: promotion.key,
       productCount: promotion.products.length,
     });
-    return promotion;
+    return toAdminPromotionDTO(promotion);
+  });
+}
+
+function toAdminPromotionDTO(promotion: {
+  id: string;
+  key: string;
+  name: string;
+  status: AdminPromotionDTO["status"];
+  discountType: AdminPromotionDTO["discountType"];
+  discountValue: Prisma.Decimal;
+  fundingType: AdminPromotionDTO["fundingType"];
+  collectionId: string | null;
+  startsAt: Date;
+  endsAt: Date;
+  inventoryLimit: number | null;
+  purchasedCount: number;
+  perCustomerLimit: number | null;
+  createdAt: Date;
+  updatedAt: Date;
+  products: Array<{
+    id: string;
+    productId: string;
+    promotionalPrice: Prisma.Decimal | null;
+    inventoryLimit: number | null;
+    purchasedCount: number;
+    perCustomerLimit: number | null;
+    product: {
+      id: string;
+      name: string;
+      sku: string | null;
+      price: Prisma.Decimal;
+      sellingPrice: Prisma.Decimal | null;
+    };
+  }>;
+}): AdminPromotionDTO {
+  return {
+    ...promotion,
+    discountValue: promotion.discountValue.toString(),
+    startsAt: promotion.startsAt.toISOString(),
+    endsAt: promotion.endsAt.toISOString(),
+    createdAt: promotion.createdAt.toISOString(),
+    updatedAt: promotion.updatedAt.toISOString(),
+    products: promotion.products.map((item) => ({
+      ...item,
+      promotionalPrice: item.promotionalPrice?.toString() ?? null,
+      product: {
+        ...item.product,
+        price: item.product.price.toString(),
+        sellingPrice: item.product.sellingPrice?.toString() ?? null,
+      },
+    })),
+  };
+}
+
+export async function listPromotions(collectionId?: string): Promise<AdminPromotionDTO[]> {
+  const promotions = await prisma.promotion.findMany({
+    where: collectionId ? { collectionId } : undefined,
+    orderBy: [{ createdAt: "desc" }],
+    include: {
+      products: {
+        orderBy: { createdAt: "asc" },
+        include: {
+          product: {
+            select: { id: true, name: true, sku: true, price: true, sellingPrice: true },
+          },
+        },
+      },
+    },
+  });
+  return promotions.map(toAdminPromotionDTO);
+}
+
+export async function updatePromotionStatus(
+  id: string,
+  input: PromotionStatusUpdateInput,
+  adminId: string,
+): Promise<AdminPromotionDTO> {
+  return prisma.$transaction(async (tx) => {
+    const existing = await tx.promotion.findUnique({ where: { id }, select: { id: true } });
+    if (!existing) throw Errors.notFound("Promotion not found.");
+    const promotion = await tx.promotion.update({
+      where: { id },
+      data: { status: input.status },
+      include: {
+        products: {
+          orderBy: { createdAt: "asc" },
+          include: {
+            product: {
+              select: { id: true, name: true, sku: true, price: true, sellingPrice: true },
+            },
+          },
+        },
+      },
+    });
+    if (promotion.collectionId) {
+      await tx.merchandisingCollection.update({
+        where: { id: promotion.collectionId },
+        data: { cacheVersion: { increment: 1 } },
+      });
+    }
+    await audit(tx, adminId, "merchandising.promotion.status_updated", "promotion", id, {
+      status: input.status,
+    });
+    return toAdminPromotionDTO(promotion);
   });
 }
 

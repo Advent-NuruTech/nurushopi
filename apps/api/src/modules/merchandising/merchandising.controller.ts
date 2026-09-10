@@ -14,6 +14,7 @@ import {
   merchandisingLifecycleSchema,
   merchandisingWorkspaceCreateSchema,
   promotionCreateSchema,
+  promotionStatusUpdateSchema,
   notificationPreferenceSchema,
   retentionSubscriptionSchema,
 } from "@nuru/types";
@@ -21,6 +22,10 @@ import { Errors } from "../../lib/errors.js";
 import { sendOk } from "../../lib/response.js";
 import * as merchandising from "./merchandising.service.js";
 import * as retention from "./retention.service.js";
+import {
+  readMarketingUnsubscribeToken,
+  unsubscribeMonthlyPromotion,
+} from "./monthly-email.service.js";
 
 function param(req: Request, key: string): string {
   const value = req.params[key];
@@ -102,6 +107,34 @@ export async function unsubscribeRetention(req: Request, res: Response): Promise
   const input = retentionSubscriptionSchema.parse(req.body);
   await retention.unsubscribe(req.user.sub, input);
   sendOk(res, { success: true });
+}
+
+function unsubscribeToken(req: Request): string {
+  const token = typeof req.query.token === "string" ? req.query.token : req.body?.token;
+  if (typeof token !== "string" || !token) throw Errors.badRequest("Invalid unsubscribe link.");
+  return token;
+}
+
+export async function showEmailUnsubscribe(req: Request, res: Response): Promise<void> {
+  const token = unsubscribeToken(req);
+  if (!readMarketingUnsubscribeToken(token)) throw Errors.badRequest("Invalid unsubscribe link.");
+  res
+    .status(200)
+    .type("html")
+    .send(
+      `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Email preferences - NuruShop</title></head><body><main><h1>Stop monthly product emails?</h1><p>You will still receive essential account and order emails.</p><form method="post" action="/api/v1/email/unsubscribe?token=${encodeURIComponent(token)}"><button type="submit">Unsubscribe</button></form></main></body></html>`,
+    );
+}
+
+export async function confirmEmailUnsubscribe(req: Request, res: Response): Promise<void> {
+  const success = await unsubscribeMonthlyPromotion(unsubscribeToken(req));
+  if (!success) throw Errors.badRequest("Invalid unsubscribe link.");
+  res
+    .status(200)
+    .type("html")
+    .send(
+      '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Unsubscribed - NuruShop</title></head><body><main><h1>You are unsubscribed</h1><p>NuruShop will no longer send you monthly product emails.</p></main></body></html>',
+    );
 }
 
 export async function adminCollections(_req: Request, res: Response): Promise<void> {
@@ -196,6 +229,19 @@ export async function adminReorderHomepageSections(req: Request, res: Response):
 export async function adminCreatePromotion(req: Request, res: Response): Promise<void> {
   const input = promotionCreateSchema.parse(req.body);
   sendOk(res, { promotion: await merchandising.createPromotion(input, adminId(req)) }, 201);
+}
+
+export async function adminPromotions(req: Request, res: Response): Promise<void> {
+  const collectionId =
+    typeof req.query.collectionId === "string" ? req.query.collectionId : undefined;
+  sendOk(res, { promotions: await merchandising.listPromotions(collectionId) });
+}
+
+export async function adminUpdatePromotionStatus(req: Request, res: Response): Promise<void> {
+  const input = promotionStatusUpdateSchema.parse(req.body);
+  sendOk(res, {
+    promotion: await merchandising.updatePromotionStatus(param(req, "id"), input, adminId(req)),
+  });
 }
 
 export async function adminCollectionAnalytics(req: Request, res: Response): Promise<void> {

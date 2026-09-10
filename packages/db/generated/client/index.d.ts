@@ -283,6 +283,19 @@ export type RetentionSubscription = $Result.DefaultSelection<Prisma.$RetentionSu
  */
 export type RetentionTrigger = $Result.DefaultSelection<Prisma.$RetentionTriggerPayload>
 /**
+ * Model EmailSuppression
+ * Local do-not-send list populated from authenticated Resend delivery events.
+ * Keeping this in our database prevents a provider change or API mistake from
+ * re-mailing an address that has bounced, complained, or been suppressed.
+ */
+export type EmailSuppression = $Result.DefaultSelection<Prisma.$EmailSuppressionPayload>
+/**
+ * Model EmailWebhookEvent
+ * Minimal webhook receipt ledger. The Svix message id is the primary key so
+ * Resend retries are idempotent without storing the full customer payload.
+ */
+export type EmailWebhookEvent = $Result.DefaultSelection<Prisma.$EmailWebhookEventPayload>
+/**
  * Model Experiment
  * 
  */
@@ -1258,6 +1271,26 @@ export class PrismaClient<
   get retentionTrigger(): Prisma.RetentionTriggerDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.emailSuppression`: Exposes CRUD operations for the **EmailSuppression** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more EmailSuppressions
+    * const emailSuppressions = await prisma.emailSuppression.findMany()
+    * ```
+    */
+  get emailSuppression(): Prisma.EmailSuppressionDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.emailWebhookEvent`: Exposes CRUD operations for the **EmailWebhookEvent** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more EmailWebhookEvents
+    * const emailWebhookEvents = await prisma.emailWebhookEvent.findMany()
+    * ```
+    */
+  get emailWebhookEvent(): Prisma.EmailWebhookEventDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.experiment`: Exposes CRUD operations for the **Experiment** model.
     * Example usage:
     * ```ts
@@ -1770,6 +1803,8 @@ export namespace Prisma {
     NotificationPreference: 'NotificationPreference',
     RetentionSubscription: 'RetentionSubscription',
     RetentionTrigger: 'RetentionTrigger',
+    EmailSuppression: 'EmailSuppression',
+    EmailWebhookEvent: 'EmailWebhookEvent',
     Experiment: 'Experiment',
     ExperimentAssignment: 'ExperimentAssignment'
   };
@@ -1790,7 +1825,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "oAuthAccount" | "refreshToken" | "emailVerificationToken" | "passwordResetToken" | "legacyPasswordImport" | "loginAttempt" | "admin" | "adminInvite" | "adminLog" | "category" | "product" | "banner" | "heroAnnouncement" | "wholesaleItem" | "order" | "fulfillmentConfiguration" | "pickupStation" | "deliveryRate" | "orderItem" | "review" | "wishlistItem" | "productView" | "walletTransaction" | "walletRedemption" | "referral" | "notification" | "message" | "contact" | "vendorApplication" | "vendorAccount" | "vendorInvite" | "pwaInstall" | "sabbathMessage" | "merchandisingCollection" | "collectionMembership" | "collectionOverride" | "homepageSection" | "promotion" | "promotionProduct" | "promotionRedemption" | "bundle" | "bundleItem" | "spotlightPlacement" | "commerceEvent" | "productMetricHourly" | "productMetricDaily" | "collectionMetricDaily" | "productRanking" | "userProductAffinity" | "notificationPreference" | "retentionSubscription" | "retentionTrigger" | "experiment" | "experimentAssignment"
+      modelProps: "user" | "oAuthAccount" | "refreshToken" | "emailVerificationToken" | "passwordResetToken" | "legacyPasswordImport" | "loginAttempt" | "admin" | "adminInvite" | "adminLog" | "category" | "product" | "banner" | "heroAnnouncement" | "wholesaleItem" | "order" | "fulfillmentConfiguration" | "pickupStation" | "deliveryRate" | "orderItem" | "review" | "wishlistItem" | "productView" | "walletTransaction" | "walletRedemption" | "referral" | "notification" | "message" | "contact" | "vendorApplication" | "vendorAccount" | "vendorInvite" | "pwaInstall" | "sabbathMessage" | "merchandisingCollection" | "collectionMembership" | "collectionOverride" | "homepageSection" | "promotion" | "promotionProduct" | "promotionRedemption" | "bundle" | "bundleItem" | "spotlightPlacement" | "commerceEvent" | "productMetricHourly" | "productMetricDaily" | "collectionMetricDaily" | "productRanking" | "userProductAffinity" | "notificationPreference" | "retentionSubscription" | "retentionTrigger" | "emailSuppression" | "emailWebhookEvent" | "experiment" | "experimentAssignment"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -5716,6 +5751,154 @@ export namespace Prisma {
           }
         }
       }
+      EmailSuppression: {
+        payload: Prisma.$EmailSuppressionPayload<ExtArgs>
+        fields: Prisma.EmailSuppressionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.EmailSuppressionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailSuppressionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.EmailSuppressionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailSuppressionPayload>
+          }
+          findFirst: {
+            args: Prisma.EmailSuppressionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailSuppressionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.EmailSuppressionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailSuppressionPayload>
+          }
+          findMany: {
+            args: Prisma.EmailSuppressionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailSuppressionPayload>[]
+          }
+          create: {
+            args: Prisma.EmailSuppressionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailSuppressionPayload>
+          }
+          createMany: {
+            args: Prisma.EmailSuppressionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.EmailSuppressionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailSuppressionPayload>[]
+          }
+          delete: {
+            args: Prisma.EmailSuppressionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailSuppressionPayload>
+          }
+          update: {
+            args: Prisma.EmailSuppressionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailSuppressionPayload>
+          }
+          deleteMany: {
+            args: Prisma.EmailSuppressionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.EmailSuppressionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.EmailSuppressionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailSuppressionPayload>[]
+          }
+          upsert: {
+            args: Prisma.EmailSuppressionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailSuppressionPayload>
+          }
+          aggregate: {
+            args: Prisma.EmailSuppressionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateEmailSuppression>
+          }
+          groupBy: {
+            args: Prisma.EmailSuppressionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<EmailSuppressionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.EmailSuppressionCountArgs<ExtArgs>
+            result: $Utils.Optional<EmailSuppressionCountAggregateOutputType> | number
+          }
+        }
+      }
+      EmailWebhookEvent: {
+        payload: Prisma.$EmailWebhookEventPayload<ExtArgs>
+        fields: Prisma.EmailWebhookEventFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.EmailWebhookEventFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailWebhookEventPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.EmailWebhookEventFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailWebhookEventPayload>
+          }
+          findFirst: {
+            args: Prisma.EmailWebhookEventFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailWebhookEventPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.EmailWebhookEventFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailWebhookEventPayload>
+          }
+          findMany: {
+            args: Prisma.EmailWebhookEventFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailWebhookEventPayload>[]
+          }
+          create: {
+            args: Prisma.EmailWebhookEventCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailWebhookEventPayload>
+          }
+          createMany: {
+            args: Prisma.EmailWebhookEventCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.EmailWebhookEventCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailWebhookEventPayload>[]
+          }
+          delete: {
+            args: Prisma.EmailWebhookEventDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailWebhookEventPayload>
+          }
+          update: {
+            args: Prisma.EmailWebhookEventUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailWebhookEventPayload>
+          }
+          deleteMany: {
+            args: Prisma.EmailWebhookEventDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.EmailWebhookEventUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.EmailWebhookEventUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailWebhookEventPayload>[]
+          }
+          upsert: {
+            args: Prisma.EmailWebhookEventUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailWebhookEventPayload>
+          }
+          aggregate: {
+            args: Prisma.EmailWebhookEventAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateEmailWebhookEvent>
+          }
+          groupBy: {
+            args: Prisma.EmailWebhookEventGroupByArgs<ExtArgs>
+            result: $Utils.Optional<EmailWebhookEventGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.EmailWebhookEventCountArgs<ExtArgs>
+            result: $Utils.Optional<EmailWebhookEventCountAggregateOutputType> | number
+          }
+        }
+      }
       Experiment: {
         payload: Prisma.$ExperimentPayload<ExtArgs>
         fields: Prisma.ExperimentFieldRefs
@@ -6013,6 +6196,8 @@ export namespace Prisma {
     notificationPreference?: NotificationPreferenceOmit
     retentionSubscription?: RetentionSubscriptionOmit
     retentionTrigger?: RetentionTriggerOmit
+    emailSuppression?: EmailSuppressionOmit
+    emailWebhookEvent?: EmailWebhookEventOmit
     experiment?: ExperimentOmit
     experimentAssignment?: ExperimentAssignmentOmit
   }
@@ -70623,6 +70808,2057 @@ export namespace Prisma {
 
 
   /**
+   * Model EmailSuppression
+   */
+
+  export type AggregateEmailSuppression = {
+    _count: EmailSuppressionCountAggregateOutputType | null
+    _min: EmailSuppressionMinAggregateOutputType | null
+    _max: EmailSuppressionMaxAggregateOutputType | null
+  }
+
+  export type EmailSuppressionMinAggregateOutputType = {
+    id: string | null
+    email: string | null
+    reason: string | null
+    sourceEventId: string | null
+    providerMessageId: string | null
+    active: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type EmailSuppressionMaxAggregateOutputType = {
+    id: string | null
+    email: string | null
+    reason: string | null
+    sourceEventId: string | null
+    providerMessageId: string | null
+    active: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type EmailSuppressionCountAggregateOutputType = {
+    id: number
+    email: number
+    reason: number
+    sourceEventId: number
+    providerMessageId: number
+    active: number
+    details: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type EmailSuppressionMinAggregateInputType = {
+    id?: true
+    email?: true
+    reason?: true
+    sourceEventId?: true
+    providerMessageId?: true
+    active?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type EmailSuppressionMaxAggregateInputType = {
+    id?: true
+    email?: true
+    reason?: true
+    sourceEventId?: true
+    providerMessageId?: true
+    active?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type EmailSuppressionCountAggregateInputType = {
+    id?: true
+    email?: true
+    reason?: true
+    sourceEventId?: true
+    providerMessageId?: true
+    active?: true
+    details?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type EmailSuppressionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which EmailSuppression to aggregate.
+     */
+    where?: EmailSuppressionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EmailSuppressions to fetch.
+     */
+    orderBy?: EmailSuppressionOrderByWithRelationInput | EmailSuppressionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: EmailSuppressionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EmailSuppressions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EmailSuppressions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned EmailSuppressions
+    **/
+    _count?: true | EmailSuppressionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: EmailSuppressionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: EmailSuppressionMaxAggregateInputType
+  }
+
+  export type GetEmailSuppressionAggregateType<T extends EmailSuppressionAggregateArgs> = {
+        [P in keyof T & keyof AggregateEmailSuppression]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateEmailSuppression[P]>
+      : GetScalarType<T[P], AggregateEmailSuppression[P]>
+  }
+
+
+
+
+  export type EmailSuppressionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: EmailSuppressionWhereInput
+    orderBy?: EmailSuppressionOrderByWithAggregationInput | EmailSuppressionOrderByWithAggregationInput[]
+    by: EmailSuppressionScalarFieldEnum[] | EmailSuppressionScalarFieldEnum
+    having?: EmailSuppressionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: EmailSuppressionCountAggregateInputType | true
+    _min?: EmailSuppressionMinAggregateInputType
+    _max?: EmailSuppressionMaxAggregateInputType
+  }
+
+  export type EmailSuppressionGroupByOutputType = {
+    id: string
+    email: string
+    reason: string
+    sourceEventId: string | null
+    providerMessageId: string | null
+    active: boolean
+    details: JsonValue | null
+    createdAt: Date
+    updatedAt: Date
+    _count: EmailSuppressionCountAggregateOutputType | null
+    _min: EmailSuppressionMinAggregateOutputType | null
+    _max: EmailSuppressionMaxAggregateOutputType | null
+  }
+
+  type GetEmailSuppressionGroupByPayload<T extends EmailSuppressionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<EmailSuppressionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof EmailSuppressionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], EmailSuppressionGroupByOutputType[P]>
+            : GetScalarType<T[P], EmailSuppressionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type EmailSuppressionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    email?: boolean
+    reason?: boolean
+    sourceEventId?: boolean
+    providerMessageId?: boolean
+    active?: boolean
+    details?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["emailSuppression"]>
+
+  export type EmailSuppressionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    email?: boolean
+    reason?: boolean
+    sourceEventId?: boolean
+    providerMessageId?: boolean
+    active?: boolean
+    details?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["emailSuppression"]>
+
+  export type EmailSuppressionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    email?: boolean
+    reason?: boolean
+    sourceEventId?: boolean
+    providerMessageId?: boolean
+    active?: boolean
+    details?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["emailSuppression"]>
+
+  export type EmailSuppressionSelectScalar = {
+    id?: boolean
+    email?: boolean
+    reason?: boolean
+    sourceEventId?: boolean
+    providerMessageId?: boolean
+    active?: boolean
+    details?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type EmailSuppressionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "reason" | "sourceEventId" | "providerMessageId" | "active" | "details" | "createdAt" | "updatedAt", ExtArgs["result"]["emailSuppression"]>
+
+  export type $EmailSuppressionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "EmailSuppression"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      email: string
+      reason: string
+      sourceEventId: string | null
+      providerMessageId: string | null
+      active: boolean
+      details: Prisma.JsonValue | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["emailSuppression"]>
+    composites: {}
+  }
+
+  type EmailSuppressionGetPayload<S extends boolean | null | undefined | EmailSuppressionDefaultArgs> = $Result.GetResult<Prisma.$EmailSuppressionPayload, S>
+
+  type EmailSuppressionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<EmailSuppressionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: EmailSuppressionCountAggregateInputType | true
+    }
+
+  export interface EmailSuppressionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['EmailSuppression'], meta: { name: 'EmailSuppression' } }
+    /**
+     * Find zero or one EmailSuppression that matches the filter.
+     * @param {EmailSuppressionFindUniqueArgs} args - Arguments to find a EmailSuppression
+     * @example
+     * // Get one EmailSuppression
+     * const emailSuppression = await prisma.emailSuppression.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends EmailSuppressionFindUniqueArgs>(args: SelectSubset<T, EmailSuppressionFindUniqueArgs<ExtArgs>>): Prisma__EmailSuppressionClient<$Result.GetResult<Prisma.$EmailSuppressionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one EmailSuppression that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {EmailSuppressionFindUniqueOrThrowArgs} args - Arguments to find a EmailSuppression
+     * @example
+     * // Get one EmailSuppression
+     * const emailSuppression = await prisma.emailSuppression.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends EmailSuppressionFindUniqueOrThrowArgs>(args: SelectSubset<T, EmailSuppressionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__EmailSuppressionClient<$Result.GetResult<Prisma.$EmailSuppressionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first EmailSuppression that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EmailSuppressionFindFirstArgs} args - Arguments to find a EmailSuppression
+     * @example
+     * // Get one EmailSuppression
+     * const emailSuppression = await prisma.emailSuppression.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends EmailSuppressionFindFirstArgs>(args?: SelectSubset<T, EmailSuppressionFindFirstArgs<ExtArgs>>): Prisma__EmailSuppressionClient<$Result.GetResult<Prisma.$EmailSuppressionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first EmailSuppression that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EmailSuppressionFindFirstOrThrowArgs} args - Arguments to find a EmailSuppression
+     * @example
+     * // Get one EmailSuppression
+     * const emailSuppression = await prisma.emailSuppression.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends EmailSuppressionFindFirstOrThrowArgs>(args?: SelectSubset<T, EmailSuppressionFindFirstOrThrowArgs<ExtArgs>>): Prisma__EmailSuppressionClient<$Result.GetResult<Prisma.$EmailSuppressionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more EmailSuppressions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EmailSuppressionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all EmailSuppressions
+     * const emailSuppressions = await prisma.emailSuppression.findMany()
+     * 
+     * // Get first 10 EmailSuppressions
+     * const emailSuppressions = await prisma.emailSuppression.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const emailSuppressionWithIdOnly = await prisma.emailSuppression.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends EmailSuppressionFindManyArgs>(args?: SelectSubset<T, EmailSuppressionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EmailSuppressionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a EmailSuppression.
+     * @param {EmailSuppressionCreateArgs} args - Arguments to create a EmailSuppression.
+     * @example
+     * // Create one EmailSuppression
+     * const EmailSuppression = await prisma.emailSuppression.create({
+     *   data: {
+     *     // ... data to create a EmailSuppression
+     *   }
+     * })
+     * 
+     */
+    create<T extends EmailSuppressionCreateArgs>(args: SelectSubset<T, EmailSuppressionCreateArgs<ExtArgs>>): Prisma__EmailSuppressionClient<$Result.GetResult<Prisma.$EmailSuppressionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many EmailSuppressions.
+     * @param {EmailSuppressionCreateManyArgs} args - Arguments to create many EmailSuppressions.
+     * @example
+     * // Create many EmailSuppressions
+     * const emailSuppression = await prisma.emailSuppression.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends EmailSuppressionCreateManyArgs>(args?: SelectSubset<T, EmailSuppressionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many EmailSuppressions and returns the data saved in the database.
+     * @param {EmailSuppressionCreateManyAndReturnArgs} args - Arguments to create many EmailSuppressions.
+     * @example
+     * // Create many EmailSuppressions
+     * const emailSuppression = await prisma.emailSuppression.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many EmailSuppressions and only return the `id`
+     * const emailSuppressionWithIdOnly = await prisma.emailSuppression.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends EmailSuppressionCreateManyAndReturnArgs>(args?: SelectSubset<T, EmailSuppressionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EmailSuppressionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a EmailSuppression.
+     * @param {EmailSuppressionDeleteArgs} args - Arguments to delete one EmailSuppression.
+     * @example
+     * // Delete one EmailSuppression
+     * const EmailSuppression = await prisma.emailSuppression.delete({
+     *   where: {
+     *     // ... filter to delete one EmailSuppression
+     *   }
+     * })
+     * 
+     */
+    delete<T extends EmailSuppressionDeleteArgs>(args: SelectSubset<T, EmailSuppressionDeleteArgs<ExtArgs>>): Prisma__EmailSuppressionClient<$Result.GetResult<Prisma.$EmailSuppressionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one EmailSuppression.
+     * @param {EmailSuppressionUpdateArgs} args - Arguments to update one EmailSuppression.
+     * @example
+     * // Update one EmailSuppression
+     * const emailSuppression = await prisma.emailSuppression.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends EmailSuppressionUpdateArgs>(args: SelectSubset<T, EmailSuppressionUpdateArgs<ExtArgs>>): Prisma__EmailSuppressionClient<$Result.GetResult<Prisma.$EmailSuppressionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more EmailSuppressions.
+     * @param {EmailSuppressionDeleteManyArgs} args - Arguments to filter EmailSuppressions to delete.
+     * @example
+     * // Delete a few EmailSuppressions
+     * const { count } = await prisma.emailSuppression.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends EmailSuppressionDeleteManyArgs>(args?: SelectSubset<T, EmailSuppressionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more EmailSuppressions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EmailSuppressionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many EmailSuppressions
+     * const emailSuppression = await prisma.emailSuppression.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends EmailSuppressionUpdateManyArgs>(args: SelectSubset<T, EmailSuppressionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more EmailSuppressions and returns the data updated in the database.
+     * @param {EmailSuppressionUpdateManyAndReturnArgs} args - Arguments to update many EmailSuppressions.
+     * @example
+     * // Update many EmailSuppressions
+     * const emailSuppression = await prisma.emailSuppression.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more EmailSuppressions and only return the `id`
+     * const emailSuppressionWithIdOnly = await prisma.emailSuppression.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends EmailSuppressionUpdateManyAndReturnArgs>(args: SelectSubset<T, EmailSuppressionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EmailSuppressionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one EmailSuppression.
+     * @param {EmailSuppressionUpsertArgs} args - Arguments to update or create a EmailSuppression.
+     * @example
+     * // Update or create a EmailSuppression
+     * const emailSuppression = await prisma.emailSuppression.upsert({
+     *   create: {
+     *     // ... data to create a EmailSuppression
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the EmailSuppression we want to update
+     *   }
+     * })
+     */
+    upsert<T extends EmailSuppressionUpsertArgs>(args: SelectSubset<T, EmailSuppressionUpsertArgs<ExtArgs>>): Prisma__EmailSuppressionClient<$Result.GetResult<Prisma.$EmailSuppressionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of EmailSuppressions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EmailSuppressionCountArgs} args - Arguments to filter EmailSuppressions to count.
+     * @example
+     * // Count the number of EmailSuppressions
+     * const count = await prisma.emailSuppression.count({
+     *   where: {
+     *     // ... the filter for the EmailSuppressions we want to count
+     *   }
+     * })
+    **/
+    count<T extends EmailSuppressionCountArgs>(
+      args?: Subset<T, EmailSuppressionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], EmailSuppressionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a EmailSuppression.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EmailSuppressionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends EmailSuppressionAggregateArgs>(args: Subset<T, EmailSuppressionAggregateArgs>): Prisma.PrismaPromise<GetEmailSuppressionAggregateType<T>>
+
+    /**
+     * Group by EmailSuppression.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EmailSuppressionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends EmailSuppressionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: EmailSuppressionGroupByArgs['orderBy'] }
+        : { orderBy?: EmailSuppressionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, EmailSuppressionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetEmailSuppressionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the EmailSuppression model
+   */
+  readonly fields: EmailSuppressionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for EmailSuppression.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__EmailSuppressionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the EmailSuppression model
+   */
+  interface EmailSuppressionFieldRefs {
+    readonly id: FieldRef<"EmailSuppression", 'String'>
+    readonly email: FieldRef<"EmailSuppression", 'String'>
+    readonly reason: FieldRef<"EmailSuppression", 'String'>
+    readonly sourceEventId: FieldRef<"EmailSuppression", 'String'>
+    readonly providerMessageId: FieldRef<"EmailSuppression", 'String'>
+    readonly active: FieldRef<"EmailSuppression", 'Boolean'>
+    readonly details: FieldRef<"EmailSuppression", 'Json'>
+    readonly createdAt: FieldRef<"EmailSuppression", 'DateTime'>
+    readonly updatedAt: FieldRef<"EmailSuppression", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * EmailSuppression findUnique
+   */
+  export type EmailSuppressionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailSuppression
+     */
+    select?: EmailSuppressionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailSuppression
+     */
+    omit?: EmailSuppressionOmit<ExtArgs> | null
+    /**
+     * Filter, which EmailSuppression to fetch.
+     */
+    where: EmailSuppressionWhereUniqueInput
+  }
+
+  /**
+   * EmailSuppression findUniqueOrThrow
+   */
+  export type EmailSuppressionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailSuppression
+     */
+    select?: EmailSuppressionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailSuppression
+     */
+    omit?: EmailSuppressionOmit<ExtArgs> | null
+    /**
+     * Filter, which EmailSuppression to fetch.
+     */
+    where: EmailSuppressionWhereUniqueInput
+  }
+
+  /**
+   * EmailSuppression findFirst
+   */
+  export type EmailSuppressionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailSuppression
+     */
+    select?: EmailSuppressionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailSuppression
+     */
+    omit?: EmailSuppressionOmit<ExtArgs> | null
+    /**
+     * Filter, which EmailSuppression to fetch.
+     */
+    where?: EmailSuppressionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EmailSuppressions to fetch.
+     */
+    orderBy?: EmailSuppressionOrderByWithRelationInput | EmailSuppressionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for EmailSuppressions.
+     */
+    cursor?: EmailSuppressionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EmailSuppressions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EmailSuppressions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of EmailSuppressions.
+     */
+    distinct?: EmailSuppressionScalarFieldEnum | EmailSuppressionScalarFieldEnum[]
+  }
+
+  /**
+   * EmailSuppression findFirstOrThrow
+   */
+  export type EmailSuppressionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailSuppression
+     */
+    select?: EmailSuppressionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailSuppression
+     */
+    omit?: EmailSuppressionOmit<ExtArgs> | null
+    /**
+     * Filter, which EmailSuppression to fetch.
+     */
+    where?: EmailSuppressionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EmailSuppressions to fetch.
+     */
+    orderBy?: EmailSuppressionOrderByWithRelationInput | EmailSuppressionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for EmailSuppressions.
+     */
+    cursor?: EmailSuppressionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EmailSuppressions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EmailSuppressions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of EmailSuppressions.
+     */
+    distinct?: EmailSuppressionScalarFieldEnum | EmailSuppressionScalarFieldEnum[]
+  }
+
+  /**
+   * EmailSuppression findMany
+   */
+  export type EmailSuppressionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailSuppression
+     */
+    select?: EmailSuppressionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailSuppression
+     */
+    omit?: EmailSuppressionOmit<ExtArgs> | null
+    /**
+     * Filter, which EmailSuppressions to fetch.
+     */
+    where?: EmailSuppressionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EmailSuppressions to fetch.
+     */
+    orderBy?: EmailSuppressionOrderByWithRelationInput | EmailSuppressionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing EmailSuppressions.
+     */
+    cursor?: EmailSuppressionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EmailSuppressions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EmailSuppressions.
+     */
+    skip?: number
+    distinct?: EmailSuppressionScalarFieldEnum | EmailSuppressionScalarFieldEnum[]
+  }
+
+  /**
+   * EmailSuppression create
+   */
+  export type EmailSuppressionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailSuppression
+     */
+    select?: EmailSuppressionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailSuppression
+     */
+    omit?: EmailSuppressionOmit<ExtArgs> | null
+    /**
+     * The data needed to create a EmailSuppression.
+     */
+    data: XOR<EmailSuppressionCreateInput, EmailSuppressionUncheckedCreateInput>
+  }
+
+  /**
+   * EmailSuppression createMany
+   */
+  export type EmailSuppressionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many EmailSuppressions.
+     */
+    data: EmailSuppressionCreateManyInput | EmailSuppressionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * EmailSuppression createManyAndReturn
+   */
+  export type EmailSuppressionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailSuppression
+     */
+    select?: EmailSuppressionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailSuppression
+     */
+    omit?: EmailSuppressionOmit<ExtArgs> | null
+    /**
+     * The data used to create many EmailSuppressions.
+     */
+    data: EmailSuppressionCreateManyInput | EmailSuppressionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * EmailSuppression update
+   */
+  export type EmailSuppressionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailSuppression
+     */
+    select?: EmailSuppressionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailSuppression
+     */
+    omit?: EmailSuppressionOmit<ExtArgs> | null
+    /**
+     * The data needed to update a EmailSuppression.
+     */
+    data: XOR<EmailSuppressionUpdateInput, EmailSuppressionUncheckedUpdateInput>
+    /**
+     * Choose, which EmailSuppression to update.
+     */
+    where: EmailSuppressionWhereUniqueInput
+  }
+
+  /**
+   * EmailSuppression updateMany
+   */
+  export type EmailSuppressionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update EmailSuppressions.
+     */
+    data: XOR<EmailSuppressionUpdateManyMutationInput, EmailSuppressionUncheckedUpdateManyInput>
+    /**
+     * Filter which EmailSuppressions to update
+     */
+    where?: EmailSuppressionWhereInput
+    /**
+     * Limit how many EmailSuppressions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * EmailSuppression updateManyAndReturn
+   */
+  export type EmailSuppressionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailSuppression
+     */
+    select?: EmailSuppressionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailSuppression
+     */
+    omit?: EmailSuppressionOmit<ExtArgs> | null
+    /**
+     * The data used to update EmailSuppressions.
+     */
+    data: XOR<EmailSuppressionUpdateManyMutationInput, EmailSuppressionUncheckedUpdateManyInput>
+    /**
+     * Filter which EmailSuppressions to update
+     */
+    where?: EmailSuppressionWhereInput
+    /**
+     * Limit how many EmailSuppressions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * EmailSuppression upsert
+   */
+  export type EmailSuppressionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailSuppression
+     */
+    select?: EmailSuppressionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailSuppression
+     */
+    omit?: EmailSuppressionOmit<ExtArgs> | null
+    /**
+     * The filter to search for the EmailSuppression to update in case it exists.
+     */
+    where: EmailSuppressionWhereUniqueInput
+    /**
+     * In case the EmailSuppression found by the `where` argument doesn't exist, create a new EmailSuppression with this data.
+     */
+    create: XOR<EmailSuppressionCreateInput, EmailSuppressionUncheckedCreateInput>
+    /**
+     * In case the EmailSuppression was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<EmailSuppressionUpdateInput, EmailSuppressionUncheckedUpdateInput>
+  }
+
+  /**
+   * EmailSuppression delete
+   */
+  export type EmailSuppressionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailSuppression
+     */
+    select?: EmailSuppressionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailSuppression
+     */
+    omit?: EmailSuppressionOmit<ExtArgs> | null
+    /**
+     * Filter which EmailSuppression to delete.
+     */
+    where: EmailSuppressionWhereUniqueInput
+  }
+
+  /**
+   * EmailSuppression deleteMany
+   */
+  export type EmailSuppressionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which EmailSuppressions to delete
+     */
+    where?: EmailSuppressionWhereInput
+    /**
+     * Limit how many EmailSuppressions to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * EmailSuppression without action
+   */
+  export type EmailSuppressionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailSuppression
+     */
+    select?: EmailSuppressionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailSuppression
+     */
+    omit?: EmailSuppressionOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model EmailWebhookEvent
+   */
+
+  export type AggregateEmailWebhookEvent = {
+    _count: EmailWebhookEventCountAggregateOutputType | null
+    _min: EmailWebhookEventMinAggregateOutputType | null
+    _max: EmailWebhookEventMaxAggregateOutputType | null
+  }
+
+  export type EmailWebhookEventMinAggregateOutputType = {
+    id: string | null
+    eventType: string | null
+    providerMessageId: string | null
+    recipientEmail: string | null
+    receivedAt: Date | null
+    processedAt: Date | null
+  }
+
+  export type EmailWebhookEventMaxAggregateOutputType = {
+    id: string | null
+    eventType: string | null
+    providerMessageId: string | null
+    recipientEmail: string | null
+    receivedAt: Date | null
+    processedAt: Date | null
+  }
+
+  export type EmailWebhookEventCountAggregateOutputType = {
+    id: number
+    eventType: number
+    providerMessageId: number
+    recipientEmail: number
+    receivedAt: number
+    processedAt: number
+    _all: number
+  }
+
+
+  export type EmailWebhookEventMinAggregateInputType = {
+    id?: true
+    eventType?: true
+    providerMessageId?: true
+    recipientEmail?: true
+    receivedAt?: true
+    processedAt?: true
+  }
+
+  export type EmailWebhookEventMaxAggregateInputType = {
+    id?: true
+    eventType?: true
+    providerMessageId?: true
+    recipientEmail?: true
+    receivedAt?: true
+    processedAt?: true
+  }
+
+  export type EmailWebhookEventCountAggregateInputType = {
+    id?: true
+    eventType?: true
+    providerMessageId?: true
+    recipientEmail?: true
+    receivedAt?: true
+    processedAt?: true
+    _all?: true
+  }
+
+  export type EmailWebhookEventAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which EmailWebhookEvent to aggregate.
+     */
+    where?: EmailWebhookEventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EmailWebhookEvents to fetch.
+     */
+    orderBy?: EmailWebhookEventOrderByWithRelationInput | EmailWebhookEventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: EmailWebhookEventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EmailWebhookEvents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EmailWebhookEvents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned EmailWebhookEvents
+    **/
+    _count?: true | EmailWebhookEventCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: EmailWebhookEventMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: EmailWebhookEventMaxAggregateInputType
+  }
+
+  export type GetEmailWebhookEventAggregateType<T extends EmailWebhookEventAggregateArgs> = {
+        [P in keyof T & keyof AggregateEmailWebhookEvent]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateEmailWebhookEvent[P]>
+      : GetScalarType<T[P], AggregateEmailWebhookEvent[P]>
+  }
+
+
+
+
+  export type EmailWebhookEventGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: EmailWebhookEventWhereInput
+    orderBy?: EmailWebhookEventOrderByWithAggregationInput | EmailWebhookEventOrderByWithAggregationInput[]
+    by: EmailWebhookEventScalarFieldEnum[] | EmailWebhookEventScalarFieldEnum
+    having?: EmailWebhookEventScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: EmailWebhookEventCountAggregateInputType | true
+    _min?: EmailWebhookEventMinAggregateInputType
+    _max?: EmailWebhookEventMaxAggregateInputType
+  }
+
+  export type EmailWebhookEventGroupByOutputType = {
+    id: string
+    eventType: string
+    providerMessageId: string | null
+    recipientEmail: string | null
+    receivedAt: Date
+    processedAt: Date | null
+    _count: EmailWebhookEventCountAggregateOutputType | null
+    _min: EmailWebhookEventMinAggregateOutputType | null
+    _max: EmailWebhookEventMaxAggregateOutputType | null
+  }
+
+  type GetEmailWebhookEventGroupByPayload<T extends EmailWebhookEventGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<EmailWebhookEventGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof EmailWebhookEventGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], EmailWebhookEventGroupByOutputType[P]>
+            : GetScalarType<T[P], EmailWebhookEventGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type EmailWebhookEventSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    eventType?: boolean
+    providerMessageId?: boolean
+    recipientEmail?: boolean
+    receivedAt?: boolean
+    processedAt?: boolean
+  }, ExtArgs["result"]["emailWebhookEvent"]>
+
+  export type EmailWebhookEventSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    eventType?: boolean
+    providerMessageId?: boolean
+    recipientEmail?: boolean
+    receivedAt?: boolean
+    processedAt?: boolean
+  }, ExtArgs["result"]["emailWebhookEvent"]>
+
+  export type EmailWebhookEventSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    eventType?: boolean
+    providerMessageId?: boolean
+    recipientEmail?: boolean
+    receivedAt?: boolean
+    processedAt?: boolean
+  }, ExtArgs["result"]["emailWebhookEvent"]>
+
+  export type EmailWebhookEventSelectScalar = {
+    id?: boolean
+    eventType?: boolean
+    providerMessageId?: boolean
+    recipientEmail?: boolean
+    receivedAt?: boolean
+    processedAt?: boolean
+  }
+
+  export type EmailWebhookEventOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "eventType" | "providerMessageId" | "recipientEmail" | "receivedAt" | "processedAt", ExtArgs["result"]["emailWebhookEvent"]>
+
+  export type $EmailWebhookEventPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "EmailWebhookEvent"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      eventType: string
+      providerMessageId: string | null
+      recipientEmail: string | null
+      receivedAt: Date
+      processedAt: Date | null
+    }, ExtArgs["result"]["emailWebhookEvent"]>
+    composites: {}
+  }
+
+  type EmailWebhookEventGetPayload<S extends boolean | null | undefined | EmailWebhookEventDefaultArgs> = $Result.GetResult<Prisma.$EmailWebhookEventPayload, S>
+
+  type EmailWebhookEventCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<EmailWebhookEventFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: EmailWebhookEventCountAggregateInputType | true
+    }
+
+  export interface EmailWebhookEventDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['EmailWebhookEvent'], meta: { name: 'EmailWebhookEvent' } }
+    /**
+     * Find zero or one EmailWebhookEvent that matches the filter.
+     * @param {EmailWebhookEventFindUniqueArgs} args - Arguments to find a EmailWebhookEvent
+     * @example
+     * // Get one EmailWebhookEvent
+     * const emailWebhookEvent = await prisma.emailWebhookEvent.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends EmailWebhookEventFindUniqueArgs>(args: SelectSubset<T, EmailWebhookEventFindUniqueArgs<ExtArgs>>): Prisma__EmailWebhookEventClient<$Result.GetResult<Prisma.$EmailWebhookEventPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one EmailWebhookEvent that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {EmailWebhookEventFindUniqueOrThrowArgs} args - Arguments to find a EmailWebhookEvent
+     * @example
+     * // Get one EmailWebhookEvent
+     * const emailWebhookEvent = await prisma.emailWebhookEvent.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends EmailWebhookEventFindUniqueOrThrowArgs>(args: SelectSubset<T, EmailWebhookEventFindUniqueOrThrowArgs<ExtArgs>>): Prisma__EmailWebhookEventClient<$Result.GetResult<Prisma.$EmailWebhookEventPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first EmailWebhookEvent that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EmailWebhookEventFindFirstArgs} args - Arguments to find a EmailWebhookEvent
+     * @example
+     * // Get one EmailWebhookEvent
+     * const emailWebhookEvent = await prisma.emailWebhookEvent.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends EmailWebhookEventFindFirstArgs>(args?: SelectSubset<T, EmailWebhookEventFindFirstArgs<ExtArgs>>): Prisma__EmailWebhookEventClient<$Result.GetResult<Prisma.$EmailWebhookEventPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first EmailWebhookEvent that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EmailWebhookEventFindFirstOrThrowArgs} args - Arguments to find a EmailWebhookEvent
+     * @example
+     * // Get one EmailWebhookEvent
+     * const emailWebhookEvent = await prisma.emailWebhookEvent.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends EmailWebhookEventFindFirstOrThrowArgs>(args?: SelectSubset<T, EmailWebhookEventFindFirstOrThrowArgs<ExtArgs>>): Prisma__EmailWebhookEventClient<$Result.GetResult<Prisma.$EmailWebhookEventPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more EmailWebhookEvents that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EmailWebhookEventFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all EmailWebhookEvents
+     * const emailWebhookEvents = await prisma.emailWebhookEvent.findMany()
+     * 
+     * // Get first 10 EmailWebhookEvents
+     * const emailWebhookEvents = await prisma.emailWebhookEvent.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const emailWebhookEventWithIdOnly = await prisma.emailWebhookEvent.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends EmailWebhookEventFindManyArgs>(args?: SelectSubset<T, EmailWebhookEventFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EmailWebhookEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a EmailWebhookEvent.
+     * @param {EmailWebhookEventCreateArgs} args - Arguments to create a EmailWebhookEvent.
+     * @example
+     * // Create one EmailWebhookEvent
+     * const EmailWebhookEvent = await prisma.emailWebhookEvent.create({
+     *   data: {
+     *     // ... data to create a EmailWebhookEvent
+     *   }
+     * })
+     * 
+     */
+    create<T extends EmailWebhookEventCreateArgs>(args: SelectSubset<T, EmailWebhookEventCreateArgs<ExtArgs>>): Prisma__EmailWebhookEventClient<$Result.GetResult<Prisma.$EmailWebhookEventPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many EmailWebhookEvents.
+     * @param {EmailWebhookEventCreateManyArgs} args - Arguments to create many EmailWebhookEvents.
+     * @example
+     * // Create many EmailWebhookEvents
+     * const emailWebhookEvent = await prisma.emailWebhookEvent.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends EmailWebhookEventCreateManyArgs>(args?: SelectSubset<T, EmailWebhookEventCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many EmailWebhookEvents and returns the data saved in the database.
+     * @param {EmailWebhookEventCreateManyAndReturnArgs} args - Arguments to create many EmailWebhookEvents.
+     * @example
+     * // Create many EmailWebhookEvents
+     * const emailWebhookEvent = await prisma.emailWebhookEvent.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many EmailWebhookEvents and only return the `id`
+     * const emailWebhookEventWithIdOnly = await prisma.emailWebhookEvent.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends EmailWebhookEventCreateManyAndReturnArgs>(args?: SelectSubset<T, EmailWebhookEventCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EmailWebhookEventPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a EmailWebhookEvent.
+     * @param {EmailWebhookEventDeleteArgs} args - Arguments to delete one EmailWebhookEvent.
+     * @example
+     * // Delete one EmailWebhookEvent
+     * const EmailWebhookEvent = await prisma.emailWebhookEvent.delete({
+     *   where: {
+     *     // ... filter to delete one EmailWebhookEvent
+     *   }
+     * })
+     * 
+     */
+    delete<T extends EmailWebhookEventDeleteArgs>(args: SelectSubset<T, EmailWebhookEventDeleteArgs<ExtArgs>>): Prisma__EmailWebhookEventClient<$Result.GetResult<Prisma.$EmailWebhookEventPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one EmailWebhookEvent.
+     * @param {EmailWebhookEventUpdateArgs} args - Arguments to update one EmailWebhookEvent.
+     * @example
+     * // Update one EmailWebhookEvent
+     * const emailWebhookEvent = await prisma.emailWebhookEvent.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends EmailWebhookEventUpdateArgs>(args: SelectSubset<T, EmailWebhookEventUpdateArgs<ExtArgs>>): Prisma__EmailWebhookEventClient<$Result.GetResult<Prisma.$EmailWebhookEventPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more EmailWebhookEvents.
+     * @param {EmailWebhookEventDeleteManyArgs} args - Arguments to filter EmailWebhookEvents to delete.
+     * @example
+     * // Delete a few EmailWebhookEvents
+     * const { count } = await prisma.emailWebhookEvent.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends EmailWebhookEventDeleteManyArgs>(args?: SelectSubset<T, EmailWebhookEventDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more EmailWebhookEvents.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EmailWebhookEventUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many EmailWebhookEvents
+     * const emailWebhookEvent = await prisma.emailWebhookEvent.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends EmailWebhookEventUpdateManyArgs>(args: SelectSubset<T, EmailWebhookEventUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more EmailWebhookEvents and returns the data updated in the database.
+     * @param {EmailWebhookEventUpdateManyAndReturnArgs} args - Arguments to update many EmailWebhookEvents.
+     * @example
+     * // Update many EmailWebhookEvents
+     * const emailWebhookEvent = await prisma.emailWebhookEvent.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more EmailWebhookEvents and only return the `id`
+     * const emailWebhookEventWithIdOnly = await prisma.emailWebhookEvent.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends EmailWebhookEventUpdateManyAndReturnArgs>(args: SelectSubset<T, EmailWebhookEventUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EmailWebhookEventPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one EmailWebhookEvent.
+     * @param {EmailWebhookEventUpsertArgs} args - Arguments to update or create a EmailWebhookEvent.
+     * @example
+     * // Update or create a EmailWebhookEvent
+     * const emailWebhookEvent = await prisma.emailWebhookEvent.upsert({
+     *   create: {
+     *     // ... data to create a EmailWebhookEvent
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the EmailWebhookEvent we want to update
+     *   }
+     * })
+     */
+    upsert<T extends EmailWebhookEventUpsertArgs>(args: SelectSubset<T, EmailWebhookEventUpsertArgs<ExtArgs>>): Prisma__EmailWebhookEventClient<$Result.GetResult<Prisma.$EmailWebhookEventPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of EmailWebhookEvents.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EmailWebhookEventCountArgs} args - Arguments to filter EmailWebhookEvents to count.
+     * @example
+     * // Count the number of EmailWebhookEvents
+     * const count = await prisma.emailWebhookEvent.count({
+     *   where: {
+     *     // ... the filter for the EmailWebhookEvents we want to count
+     *   }
+     * })
+    **/
+    count<T extends EmailWebhookEventCountArgs>(
+      args?: Subset<T, EmailWebhookEventCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], EmailWebhookEventCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a EmailWebhookEvent.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EmailWebhookEventAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends EmailWebhookEventAggregateArgs>(args: Subset<T, EmailWebhookEventAggregateArgs>): Prisma.PrismaPromise<GetEmailWebhookEventAggregateType<T>>
+
+    /**
+     * Group by EmailWebhookEvent.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EmailWebhookEventGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends EmailWebhookEventGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: EmailWebhookEventGroupByArgs['orderBy'] }
+        : { orderBy?: EmailWebhookEventGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, EmailWebhookEventGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetEmailWebhookEventGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the EmailWebhookEvent model
+   */
+  readonly fields: EmailWebhookEventFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for EmailWebhookEvent.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__EmailWebhookEventClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the EmailWebhookEvent model
+   */
+  interface EmailWebhookEventFieldRefs {
+    readonly id: FieldRef<"EmailWebhookEvent", 'String'>
+    readonly eventType: FieldRef<"EmailWebhookEvent", 'String'>
+    readonly providerMessageId: FieldRef<"EmailWebhookEvent", 'String'>
+    readonly recipientEmail: FieldRef<"EmailWebhookEvent", 'String'>
+    readonly receivedAt: FieldRef<"EmailWebhookEvent", 'DateTime'>
+    readonly processedAt: FieldRef<"EmailWebhookEvent", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * EmailWebhookEvent findUnique
+   */
+  export type EmailWebhookEventFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailWebhookEvent
+     */
+    select?: EmailWebhookEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailWebhookEvent
+     */
+    omit?: EmailWebhookEventOmit<ExtArgs> | null
+    /**
+     * Filter, which EmailWebhookEvent to fetch.
+     */
+    where: EmailWebhookEventWhereUniqueInput
+  }
+
+  /**
+   * EmailWebhookEvent findUniqueOrThrow
+   */
+  export type EmailWebhookEventFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailWebhookEvent
+     */
+    select?: EmailWebhookEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailWebhookEvent
+     */
+    omit?: EmailWebhookEventOmit<ExtArgs> | null
+    /**
+     * Filter, which EmailWebhookEvent to fetch.
+     */
+    where: EmailWebhookEventWhereUniqueInput
+  }
+
+  /**
+   * EmailWebhookEvent findFirst
+   */
+  export type EmailWebhookEventFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailWebhookEvent
+     */
+    select?: EmailWebhookEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailWebhookEvent
+     */
+    omit?: EmailWebhookEventOmit<ExtArgs> | null
+    /**
+     * Filter, which EmailWebhookEvent to fetch.
+     */
+    where?: EmailWebhookEventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EmailWebhookEvents to fetch.
+     */
+    orderBy?: EmailWebhookEventOrderByWithRelationInput | EmailWebhookEventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for EmailWebhookEvents.
+     */
+    cursor?: EmailWebhookEventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EmailWebhookEvents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EmailWebhookEvents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of EmailWebhookEvents.
+     */
+    distinct?: EmailWebhookEventScalarFieldEnum | EmailWebhookEventScalarFieldEnum[]
+  }
+
+  /**
+   * EmailWebhookEvent findFirstOrThrow
+   */
+  export type EmailWebhookEventFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailWebhookEvent
+     */
+    select?: EmailWebhookEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailWebhookEvent
+     */
+    omit?: EmailWebhookEventOmit<ExtArgs> | null
+    /**
+     * Filter, which EmailWebhookEvent to fetch.
+     */
+    where?: EmailWebhookEventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EmailWebhookEvents to fetch.
+     */
+    orderBy?: EmailWebhookEventOrderByWithRelationInput | EmailWebhookEventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for EmailWebhookEvents.
+     */
+    cursor?: EmailWebhookEventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EmailWebhookEvents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EmailWebhookEvents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of EmailWebhookEvents.
+     */
+    distinct?: EmailWebhookEventScalarFieldEnum | EmailWebhookEventScalarFieldEnum[]
+  }
+
+  /**
+   * EmailWebhookEvent findMany
+   */
+  export type EmailWebhookEventFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailWebhookEvent
+     */
+    select?: EmailWebhookEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailWebhookEvent
+     */
+    omit?: EmailWebhookEventOmit<ExtArgs> | null
+    /**
+     * Filter, which EmailWebhookEvents to fetch.
+     */
+    where?: EmailWebhookEventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EmailWebhookEvents to fetch.
+     */
+    orderBy?: EmailWebhookEventOrderByWithRelationInput | EmailWebhookEventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing EmailWebhookEvents.
+     */
+    cursor?: EmailWebhookEventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EmailWebhookEvents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EmailWebhookEvents.
+     */
+    skip?: number
+    distinct?: EmailWebhookEventScalarFieldEnum | EmailWebhookEventScalarFieldEnum[]
+  }
+
+  /**
+   * EmailWebhookEvent create
+   */
+  export type EmailWebhookEventCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailWebhookEvent
+     */
+    select?: EmailWebhookEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailWebhookEvent
+     */
+    omit?: EmailWebhookEventOmit<ExtArgs> | null
+    /**
+     * The data needed to create a EmailWebhookEvent.
+     */
+    data: XOR<EmailWebhookEventCreateInput, EmailWebhookEventUncheckedCreateInput>
+  }
+
+  /**
+   * EmailWebhookEvent createMany
+   */
+  export type EmailWebhookEventCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many EmailWebhookEvents.
+     */
+    data: EmailWebhookEventCreateManyInput | EmailWebhookEventCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * EmailWebhookEvent createManyAndReturn
+   */
+  export type EmailWebhookEventCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailWebhookEvent
+     */
+    select?: EmailWebhookEventSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailWebhookEvent
+     */
+    omit?: EmailWebhookEventOmit<ExtArgs> | null
+    /**
+     * The data used to create many EmailWebhookEvents.
+     */
+    data: EmailWebhookEventCreateManyInput | EmailWebhookEventCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * EmailWebhookEvent update
+   */
+  export type EmailWebhookEventUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailWebhookEvent
+     */
+    select?: EmailWebhookEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailWebhookEvent
+     */
+    omit?: EmailWebhookEventOmit<ExtArgs> | null
+    /**
+     * The data needed to update a EmailWebhookEvent.
+     */
+    data: XOR<EmailWebhookEventUpdateInput, EmailWebhookEventUncheckedUpdateInput>
+    /**
+     * Choose, which EmailWebhookEvent to update.
+     */
+    where: EmailWebhookEventWhereUniqueInput
+  }
+
+  /**
+   * EmailWebhookEvent updateMany
+   */
+  export type EmailWebhookEventUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update EmailWebhookEvents.
+     */
+    data: XOR<EmailWebhookEventUpdateManyMutationInput, EmailWebhookEventUncheckedUpdateManyInput>
+    /**
+     * Filter which EmailWebhookEvents to update
+     */
+    where?: EmailWebhookEventWhereInput
+    /**
+     * Limit how many EmailWebhookEvents to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * EmailWebhookEvent updateManyAndReturn
+   */
+  export type EmailWebhookEventUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailWebhookEvent
+     */
+    select?: EmailWebhookEventSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailWebhookEvent
+     */
+    omit?: EmailWebhookEventOmit<ExtArgs> | null
+    /**
+     * The data used to update EmailWebhookEvents.
+     */
+    data: XOR<EmailWebhookEventUpdateManyMutationInput, EmailWebhookEventUncheckedUpdateManyInput>
+    /**
+     * Filter which EmailWebhookEvents to update
+     */
+    where?: EmailWebhookEventWhereInput
+    /**
+     * Limit how many EmailWebhookEvents to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * EmailWebhookEvent upsert
+   */
+  export type EmailWebhookEventUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailWebhookEvent
+     */
+    select?: EmailWebhookEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailWebhookEvent
+     */
+    omit?: EmailWebhookEventOmit<ExtArgs> | null
+    /**
+     * The filter to search for the EmailWebhookEvent to update in case it exists.
+     */
+    where: EmailWebhookEventWhereUniqueInput
+    /**
+     * In case the EmailWebhookEvent found by the `where` argument doesn't exist, create a new EmailWebhookEvent with this data.
+     */
+    create: XOR<EmailWebhookEventCreateInput, EmailWebhookEventUncheckedCreateInput>
+    /**
+     * In case the EmailWebhookEvent was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<EmailWebhookEventUpdateInput, EmailWebhookEventUncheckedUpdateInput>
+  }
+
+  /**
+   * EmailWebhookEvent delete
+   */
+  export type EmailWebhookEventDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailWebhookEvent
+     */
+    select?: EmailWebhookEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailWebhookEvent
+     */
+    omit?: EmailWebhookEventOmit<ExtArgs> | null
+    /**
+     * Filter which EmailWebhookEvent to delete.
+     */
+    where: EmailWebhookEventWhereUniqueInput
+  }
+
+  /**
+   * EmailWebhookEvent deleteMany
+   */
+  export type EmailWebhookEventDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which EmailWebhookEvents to delete
+     */
+    where?: EmailWebhookEventWhereInput
+    /**
+     * Limit how many EmailWebhookEvents to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * EmailWebhookEvent without action
+   */
+  export type EmailWebhookEventDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailWebhookEvent
+     */
+    select?: EmailWebhookEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailWebhookEvent
+     */
+    omit?: EmailWebhookEventOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Model Experiment
    */
 
@@ -73868,6 +76104,33 @@ export namespace Prisma {
   };
 
   export type RetentionTriggerScalarFieldEnum = (typeof RetentionTriggerScalarFieldEnum)[keyof typeof RetentionTriggerScalarFieldEnum]
+
+
+  export const EmailSuppressionScalarFieldEnum: {
+    id: 'id',
+    email: 'email',
+    reason: 'reason',
+    sourceEventId: 'sourceEventId',
+    providerMessageId: 'providerMessageId',
+    active: 'active',
+    details: 'details',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type EmailSuppressionScalarFieldEnum = (typeof EmailSuppressionScalarFieldEnum)[keyof typeof EmailSuppressionScalarFieldEnum]
+
+
+  export const EmailWebhookEventScalarFieldEnum: {
+    id: 'id',
+    eventType: 'eventType',
+    providerMessageId: 'providerMessageId',
+    recipientEmail: 'recipientEmail',
+    receivedAt: 'receivedAt',
+    processedAt: 'processedAt'
+  };
+
+  export type EmailWebhookEventScalarFieldEnum = (typeof EmailWebhookEventScalarFieldEnum)[keyof typeof EmailWebhookEventScalarFieldEnum]
 
 
   export const ExperimentScalarFieldEnum: {
@@ -79206,6 +81469,135 @@ export namespace Prisma {
     lastError?: StringNullableWithAggregatesFilter<"RetentionTrigger"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"RetentionTrigger"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"RetentionTrigger"> | Date | string
+  }
+
+  export type EmailSuppressionWhereInput = {
+    AND?: EmailSuppressionWhereInput | EmailSuppressionWhereInput[]
+    OR?: EmailSuppressionWhereInput[]
+    NOT?: EmailSuppressionWhereInput | EmailSuppressionWhereInput[]
+    id?: StringFilter<"EmailSuppression"> | string
+    email?: StringFilter<"EmailSuppression"> | string
+    reason?: StringFilter<"EmailSuppression"> | string
+    sourceEventId?: StringNullableFilter<"EmailSuppression"> | string | null
+    providerMessageId?: StringNullableFilter<"EmailSuppression"> | string | null
+    active?: BoolFilter<"EmailSuppression"> | boolean
+    details?: JsonNullableFilter<"EmailSuppression">
+    createdAt?: DateTimeFilter<"EmailSuppression"> | Date | string
+    updatedAt?: DateTimeFilter<"EmailSuppression"> | Date | string
+  }
+
+  export type EmailSuppressionOrderByWithRelationInput = {
+    id?: SortOrder
+    email?: SortOrder
+    reason?: SortOrder
+    sourceEventId?: SortOrderInput | SortOrder
+    providerMessageId?: SortOrderInput | SortOrder
+    active?: SortOrder
+    details?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type EmailSuppressionWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    email?: string
+    AND?: EmailSuppressionWhereInput | EmailSuppressionWhereInput[]
+    OR?: EmailSuppressionWhereInput[]
+    NOT?: EmailSuppressionWhereInput | EmailSuppressionWhereInput[]
+    reason?: StringFilter<"EmailSuppression"> | string
+    sourceEventId?: StringNullableFilter<"EmailSuppression"> | string | null
+    providerMessageId?: StringNullableFilter<"EmailSuppression"> | string | null
+    active?: BoolFilter<"EmailSuppression"> | boolean
+    details?: JsonNullableFilter<"EmailSuppression">
+    createdAt?: DateTimeFilter<"EmailSuppression"> | Date | string
+    updatedAt?: DateTimeFilter<"EmailSuppression"> | Date | string
+  }, "id" | "email">
+
+  export type EmailSuppressionOrderByWithAggregationInput = {
+    id?: SortOrder
+    email?: SortOrder
+    reason?: SortOrder
+    sourceEventId?: SortOrderInput | SortOrder
+    providerMessageId?: SortOrderInput | SortOrder
+    active?: SortOrder
+    details?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: EmailSuppressionCountOrderByAggregateInput
+    _max?: EmailSuppressionMaxOrderByAggregateInput
+    _min?: EmailSuppressionMinOrderByAggregateInput
+  }
+
+  export type EmailSuppressionScalarWhereWithAggregatesInput = {
+    AND?: EmailSuppressionScalarWhereWithAggregatesInput | EmailSuppressionScalarWhereWithAggregatesInput[]
+    OR?: EmailSuppressionScalarWhereWithAggregatesInput[]
+    NOT?: EmailSuppressionScalarWhereWithAggregatesInput | EmailSuppressionScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"EmailSuppression"> | string
+    email?: StringWithAggregatesFilter<"EmailSuppression"> | string
+    reason?: StringWithAggregatesFilter<"EmailSuppression"> | string
+    sourceEventId?: StringNullableWithAggregatesFilter<"EmailSuppression"> | string | null
+    providerMessageId?: StringNullableWithAggregatesFilter<"EmailSuppression"> | string | null
+    active?: BoolWithAggregatesFilter<"EmailSuppression"> | boolean
+    details?: JsonNullableWithAggregatesFilter<"EmailSuppression">
+    createdAt?: DateTimeWithAggregatesFilter<"EmailSuppression"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"EmailSuppression"> | Date | string
+  }
+
+  export type EmailWebhookEventWhereInput = {
+    AND?: EmailWebhookEventWhereInput | EmailWebhookEventWhereInput[]
+    OR?: EmailWebhookEventWhereInput[]
+    NOT?: EmailWebhookEventWhereInput | EmailWebhookEventWhereInput[]
+    id?: StringFilter<"EmailWebhookEvent"> | string
+    eventType?: StringFilter<"EmailWebhookEvent"> | string
+    providerMessageId?: StringNullableFilter<"EmailWebhookEvent"> | string | null
+    recipientEmail?: StringNullableFilter<"EmailWebhookEvent"> | string | null
+    receivedAt?: DateTimeFilter<"EmailWebhookEvent"> | Date | string
+    processedAt?: DateTimeNullableFilter<"EmailWebhookEvent"> | Date | string | null
+  }
+
+  export type EmailWebhookEventOrderByWithRelationInput = {
+    id?: SortOrder
+    eventType?: SortOrder
+    providerMessageId?: SortOrderInput | SortOrder
+    recipientEmail?: SortOrderInput | SortOrder
+    receivedAt?: SortOrder
+    processedAt?: SortOrderInput | SortOrder
+  }
+
+  export type EmailWebhookEventWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: EmailWebhookEventWhereInput | EmailWebhookEventWhereInput[]
+    OR?: EmailWebhookEventWhereInput[]
+    NOT?: EmailWebhookEventWhereInput | EmailWebhookEventWhereInput[]
+    eventType?: StringFilter<"EmailWebhookEvent"> | string
+    providerMessageId?: StringNullableFilter<"EmailWebhookEvent"> | string | null
+    recipientEmail?: StringNullableFilter<"EmailWebhookEvent"> | string | null
+    receivedAt?: DateTimeFilter<"EmailWebhookEvent"> | Date | string
+    processedAt?: DateTimeNullableFilter<"EmailWebhookEvent"> | Date | string | null
+  }, "id">
+
+  export type EmailWebhookEventOrderByWithAggregationInput = {
+    id?: SortOrder
+    eventType?: SortOrder
+    providerMessageId?: SortOrderInput | SortOrder
+    recipientEmail?: SortOrderInput | SortOrder
+    receivedAt?: SortOrder
+    processedAt?: SortOrderInput | SortOrder
+    _count?: EmailWebhookEventCountOrderByAggregateInput
+    _max?: EmailWebhookEventMaxOrderByAggregateInput
+    _min?: EmailWebhookEventMinOrderByAggregateInput
+  }
+
+  export type EmailWebhookEventScalarWhereWithAggregatesInput = {
+    AND?: EmailWebhookEventScalarWhereWithAggregatesInput | EmailWebhookEventScalarWhereWithAggregatesInput[]
+    OR?: EmailWebhookEventScalarWhereWithAggregatesInput[]
+    NOT?: EmailWebhookEventScalarWhereWithAggregatesInput | EmailWebhookEventScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"EmailWebhookEvent"> | string
+    eventType?: StringWithAggregatesFilter<"EmailWebhookEvent"> | string
+    providerMessageId?: StringNullableWithAggregatesFilter<"EmailWebhookEvent"> | string | null
+    recipientEmail?: StringNullableWithAggregatesFilter<"EmailWebhookEvent"> | string | null
+    receivedAt?: DateTimeWithAggregatesFilter<"EmailWebhookEvent"> | Date | string
+    processedAt?: DateTimeNullableWithAggregatesFilter<"EmailWebhookEvent"> | Date | string | null
   }
 
   export type ExperimentWhereInput = {
@@ -84778,6 +87170,153 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type EmailSuppressionCreateInput = {
+    id?: string
+    email: string
+    reason: string
+    sourceEventId?: string | null
+    providerMessageId?: string | null
+    active?: boolean
+    details?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type EmailSuppressionUncheckedCreateInput = {
+    id?: string
+    email: string
+    reason: string
+    sourceEventId?: string | null
+    providerMessageId?: string | null
+    active?: boolean
+    details?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type EmailSuppressionUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    reason?: StringFieldUpdateOperationsInput | string
+    sourceEventId?: NullableStringFieldUpdateOperationsInput | string | null
+    providerMessageId?: NullableStringFieldUpdateOperationsInput | string | null
+    active?: BoolFieldUpdateOperationsInput | boolean
+    details?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EmailSuppressionUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    reason?: StringFieldUpdateOperationsInput | string
+    sourceEventId?: NullableStringFieldUpdateOperationsInput | string | null
+    providerMessageId?: NullableStringFieldUpdateOperationsInput | string | null
+    active?: BoolFieldUpdateOperationsInput | boolean
+    details?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EmailSuppressionCreateManyInput = {
+    id?: string
+    email: string
+    reason: string
+    sourceEventId?: string | null
+    providerMessageId?: string | null
+    active?: boolean
+    details?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type EmailSuppressionUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    reason?: StringFieldUpdateOperationsInput | string
+    sourceEventId?: NullableStringFieldUpdateOperationsInput | string | null
+    providerMessageId?: NullableStringFieldUpdateOperationsInput | string | null
+    active?: BoolFieldUpdateOperationsInput | boolean
+    details?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EmailSuppressionUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    reason?: StringFieldUpdateOperationsInput | string
+    sourceEventId?: NullableStringFieldUpdateOperationsInput | string | null
+    providerMessageId?: NullableStringFieldUpdateOperationsInput | string | null
+    active?: BoolFieldUpdateOperationsInput | boolean
+    details?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EmailWebhookEventCreateInput = {
+    id: string
+    eventType: string
+    providerMessageId?: string | null
+    recipientEmail?: string | null
+    receivedAt?: Date | string
+    processedAt?: Date | string | null
+  }
+
+  export type EmailWebhookEventUncheckedCreateInput = {
+    id: string
+    eventType: string
+    providerMessageId?: string | null
+    recipientEmail?: string | null
+    receivedAt?: Date | string
+    processedAt?: Date | string | null
+  }
+
+  export type EmailWebhookEventUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    eventType?: StringFieldUpdateOperationsInput | string
+    providerMessageId?: NullableStringFieldUpdateOperationsInput | string | null
+    recipientEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    receivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type EmailWebhookEventUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    eventType?: StringFieldUpdateOperationsInput | string
+    providerMessageId?: NullableStringFieldUpdateOperationsInput | string | null
+    recipientEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    receivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type EmailWebhookEventCreateManyInput = {
+    id: string
+    eventType: string
+    providerMessageId?: string | null
+    recipientEmail?: string | null
+    receivedAt?: Date | string
+    processedAt?: Date | string | null
+  }
+
+  export type EmailWebhookEventUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    eventType?: StringFieldUpdateOperationsInput | string
+    providerMessageId?: NullableStringFieldUpdateOperationsInput | string | null
+    recipientEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    receivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type EmailWebhookEventUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    eventType?: StringFieldUpdateOperationsInput | string
+    providerMessageId?: NullableStringFieldUpdateOperationsInput | string | null
+    recipientEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    receivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
   export type ExperimentCreateInput = {
     id?: string
     key: string
@@ -88837,6 +91376,67 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumRetentionTriggerStatusFilter<$PrismaModel>
     _max?: NestedEnumRetentionTriggerStatusFilter<$PrismaModel>
+  }
+
+  export type EmailSuppressionCountOrderByAggregateInput = {
+    id?: SortOrder
+    email?: SortOrder
+    reason?: SortOrder
+    sourceEventId?: SortOrder
+    providerMessageId?: SortOrder
+    active?: SortOrder
+    details?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type EmailSuppressionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    email?: SortOrder
+    reason?: SortOrder
+    sourceEventId?: SortOrder
+    providerMessageId?: SortOrder
+    active?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type EmailSuppressionMinOrderByAggregateInput = {
+    id?: SortOrder
+    email?: SortOrder
+    reason?: SortOrder
+    sourceEventId?: SortOrder
+    providerMessageId?: SortOrder
+    active?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type EmailWebhookEventCountOrderByAggregateInput = {
+    id?: SortOrder
+    eventType?: SortOrder
+    providerMessageId?: SortOrder
+    recipientEmail?: SortOrder
+    receivedAt?: SortOrder
+    processedAt?: SortOrder
+  }
+
+  export type EmailWebhookEventMaxOrderByAggregateInput = {
+    id?: SortOrder
+    eventType?: SortOrder
+    providerMessageId?: SortOrder
+    recipientEmail?: SortOrder
+    receivedAt?: SortOrder
+    processedAt?: SortOrder
+  }
+
+  export type EmailWebhookEventMinOrderByAggregateInput = {
+    id?: SortOrder
+    eventType?: SortOrder
+    providerMessageId?: SortOrder
+    recipientEmail?: SortOrder
+    receivedAt?: SortOrder
+    processedAt?: SortOrder
   }
 
   export type EnumExperimentStatusFilter<$PrismaModel = never> = {

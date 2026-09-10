@@ -1,10 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Clock3 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import type { HomepageDTO } from "@nuru/types";
 import type { Route } from "next";
 import { formatPrice } from "@/lib/formatPrice";
 import RatingStars from "@/components/ui/RatingStars";
+import PromotionCountdown from "@/components/merchandising/PromotionCountdown";
 
 function configuration(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value)
@@ -119,11 +120,12 @@ export default function HomepageSections({ homepage }: { homepage: HomepageDTO }
                           </p>
                         </div>
                         {product.promotionEndsAt && (
-                          <span
-                            className="inline-flex items-center gap-1 text-[10px] text-rose-600"
-                            title={`Ends ${product.promotionEndsAt}`}
-                          >
-                            <Clock3 size={12} /> Limited
+                          <span className="text-rose-600" title={`Ends ${product.promotionEndsAt}`}>
+                            <PromotionCountdown
+                              endsAt={product.promotionEndsAt}
+                              initialNow={homepage.generatedAt}
+                              compact
+                            />
                           </span>
                         )}
                       </div>

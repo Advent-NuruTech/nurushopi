@@ -68,22 +68,38 @@ export async function signup(input: SignupInput): Promise<User> {
     referredById = referrer?.id ?? null;
   }
 
-  const user = await prisma.user.create({
-    data: {
-      email: input.email,
-      passwordHash,
-      name: input.name ?? null,
-      phone: input.phone ?? null,
-      referralCode,
-      referredById,
-    },
-  });
-
-  if (referredById) {
-    await prisma.referral.create({
-      data: { referrerId: referredById, referredId: user.id },
+  const user = await prisma.$transaction(async (tx) => {
+    const created = await tx.user.create({
+      data: {
+        email: input.email,
+        passwordHash,
+        name: input.name ?? null,
+        phone: input.phone ?? null,
+        referralCode,
+        referredById,
+      },
     });
-  }
+
+    if (referredById) {
+      await tx.referral.create({
+        data: { referrerId: referredById, referredId: created.id },
+      });
+    }
+    if (input.marketingOptIn) {
+      await tx.notificationPreference.create({
+        data: {
+          userId: created.id,
+          channel: "email",
+          topic: "monthly_promotion",
+          enabled: true,
+          consentedAt: new Date(),
+          maxPerDay: 1,
+          maxPerWeek: 1,
+        },
+      });
+    }
+    return created;
+  });
 
   await createAndSendVerification(user.id, user.email);
   return user;

@@ -7,6 +7,8 @@ process.env.JWT_REFRESH_SECRET ??= "test-refresh-secret-0123456789abcdef";
 process.env.WEB_ORIGIN ??= "http://localhost:3000";
 process.env.API_PUBLIC_URL ??= "http://localhost:4000";
 process.env.WEB_APP_URL ??= "http://localhost:3000";
+process.env.RESEND_WEBHOOK_SECRET ??=
+  "whsec_dGVzdC1yZXNlbmQtd2ViaG9vay1zZWNyZXQtMzItYnl0ZXM=";
 process.env.SENIOR_ADMIN_CODE ??= "test-senior-admin-code-0123456789";
 // Enables the legacy (Firebase scrypt) login path so the lazy-rehash flow is
 // testable. The actual scrypt verifier is mocked in the relevant test.

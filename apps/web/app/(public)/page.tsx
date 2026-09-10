@@ -59,6 +59,11 @@ export default async function HomePage() {
     cta: section.collection.ctaText,
     href: (section.collection.ctaUrl ||
       `/collections/${encodeURIComponent(section.collection.key)}`) as Route,
+    promotionEndsAt:
+      section.products
+        .flatMap((product) => (product.promotionEndsAt ? [product.promotionEndsAt] : []))
+        .sort()[0] ?? null,
+    generatedAt: homepage.generatedAt,
   }));
 
   return (

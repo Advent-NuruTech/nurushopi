@@ -5,10 +5,7 @@ const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   // Hosts like Render inject the listening port via PORT; prefer it, then
   // fall back to an explicit API_PORT, then the local-dev default.
-  API_PORT: z.preprocess(
-    (v) => v ?? process.env.PORT,
-    z.coerce.number().default(4000),
-  ),
+  API_PORT: z.preprocess((v) => v ?? process.env.PORT, z.coerce.number().default(4000)),
 
   WEB_ORIGIN: z.string().default("http://localhost:3000"),
   API_PUBLIC_URL: z.string().url().default("http://localhost:4000"),
@@ -51,7 +48,31 @@ const envSchema = z.object({
   SMTP_PORT: z.coerce.number().optional(),
   SMTP_USER: z.string().optional(),
   SMTP_PASSWORD: z.string().optional(),
-  EMAIL_FROM: z.string().default("NuruShop <no-reply@nurushop.com>"),
+  RESEND_API_KEY: z.preprocess(
+    (v) => (v === "" ? undefined : v),
+    z.string().startsWith("re_").optional(),
+  ),
+  RESEND_WEBHOOK_SECRET: z.preprocess(
+    (v) => (v === "" ? undefined : v),
+    z.string().startsWith("whsec_").optional(),
+  ),
+  EMAIL_FROM: z.string().default("NuruShop <hello@nurushop.co.ke>"),
+  EMAIL_REPLY_TO: z.preprocess(
+    (v) => (v === "" ? undefined : v),
+    z.string().email().optional(),
+  ),
+  MARKETING_EMAIL_ENABLED: z
+    .preprocess((v) => (typeof v === "string" ? v.toLowerCase() : v), z.enum(["true", "false"]))
+    .default("true")
+    .transform((v) => v === "true"),
+  // Deliberately below Resend's free-plan quotas. This reserves capacity for
+  // account verification, password reset and other transactional messages.
+  MARKETING_EMAIL_DAILY_LIMIT: z.coerce.number().int().min(1).max(100_000).default(80),
+  MARKETING_EMAIL_MONTHLY_LIMIT: z.coerce.number().int().min(1).max(1_000_000).default(2_400),
+  MARKETING_EMAIL_BATCH_SIZE: z.coerce.number().int().min(1).max(100).default(10),
+  MARKETING_EMAIL_RATE_PER_SECOND: z.coerce.number().min(0.2).max(5).default(1),
+  MARKETING_EMAIL_POLL_MINUTES: z.coerce.number().int().min(5).max(1_440).default(15),
+  EMAIL_BUSINESS_ADDRESS: z.string().default("NuruShop, Kenya"),
 });
 
 const parsed = envSchema.safeParse(process.env);
@@ -90,3 +111,10 @@ export const firebaseScryptParams = {
 export const googleOAuthConfigured = Boolean(
   env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET && env.GOOGLE_REDIRECT_URI,
 );
+
+export const resendConfigured = Boolean(env.RESEND_API_KEY);
+
+export const marketingEmailConfigured =
+  resendConfigured &&
+  env.MARKETING_EMAIL_ENABLED &&
+  (isProd || process.env.MARKETING_EMAIL_ALLOW_DEVELOPMENT === "true");

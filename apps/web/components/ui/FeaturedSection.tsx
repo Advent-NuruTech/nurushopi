@@ -14,6 +14,7 @@ import { getDiscountPercent, getOriginalPrice, getSellingPrice } from "@/lib/pri
 import { useSabbathStatus } from "@/lib/useSabbathStatus";
 import RatingStars from "@/components/ui/RatingStars";
 import ShareButton from "@/components/ui/ShareButton";
+import PromotionCountdown from "@/components/merchandising/PromotionCountdown";
 import type { BannerVM, WholesaleCardVM } from "@/lib/view/catalog";
 
 interface Product {
@@ -51,6 +52,8 @@ export interface MerchandisingFeedCard {
   badge?: string | null;
   cta?: string | null;
   href: Route;
+  promotionEndsAt?: string | null;
+  generatedAt?: string;
 }
 
 interface FeaturedSectionProps {
@@ -423,9 +426,25 @@ export default function FeaturedSection({
                         <p className="mt-auto pt-8 text-[10px] font-extrabold uppercase tracking-[0.16em] text-brand-strong dark:text-brand-bright">
                           {merchandisingCard.badge || "Featured collection"}
                         </p>
+                        {merchandisingCard.promotionEndsAt && (
+                          <span className="mt-2 inline-flex w-fit rounded-full bg-rose-600 px-2.5 py-1.5 text-white shadow-sm">
+                            <PromotionCountdown
+                              endsAt={merchandisingCard.promotionEndsAt}
+                              initialNow={merchandisingCard.generatedAt}
+                            />
+                          </span>
+                        )}
                         <h3 className="mt-2 text-lg font-bold leading-tight text-slate-950 sm:text-xl dark:text-white">
                           {merchandisingCard.title}
                         </h3>
+                        {merchandisingCard.promotionEndsAt && (
+                          <span className="mt-2 w-fit rounded-full bg-white/85 px-2.5 py-1 text-rose-700 shadow-sm dark:bg-slate-950/70 dark:text-rose-300">
+                            <PromotionCountdown
+                              endsAt={merchandisingCard.promotionEndsAt}
+                              initialNow={merchandisingCard.generatedAt}
+                            />
+                          </span>
+                        )}
                         {merchandisingCard.description && (
                           <p className="mt-2 line-clamp-3 text-xs leading-5 text-slate-600 dark:text-slate-300">
                             {merchandisingCard.description}

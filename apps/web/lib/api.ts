@@ -95,9 +95,14 @@ import type {
   CollectionMembershipImportInput,
   MerchandisingLifecycleInput,
   MerchandisingWorkspaceCreateInput,
+  AdminPromotionDTO,
+  PromotionCreateInput,
+  PromotionStatusUpdateInput,
   WishlistItemDTO,
   WishlistQuery,
   WishlistUpsertInput,
+  NotificationPreferenceDTO,
+  NotificationPreferenceInput,
 } from "@nuru/types";
 
 /** Public wholesale list filters accepted by the API (all optional on the client). */
@@ -238,7 +243,13 @@ export const authApi = {
   updateProfile: (input: ProfileUpdateInput) => api.patch<AuthUserResponse>("/auth/me", input),
   login: (email: string, password: string) =>
     api.post<AuthUserResponse>("/auth/login", { email, password }),
-  signup: (input: { email: string; password: string; name?: string; referralCode?: string }) =>
+  signup: (input: {
+    email: string;
+    password: string;
+    name?: string;
+    referralCode?: string;
+    marketingOptIn?: boolean;
+  }) =>
     api.post<AuthUserResponse>("/auth/signup", input),
   logout: () => api.post<{ success: boolean }>("/auth/logout"),
   refresh: () => api.post<{ success: boolean }>("/auth/refresh"),
@@ -724,6 +735,11 @@ export interface AdminHomepageSection {
 }
 
 export const merchandisingApi = {
+  preferences: {
+    list: () => api.get<{ preferences: NotificationPreferenceDTO[] }>("/retention/preferences"),
+    save: (input: NotificationPreferenceInput) =>
+      api.put<{ preference: NotificationPreferenceDTO }>("/retention/preferences", input),
+  },
   admin: {
     collections: () =>
       api.get<{ collections: MerchandisingCollectionDTO[] }>("/admin/merchandising/collections"),
@@ -782,6 +798,17 @@ export const merchandisingApi = {
     analytics: (id: string, days = 30) =>
       api.get<{ analytics: Record<string, number | string | null> }>(
         `/admin/merchandising/collections/${encodeURIComponent(id)}/analytics?days=${days}`,
+      ),
+    promotions: (collectionId?: string) =>
+      api.get<{ promotions: AdminPromotionDTO[] }>(
+        `/admin/merchandising/promotions${qs({ collectionId })}`,
+      ),
+    createPromotion: (input: PromotionCreateInput) =>
+      api.post<{ promotion: AdminPromotionDTO }>("/admin/merchandising/promotions", input),
+    updatePromotionStatus: (id: string, input: PromotionStatusUpdateInput) =>
+      api.patch<{ promotion: AdminPromotionDTO }>(
+        `/admin/merchandising/promotions/${encodeURIComponent(id)}/status`,
+        input,
       ),
   },
   vendor: {

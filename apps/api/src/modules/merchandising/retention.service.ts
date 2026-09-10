@@ -102,6 +102,7 @@ export async function dispatchRetentionBatch(now = new Date(), limit = 100): Pro
   const triggers = await prisma.retentionTrigger.findMany({
     where: {
       status: "PENDING",
+      channel: "in_app",
       scheduledAt: { lte: now },
       OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
     },

@@ -28,6 +28,7 @@ function SignupForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -65,7 +66,12 @@ function SignupForm() {
         typeof window !== "undefined"
           ? (localStorage.getItem("nurushop_referrer") ?? undefined)
           : undefined;
-      const { user: authUser } = await authApi.signup({ email, password, referralCode });
+      const { user: authUser } = await authApi.signup({
+        email,
+        password,
+        referralCode,
+        marketingOptIn,
+      });
       localStorage.removeItem("nurushop_referrer");
       setUserFromAuth(authUser);
       setSuccess("Account created successfully! Redirecting...");
@@ -151,7 +157,7 @@ function SignupForm() {
               </div>
             </div>
 
-            <div className="mb-6">
+            <div className="mb-4">
               <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
                 Confirm Password
               </label>
@@ -174,6 +180,19 @@ function SignupForm() {
                 </button>
               </div>
             </div>
+
+            <label className="mb-6 flex cursor-pointer items-start gap-3 rounded-2xl border border-[#B8F5C8] bg-[#EFFCF3] p-3.5 text-sm text-slate-700">
+              <input
+                type="checkbox"
+                checked={marketingOptIn}
+                onChange={(event) => setMarketingOptIn(event.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-[#009933]"
+              />
+              <span>
+                Send me one monthly email with useful product picks and genuine offers. Optional;
+                unsubscribe anytime.
+              </span>
+            </label>
 
             <motion.button
               type="submit"

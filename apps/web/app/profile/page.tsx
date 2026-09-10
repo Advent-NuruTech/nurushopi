@@ -33,6 +33,7 @@ import AuthRequired from "./components/AuthRequired";
 import MessagesPanel from "./components/MessagesPanel";
 import WalletTab from "./components/WalletTab";
 import ReviewsTab from "./components/ReviewsTab";
+import MarketingEmailPreference from "./components/MarketingEmailPreference";
 //import QuickReorder from "./components/QuickReorder";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 
@@ -458,16 +459,19 @@ function ProfilePageContent() {
 */}
 
             {activeTab === "profile" && (
-              <UpdateProfile
-                editFullName={editFullName}
-                editPhone={editPhone}
-                editAddress={editAddress}
-                onFullNameChange={setEditFullName}
-                onPhoneChange={setEditPhone}
-                onAddressChange={setEditAddress}
-                onSave={() => setShowConfirmModal(true)}
-                saving={saving}
-              />
+              <>
+                <UpdateProfile
+                  editFullName={editFullName}
+                  editPhone={editPhone}
+                  editAddress={editAddress}
+                  onFullNameChange={setEditFullName}
+                  onPhoneChange={setEditPhone}
+                  onAddressChange={setEditAddress}
+                  onSave={() => setShowConfirmModal(true)}
+                  saving={saving}
+                />
+                <MarketingEmailPreference />
+              </>
             )}
 
             {activeTab === "invite" && (

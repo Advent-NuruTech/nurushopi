@@ -45,6 +45,8 @@ merchandisingPublicRouter.delete(
   requireAuth,
   asyncHandler(ctrl.unsubscribeRetention),
 );
+merchandisingPublicRouter.get("/email/unsubscribe", asyncHandler(ctrl.showEmailUnsubscribe));
+merchandisingPublicRouter.post("/email/unsubscribe", asyncHandler(ctrl.confirmEmailUnsubscribe));
 
 /** Audited control-plane endpoints. Any admin may read; writes require SENIOR. */
 export const merchandisingAdminRouter: Router = Router();
@@ -56,6 +58,7 @@ merchandisingAdminRouter.get(
   asyncHandler(ctrl.adminCollectionAnalytics),
 );
 merchandisingAdminRouter.get("/homepage-sections", asyncHandler(ctrl.adminHomepageSections));
+merchandisingAdminRouter.get("/promotions", asyncHandler(ctrl.adminPromotions));
 
 merchandisingAdminRouter.post(
   "/collections",
@@ -121,6 +124,11 @@ merchandisingAdminRouter.post(
   "/promotions",
   requireAdmin("SENIOR"),
   asyncHandler(ctrl.adminCreatePromotion),
+);
+merchandisingAdminRouter.patch(
+  "/promotions/:id/status",
+  requireAdmin("SENIOR"),
+  asyncHandler(ctrl.adminUpdatePromotionStatus),
 );
 
 /** Vendor merchandising access: discover collections and manage only owned products. */

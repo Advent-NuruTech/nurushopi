@@ -864,6 +864,27 @@ exports.Prisma.RetentionTriggerScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.EmailSuppressionScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  reason: 'reason',
+  sourceEventId: 'sourceEventId',
+  providerMessageId: 'providerMessageId',
+  active: 'active',
+  details: 'details',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.EmailWebhookEventScalarFieldEnum = {
+  id: 'id',
+  eventType: 'eventType',
+  providerMessageId: 'providerMessageId',
+  recipientEmail: 'recipientEmail',
+  receivedAt: 'receivedAt',
+  processedAt: 'processedAt'
+};
+
 exports.Prisma.ExperimentScalarFieldEnum = {
   id: 'id',
   key: 'key',
@@ -1122,6 +1143,8 @@ exports.Prisma.ModelName = {
   NotificationPreference: 'NotificationPreference',
   RetentionSubscription: 'RetentionSubscription',
   RetentionTrigger: 'RetentionTrigger',
+  EmailSuppression: 'EmailSuppression',
+  EmailWebhookEvent: 'EmailWebhookEvent',
   Experiment: 'Experiment',
   ExperimentAssignment: 'ExperimentAssignment'
 };

@@ -94,7 +94,10 @@ export interface CollectionMembershipDTO {
   rank: number | null;
   startsAt: string | null;
   expiresAt: string | null;
-  product: Pick<ProductDTO, "id" | "name" | "sku" | "images" | "stock" | "isActive" | "vendorId">;
+  product: Pick<
+    ProductDTO,
+    "id" | "name" | "sku" | "images" | "price" | "sellingPrice" | "stock" | "isActive" | "vendorId"
+  >;
 }
 
 export const collectionOverrideSchema = z.object({
@@ -308,6 +311,40 @@ export const promotionCreateSchema = z
   });
 export type PromotionCreateInput = z.infer<typeof promotionCreateSchema>;
 
+export const promotionStatusUpdateSchema = z.object({
+  status: z.enum(["ACTIVE", "PAUSED"]),
+});
+export type PromotionStatusUpdateInput = z.infer<typeof promotionStatusUpdateSchema>;
+
+export interface AdminPromotionProductDTO {
+  id: string;
+  productId: string;
+  promotionalPrice: string | null;
+  inventoryLimit: number | null;
+  purchasedCount: number;
+  perCustomerLimit: number | null;
+  product: Pick<ProductDTO, "id" | "name" | "sku" | "price" | "sellingPrice">;
+}
+
+export interface AdminPromotionDTO {
+  id: string;
+  key: string;
+  name: string;
+  status: z.infer<typeof merchandisingStatus>;
+  discountType: z.infer<typeof promotionCreateSchema>["discountType"];
+  discountValue: string;
+  fundingType: z.infer<typeof promotionCreateSchema>["fundingType"];
+  collectionId: string | null;
+  startsAt: string;
+  endsAt: string;
+  inventoryLimit: number | null;
+  purchasedCount: number;
+  perCustomerLimit: number | null;
+  products: AdminPromotionProductDTO[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export const bundleQuoteSchema = z.object({
   bundleId: idSchema,
   productIds: z.array(idSchema).min(1).max(20),
@@ -323,6 +360,7 @@ export const notificationPreferenceSchema = z.object({
     "cart_recovery",
     "new_discovery",
     "reorder",
+    "monthly_promotion",
   ]),
   enabled: z.boolean(),
   maxPerDay: z.coerce.number().int().min(0).max(20).default(2),
@@ -330,6 +368,19 @@ export const notificationPreferenceSchema = z.object({
   quietHours: jsonObject,
 });
 export type NotificationPreferenceInput = z.infer<typeof notificationPreferenceSchema>;
+
+export interface NotificationPreferenceDTO {
+  id: string;
+  userId: string;
+  channel: NotificationPreferenceInput["channel"];
+  topic: NotificationPreferenceInput["topic"];
+  enabled: boolean;
+  consentedAt: string | null;
+  quietHours: Record<string, unknown> | null;
+  maxPerDay: number;
+  maxPerWeek: number;
+  updatedAt: string;
+}
 
 export const retentionSubscriptionSchema = z.object({
   productId: idSchema,

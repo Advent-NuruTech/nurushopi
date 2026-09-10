@@ -2,6 +2,10 @@ import { prisma, Prisma, type ProductMetricHourly } from "@nuru/db";
 import { COLLECTION_KEYS } from "@nuru/types";
 import { bestsellerScore, trendingScore } from "./ranking.js";
 import { dispatchRetentionBatch } from "./retention.service.js";
+import {
+  dispatchMonthlyPromotionEmails,
+  scheduleMonthlyPromotionEmails,
+} from "./monthly-email.service.js";
 
 export interface MaintenanceResult {
   activatedPromotions: number;
@@ -11,6 +15,8 @@ export interface MaintenanceResult {
   bestsellerCandidates: number;
   trendingCandidates: number;
   retentionSent: number;
+  monthlyEmailsScheduled: number;
+  monthlyEmailsSent: number;
   completedAt: string;
 }
 
@@ -129,13 +135,21 @@ async function publishRanking(
     if (ranked.length) {
       await tx.productRanking.createMany({
         data: ranked.map((item, index) => ({
-          collectionId, productId: item.productId, algorithm, segmentKey: "global",
-          snapshotAt: now, score: item.score, rank: index + 1, reasons: item.reasons, expiresAt,
+          collectionId,
+          productId: item.productId,
+          algorithm,
+          segmentKey: "global",
+          snapshotAt: now,
+          score: item.score,
+          rank: index + 1,
+          reasons: item.reasons,
+          expiresAt,
         })),
       });
     }
     await tx.merchandisingCollection.update({
-      where: { id: collectionId }, data: { cacheVersion: { increment: 1 } },
+      where: { id: collectionId },
+      data: { cacheVersion: { increment: 1 } },
     });
     await tx.productRanking.deleteMany({
       where: { collectionId, snapshotAt: { lt: new Date(now.getTime() - 48 * 60 * 60 * 1000) } },
@@ -145,7 +159,9 @@ async function publishRanking(
 }
 
 async function refreshFreshFinds(now: Date): Promise<number> {
-  const collection = await prisma.merchandisingCollection.findUnique({ where: { key: COLLECTION_KEYS.newArrivals } });
+  const collection = await prisma.merchandisingCollection.findUnique({
+    where: { key: COLLECTION_KEYS.newArrivals },
+  });
   if (!collection) return 0;
   const windowDays = configNumber(collection.configuration, "newArrivalWindowDays", 30);
   const products = await prisma.product.findMany({
@@ -161,53 +177,90 @@ async function refreshFreshFinds(now: Date): Promise<number> {
   await prisma.$transaction(async (tx) => {
     for (let index = 0; index < products.length; index += 500) {
       const batch = products.slice(index, index + 500);
-      await Promise.all(batch.map((product, offset) => tx.collectionMembership.upsert({
-        where: { collectionId_productId: { collectionId: collection.id, productId: product.id } },
-        create: {
-          collectionId: collection.id, productId: product.id, source: "AUTOMATIC",
-          rank: index + offset + 1,
-          score: product.createdAt.getTime() / 1_000_000_000_000 + Math.log1p(product.stock),
-          expiresAt: new Date(product.createdAt.getTime() + windowDays * 86_400_000),
-          metadata: { windowDays },
-        },
-        update: {
-          rank: index + offset + 1,
-          expiresAt: new Date(product.createdAt.getTime() + windowDays * 86_400_000),
-        },
-      })));
+      await Promise.all(
+        batch.map((product, offset) =>
+          tx.collectionMembership.upsert({
+            where: {
+              collectionId_productId: { collectionId: collection.id, productId: product.id },
+            },
+            create: {
+              collectionId: collection.id,
+              productId: product.id,
+              source: "AUTOMATIC",
+              rank: index + offset + 1,
+              score: product.createdAt.getTime() / 1_000_000_000_000 + Math.log1p(product.stock),
+              expiresAt: new Date(product.createdAt.getTime() + windowDays * 86_400_000),
+              metadata: { windowDays },
+            },
+            update: {
+              rank: index + offset + 1,
+              expiresAt: new Date(product.createdAt.getTime() + windowDays * 86_400_000),
+            },
+          }),
+        ),
+      );
     }
     await tx.collectionMembership.deleteMany({
       where: { collectionId: collection.id, source: "AUTOMATIC", expiresAt: { lte: now } },
     });
     await tx.merchandisingCollection.update({
-      where: { id: collection.id }, data: { cacheVersion: { increment: 1 } },
+      where: { id: collection.id },
+      data: { cacheVersion: { increment: 1 } },
     });
   });
   return products.length;
 }
 
 interface MetricTotals {
-  impressions: number; uniqueViewers: number; views: number; wishlistAdds: number;
-  cartAdds: number; purchases: number; unitsSold: number; revenue: number;
-  cancellations: number; returns: number; reviewActivity: number;
-  suspiciousEvents: number; latestAgeHours: number;
+  impressions: number;
+  uniqueViewers: number;
+  views: number;
+  wishlistAdds: number;
+  cartAdds: number;
+  purchases: number;
+  unitsSold: number;
+  revenue: number;
+  cancellations: number;
+  returns: number;
+  reviewActivity: number;
+  suspiciousEvents: number;
+  latestAgeHours: number;
 }
 
 function sumMetrics(rows: ProductMetricHourly[], now: Date) {
   const byProduct = new Map<string, MetricTotals>();
   for (const row of rows) {
     const value = byProduct.get(row.productId) ?? {
-      impressions: 0, uniqueViewers: 0, views: 0, wishlistAdds: 0, cartAdds: 0,
-      purchases: 0, unitsSold: 0, revenue: 0, cancellations: 0, returns: 0,
-      reviewActivity: 0, suspiciousEvents: 0, latestAgeHours: Number.POSITIVE_INFINITY,
+      impressions: 0,
+      uniqueViewers: 0,
+      views: 0,
+      wishlistAdds: 0,
+      cartAdds: 0,
+      purchases: 0,
+      unitsSold: 0,
+      revenue: 0,
+      cancellations: 0,
+      returns: 0,
+      reviewActivity: 0,
+      suspiciousEvents: 0,
+      latestAgeHours: Number.POSITIVE_INFINITY,
     };
-    value.impressions += row.impressions; value.uniqueViewers += row.uniqueViewers;
-    value.views += row.views; value.wishlistAdds += row.wishlistAdds;
-    value.cartAdds += row.cartAdds; value.purchases += row.purchases;
-    value.unitsSold += row.unitsSold; value.revenue += Number(row.revenue);
-    value.cancellations += row.cancellations; value.returns += row.returns;
-    value.reviewActivity += row.reviewActivity; value.suspiciousEvents += row.suspiciousEvents;
-    value.latestAgeHours = Math.min(value.latestAgeHours, (now.getTime() - row.bucketStart.getTime()) / 3_600_000);
+    value.impressions += row.impressions;
+    value.uniqueViewers += row.uniqueViewers;
+    value.views += row.views;
+    value.wishlistAdds += row.wishlistAdds;
+    value.cartAdds += row.cartAdds;
+    value.purchases += row.purchases;
+    value.unitsSold += row.unitsSold;
+    value.revenue += Number(row.revenue);
+    value.cancellations += row.cancellations;
+    value.returns += row.returns;
+    value.reviewActivity += row.reviewActivity;
+    value.suspiciousEvents += row.suspiciousEvents;
+    value.latestAgeHours = Math.min(
+      value.latestAgeHours,
+      (now.getTime() - row.bucketStart.getTime()) / 3_600_000,
+    );
     byProduct.set(row.productId, value);
   }
   return byProduct;
@@ -216,10 +269,12 @@ function sumMetrics(rows: ProductMetricHourly[], now: Date) {
 export async function runMerchandisingMaintenance(now = new Date()): Promise<MaintenanceResult> {
   const [activated, expired, memberships] = await prisma.$transaction([
     prisma.promotion.updateMany({
-      where: { status: "SCHEDULED", startsAt: { lte: now }, endsAt: { gt: now } }, data: { status: "ACTIVE" },
+      where: { status: "SCHEDULED", startsAt: { lte: now }, endsAt: { gt: now } },
+      data: { status: "ACTIVE" },
     }),
     prisma.promotion.updateMany({
-      where: { status: { in: ["ACTIVE", "SCHEDULED"] }, endsAt: { lte: now } }, data: { status: "ARCHIVED" },
+      where: { status: { in: ["ACTIVE", "SCHEDULED"] }, endsAt: { lte: now } },
+      data: { status: "ARCHIVED" },
     }),
     prisma.collectionMembership.deleteMany({ where: { expiresAt: { lte: now } } }),
   ]);
@@ -235,18 +290,29 @@ export async function runMerchandisingMaintenance(now = new Date()): Promise<Mai
     prisma.merchandisingCollection.findUnique({ where: { key: COLLECTION_KEYS.bestSellers } }),
     prisma.merchandisingCollection.findUnique({ where: { key: COLLECTION_KEYS.trending } }),
   ]);
-  const bestsellerWindowDays = best ? configNumber(best.configuration, "rankingWindowDays", 30) : 30;
+  const bestsellerWindowDays = best
+    ? configNumber(best.configuration, "rankingWindowDays", 30)
+    : 30;
   const bestsellerTotals = sumMetrics(
-    metrics.filter((metric) => metric.bucketStart >= new Date(now.getTime() - bestsellerWindowDays * 86_400_000)),
+    metrics.filter(
+      (metric) => metric.bucketStart >= new Date(now.getTime() - bestsellerWindowDays * 86_400_000),
+    ),
     now,
   );
-  const trendingTotals = new Map<string, { score: number; uniqueViewers: number; suspiciousEvents: number }>();
+  const trendingTotals = new Map<
+    string,
+    { score: number; uniqueViewers: number; suspiciousEvents: number }
+  >();
   for (const metric of metrics) {
     const ageHours = (now.getTime() - metric.bucketStart.getTime()) / 3_600_000;
     // A 12-hour half-life makes rows older than a few days negligible while
     // preserving a bounded lookback for recovery/reprocessing.
     if (ageHours > 7 * 24) continue;
-    const value = trendingTotals.get(metric.productId) ?? { score: 0, uniqueViewers: 0, suspiciousEvents: 0 };
+    const value = trendingTotals.get(metric.productId) ?? {
+      score: 0,
+      uniqueViewers: 0,
+      suspiciousEvents: 0,
+    };
     value.score += trendingScore({
       ageHours,
       views: metric.views,
@@ -263,21 +329,52 @@ export async function runMerchandisingMaintenance(now = new Date()): Promise<Mai
     trendingTotals.set(metric.productId, value);
   }
   const bestsellerCandidates = best
-    ? await publishRanking(best.id, `bestseller_v1_${bestsellerWindowDays}d`, [...bestsellerTotals].map(([productId, s]) => ({
-        productId, score: bestsellerScore(s),
-        reasons: { windowDays: bestsellerWindowDays, unitsSold: s.unitsSold, conversion: s.impressions ? s.purchases / s.impressions : 0 },
-      })), now)
+    ? await publishRanking(
+        best.id,
+        `bestseller_v1_${bestsellerWindowDays}d`,
+        [...bestsellerTotals].map(([productId, s]) => ({
+          productId,
+          score: bestsellerScore(s),
+          reasons: {
+            windowDays: bestsellerWindowDays,
+            unitsSold: s.unitsSold,
+            conversion: s.impressions ? s.purchases / s.impressions : 0,
+          },
+        })),
+        now,
+      )
     : 0;
   const trendingCandidates = trending
-    ? await publishRanking(trending.id, "trending_velocity_v1", [...trendingTotals].map(([productId, s]) => ({
-        productId, score: s.score,
-        reasons: { halfLifeHours: 12, uniqueViewers: s.uniqueViewers, suspiciousEvents: s.suspiciousEvents },
-      })), now)
+    ? await publishRanking(
+        trending.id,
+        "trending_velocity_v1",
+        [...trendingTotals].map(([productId, s]) => ({
+          productId,
+          score: s.score,
+          reasons: {
+            halfLifeHours: 12,
+            uniqueViewers: s.uniqueViewers,
+            suspiciousEvents: s.suspiciousEvents,
+          },
+        })),
+        now,
+      )
     : 0;
-  const retentionSent = await dispatchRetentionBatch(now);
+  const monthlyEmailsScheduled = await scheduleMonthlyPromotionEmails(now);
+  const [retentionSent, monthlyEmailsSent] = await Promise.all([
+    dispatchRetentionBatch(now),
+    dispatchMonthlyPromotionEmails(now),
+  ]);
   return {
-    activatedPromotions: activated.count, expiredPromotions: expired.count,
-    expiredMemberships: memberships.count, freshFinds, bestsellerCandidates,
-    trendingCandidates, retentionSent, completedAt: new Date().toISOString(),
+    activatedPromotions: activated.count,
+    expiredPromotions: expired.count,
+    expiredMemberships: memberships.count,
+    freshFinds,
+    bestsellerCandidates,
+    trendingCandidates,
+    retentionSent,
+    monthlyEmailsScheduled,
+    monthlyEmailsSent,
+    completedAt: new Date().toISOString(),
   };
 }

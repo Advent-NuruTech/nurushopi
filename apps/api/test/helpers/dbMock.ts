@@ -141,6 +141,8 @@ export function makeDbMock() {
     userProductAffinity: model(),
     notificationPreference: model(),
     retentionTrigger: model(),
+    emailSuppression: model(),
+    emailWebhookEvent: model(),
     retentionSubscription: model(),
     wishlistItem: model(),
     experiment: model(),

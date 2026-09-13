@@ -1,4 +1,4 @@
-import type { Order, OrderItem } from "@nuru/db";
+import type { Order, OrderItem, OrderNotificationDelivery, OrderStatusHistory } from "@nuru/db";
 import type {
   DeliveryFeeStatus,
   FulfillmentMethod,
@@ -8,7 +8,11 @@ import type {
   PaymentStatus,
 } from "@nuru/types";
 
-export type OrderWithItems = Order & { items: OrderItem[] };
+export type OrderWithItems = Order & {
+  items: OrderItem[];
+  statusHistory?: OrderStatusHistory[];
+  notificationDeliveries?: OrderNotificationDelivery[];
+};
 
 const toIso = (d: Date): string => d.toISOString();
 
@@ -34,7 +38,10 @@ export function toOrderItemDTO(i: OrderItem): OrderItemDTO {
   };
 }
 
-export function toOrderDTO(o: OrderWithItems): OrderDTO {
+export function toOrderDTO(
+  o: OrderWithItems,
+  options: { includeActorIdentity?: boolean } = {},
+): OrderDTO {
   const items = o.items.map(toOrderItemDTO);
   return {
     id: o.id,
@@ -59,6 +66,26 @@ export function toOrderDTO(o: OrderWithItems): OrderDTO {
     deliveryEta: o.deliveryEta ?? null,
     deliveryOrigin: o.deliveryOrigin ?? null,
     deliveryRateId: o.deliveryRateId ?? null,
+    pickupReadyAt: o.pickupReadyAt?.toISOString() ?? null,
+    pickedUpAt: o.pickedUpAt?.toISOString() ?? null,
+    pickupReadyEmailStatus:
+      (o.notificationDeliveries?.find((delivery) => delivery.type === "PICKUP_READY")?.status as
+        "PENDING" | "SENT" | "FAILED" | undefined) ?? null,
+    statusHistory: (o.statusHistory ?? []).map((event) => ({
+      id: event.id,
+      fromStatus: event.fromStatus as OrderStatus | null,
+      toStatus: event.toStatus as OrderStatus,
+      actorType: event.actorType,
+      actorName: options.includeActorIdentity
+        ? event.actorName
+        : event.actorType === "CUSTOMER"
+          ? "Customer"
+          : event.actorType === "PICKUP_AGENT"
+            ? "Pickup station"
+            : "NuruShop team",
+      note: event.note,
+      createdAt: toIso(event.createdAt),
+    })),
     items,
     itemCount: o.items.reduce((sum, i) => sum + i.quantity, 0),
     createdAt: toIso(o.createdAt),

@@ -24,11 +24,16 @@ export const ORDER_STATUSES = [
   "CONFIRMED",
   "PROCESSING",
   "SHIPPED",
+  "AT_PICKUP_STATION",
+  "PICKED_UP",
   "DELIVERED",
   "CANCELLED",
   "REFUNDED",
 ] as const;
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
+
+export const ORDER_STATUS_ACTOR_TYPES = ["CUSTOMER", "ADMIN", "PICKUP_AGENT", "SYSTEM"] as const;
+export type OrderStatusActorType = (typeof ORDER_STATUS_ACTOR_TYPES)[number];
 
 /** Payment states. Mirrors the Prisma `PaymentStatus` enum. */
 export const PAYMENT_STATUSES = ["UNPAID", "PAID", "REFUNDED", "FAILED"] as const;
@@ -160,6 +165,16 @@ export const orderDeliveryQuoteSchema = z
   .strict();
 export type OrderDeliveryQuoteInput = z.infer<typeof orderDeliveryQuoteSchema>;
 
+export interface OrderStatusHistoryDTO {
+  id: string;
+  fromStatus: OrderStatus | null;
+  toStatus: OrderStatus;
+  actorType: OrderStatusActorType;
+  actorName: string | null;
+  note: string | null;
+  createdAt: string;
+}
+
 export interface OrderItemDTO {
   id: string;
   productId: string | null;
@@ -195,6 +210,10 @@ export interface OrderDTO {
   deliveryEta: string | null;
   deliveryOrigin: string | null;
   deliveryRateId: string | null;
+  pickupReadyAt: string | null;
+  pickedUpAt: string | null;
+  pickupReadyEmailStatus: "PENDING" | "SENT" | "FAILED" | null;
+  statusHistory: OrderStatusHistoryDTO[];
   items: OrderItemDTO[];
   /** Sum of line quantities. */
   itemCount: number;

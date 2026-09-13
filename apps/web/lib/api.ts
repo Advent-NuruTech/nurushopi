@@ -103,6 +103,11 @@ import type {
   WishlistUpsertInput,
   NotificationPreferenceDTO,
   NotificationPreferenceInput,
+  PickupAgentCreateInput,
+  PickupAgentDTO,
+  PickupAgentLoginInput,
+  PickupAgentUpdateInput,
+  PickupOrderStatusUpdateInput,
 } from "@nuru/types";
 
 /** Public wholesale list filters accepted by the API (all optional on the client). */
@@ -428,6 +433,35 @@ export const orderApi = {
         deliveryFee,
         deliveryEta,
       }),
+    retryPickupReadyEmail: (id: string) =>
+      api.post<{ success: boolean }>(
+        `/admin/orders/${encodeURIComponent(id)}/pickup-ready-email/retry`,
+      ),
+  },
+};
+
+// ---- Pickup-station operations ----
+
+export const pickupAgentApi = {
+  login: (input: PickupAgentLoginInput) =>
+    api.post<{ agent: PickupAgentDTO }>("/pickup/auth/login", input),
+  logout: () => api.post<{ success: boolean }>("/pickup/auth/logout"),
+  me: () => api.get<{ agent: PickupAgentDTO }>("/pickup/auth/me"),
+  orders: (
+    query: Partial<{ page: number; pageSize: number; status: OrderStatus; search: string }> = {},
+  ) => api.get<Paginated<OrderDTO>>(`/pickup/orders${qs(query)}`),
+  updateOrderStatus: (id: string, input: PickupOrderStatusUpdateInput) =>
+    api.patch<{ order: OrderDTO }>(`/pickup/orders/${encodeURIComponent(id)}/status`, input),
+  retryPickupReadyEmail: (id: string) =>
+    api.post<{ success: boolean }>(
+      `/pickup/orders/${encodeURIComponent(id)}/pickup-ready-email/retry`,
+    ),
+  admin: {
+    list: () => api.get<{ agents: PickupAgentDTO[] }>("/admin/pickup-agents"),
+    create: (input: PickupAgentCreateInput) =>
+      api.post<{ agent: PickupAgentDTO }>("/admin/pickup-agents", input),
+    update: (id: string, input: PickupAgentUpdateInput) =>
+      api.patch<{ agent: PickupAgentDTO }>(`/admin/pickup-agents/${encodeURIComponent(id)}`, input),
   },
 };
 

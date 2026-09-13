@@ -1,7 +1,12 @@
 // Edge-safe JWT helpers (jose only — no Node built-ins).
 // Safe to import from Next.js middleware (Edge runtime).
 import { SignJWT, jwtVerify, type JWTPayload } from "jose";
-import type { AccessTokenClaims, AdminAccessTokenClaims, VendorAccessTokenClaims } from "@nuru/types";
+import type {
+  AccessTokenClaims,
+  AdminAccessTokenClaims,
+  PickupAgentAccessTokenClaims,
+  VendorAccessTokenClaims,
+} from "@nuru/types";
 
 const encoder = new TextEncoder();
 
@@ -84,6 +89,31 @@ export async function verifyVendorAccessToken(
     const { payload } = await jwtVerify(token, secretKey(secret));
     if ((payload as JWTPayload & { type?: string }).type !== "vendor_access") return null;
     return payload as unknown as VendorAccessTokenClaims;
+  } catch {
+    return null;
+  }
+}
+
+export async function signPickupAgentAccessToken(
+  claims: Omit<PickupAgentAccessTokenClaims, "type">,
+  opts: SignOptions,
+): Promise<string> {
+  return new SignJWT({ ...claims, type: "pickup_agent_access" })
+    .setProtectedHeader({ alg: "HS256" })
+    .setSubject(claims.sub)
+    .setIssuedAt()
+    .setExpirationTime(`${opts.ttlSeconds}s`)
+    .sign(secretKey(opts.secret));
+}
+
+export async function verifyPickupAgentAccessToken(
+  token: string,
+  secret: string,
+): Promise<PickupAgentAccessTokenClaims | null> {
+  try {
+    const { payload } = await jwtVerify(token, secretKey(secret));
+    if ((payload as JWTPayload & { type?: string }).type !== "pickup_agent_access") return null;
+    return payload as unknown as PickupAgentAccessTokenClaims;
   } catch {
     return null;
   }

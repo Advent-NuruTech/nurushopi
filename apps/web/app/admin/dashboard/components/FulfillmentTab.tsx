@@ -10,6 +10,7 @@ import type {
 import { ApiClientError, fulfillmentApi } from "@/lib/api";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import DeliveryRatesManager from "./DeliveryRatesManager";
+import PickupAgentsManager from "./PickupAgentsManager";
 import { KENYA_COUNTIES } from "@/lib/kenyaLocations";
 
 const defaultConfiguration: FulfillmentConfigurationDTO = {
@@ -455,6 +456,8 @@ export default function FulfillmentTab() {
           </div>
         )}
       </div>
+
+      <PickupAgentsManager stations={stations} />
 
       {showStationForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-4">

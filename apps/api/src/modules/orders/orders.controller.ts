@@ -54,7 +54,23 @@ export async function adminGetOrder(req: Request, res: Response): Promise<void> 
 
 export async function updateOrderStatus(req: Request, res: Response): Promise<void> {
   const { status } = orderStatusUpdateSchema.parse(req.body);
-  sendOk(res, { order: await orders.updateStatus(param(req, "id"), status) });
+  if (!req.admin) throw Errors.unauthorized();
+  if (req.admin.role !== "SENIOR" && status !== "SHIPPED") {
+    throw Errors.forbidden("Senior admin access is required to override order status.");
+  }
+  sendOk(res, {
+    order: await orders.updateStatus(param(req, "id"), status, {
+      type: "ADMIN",
+      id: req.admin.sub,
+      name: req.admin.email,
+      note: "Admin override",
+    }),
+  });
+}
+
+export async function retryPickupReadyEmail(req: Request, res: Response): Promise<void> {
+  await orders.dispatchPickupReadyEmail(param(req, "id"));
+  sendOk(res, { success: true });
 }
 
 export async function updateOrderPayment(req: Request, res: Response): Promise<void> {

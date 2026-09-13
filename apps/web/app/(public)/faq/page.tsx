@@ -44,9 +44,9 @@ const faqCategories: FaqCategory[] = [
           <p>
             NuruShop is one of Kenya&apos;s leading online marketplaces for natural products,
             organic foods, herbs and spices, essential oils, healthy living products, and
-            faith-based literature. Our tagline is{" "}
-            <strong>&quot;Health &amp; Truth&quot;</strong> — we exist to reconnect people with the
-            pure, simple, and healing principles of nature as originally designed by the Creator.
+            faith-based literature. Our tagline is <strong>&quot;Health &amp; Truth&quot;</strong> —
+            we exist to reconnect people with the pure, simple, and healing principles of nature as
+            originally designed by the Creator.
           </p>
         ),
       },
@@ -72,11 +72,16 @@ const faqCategories: FaqCategory[] = [
         q: "What kind of products does NuruShop sell?",
         a: (
           <>
-            <p>We stock a carefully curated range of natural and faith-inspired goods, including:</p>
+            <p>
+              We stock a carefully curated range of natural and faith-inspired goods, including:
+            </p>
             <ul className="mt-2 list-disc list-inside space-y-1">
               <li>Natural products &amp; health reform products</li>
               <li>Organic foods and superfoods (e.g., flax seeds, peanut butter, soya products)</li>
-              <li>Herbs and spices (e.g., turmeric powder, garlic powder, hibiscus powder, Himalayan pink salt)</li>
+              <li>
+                Herbs and spices (e.g., turmeric powder, garlic powder, hibiscus powder, Himalayan
+                pink salt)
+              </li>
               <li>Essential oils</li>
               <li>Christian literature — EGW books, pioneer writings, and spiritual books</li>
             </ul>
@@ -98,10 +103,10 @@ const faqCategories: FaqCategory[] = [
         q: "Is NuruShop legit and safe to use?",
         a: (
           <p>
-            Yes. NuruShop is operated by Advent NuruTech and connects registered sellers with
-            buyers across Kenya. Your data and transactions are protected, communication is
-            encrypted, and we never ask for personal information unrelated to your business with
-            us. Always pay through the official NuruShop payment channels — never to a third party.
+            Yes. NuruShop is operated by Advent NuruTech and connects registered sellers with buyers
+            across Kenya. Your data and transactions are protected, communication is encrypted, and
+            we never ask for personal information unrelated to your business with us. Always pay
+            through the official NuruShop payment channels — never to a third party.
           </p>
         ),
       },
@@ -110,9 +115,9 @@ const faqCategories: FaqCategory[] = [
         a: (
           <p>
             Checkout supports many countries around the world (Kenya, Uganda, Tanzania, Rwanda,
-            Ethiopia, South Africa, the United States, the UK, and more). International delivery
-            is confirmed by our customer care team before your order is approved so you always
-            know the exact cost and timeline.
+            Ethiopia, South Africa, the United States, the UK, and more). International delivery is
+            confirmed by our customer care team before your order is approved so you always know the
+            exact cost and timeline.
           </p>
         ),
       },
@@ -127,7 +132,10 @@ const faqCategories: FaqCategory[] = [
         q: "How do I place an order?",
         a: (
           <p>
-            Browse the <Link href="/shop" className="text-sky-600 dark:text-emerald-400 hover:underline">Shop</Link>{" "}
+            Browse the{" "}
+            <Link href="/shop" className="text-sky-600 dark:text-emerald-400 hover:underline">
+              Shop
+            </Link>{" "}
             page, add products to your cart, then open the cart and go to checkout. Sign in (or
             create an account), fill in your delivery details (full name, phone, country,
             county/state, and exact locality), and submit. You&apos;ll receive an order number and a
@@ -139,9 +147,9 @@ const faqCategories: FaqCategory[] = [
         q: "Do I need an account to place an order?",
         a: (
           <p>
-            Yes. You need to be signed in to complete an order so we can save your order history
-            and deliver securely. You can create a free account in a few minutes and it will let
-            you track orders, manage your wallet, and get support faster.
+            Yes. You need to be signed in to complete an order so we can save your order history and
+            deliver securely. You can create a free account in a few minutes and it will let you
+            track orders, manage your wallet, and get support faster.
           </p>
         ),
       },
@@ -149,10 +157,13 @@ const faqCategories: FaqCategory[] = [
         q: "How will I know my order was received?",
         a: (
           <p>
-            Once you submit an order you receive a unique order number. Our team confirms the
-            order via WhatsApp and/or Email, and we open a WhatsApp chat so you can follow up. You
-            can also review your orders anytime under{" "}
-            <Link href="/myoders" className="text-sky-600 dark:text-emerald-400 hover:underline">My Orders</Link>.
+            Once you submit an order you receive a unique order number. Our team confirms the order
+            via WhatsApp and/or Email, and we open a WhatsApp chat so you can follow up. You can
+            also review your orders anytime under{" "}
+            <Link href="/myoders" className="text-sky-600 dark:text-emerald-400 hover:underline">
+              My Orders
+            </Link>
+            .
           </p>
         ),
       },
@@ -160,10 +171,12 @@ const faqCategories: FaqCategory[] = [
         q: "Can I track my order?",
         a: (
           <p>
-            Yes — visit{" "}
-            <Link href="/myoders" className="text-sky-600 dark:text-emerald-400 hover:underline">My Orders</Link>{" "}
-            or your profile to see your order history and status. For live updates, message us on
-            WhatsApp with your order number.
+            Yes — open the{" "}
+            <Link href={{ pathname: "/track-order" }} className="text-brand-strong hover:underline">
+              order tracker
+            </Link>{" "}
+            and enter the unique number from checkout. You will see each fulfillment stage,
+            timestamp, delivery or pickup details, and the complete order summary.
           </p>
         ),
       },
@@ -197,8 +210,8 @@ const faqCategories: FaqCategory[] = [
         a: (
           <p>
             We accept <strong>M-Pesa</strong> and <strong>cash on delivery</strong>. For cash
-            delivery, you can pay the rider when your order arrives. M-Pesa payments are made to
-            the official NuruShop number: <strong>0759167209</strong>.
+            delivery, you can pay the rider when your order arrives. M-Pesa payments are made to the
+            official NuruShop number: <strong>0759167209</strong>.
           </p>
         ),
       },
@@ -206,10 +219,10 @@ const faqCategories: FaqCategory[] = [
         q: "Do I pay the seller directly?",
         a: (
           <p>
-            <strong>No.</strong> Always send payment to the official NuruShop account (product
-            price + delivery fee). NuruShop confirms the payment and later transfers the
-            seller&apos;s amount after deducting our commission. Direct buyer-to-seller payment is
-            not allowed unless specifically authorized by NuruShop.
+            <strong>No.</strong> Always send payment to the official NuruShop account (product price
+            + delivery fee). NuruShop confirms the payment and later transfers the seller&apos;s
+            amount after deducting our commission. Direct buyer-to-seller payment is not allowed
+            unless specifically authorized by NuruShop.
           </p>
         ),
       },
@@ -217,9 +230,9 @@ const faqCategories: FaqCategory[] = [
         q: "Is it safe to send money for my order?",
         a: (
           <p>
-            Yes — as long as you pay only through the official NuruShop channels shared by our
-            team. We confirm every payment and will never ask you to pay a personal number or a
-            random third party. If in doubt, verify on WhatsApp before paying.
+            Yes — as long as you pay only through the official NuruShop channels shared by our team.
+            We confirm every payment and will never ask you to pay a personal number or a random
+            third party. If in doubt, verify on WhatsApp before paying.
           </p>
         ),
       },
@@ -294,8 +307,10 @@ const faqCategories: FaqCategory[] = [
         q: "Can I pick up my order instead of delivery?",
         a: (
           <p>
-            We are working on establishing pickup stations. For now, ask our support team on
-            WhatsApp about pickup options available in your area.
+            Yes. If pickup is available for your destination, choose an active station during
+            checkout. When the parcel reaches that station, we email you and update the order
+            tracker to <strong>Ready for pickup</strong>. Bring your order number and valid
+            identification when collecting it.
           </p>
         ),
       },
@@ -329,8 +344,8 @@ const faqCategories: FaqCategory[] = [
         q: "Are delivery fees refundable?",
         a: (
           <p>
-            Parceling/delivery fees are non-refundable once delivery has started, even if a
-            product refund is granted.
+            Parceling/delivery fees are non-refundable once delivery has started, even if a product
+            refund is granted.
           </p>
         ),
       },
@@ -338,9 +353,9 @@ const faqCategories: FaqCategory[] = [
         q: "How do I request a refund?",
         a: (
           <p>
-            Refund requests must be made <strong>within 24 hours after delivery</strong>. Contact
-            us via WhatsApp, email, or the contact form with your order number and a description of
-            the issue, and our team will handle it promptly.
+            Refund requests must be made <strong>within 24 hours after delivery</strong>. Contact us
+            via WhatsApp, email, or the contact form with your order number and a description of the
+            issue, and our team will handle it promptly.
           </p>
         ),
       },
@@ -348,9 +363,9 @@ const faqCategories: FaqCategory[] = [
         q: "I received a damaged or incorrect item — what now?",
         a: (
           <p>
-            Report it within 24 hours of delivery with photos. NuruShop will mediate between you
-            and the seller and arrange a refund, replacement, or partial refund depending on the
-            review outcome.
+            Report it within 24 hours of delivery with photos. NuruShop will mediate between you and
+            the seller and arrange a refund, replacement, or partial refund depending on the review
+            outcome.
           </p>
         ),
       },
@@ -365,10 +380,10 @@ const faqCategories: FaqCategory[] = [
         q: "What is NuruShop's Sabbath policy?",
         a: (
           <p>
-            NuruShop honors the Sabbath as a sacred time of rest. Purchasing and checkout are
-            paused from <strong>Friday sunset (5:00 PM) until Saturday evening (6:30 PM)</strong>{" "}
-            in your local time. You can still browse the store, but orders are processed once the
-            Sabbath ends.
+            NuruShop honors the Sabbath as a sacred time of rest. Purchasing and checkout are paused
+            from <strong>Friday sunset (5:00 PM) until Saturday evening (6:30 PM)</strong> in your
+            local time. You can still browse the store, but orders are processed once the Sabbath
+            ends.
           </p>
         ),
       },
@@ -388,7 +403,12 @@ const faqCategories: FaqCategory[] = [
           <p>
             Each Sabbath we publish a devotional message for the community. You can read the current
             message and explore the full history on the{" "}
-            <Link href="/sabbath-archives" className="text-sky-600 dark:text-emerald-400 hover:underline">Sabbath Archives</Link>{" "}
+            <Link
+              href="/sabbath-archives"
+              className="text-sky-600 dark:text-emerald-400 hover:underline"
+            >
+              Sabbath Archives
+            </Link>{" "}
             page.
           </p>
         ),
@@ -416,7 +436,12 @@ const faqCategories: FaqCategory[] = [
           <p>
             Wholesale lets you buy products in bulk at a discounted per-unit price. Every wholesale
             item shows its unit price and a minimum quantity you must order. Visit the{" "}
-            <Link href="/wholeseller" className="text-sky-600 dark:text-emerald-400 hover:underline">Wholesale</Link>{" "}
+            <Link
+              href="/wholeseller"
+              className="text-sky-600 dark:text-emerald-400 hover:underline"
+            >
+              Wholesale
+            </Link>{" "}
             page to browse available bulk items.
           </p>
         ),
@@ -426,8 +451,8 @@ const faqCategories: FaqCategory[] = [
         a: (
           <p>
             Browse the wholesale catalog, note the minimum quantity for each item, and contact our
-            team on WhatsApp with the items and quantities you need. We&apos;ll confirm availability,
-            pricing, and delivery arrangements for your bulk order.
+            team on WhatsApp with the items and quantities you need. We&apos;ll confirm
+            availability, pricing, and delivery arrangements for your bulk order.
           </p>
         ),
       },
@@ -452,10 +477,15 @@ const faqCategories: FaqCategory[] = [
         a: (
           <p>
             Apply through the{" "}
-            <Link href="/vendors/register" className="text-sky-600 dark:text-emerald-400 hover:underline">Vendor Registration</Link>{" "}
+            <Link
+              href="/vendors/register"
+              className="text-sky-600 dark:text-emerald-400 hover:underline"
+            >
+              Vendor Registration
+            </Link>{" "}
             form. You&apos;ll need a registered business in Kenya, quality natural/faith-based
-            products, clear product photos, accurate pricing and inventory, and a commitment to
-            good customer service.
+            products, clear product photos, accurate pricing and inventory, and a commitment to good
+            customer service.
           </p>
         ),
       },
@@ -484,9 +514,9 @@ const faqCategories: FaqCategory[] = [
         q: "How and when do I get paid as a vendor?",
         a: (
           <p>
-            Once a buyer pays the official NuruShop account, we confirm the payment and transfer
-            the seller&apos;s amount after deducting our commission. Payment details (bank/M-Pesa)
-            are collected in your vendor profile.
+            Once a buyer pays the official NuruShop account, we confirm the payment and transfer the
+            seller&apos;s amount after deducting our commission. Payment details (bank/M-Pesa) are
+            collected in your vendor profile.
           </p>
         ),
       },
@@ -513,7 +543,12 @@ const faqCategories: FaqCategory[] = [
         a: (
           <p>
             Click{" "}
-            <Link href="/auth/signup" className="text-sky-600 dark:text-emerald-400 hover:underline">Sign Up</Link>{" "}
+            <Link
+              href="/auth/signup"
+              className="text-sky-600 dark:text-emerald-400 hover:underline"
+            >
+              Sign Up
+            </Link>{" "}
             and register with your email and password, then verify your email to get started. Your
             account gives you order history, wallet access, and faster checkout.
           </p>
@@ -554,7 +589,12 @@ const faqCategories: FaqCategory[] = [
         a: (
           <p>
             Use the{" "}
-            <Link href="/auth/reset-password" className="text-sky-600 dark:text-emerald-400 hover:underline">Reset Password</Link>{" "}
+            <Link
+              href="/auth/reset-password"
+              className="text-sky-600 dark:text-emerald-400 hover:underline"
+            >
+              Reset Password
+            </Link>{" "}
             page. Enter your email and follow the link we send to set a new password.
           </p>
         ),
@@ -574,19 +614,41 @@ const faqCategories: FaqCategory[] = [
             <ul className="mt-2 space-y-1">
               <li>
                 <FaWhatsapp className="inline mr-1 text-green-600" /> WhatsApp:{" "}
-                <a href="https://wa.me/254142225233" target="_blank" rel="noopener noreferrer" className="text-sky-600 dark:text-emerald-400 hover:underline">+254 142 225 233</a>
+                <a
+                  href="https://wa.me/254142225233"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sky-600 dark:text-emerald-400 hover:underline"
+                >
+                  +254 142 225 233
+                </a>
               </li>
-            <li>
-              <FaPhoneAlt className="inline mr-1 text-sky-600" /> Phone:{" "}
-              <a href="tel:+254759167209" className="text-sky-600 dark:text-emerald-400 hover:underline">+254 759 167 209</a>
-            </li>
-            <li>
-              <FaEnvelope className="inline mr-1 text-rose-600" /> Email:{" "}
-              <a href="mailto:nurushoponline@gmail.com" className="text-sky-600 dark:text-emerald-400 hover:underline">nurushoponline@gmail.com</a>
-            </li>
+              <li>
+                <FaPhoneAlt className="inline mr-1 text-sky-600" /> Phone:{" "}
+                <a
+                  href="tel:+254759167209"
+                  className="text-sky-600 dark:text-emerald-400 hover:underline"
+                >
+                  +254 759 167 209
+                </a>
+              </li>
+              <li>
+                <FaEnvelope className="inline mr-1 text-rose-600" /> Email:{" "}
+                <a
+                  href="mailto:nurushoponline@gmail.com"
+                  className="text-sky-600 dark:text-emerald-400 hover:underline"
+                >
+                  nurushoponline@gmail.com
+                </a>
+              </li>
               <li>
                 Contact form:{" "}
-                <Link href="/contact" className="text-sky-600 dark:text-emerald-400 hover:underline">/contact</Link>
+                <Link
+                  href="/contact"
+                  className="text-sky-600 dark:text-emerald-400 hover:underline"
+                >
+                  /contact
+                </Link>
               </li>
             </ul>
           </>
@@ -596,8 +658,8 @@ const faqCategories: FaqCategory[] = [
         q: "How fast do you respond?",
         a: (
           <p>
-            We typically respond within 24 hours during business days (Sunday to Friday). For
-            urgent issues, call us or message us on WhatsApp for the fastest reply.
+            We typically respond within 24 hours during business days (Sunday to Friday). For urgent
+            issues, call us or message us on WhatsApp for the fastest reply.
           </p>
         ),
       },
@@ -605,9 +667,9 @@ const faqCategories: FaqCategory[] = [
         q: "I have a dispute with a seller — who do I talk to?",
         a: (
           <p>
-            NuruShop acts as a mediator in disputes. Contact our support team with your order
-            number and a clear explanation, and our team will review the case fairly, prioritizing
-            honesty and platform integrity.
+            NuruShop acts as a mediator in disputes. Contact our support team with your order number
+            and a clear explanation, and our team will review the case fairly, prioritizing honesty
+            and platform integrity.
           </p>
         ),
       },
@@ -616,11 +678,20 @@ const faqCategories: FaqCategory[] = [
         a: (
           <p>
             You can read our{" "}
-            <Link href="/terms" className="text-sky-600 dark:text-emerald-400 hover:underline">Terms &amp; Conditions</Link>
+            <Link href="/terms" className="text-sky-600 dark:text-emerald-400 hover:underline">
+              Terms &amp; Conditions
+            </Link>
             ,{" "}
-            <Link href="/privacy" className="text-sky-600 dark:text-emerald-400 hover:underline">Privacy Policy</Link>
+            <Link href="/privacy" className="text-sky-600 dark:text-emerald-400 hover:underline">
+              Privacy Policy
+            </Link>
             , and{" "}
-            <Link href="/shipping-policy" className="text-sky-600 dark:text-emerald-400 hover:underline">Shipping Policy</Link>{" "}
+            <Link
+              href="/shipping-policy"
+              className="text-sky-600 dark:text-emerald-400 hover:underline"
+            >
+              Shipping Policy
+            </Link>{" "}
             anytime from the footer.
           </p>
         ),
@@ -667,7 +738,7 @@ export default function FaqPage() {
         ? cat.items.filter(
             (item) =>
               item.q.toLowerCase().includes(filtered) ||
-              (typeof item.a === "string" && item.a.toLowerCase().includes(filtered))
+              (typeof item.a === "string" && item.a.toLowerCase().includes(filtered)),
           )
         : cat.items,
     }))

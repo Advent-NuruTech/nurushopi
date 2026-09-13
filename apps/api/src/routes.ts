@@ -39,6 +39,10 @@ import {
   fulfillmentAdminRouter,
   fulfillmentPublicRouter,
 } from "./modules/fulfillment/fulfillment.routes.js";
+import {
+  pickupAgentAdminRouter,
+  pickupAgentRouter,
+} from "./modules/pickup-agents/pickup-agents.routes.js";
 
 export const apiRouter: Router = Router();
 
@@ -59,6 +63,8 @@ apiRouter.use("/orders", ordersCustomerRouter);
 apiRouter.use("/admin/orders", ordersAdminRouter);
 apiRouter.use("/fulfillment", fulfillmentPublicRouter);
 apiRouter.use("/admin/fulfillment", fulfillmentAdminRouter);
+apiRouter.use("/pickup", pickupAgentRouter);
+apiRouter.use("/admin/pickup-agents", pickupAgentAdminRouter);
 apiRouter.use("/wallet", walletCustomerRouter);
 apiRouter.use("/admin/wallet", walletAdminRouter);
 apiRouter.use("/admin/dashboard", dashboardAdminRouter);

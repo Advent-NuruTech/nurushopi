@@ -5,6 +5,10 @@ vi.mock("@nuru/db", async () => {
   return makeDbMock();
 });
 
+vi.mock("../../src/modules/auth/email.js", () => ({
+  sendPickupReadyEmail: vi.fn().mockResolvedValue({ id: "email-1", provider: "development" }),
+}));
+
 import { prisma } from "@nuru/db";
 import * as orders from "../../src/modules/orders/orders.service.js";
 
@@ -430,6 +434,64 @@ describe("orders.listForUser", () => {
 });
 
 describe("orders.updateStatus", () => {
+  it("records pickup arrival, queues the customer email and marks delivery sent", async () => {
+    const readyAt = new Date();
+    const current = orderRow({
+      status: "SHIPPED",
+      fulfillmentMethod: "PICKUP_STATION",
+      pickupStationName: "Nairobi CBD",
+      pickupStationAddress: "Market Street",
+      contactEmail: "jane@example.com",
+      user: null,
+    });
+    const arrived = orderRow({
+      ...current,
+      status: "AT_PICKUP_STATION",
+      pickupReadyAt: readyAt,
+      statusHistory: [],
+      notificationDeliveries: [
+        { id: "delivery1", type: "PICKUP_READY", recipient: "jane@example.com", status: "PENDING" },
+      ],
+    });
+    const sent = {
+      ...arrived,
+      notificationDeliveries: [
+        { id: "delivery1", type: "PICKUP_READY", recipient: "jane@example.com", status: "SENT" },
+      ],
+    };
+    p.order.findUnique
+      .mockResolvedValueOnce(current)
+      .mockResolvedValueOnce(arrived)
+      .mockResolvedValueOnce(sent);
+    p.order.update.mockResolvedValue(arrived);
+    p.orderNotificationDelivery.update.mockResolvedValue({});
+
+    const result = await orders.updateStatus("o1", "AT_PICKUP_STATION", {
+      type: "PICKUP_AGENT",
+      id: "agent1",
+      name: "Alex Agent",
+      note: "Parcel counted and shelved",
+    });
+
+    expect(p.order.update.mock.calls[0][0].data.statusHistory.create).toMatchObject({
+      fromStatus: "SHIPPED",
+      toStatus: "AT_PICKUP_STATION",
+      actorType: "PICKUP_AGENT",
+      actorId: "agent1",
+    });
+    expect(p.order.update.mock.calls[0][0].data.notificationDeliveries.upsert.create).toEqual({
+      type: "PICKUP_READY",
+      recipient: "jane@example.com",
+    });
+    expect(p.orderNotificationDelivery.update).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        where: { id: "delivery1" },
+        data: expect.objectContaining({ status: "SENT" }),
+      }),
+    );
+    expect(result.pickupReadyEmailStatus).toBe("SENT");
+  });
+
   it("restores stock when an order enters CANCELLED", async () => {
     p.order.findUnique.mockResolvedValue(orderRow({ status: "PROCESSING" }));
     p.product.updateMany.mockResolvedValue({ count: 1 });

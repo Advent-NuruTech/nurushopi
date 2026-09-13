@@ -186,6 +186,59 @@ export function sendPasswordResetEmail(to: string, token: string): Promise<SendE
   return sendEmail({ to, subject: "Reset your NuruShop password", ...content });
 }
 
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+export function sendPickupReadyEmail(input: {
+  to: string;
+  customerName: string | null;
+  orderNumber: string;
+  stationName: string | null;
+  stationAddress: string | null;
+  readyAt: Date;
+}): Promise<SendEmailResult> {
+  const customer = escapeHtml(input.customerName?.trim() || "Customer");
+  const orderNumber = escapeHtml(input.orderNumber);
+  const station = escapeHtml(input.stationName || "your selected pickup station");
+  const address = escapeHtml(input.stationAddress || "See your order tracking page for details");
+  const trackingLink = `${env.WEB_APP_URL}/track-order?order=${encodeURIComponent(input.orderNumber)}`;
+  const subject = `Order ${input.orderNumber} is ready for pickup`;
+  const intro = `Your NuruShop order has arrived at ${station}.`;
+  const html = `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
+<body style="margin:0;background:#f8fafc;color:#0f172a;font-family:Arial,sans-serif">
+  <div style="display:none;max-height:0;overflow:hidden">${intro}</div>
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f8fafc;padding:32px 12px">
+    <tr><td align="center"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background:#fff;border:1px solid #e2e8f0;border-radius:20px;overflow:hidden">
+      <tr><td style="background:#004D20;padding:22px 28px;color:#fff;font-size:24px;font-weight:700">Nuru<span style="color:#00C83A">Shop</span></td></tr>
+      <tr><td style="padding:32px 28px">
+        <p style="font-size:16px;line-height:1.6;margin:0 0 8px">Hello ${customer},</p>
+        <h1 style="font-size:24px;line-height:1.3;margin:0 0 14px">Your order is ready for pickup</h1>
+        <p style="font-size:16px;line-height:1.6;color:#475569;margin:0 0 20px">Order <strong>#${orderNumber}</strong> has arrived and is waiting for you.</p>
+        <div style="background:#EFFCF3;border:1px solid #B8F5C8;border-radius:14px;padding:16px;margin-bottom:22px"><strong>${station}</strong><br><span style="color:#475569;line-height:1.6">${address}</span></div>
+        <p style="font-size:14px;line-height:1.6;color:#475569">Bring your order number and a valid form of identification. Only confirm collection after the parcel has been handed to you.</p>
+        <a href="${trackingLink}" style="display:inline-block;background:#009933;color:#fff;text-decoration:none;font-weight:700;padding:13px 22px;border-radius:12px">Track order</a>
+      </td></tr>
+    </table></td></tr>
+  </table>
+</body></html>`;
+  const text = `Hello ${input.customerName?.trim() || "Customer"},\n\nYour NuruShop order #${input.orderNumber} is ready for pickup.\n\n${input.stationName || "Pickup station"}\n${input.stationAddress || "See tracking for details"}\n\nBring your order number and valid identification.\n\nTrack order: ${trackingLink}`;
+  return sendEmail({
+    to: input.to,
+    subject,
+    html,
+    text,
+    idempotencyKey: `pickup-ready-${input.orderNumber}`,
+    tags: [{ name: "category", value: "pickup-ready" }],
+  });
+}
+
 export function renderMarketingOptInConfirmation(nextDeliveryLabel: string) {
   const subject = "Thank you for subscribing to NuruShop emails";
   const intro = `Thank you for opting in. Your next monthly NuruShop product email is scheduled for ${nextDeliveryLabel}.`;

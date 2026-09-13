@@ -4,6 +4,7 @@ import React from "react";
 import { Package, CheckCircle2, XCircle, ChevronDown } from "lucide-react";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { formatPrice } from "@/lib/formatPrice";
+import { formatDate } from "@/lib/formatDate";
 import { statusLabel, statusBadgeClass } from "./orderUtils";
 import type { ApiOrder, OrderStatusFilter } from "../types";
 
@@ -50,9 +51,7 @@ export default function ManageOrders({
             <LoadingSpinner size={40} text="Loading orders…" />
           </div>
         ) : orders.length === 0 ? (
-          <p className="text-slate-500 dark:text-slate-400 py-8 text-center">
-            No orders found.
-          </p>
+          <p className="text-slate-500 dark:text-slate-400 py-8 text-center">No orders found.</p>
         ) : (
           <ul className="space-y-4">
             {orders.map((order) => (
@@ -62,16 +61,16 @@ export default function ManageOrders({
               >
                 <div>
                   <p className="font-medium text-slate-900 dark:text-white">
-                    Order #{order.id.slice(0, 8)}
+                    Order #{order.orderNumber || order.id.slice(0, 8)}
                   </p>
                   <p className="text-sm text-slate-500 dark:text-slate-400">
-                    {new Date(order.createdAt).toLocaleDateString()}
+                    {formatDate(order.createdAt)}
                   </p>
                 </div>
                 <div className="flex items-center gap-3 flex-wrap">
                   <span
                     className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${statusBadgeClass(
-                      order.status
+                      order.status,
                     )}`}
                   >
                     {order.status === "received" ? (

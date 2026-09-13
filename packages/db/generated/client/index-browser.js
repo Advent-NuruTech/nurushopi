@@ -202,6 +202,19 @@ exports.Prisma.AdminScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.PickupAgentScalarFieldEnum = {
+  id: 'id',
+  stationId: 'stationId',
+  email: 'email',
+  passwordHash: 'passwordHash',
+  name: 'name',
+  phone: 'phone',
+  isActive: 'isActive',
+  lastLoginAt: 'lastLoginAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.AdminInviteScalarFieldEnum = {
   id: 'id',
   email: 'email',
@@ -331,6 +344,34 @@ exports.Prisma.OrderScalarFieldEnum = {
   deliveryEta: 'deliveryEta',
   deliveryOrigin: 'deliveryOrigin',
   deliveryRateId: 'deliveryRateId',
+  pickupReadyAt: 'pickupReadyAt',
+  pickedUpAt: 'pickedUpAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.OrderStatusHistoryScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  fromStatus: 'fromStatus',
+  toStatus: 'toStatus',
+  actorType: 'actorType',
+  actorId: 'actorId',
+  actorName: 'actorName',
+  note: 'note',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.OrderNotificationDeliveryScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  type: 'type',
+  recipient: 'recipient',
+  status: 'status',
+  attempts: 'attempts',
+  providerMessageId: 'providerMessageId',
+  lastError: 'lastError',
+  sentAt: 'sentAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -956,6 +997,8 @@ exports.OrderStatus = exports.$Enums.OrderStatus = {
   CONFIRMED: 'CONFIRMED',
   PROCESSING: 'PROCESSING',
   SHIPPED: 'SHIPPED',
+  AT_PICKUP_STATION: 'AT_PICKUP_STATION',
+  PICKED_UP: 'PICKED_UP',
   DELIVERED: 'DELIVERED',
   CANCELLED: 'CANCELLED',
   REFUNDED: 'REFUNDED'
@@ -977,6 +1020,19 @@ exports.FulfillmentMethod = exports.$Enums.FulfillmentMethod = {
 exports.DeliveryFeeStatus = exports.$Enums.DeliveryFeeStatus = {
   CONFIRMED: 'CONFIRMED',
   PENDING_QUOTE: 'PENDING_QUOTE'
+};
+
+exports.OrderStatusActorType = exports.$Enums.OrderStatusActorType = {
+  CUSTOMER: 'CUSTOMER',
+  ADMIN: 'ADMIN',
+  PICKUP_AGENT: 'PICKUP_AGENT',
+  SYSTEM: 'SYSTEM'
+};
+
+exports.OrderNotificationStatus = exports.$Enums.OrderNotificationStatus = {
+  PENDING: 'PENDING',
+  SENT: 'SENT',
+  FAILED: 'FAILED'
 };
 
 exports.ReviewStatus = exports.$Enums.ReviewStatus = {
@@ -1098,6 +1154,7 @@ exports.Prisma.ModelName = {
   LegacyPasswordImport: 'LegacyPasswordImport',
   LoginAttempt: 'LoginAttempt',
   Admin: 'Admin',
+  PickupAgent: 'PickupAgent',
   AdminInvite: 'AdminInvite',
   AdminLog: 'AdminLog',
   Category: 'Category',
@@ -1106,6 +1163,8 @@ exports.Prisma.ModelName = {
   HeroAnnouncement: 'HeroAnnouncement',
   WholesaleItem: 'WholesaleItem',
   Order: 'Order',
+  OrderStatusHistory: 'OrderStatusHistory',
+  OrderNotificationDelivery: 'OrderNotificationDelivery',
   FulfillmentConfiguration: 'FulfillmentConfiguration',
   PickupStation: 'PickupStation',
   DeliveryRate: 'DeliveryRate',

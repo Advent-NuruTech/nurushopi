@@ -25,6 +25,11 @@ ordersAdminRouter.get("/", asyncHandler(ctrl.adminListOrders));
 ordersAdminRouter.get("/:id", asyncHandler(ctrl.adminGetOrder));
 ordersAdminRouter.patch("/:id/status", asyncHandler(ctrl.updateOrderStatus));
 ordersAdminRouter.patch("/:id/payment", asyncHandler(ctrl.updateOrderPayment));
+ordersAdminRouter.post(
+  "/:id/pickup-ready-email/retry",
+  requireAdmin("SENIOR"),
+  asyncHandler(ctrl.retryPickupReadyEmail),
+);
 ordersAdminRouter.patch(
   "/:id/delivery-quote",
   requireAdmin("SENIOR"),

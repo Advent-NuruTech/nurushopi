@@ -3,6 +3,7 @@ export const ACCESS_COOKIE = "nuru_access";
 export const REFRESH_COOKIE = "nuru_refresh";
 export const ADMIN_ACCESS_COOKIE = "nuru_admin_access";
 export const VENDOR_ACCESS_COOKIE = "nuru_vendor_access";
+export const PICKUP_AGENT_ACCESS_COOKIE = "nuru_pickup_agent_access";
 
 export interface CookieOptions {
   httpOnly: true;

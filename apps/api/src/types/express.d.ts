@@ -1,4 +1,9 @@
-import type { AccessTokenClaims, AdminAccessTokenClaims, VendorAccessTokenClaims } from "@nuru/types";
+import type {
+  AccessTokenClaims,
+  AdminAccessTokenClaims,
+  PickupAgentAccessTokenClaims,
+  VendorAccessTokenClaims,
+} from "@nuru/types";
 
 declare global {
   namespace Express {
@@ -6,6 +11,7 @@ declare global {
       user?: AccessTokenClaims;
       admin?: AdminAccessTokenClaims;
       vendor?: VendorAccessTokenClaims;
+      pickupAgent?: PickupAgentAccessTokenClaims;
       id?: string;
     }
   }

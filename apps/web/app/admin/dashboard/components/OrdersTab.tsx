@@ -7,6 +7,7 @@ import type { Route } from "next";
 import { useSearchParams } from "next/navigation";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { formatPrice } from "@/lib/formatPrice";
+import { formatDateTime } from "@/lib/formatDate";
 import { orderApi, ApiClientError } from "@/lib/api";
 import type { OrderDTO, OrderStatus } from "@nuru/types";
 import { AdminRole } from "./types";
@@ -21,6 +22,8 @@ const STATUS_STYLES: Record<OrderStatus, string> = {
   CONFIRMED: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
   PROCESSING: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300",
   SHIPPED: "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300",
+  AT_PICKUP_STATION: "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300",
+  PICKED_UP: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
   DELIVERED: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
   CANCELLED: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300",
   REFUNDED: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
@@ -81,6 +84,16 @@ export default function OrdersTab({ role }: OrdersTabProps) {
     }
   };
 
+  const retryPickupEmail = async (id: string) => {
+    try {
+      await orderApi.admin.retryPickupReadyEmail(id);
+      const { order } = await orderApi.admin.get(id);
+      setOrders((current) => current.map((item) => (item.id === id ? order : item)));
+    } catch (err) {
+      if (err instanceof ApiClientError) alert(err.message);
+    }
+  };
+
   if (loading) return <LoadingSpinner text="Loading orders..." />;
 
   return (
@@ -116,7 +129,7 @@ export default function OrdersTab({ role }: OrdersTabProps) {
                 Order #{order.orderNumber}
               </p>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                {new Date(order.createdAt).toLocaleString()}
+                {formatDateTime(order.createdAt)}
               </p>
             </div>
             <StatusBadge status={order.status} />
@@ -138,6 +151,26 @@ export default function OrdersTab({ role }: OrdersTabProps) {
                   </div>
                 )}
               </div>
+
+              {order.statusHistory.length > 0 && (
+                <div>
+                  <p className="mb-2 text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                    Activity trail
+                  </p>
+                  <ol className="space-y-2 border-l-2 border-brand-border pl-3">
+                    {order.statusHistory.map((event) => (
+                      <li key={event.id} className="text-xs text-slate-600 dark:text-slate-300">
+                        <span className="font-bold text-slate-900 dark:text-white">
+                          {event.toStatus.replaceAll("_", " ")}
+                        </span>{" "}
+                        · {formatDateTime(event.createdAt)}
+                        {event.actorName ? ` · ${event.actorName}` : ""}
+                        {event.note ? <p className="mt-0.5">{event.note}</p> : null}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
 
               <div>
                 <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
@@ -289,7 +322,7 @@ export default function OrdersTab({ role }: OrdersTabProps) {
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="mt-4 flex flex-wrap items-center gap-2">
             {role === "sub" && (
               <button
                 onClick={() => setStatus(order.id, "SHIPPED")}
@@ -306,6 +339,35 @@ export default function OrdersTab({ role }: OrdersTabProps) {
             >
               Confirm
             </button>
+            {role === "senior" && (
+              <label className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-1.5 text-sm dark:border-slate-700">
+                <span className="font-semibold">Admin override</span>
+                <select
+                  aria-label={`Override status for order ${order.orderNumber}`}
+                  value={order.status}
+                  onChange={(event) => void setStatus(order.id, event.target.value as OrderStatus)}
+                  className="bg-transparent text-sm outline-none"
+                >
+                  {Object.keys(STATUS_STYLES).map((status) => (
+                    <option key={status} value={status}>
+                      {status.replaceAll("_", " ")}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+            {role === "senior" &&
+              order.fulfillmentMethod === "PICKUP_STATION" &&
+              order.status === "AT_PICKUP_STATION" &&
+              order.pickupReadyEmailStatus === "FAILED" && (
+                <button
+                  type="button"
+                  onClick={() => void retryPickupEmail(order.id)}
+                  className="rounded-lg border border-amber-300 px-3 py-1.5 text-sm font-semibold text-amber-800"
+                >
+                  Retry pickup email
+                </button>
+              )}
             {role === "senior" && (
               <button
                 onClick={() => setStatus(order.id, "CANCELLED")}

@@ -34,9 +34,24 @@ enum OrderStatus {
   CONFIRMED
   PROCESSING
   SHIPPED
+  AT_PICKUP_STATION
+  PICKED_UP
   DELIVERED
   CANCELLED
   REFUNDED
+}
+
+enum OrderStatusActorType {
+  CUSTOMER
+  ADMIN
+  PICKUP_AGENT
+  SYSTEM
+}
+
+enum OrderNotificationStatus {
+  PENDING
+  SENT
+  FAILED
 }
 
 enum PaymentStatus {
@@ -330,6 +345,23 @@ model Admin {
   @@map("admins")
 }
 
+model PickupAgent {
+  id           String        @id @default(cuid())
+  stationId    String
+  station      PickupStation @relation(fields: [stationId], references: [id], onDelete: Restrict)
+  email        String        @unique
+  passwordHash String
+  name         String
+  phone        String?
+  isActive     Boolean       @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([stationId, isActive])
+  @@map("pickup_agents")
+}
+
 model AdminInvite {
   id          String            @id @default(cuid())
   email       String
@@ -539,18 +571,57 @@ model Order {
   deliveryOrigin       String?
   deliveryRateId       String?
   deliveryRate         DeliveryRate?     @relation(fields: [deliveryRateId], references: [id], onDelete: SetNull)
+  pickupReadyAt        DateTime?
+  pickedUpAt           DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  items                OrderItem[]
-  promotionRedemptions PromotionRedemption[]
+  items                  OrderItem[]
+  promotionRedemptions   PromotionRedemption[]
+  statusHistory          OrderStatusHistory[]
+  notificationDeliveries OrderNotificationDelivery[]
 
   @@index([userId])
   @@index([status])
   @@index([pickupStationId])
   @@index([deliveryRateId])
   @@map("orders")
+}
+
+model OrderStatusHistory {
+  id         String               @id @default(cuid())
+  orderId    String
+  order      Order                @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  fromStatus OrderStatus?
+  toStatus   OrderStatus
+  actorType  OrderStatusActorType
+  actorId    String?
+  actorName  String?
+  note       String?
+  createdAt  DateTime             @default(now())
+
+  @@index([orderId, createdAt])
+  @@map("order_status_history")
+}
+
+model OrderNotificationDelivery {
+  id                String                  @id @default(cuid())
+  orderId           String
+  order             Order                   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  type              String
+  recipient         String
+  status            OrderNotificationStatus @default(PENDING)
+  attempts          Int                     @default(0)
+  providerMessageId String?
+  lastError         String?
+  sentAt            DateTime?
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+
+  @@unique([orderId, type])
+  @@index([status, updatedAt])
+  @@map("order_notification_deliveries")
 }
 
 // A singleton row (id = "default") controls the optional fulfillment flow.
@@ -590,6 +661,7 @@ model PickupStation {
   updatedAt             DateTime  @updatedAt
 
   orders Order[]
+  agents PickupAgent[]
 
   @@index([isActive, archivedAt, displayOrder])
   @@index([city])

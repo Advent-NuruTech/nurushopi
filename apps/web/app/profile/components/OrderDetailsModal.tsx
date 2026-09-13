@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { X, CheckCircle2, XCircle, ExternalLink } from "lucide-react";
 import { formatPrice } from "@/lib/formatPrice";
+import { formatDateTime } from "@/lib/formatDate";
 import { orderApi, ApiClientError } from "@/lib/api";
 import { statusLabel, statusBadgeClass } from "./orderUtils";
 import ReceiptDownloadButton from "./ReceiptDownloadButton";
@@ -28,15 +29,19 @@ export default function OrderDetailsModal({
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [nowMs, setNowMs] = useState<number | null>(null);
+
+  useEffect(() => setNowMs(Date.now()), [order?.id]);
 
   if (!order) return null;
 
   const createdAtMs = Date.parse(order.createdAt);
   const canCancel =
     Boolean(userId) &&
-    (order.status === "pending" || order.status === "shipped") &&
+    order.status === "pending" &&
+    nowMs !== null &&
     Number.isFinite(createdAtMs) &&
-    Date.now() - createdAtMs <= 24 * 60 * 60 * 1000;
+    nowMs - createdAtMs <= 24 * 60 * 60 * 1000;
 
   const cancelOrder = async () => {
     if (!userId || !canCancel || cancelling) return;
@@ -56,9 +61,7 @@ export default function OrderDetailsModal({
       setCancelReason("");
       onOrderUpdated?.(order.id, "cancelled");
     } catch (error) {
-      setActionMessage(
-        error instanceof ApiClientError ? error.message : "Failed to cancel order.",
-      );
+      setActionMessage(error instanceof ApiClientError ? error.message : "Failed to cancel order.");
     } finally {
       setCancelling(false);
     }
@@ -74,7 +77,10 @@ export default function OrderDetailsModal({
     >
       <div className="w-full max-w-lg my-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-xl overflow-hidden">
         <div className="p-6 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-          <h3 id="order-detail-title" className="text-lg font-semibold text-slate-900 dark:text-white">
+          <h3
+            id="order-detail-title"
+            className="text-lg font-semibold text-slate-900 dark:text-white"
+          >
             Order #{order.id.slice(0, 8)}
           </h3>
           <button
@@ -90,14 +96,14 @@ export default function OrderDetailsModal({
           <div className="flex justify-between text-sm">
             <span className="text-slate-500 dark:text-slate-400">Date</span>
             <span className="text-slate-900 dark:text-white">
-              {new Date(order.createdAt).toLocaleString()}
+              {formatDateTime(order.createdAt)}
             </span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-slate-500 dark:text-slate-400">Status</span>
             <span
               className={`inline-flex items-center px-2 py-1 rounded-full text-sm font-medium ${statusBadgeClass(
-                order.status
+                order.status,
               )}`}
             >
               {order.status === "received" ? (
@@ -154,7 +160,11 @@ export default function OrderDetailsModal({
               <p className="text-sm text-slate-700 dark:text-slate-300">
                 Your order was delivered. Share your review in the dedicated reviews tab.
               </p>
-              <Link href={`/profile?tab=reviews&orderId=${encodeURIComponent(order.id)}`} className="mt-2 inline-block text-sm font-semibold text-sky-600 dark:text-sky-400 hover:underline" onClick={onClose}>
+              <Link
+                href={`/profile?tab=reviews&orderId=${encodeURIComponent(order.id)}`}
+                className="mt-2 inline-block text-sm font-semibold text-sky-600 dark:text-sky-400 hover:underline"
+                onClick={onClose}
+              >
                 Go to Reviews
               </Link>
             </div>
@@ -174,8 +184,8 @@ export default function OrderDetailsModal({
                 {cancelling
                   ? "Cancelling..."
                   : showCancelConfirm
-                  ? "Hide Cancellation Form"
-                  : "Cancel Order"}
+                    ? "Hide Cancellation Form"
+                    : "Cancel Order"}
               </button>
 
               {showCancelConfirm && (
@@ -231,11 +241,15 @@ export default function OrderDetailsModal({
         </div>
         <div className="p-6 border-t border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row justify-between items-center gap-4">
           <Link
-            href="/shop"
-            className="inline-flex items-center gap-2 text-sky-600 dark:text-sky-400 font-medium hover:underline"
+            href={
+              order.orderNumber
+                ? { pathname: "/track-order", query: { order: order.orderNumber } }
+                : "/shop"
+            }
+            className="inline-flex items-center gap-2 text-brand-strong dark:text-brand-bright font-medium hover:underline"
             onClick={onClose}
           >
-            Continue shopping
+            {order.orderNumber ? "Track this order" : "Continue shopping"}
             <ExternalLink size={16} />
           </Link>
 

@@ -532,14 +532,18 @@ function CheckoutContent() {
             : "You’ll receive a confirmation via WhatsApp or email soon."}
         </p>
         <Link
-          href="/profile?tab=orders"
-          className="mt-4 inline-flex items-center justify-center text-sky-600 font-medium hover:underline"
+          href={
+            orderNumber
+              ? { pathname: "/track-order", query: { order: orderNumber } }
+              : "/profile?tab=orders"
+          }
+          className="mt-4 inline-flex items-center justify-center text-brand-strong font-medium hover:underline"
         >
           View your orders →
         </Link>
         <div>
           <button
-            className="mt-6 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
+            className="mt-6 bg-brand text-white px-6 py-3 rounded-lg hover:bg-brand-strong transition"
             onClick={() => router.push("/shop")}
           >
             Continue Shopping

@@ -14,6 +14,10 @@ const VENDOR_LEGACY_PATH = "/vendor";
 const VENDOR_PUBLIC = [`${VENDOR_BASE_PATH}/login`, `${VENDOR_BASE_PATH}/signup`];
 const VENDOR_COOKIE = "nuru_vendor_access";
 
+const PICKUP_BASE_PATH = "/pickup";
+const PICKUP_PUBLIC = [`${PICKUP_BASE_PATH}/login`];
+const PICKUP_COOKIE = "nuru_pickup_agent_access";
+
 // User session cookie issued by the Express API (presence-gated here; the API
 // performs full signature verification on every request).
 const USER_ACCESS_COOKIE = "nuru_access";
@@ -46,10 +50,7 @@ function decodeJwtPayload(token: string): Record<string, unknown> | null {
     const base64Payload = token.split(".")[1];
     if (!base64Payload) return null;
     const normalized = base64Payload.replace(/-/g, "+").replace(/_/g, "/");
-    const padded = normalized.padEnd(
-      normalized.length + ((4 - (normalized.length % 4)) % 4),
-      "="
-    );
+    const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), "=");
     const json = Buffer.from(padded, "base64").toString("utf8");
     return JSON.parse(json) as Record<string, unknown>;
   } catch {
@@ -71,6 +72,11 @@ function isVendorToken(token: string): boolean {
   return payload?.type === "vendor_access";
 }
 
+function isPickupAgentToken(token: string): boolean {
+  const payload = decodeJwtPayload(token);
+  return payload?.type === "pickup_agent_access";
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
 
@@ -82,6 +88,16 @@ export async function middleware(request: NextRequest) {
       // Keep the complete intended location so profile subviews (for example
       // the wishlist) remain available after sign-in.
       loginUrl.searchParams.set("redirectTo", `${pathname}${request.nextUrl.search}`);
+      return NextResponse.redirect(loginUrl);
+    }
+    return NextResponse.next();
+  }
+
+  if (pathname === PICKUP_BASE_PATH || pathname.startsWith(`${PICKUP_BASE_PATH}/`)) {
+    if (PICKUP_PUBLIC.includes(pathname)) return NextResponse.next();
+    const token = request.cookies.get(PICKUP_COOKIE)?.value;
+    if (!token || !isPickupAgentToken(token)) {
+      const loginUrl = new URL(`${PICKUP_BASE_PATH}/login`, request.url);
       return NextResponse.redirect(loginUrl);
     }
     return NextResponse.next();
@@ -117,7 +133,8 @@ export async function middleware(request: NextRequest) {
   }
 
   // ---- Admin path handling (unchanged) ----
-  const isLegacyAdmin = pathname === ADMIN_LEGACY_PATH || pathname.startsWith(`${ADMIN_LEGACY_PATH}/`);
+  const isLegacyAdmin =
+    pathname === ADMIN_LEGACY_PATH || pathname.startsWith(`${ADMIN_LEGACY_PATH}/`);
   if (isLegacyAdmin) {
     const notFoundUrl = new URL("/not-found", request.url);
     return NextResponse.rewrite(notFoundUrl);

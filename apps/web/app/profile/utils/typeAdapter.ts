@@ -13,6 +13,8 @@ const ORDER_STATUS_MAP: Record<OrderDTO["status"], ApiOrder["status"]> = {
   CONFIRMED: "pending",
   PROCESSING: "pending",
   SHIPPED: "shipped",
+  AT_PICKUP_STATION: "ready",
+  PICKED_UP: "received",
   DELIVERED: "received",
   CANCELLED: "cancelled",
   REFUNDED: "cancelled",
@@ -61,7 +63,7 @@ export type LocalAppUser = {
 
 export const adaptAppUser = (contextUser: ContextAppUser | null): LocalAppUser | null => {
   if (!contextUser) return null;
-  
+
   return {
     id: contextUser.id,
     name: contextUser.name ?? undefined,

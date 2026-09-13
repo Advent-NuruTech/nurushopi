@@ -7,6 +7,7 @@ import {
   scheduleMonthlyPromotionEmails,
 } from "./modules/merchandising/monthly-email.service.js";
 import { assertEmailTransportReady } from "./modules/auth/email.js";
+import { retryPendingPickupReadyEmails } from "./modules/orders/orders.service.js";
 
 // Never let production accept signups or opt-ins while silently discarding
 // verification, reset, or subscription-confirmation emails.
@@ -42,10 +43,31 @@ const marketingEmailTimer = marketingEmailConfigured
   : null;
 marketingEmailTimer?.unref();
 
+let pickupEmailRetryRunning = false;
+async function pollPickupEmailOutbox(): Promise<void> {
+  if (pickupEmailRetryRunning) return;
+  pickupEmailRetryRunning = true;
+  try {
+    const retried = await retryPendingPickupReadyEmails();
+    if (retried) logger.info({ retried }, "Pickup-ready email retry completed");
+  } catch (error) {
+    logger.error({ error }, "Pickup-ready email retry failed");
+  } finally {
+    pickupEmailRetryRunning = false;
+  }
+}
+
+const initialPickupEmailRetry = setTimeout(() => void pollPickupEmailOutbox(), 15_000);
+initialPickupEmailRetry.unref();
+const pickupEmailRetryTimer = setInterval(() => void pollPickupEmailOutbox(), 5 * 60_000);
+pickupEmailRetryTimer.unref();
+
 async function shutdown(signal: string): Promise<void> {
   logger.info(`${signal} received, shutting down...`);
   if (initialMarketingEmailPoll) clearTimeout(initialMarketingEmailPoll);
   if (marketingEmailTimer) clearInterval(marketingEmailTimer);
+  clearTimeout(initialPickupEmailRetry);
+  clearInterval(pickupEmailRetryTimer);
   server.close(() => logger.info("HTTP server closed"));
   await prisma.$disconnect();
   process.exit(0);

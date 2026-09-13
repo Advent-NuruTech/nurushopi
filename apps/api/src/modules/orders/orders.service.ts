@@ -10,14 +10,29 @@ import type {
   OrderStatus,
   Paginated,
   PaymentStatus,
+  OrderStatusActorType,
 } from "@nuru/types";
 import { Errors } from "../../lib/errors.js";
 import { resolveDeliveryQuote } from "../fulfillment/fulfillment.service.js";
 import { creditWallet, debitWallet, rewardReferralOnFirstOrder } from "../wallet/ledger.js";
 import { toOrderDTO, type OrderWithItems } from "./serializers.js";
 import { loadEffectivePrices } from "../merchandising/pricing.service.js";
+import { sendPickupReadyEmail } from "../auth/email.js";
+import { logger } from "../../lib/logger.js";
 
-const withItems = { include: { items: true } } as const;
+const orderRelations = {
+  items: true,
+  statusHistory: { orderBy: { createdAt: "asc" as const } },
+  notificationDeliveries: true,
+} as const;
+const withItems = { include: orderRelations } as const;
+
+export interface OrderStatusActor {
+  type: OrderStatusActorType;
+  id?: string;
+  name?: string;
+  note?: string | null;
+}
 
 type FulfillmentGate = {
   featureEnabled: boolean;
@@ -238,7 +253,11 @@ function buildOrderBy(sort: OrderQuery["sort"]): Prisma.OrderOrderByWithRelation
   }
 }
 
-async function listOrders(query: OrderQuery, scopeUserId?: string): Promise<Paginated<OrderDTO>> {
+async function listOrders(
+  query: OrderQuery,
+  scopeUserId?: string,
+  includeActorIdentity = false,
+): Promise<Paginated<OrderDTO>> {
   const where = buildWhere(query, scopeUserId);
   const skip = (query.page - 1) * query.pageSize;
 
@@ -249,12 +268,12 @@ async function listOrders(query: OrderQuery, scopeUserId?: string): Promise<Pagi
       orderBy: buildOrderBy(query.sort),
       skip,
       take: query.pageSize,
-      include: { items: true },
+      include: orderRelations,
     }),
   ]);
 
   return {
-    items: rows.map((r) => toOrderDTO(r as OrderWithItems)),
+    items: rows.map((r) => toOrderDTO(r as OrderWithItems, { includeActorIdentity })),
     page: query.page,
     pageSize: query.pageSize,
     total,
@@ -264,7 +283,7 @@ async function listOrders(query: OrderQuery, scopeUserId?: string): Promise<Pagi
 
 /** Admin listing — every order, filterable. */
 export function adminList(query: OrderQuery): Promise<Paginated<OrderDTO>> {
-  return listOrders(query);
+  return listOrders(query, undefined, true);
 }
 
 /** Customer listing — scoped to the authenticated user's own orders. */
@@ -275,7 +294,7 @@ export function listForUser(userId: string, query: OrderQuery): Promise<Paginate
 export async function adminGetById(id: string): Promise<OrderDTO> {
   const row = await prisma.order.findUnique({ where: { id }, ...withItems });
   if (!row) throw Errors.notFound("Order not found.");
-  return toOrderDTO(row as OrderWithItems);
+  return toOrderDTO(row as OrderWithItems, { includeActorIdentity: true });
 }
 
 /**
@@ -404,8 +423,17 @@ export async function checkout(input: CheckoutInput, userId?: string): Promise<O
         deliveryOrigin: fulfillment.deliveryOrigin,
         deliveryRateId: fulfillment.deliveryRateId,
         items: { create: orderItems },
+        statusHistory: {
+          create: {
+            toStatus: "PENDING",
+            actorType: userId ? "CUSTOMER" : "SYSTEM",
+            actorId: userId ?? null,
+            actorName: input.contactName,
+            note: "Order placed",
+          },
+        },
       },
-      include: { items: true },
+      include: orderRelations,
     });
     await tx.commerceEvent.createMany({
       data: [...quantityByProduct].map(([productId, quantity]) => ({
@@ -529,20 +557,35 @@ export async function checkout(input: CheckoutInput, userId?: string): Promise<O
     return created;
   });
 
-  return toOrderDTO(order as OrderWithItems);
+  return toOrderDTO(order as OrderWithItems, { includeActorIdentity: true });
 }
 
 /**
  * Update order status. Entering CANCELLED from a live state restores the stock
  * reserved by the order's line items, atomically with the status write.
  */
-export async function updateStatus(id: string, status: OrderStatus): Promise<OrderDTO> {
+export async function updateStatus(
+  id: string,
+  status: OrderStatus,
+  actor: OrderStatusActor = { type: "ADMIN" },
+): Promise<OrderDTO> {
+  let shouldNotifyPickupReady = false;
   const order = await prisma.$transaction(async (tx) => {
-    const current = await tx.order.findUnique({ where: { id }, include: { items: true } });
+    const current = await tx.order.findUnique({
+      where: { id },
+      include: { items: true, user: { select: { email: true } } },
+    });
     if (!current) throw Errors.notFound("Order not found.");
     if (
       current.deliveryFeeStatus === "PENDING_QUOTE" &&
-      ["CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED"].includes(status)
+      [
+        "CONFIRMED",
+        "PROCESSING",
+        "SHIPPED",
+        "AT_PICKUP_STATION",
+        "PICKED_UP",
+        "DELIVERED",
+      ].includes(status)
     ) {
       throw Errors.conflict(
         "Confirm the route-specific delivery quote before progressing this order.",
@@ -588,10 +631,125 @@ export async function updateStatus(id: string, status: OrderStatus): Promise<Ord
       }
     }
 
-    return tx.order.update({ where: { id }, data: { status }, include: { items: true } });
+    if (current.status === status) {
+      return current;
+    }
+
+    const recipient =
+      current.contactEmail?.trim().toLowerCase() || current.user?.email.toLowerCase() || null;
+    const enteringPickupStation =
+      status === "AT_PICKUP_STATION" &&
+      current.status !== "AT_PICKUP_STATION" &&
+      current.fulfillmentMethod === "PICKUP_STATION";
+    shouldNotifyPickupReady = enteringPickupStation;
+
+    return tx.order.update({
+      where: { id },
+      data: {
+        status,
+        pickupReadyAt: enteringPickupStation ? new Date() : undefined,
+        pickedUpAt: status === "PICKED_UP" ? new Date() : undefined,
+        statusHistory: {
+          create: {
+            fromStatus: current.status,
+            toStatus: status,
+            actorType: actor.type,
+            actorId: actor.id ?? null,
+            actorName: actor.name ?? null,
+            note: actor.note?.trim() || null,
+          },
+        },
+        ...(enteringPickupStation && recipient
+          ? {
+              notificationDeliveries: {
+                upsert: {
+                  where: { orderId_type: { orderId: id, type: "PICKUP_READY" } },
+                  create: { type: "PICKUP_READY", recipient },
+                  update: { recipient, status: "PENDING", lastError: null },
+                },
+              },
+            }
+          : {}),
+      },
+      include: orderRelations,
+    });
   });
 
-  return toOrderDTO(order as OrderWithItems);
+  if (shouldNotifyPickupReady) {
+    if (order.userId) {
+      await prisma.notification
+        .create({
+          data: {
+            recipientType: "USER",
+            recipientId: order.userId,
+            title: "Your order is ready for pickup",
+            body: `Order #${order.orderNumber} has arrived at ${order.pickupStationName ?? "your pickup station"}.`,
+            type: "order_update",
+            relatedId: order.id,
+          },
+        })
+        .catch((error) =>
+          logger.error({ error, orderId: order.id }, "Pickup in-app notification failed"),
+        );
+    }
+    await dispatchPickupReadyEmail(order.id);
+    const refreshed = await prisma.order.findUnique({ where: { id: order.id }, ...withItems });
+    if (refreshed) return toOrderDTO(refreshed as OrderWithItems, { includeActorIdentity: true });
+  }
+
+  return toOrderDTO(order as OrderWithItems, { includeActorIdentity: true });
+}
+
+export async function dispatchPickupReadyEmail(orderId: string): Promise<void> {
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: { notificationDeliveries: true },
+  });
+  const delivery = order?.notificationDeliveries.find((item) => item.type === "PICKUP_READY");
+  if (!order || !delivery || delivery.status === "SENT") return;
+
+  await prisma.orderNotificationDelivery.update({
+    where: { id: delivery.id },
+    data: { attempts: { increment: 1 }, lastError: null },
+  });
+  try {
+    const result = await sendPickupReadyEmail({
+      to: delivery.recipient,
+      customerName: order.contactName,
+      orderNumber: order.orderNumber,
+      stationName: order.pickupStationName,
+      stationAddress: order.pickupStationAddress,
+      readyAt: order.pickupReadyAt ?? new Date(),
+    });
+    await prisma.orderNotificationDelivery.update({
+      where: { id: delivery.id },
+      data: { status: "SENT", providerMessageId: result.id, sentAt: new Date(), lastError: null },
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message.slice(0, 1000) : "Email delivery failed";
+    await prisma.orderNotificationDelivery.update({
+      where: { id: delivery.id },
+      data: { status: "FAILED", lastError: message },
+    });
+    logger.error({ error, orderId }, "Pickup-ready email failed");
+  }
+}
+
+/** Retry a bounded batch from the transactional email outbox. */
+export async function retryPendingPickupReadyEmails(limit = 20): Promise<number> {
+  const deliveries = await prisma.orderNotificationDelivery.findMany({
+    where: {
+      type: "PICKUP_READY",
+      status: { in: ["PENDING", "FAILED"] },
+      attempts: { lt: 5 },
+      updatedAt: { lte: new Date(Date.now() - 5 * 60 * 1000) },
+    },
+    select: { orderId: true },
+    orderBy: { updatedAt: "asc" },
+    take: Math.max(1, Math.min(limit, 100)),
+  });
+  for (const delivery of deliveries) await dispatchPickupReadyEmail(delivery.orderId);
+  return deliveries.length;
 }
 
 /** How long after placing an order a customer may still cancel it themselves. */
@@ -617,7 +775,11 @@ export async function cancelOwnOrder(userId: string, orderNumber: string): Promi
   if (Date.now() - order.createdAt.getTime() > SELF_CANCEL_WINDOW_MS) {
     throw Errors.badRequest("The 24-hour cancellation window for this order has passed.");
   }
-  return updateStatus(order.id, "CANCELLED");
+  return updateStatus(order.id, "CANCELLED", {
+    type: "CUSTOMER",
+    id: userId,
+    note: "Cancelled by customer",
+  });
 }
 
 export async function updatePayment(id: string, paymentStatus: PaymentStatus): Promise<OrderDTO> {
@@ -635,9 +797,9 @@ export async function updatePayment(id: string, paymentStatus: PaymentStatus): P
   const order = await prisma.order.update({
     where: { id },
     data: { paymentStatus },
-    include: { items: true },
+    include: orderRelations,
   });
-  return toOrderDTO(order as OrderWithItems);
+  return toOrderDTO(order as OrderWithItems, { includeActorIdentity: true });
 }
 
 /** Confirm a route-specific doorstep quote and recompute the payable total. */
@@ -666,8 +828,8 @@ export async function updateDeliveryQuote(
         deliveryEta: input.deliveryEta,
         total,
       },
-      include: { items: true },
+      include: orderRelations,
     });
   });
-  return toOrderDTO(order as OrderWithItems);
+  return toOrderDTO(order as OrderWithItems, { includeActorIdentity: true });
 }

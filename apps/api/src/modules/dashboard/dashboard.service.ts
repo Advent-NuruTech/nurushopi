@@ -91,6 +91,6 @@ export async function getStats(): Promise<DashboardStatsDTO> {
       pendingRedemptionAmount: moneyOf(pendingRedemptionAgg._sum.amount),
       outstandingBalance: moneyOf(outstandingAgg._sum.walletBalance),
     },
-    recentOrders: (recentRows as OrderWithItems[]).map(toOrderDTO),
+    recentOrders: (recentRows as OrderWithItems[]).map((order) => toOrderDTO(order)),
   };
 }

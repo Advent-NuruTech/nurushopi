@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   CheckCircle2,
@@ -15,7 +16,7 @@ import {
 import type { OrderDTO, OrderStatus, PickupAgentDTO } from "@nuru/types";
 import { ApiClientError, pickupAgentApi } from "@/lib/api";
 import { formatPrice } from "@/lib/formatPrice";
-import { PICKUP_LOGIN_PATH } from "@/lib/pickupPaths";
+import { PICKUP_AGENT_TERMS_PATH, PICKUP_LOGIN_PATH } from "@/lib/pickupPaths";
 
 const FILTERS: Array<{ value: "ALL" | OrderStatus; label: string }> = [
   { value: "ALL", label: "Active" },
@@ -135,12 +136,21 @@ export default function PickupDashboardPage() {
             </h1>
             <p className="truncate text-xs text-slate-500">{agent?.stationAddress}</p>
           </div>
-          <button
-            onClick={logout}
-            className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800"
-          >
-            <LogOut size={16} /> Sign out
-          </button>
+          <div className="flex shrink-0 items-center gap-2">
+            <Link
+              href={PICKUP_AGENT_TERMS_PATH}
+              target="_blank"
+              className="hidden rounded-xl px-3 py-2 text-sm font-semibold text-brand-strong hover:bg-brand-surface sm:inline-flex dark:text-brand-bright dark:hover:bg-brand-ink/30"
+            >
+              Station terms
+            </Link>
+            <button
+              onClick={logout}
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800"
+            >
+              <LogOut size={16} /> Sign out
+            </button>
+          </div>
         </div>
       </header>
       <div className="mx-auto max-w-7xl space-y-5 px-4 py-6">

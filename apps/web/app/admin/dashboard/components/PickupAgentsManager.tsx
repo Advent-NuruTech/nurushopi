@@ -1,9 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { KeyRound, Plus, Save, UserCog } from "lucide-react";
 import type { PickupAgentCreateInput, PickupAgentDTO, PickupStationDTO } from "@nuru/types";
 import { ApiClientError, pickupAgentApi } from "@/lib/api";
+import { PICKUP_AGENT_TERMS_PATH } from "@/lib/pickupPaths";
 
 const inputClass =
   "w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-slate-700 dark:bg-slate-950";
@@ -106,6 +108,17 @@ export default function PickupAgentsManager({ stations }: { stations: PickupStat
           </h2>
           <p className="mt-1 text-sm text-slate-500">
             Station-scoped accounts for arrival, notification, and customer handover.
+          </p>
+          <p className="mt-1 text-xs text-slate-500">
+            Give every operator the{" "}
+            <Link
+              href={PICKUP_AGENT_TERMS_PATH}
+              target="_blank"
+              className="font-semibold text-brand-strong underline underline-offset-2 dark:text-brand-bright"
+            >
+              station terms
+            </Link>{" "}
+            before issuing credentials.
           </p>
         </div>
         <button

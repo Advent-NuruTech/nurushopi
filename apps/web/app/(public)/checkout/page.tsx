@@ -32,6 +32,7 @@ import type {
   PublicFulfillmentDTO,
 } from "@nuru/types";
 import { KENYA_COUNTIES, KENYA_REGIONS, kenyaRegionForCounty } from "@/lib/kenyaLocations";
+import { PICKUP_POLICY_PATH } from "@/lib/pickupPaths";
 
 export const dynamic = "force-dynamic";
 
@@ -81,6 +82,7 @@ function CheckoutContent() {
   const [errorMessage, setErrorMessage] = useState("");
   const [phoneValid, setPhoneValid] = useState(true);
   const [useWallet, setUseWallet] = useState(false);
+  const [acceptedCheckoutTerms, setAcceptedCheckoutTerms] = useState(false);
   const [fulfillment, setFulfillment] = useState<PublicFulfillmentDTO>(disabledFulfillment);
   const [deliveryMethod, setDeliveryMethod] = useState<CustomerFulfillmentMethod | null>(null);
   const [pickupStationId, setPickupStationId] = useState("");
@@ -372,6 +374,7 @@ function CheckoutContent() {
     const errors: string[] = [];
 
     if (!name.trim()) errors.push("Name is required");
+    if (!acceptedCheckoutTerms) errors.push("Accept the checkout terms before placing the order");
 
     const phoneValidation = validatePhoneForSubmission(phone, true);
     if (!phoneValidation.isValid) errors.push(phoneValidation.message);
@@ -816,7 +819,10 @@ function CheckoutContent() {
                       <button
                         type="button"
                         aria-pressed={deliveryMethod === "PICKUP_STATION"}
-                        onClick={() => setDeliveryMethod("PICKUP_STATION")}
+                        onClick={() => {
+                          setDeliveryMethod("PICKUP_STATION");
+                          setAcceptedCheckoutTerms(false);
+                        }}
                         className={`rounded-xl border p-3 text-left transition ${
                           deliveryMethod === "PICKUP_STATION"
                             ? "border-brand bg-white text-brand-ink ring-2 ring-brand/15"
@@ -835,7 +841,10 @@ function CheckoutContent() {
                       <button
                         type="button"
                         aria-pressed={deliveryMethod === "DOORSTEP"}
-                        onClick={() => setDeliveryMethod("DOORSTEP")}
+                        onClick={() => {
+                          setDeliveryMethod("DOORSTEP");
+                          setAcceptedCheckoutTerms(false);
+                        }}
                         className={`rounded-xl border p-3 text-left transition ${
                           deliveryMethod === "DOORSTEP"
                             ? "border-brand bg-white text-brand-ink ring-2 ring-brand/15"
@@ -854,6 +863,17 @@ function CheckoutContent() {
 
                   {deliveryMethod === "PICKUP_STATION" && (
                     <div className="space-y-2">
+                      <p className="rounded-xl border border-brand-border bg-white p-3 text-xs leading-5 text-slate-600">
+                        Pickup orders require identity verification and are governed by our{" "}
+                        <Link
+                          href={PICKUP_POLICY_PATH}
+                          target="_blank"
+                          className="font-semibold text-brand-strong underline underline-offset-2"
+                        >
+                          Pickup Station Policy
+                        </Link>
+                        . Check collection requirements before choosing a station.
+                      </p>
                       <label
                         htmlFor="station-search"
                         className="text-xs font-semibold text-slate-700"
@@ -1156,6 +1176,39 @@ function CheckoutContent() {
                   Apply wallet balance ({formatPrice(walletBalance)} available)
                 </label>
               )}
+              <label className="flex items-start gap-2 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                <input
+                  type="checkbox"
+                  checked={acceptedCheckoutTerms}
+                  onChange={(event) => setAcceptedCheckoutTerms(event.target.checked)}
+                  className="mt-0.5 h-4 w-4 shrink-0 accent-brand"
+                  required
+                />
+                <span>
+                  I agree to the{" "}
+                  <Link
+                    href="/terms"
+                    target="_blank"
+                    className="font-semibold text-brand-strong underline underline-offset-2 dark:text-brand-bright"
+                  >
+                    Terms &amp; Conditions
+                  </Link>
+                  {deliveryMethod === "PICKUP_STATION" ? (
+                    <>
+                      {" "}
+                      and the{" "}
+                      <Link
+                        href={PICKUP_POLICY_PATH}
+                        target="_blank"
+                        className="font-semibold text-brand-strong underline underline-offset-2 dark:text-brand-bright"
+                      >
+                        Pickup Station Policy
+                      </Link>
+                    </>
+                  ) : null}
+                  .
+                </span>
+              </label>
             </div>
 
             {/* Enhanced Error Display */}
@@ -1183,7 +1236,7 @@ function CheckoutContent() {
 
               <button
                 onClick={handleSubmitOrder}
-                disabled={isSubmitting || !phoneValid || sabbathClosed}
+                disabled={isSubmitting || !phoneValid || !acceptedCheckoutTerms || sabbathClosed}
                 className="rounded-xl bg-brand px-4 py-2.5 font-semibold text-white transition-colors hover:bg-brand-strong disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isSubmitting ? (

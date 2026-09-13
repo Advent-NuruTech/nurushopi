@@ -9,6 +9,7 @@ import {
   ShoppingBag,
   Truck,
 } from "lucide-react";
+import { PICKUP_AGENT_TERMS_PATH, PICKUP_POLICY_PATH } from "@/lib/pickupPaths";
 
 const quickLinks = [
   { label: "Shop all", href: "/shop" },
@@ -145,6 +146,18 @@ export default function Footer() {
               className="hover:text-sky-600 dark:hover:text-emerald-400"
             >
               Shipping
+            </Link>
+            <Link
+              href={PICKUP_POLICY_PATH}
+              className="hover:text-brand-strong dark:hover:text-brand-bright"
+            >
+              Pickup policy
+            </Link>
+            <Link
+              href={PICKUP_AGENT_TERMS_PATH}
+              className="hover:text-brand-strong dark:hover:text-brand-bright"
+            >
+              Station terms
             </Link>
           </div>
         </div>

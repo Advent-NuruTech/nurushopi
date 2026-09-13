@@ -5,17 +5,22 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LockKeyhole, Mail, MapPin } from "lucide-react";
 import { ApiClientError, pickupAgentApi } from "@/lib/api";
-import { PICKUP_DASHBOARD_PATH } from "@/lib/pickupPaths";
+import { PICKUP_AGENT_TERMS_PATH, PICKUP_DASHBOARD_PATH } from "@/lib/pickupPaths";
 
 export default function PickupAgentLoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (!acceptedTerms) {
+      setError("Accept the station terms before signing in.");
+      return;
+    }
     setLoading(true);
     setError("");
     try {
@@ -86,8 +91,28 @@ export default function PickupAgentLoginPage() {
               />
             </span>
           </label>
+          <label className="mt-5 flex items-start gap-2 text-xs leading-5 text-slate-600 dark:text-slate-300">
+            <input
+              type="checkbox"
+              checked={acceptedTerms}
+              onChange={(event) => setAcceptedTerms(event.target.checked)}
+              className="mt-0.5 h-4 w-4 shrink-0 accent-brand"
+              required
+            />
+            <span>
+              I am authorised to use this account and agree to the{" "}
+              <Link
+                href={PICKUP_AGENT_TERMS_PATH}
+                target="_blank"
+                className="font-semibold text-brand-strong underline underline-offset-2 dark:text-brand-bright"
+              >
+                Pickup Station Partner &amp; Agent Terms
+              </Link>
+              .
+            </span>
+          </label>
           <button
-            disabled={loading}
+            disabled={loading || !acceptedTerms}
             className="mt-6 w-full rounded-xl bg-brand px-4 py-3 font-bold text-white hover:bg-brand-strong disabled:opacity-60"
           >
             {loading ? "Signing in…" : "Sign in to station"}

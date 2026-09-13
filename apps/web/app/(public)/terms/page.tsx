@@ -1,18 +1,19 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
+import { PICKUP_POLICY_PATH } from "@/lib/pickupPaths";
 
 const Terms: React.FC = () => {
   return (
     <main className="max-w-4xl mx-auto p-6 space-y-8 pt-32">
-  <h1 className="text-3xl font-bold">Nurushop — Terms & Conditions</h1>
-  <p className="text-gray-600">Last Updated: December 2025</p>
+      <h1 className="text-3xl font-bold">Nurushop — Terms & Conditions</h1>
+      <p className="text-gray-600">Last Updated: 13 September 2026</p>
 
-  <p>
-    Welcome to Nurushop, an online marketplace that connects buyers and product owners. By
-    using Nurushop, you agree to the following Terms & Conditions. Please read them carefully.
-  </p>
-
+      <p>
+        Welcome to Nurushop, an online marketplace that connects buyers and product owners. By using
+        Nurushop, you agree to the following Terms & Conditions. Please read them carefully.
+      </p>
 
       <section>
         <h2 className="text-2xl font-semibold mt-6 mb-2">1. Definition of Terms</h2>
@@ -52,7 +53,10 @@ const Terms: React.FC = () => {
       <section>
         <h2 className="text-2xl font-semibold mt-6 mb-2">3. Payment Process</h2>
         <ol className="list-decimal list-inside space-y-1">
-          <li>Buyers send payment directly to the official Nurushop account (product price + delivery fee).</li>
+          <li>
+            Buyers send payment directly to the official Nurushop account (product price + delivery
+            fee).
+          </li>
           <li>Nurushop confirms payment.</li>
           <li>Nurushop transfers the seller’s amount after deducting our commission.</li>
           <li>Seller proceeds with delivery of the product to the buyer.</li>
@@ -63,7 +67,7 @@ const Terms: React.FC = () => {
       <section>
         <h2 className="text-2xl font-semibold mt-6 mb-2">4. Commission Policy</h2>
         <ul className="list-disc list-inside space-y-1">
-          <li>Items below KSh 300: Minimum commission of KSh 20</li>    D
+          <li>Items below KSh 300: Minimum commission of KSh 20</li>
           <li>Items KSh 300 and above: 10% commission</li>
         </ul>
         <p>Commissions are deducted automatically before sending payment to the seller.</p>
@@ -74,11 +78,25 @@ const Terms: React.FC = () => {
         <ul className="list-disc list-inside space-y-1">
           <li>Parceling fees are based on distance and the seller&apos;s delivery method.</li>
           <li>Buyers are informed of the delivery fee before making payment.</li>
-          <li>Delivery is the responsibility of the seller/product owner.</li>
+          <li>
+            Delivery is fulfilled by the seller, carrier, or pickup partner as coordinated by
+            Nurushop.
+          </li>
           <li>Nurushop will confirm the buyer’s exact location before approving delivery.</li>
+          <li>
+            Pickup orders are also governed by the{" "}
+            <Link
+              href={PICKUP_POLICY_PATH}
+              className="font-semibold text-brand-strong hover:underline dark:text-brand-bright"
+            >
+              Pickup Station Policy
+            </Link>
+            .
+          </li>
         </ul>
         <p>
-          Nurushop is not responsible for delays caused by weather, transport, or seller schedules.
+          Delivery estimates may be affected by weather, transport, security incidents, or other
+          events beyond reasonable control. This does not remove any remedy required by law.
         </p>
       </section>
 
@@ -101,12 +119,18 @@ const Terms: React.FC = () => {
             If the buyer receives an item that is completely different from what was advertised,
             Nurushop reviews the case and decides if a refund or partial refund applies.
           </li>
-          <li>Parceling/delivery fees are non-refundable once delivery has started.</li>
+          <li>
+            Delivery costs already reasonably incurred may be deducted only where disclosed and
+            permitted by law. They are refundable where required by law or where the failed service
+            is attributable to Nurushop or its fulfilment provider.
+          </li>
         </ul>
-        <p>Refund requests must be made within 24 hours after delivery.</p>
+        <p>
+          Please report visible issues within 24 hours and concealed issues as soon as reasonably
+          possible. This reporting request does not shorten a non-excludable statutory right.
+        </p>
       </section>
-       
-    
+
       <section>
         <h2 className="text-2xl font-semibold mt-6 mb-2">8. Buyer Responsibilities</h2>
         <ul className="list-disc list-inside space-y-1">
@@ -132,8 +156,9 @@ const Terms: React.FC = () => {
       <section>
         <h2 className="text-2xl font-semibold mt-6 mb-2">10. Dispute Resolution</h2>
         <p>
-          If a disagreement occurs between a buyer and a seller, Nurushop will act as a mediator. Our
-          decision will prioritize fairness, honesty, and platform integrity.
+          If a disagreement occurs, Nurushop will investigate and may mediate between the buyer,
+          seller, carrier, or station. We will communicate the outcome and reasons. Nothing prevents
+          a party from using a regulator, tribunal, or court remedy available under Kenyan law.
         </p>
       </section>
 

@@ -48,7 +48,15 @@ export default function ProductEditPage() {
     catalogApi
       .getProduct(id)
       .then(({ product: p }) => {
-        setVariants((p.variants ?? []).map((v, key) => ({ key, name: v.name, imageUrl: v.imageUrl ?? "", file: null })));
+        setVariants(
+          (p.variants ?? []).map((v, key) => ({
+            key,
+            name: v.name,
+            imageUrl: v.imageUrl ?? "",
+            price: v.price ?? "",
+            file: null,
+          })),
+        );
         setProduct({
           id: p.id,
           name: p.name,

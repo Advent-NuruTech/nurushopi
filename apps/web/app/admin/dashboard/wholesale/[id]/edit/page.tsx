@@ -61,6 +61,7 @@ export default function WholesaleEditPage() {
             key,
             name: v.name,
             imageUrl: v.imageUrl ?? "",
+            price: v.price ?? "",
             file: null,
           })),
         );

@@ -10,12 +10,12 @@ describe.each([
     expect(update.parse({})).not.toHaveProperty("variants");
     expect(update.parse({ variants: [] }).variants).toEqual([]);
   });
-  it("preserves independent images and permits omitted images", () => {
-    const variants = [{ name: "Blue / M", imageUrl: "https://example.com/blue.jpg" }, { name: "Red / L", imageUrl: null }];
+  it("preserves independent images, prices and omitted images", () => {
+    const variants = [{ name: "Blue / M", imageUrl: "https://example.com/blue.jpg", price: 650 }, { name: "Red / L", imageUrl: null }];
     expect(create.parse({ ...base, variants }).variants).toEqual(variants);
   });
-  it("rejects duplicate names, empty names and unsafe image URLs", () => {
-    for (const variants of [[{ name: "Blue" }, { name: " blue " }], [{ name: " " }], [{ name: "Blue", imageUrl: "javascript:alert(1)" }], [{ name: "Blue", imageUrl: "invalid" }]]) {
+  it("rejects duplicate names, empty names, unsafe image URLs and negative prices", () => {
+    for (const variants of [[{ name: "Blue" }, { name: " blue " }], [{ name: " " }], [{ name: "Blue", imageUrl: "javascript:alert(1)" }], [{ name: "Blue", imageUrl: "invalid" }], [{ name: "Blue", price: -1 }]]) {
       expect(create.safeParse({ ...base, variants }).success).toBe(false);
     }
   });

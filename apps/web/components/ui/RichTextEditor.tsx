@@ -14,6 +14,7 @@ function cleanHtml(html: string) {
     if (node.nodeType !== Node.ELEMENT_NODE) return "";
     const element = node as HTMLElement, tag = element.tagName, children = Array.from(element.childNodes).map(clean).join("");
     if (!allowedTags.has(tag)) return children;
+    if (tag === "BR") return "<br>";
     if (tag === "A") { const href = element.getAttribute("href") ?? ""; return /^https?:\/\//i.test(href) || href.startsWith("mailto:") ? `<a href="${href.replace(/\"/g, "")}">${children}</a>` : children; }
     if (tag === "SPAN") { const color = safeColor(element.style.color); return color ? `<span style="color:${color}">${children}</span>` : children; }
     const normalized = tag === "B" ? "strong" : tag === "I" ? "em" : tag.toLowerCase();

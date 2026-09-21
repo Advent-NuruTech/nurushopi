@@ -423,7 +423,11 @@ function CheckoutContent() {
               .join(", ");
 
       const { order } = await orderApi.checkout({
-        items: cart.map((item) => ({ productId: item.id, quantity: item.quantity })),
+        items: cart.map((item) => ({
+          productId: item.productId ?? item.id,
+          quantity: item.quantity,
+          ...(item.variantName ? { variantName: item.variantName } : {}),
+        })),
         contactName: name.trim(),
         contactPhone: normalizedPhone,
         contactEmail: email.trim() || user.email || null,
@@ -455,7 +459,7 @@ function CheckoutContent() {
       const productList = cart
         .map(
           (item, idx) =>
-            `${idx + 1}. ${item.name} (x${item.quantity}) — ${formatPrice(item.price * item.quantity)} [ID: ${item.id}]`,
+            `${idx + 1}. ${item.name} (x${item.quantity}) — ${formatPrice(item.price * item.quantity)} [ID: ${item.productId ?? item.id}]`,
         )
         .join("\n");
 
@@ -628,6 +632,11 @@ function CheckoutContent() {
                     <p className="line-clamp-2 font-semibold text-gray-900 dark:text-gray-100">
                       {item.name}
                     </p>
+                    {item.variantName && (
+                      <p className="mt-1 text-xs font-semibold text-brand-strong dark:text-brand-bright">
+                        Option: {item.variantName}
+                      </p>
+                    )}
                     <p className="text-gray-500 text-sm">{formatPrice(item.price)}</p>
                     {(item.brandName || item.storeName) && (
                       <p className="mt-1 text-xs text-slate-500">
@@ -636,7 +645,7 @@ function CheckoutContent() {
                     )}
                     <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
                       <Link
-                        href={`/products/${item.slug ?? item.id}`}
+                        href={`/products/${item.slug ?? item.productId ?? item.id}`}
                         className="rounded-full border border-blue-200 px-2 py-0.5 text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-900/30"
                       >
                         View details

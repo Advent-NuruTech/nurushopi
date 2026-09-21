@@ -1,16 +1,17 @@
 import { createHash, randomUUID } from "node:crypto";
 import { prisma, Prisma } from "@nuru/db";
-import type {
-  CheckoutInput,
-  DeliveryFeeStatus,
-  FulfillmentMethod,
-  OrderDeliveryQuoteInput,
-  OrderDTO,
-  OrderQuery,
-  OrderStatus,
-  Paginated,
-  PaymentStatus,
-  OrderStatusActorType,
+import {
+  productVariantsSchema,
+  type CheckoutInput,
+  type DeliveryFeeStatus,
+  type FulfillmentMethod,
+  type OrderDeliveryQuoteInput,
+  type OrderDTO,
+  type OrderQuery,
+  type OrderStatus,
+  type Paginated,
+  type PaymentStatus,
+  type OrderStatusActorType,
 } from "@nuru/types";
 import { Errors } from "../../lib/errors.js";
 import { resolveDeliveryQuote } from "../fulfillment/fulfillment.service.js";
@@ -315,9 +316,22 @@ export async function getByOrderNumber(orderNumber: string): Promise<OrderDTO> {
  */
 export async function checkout(input: CheckoutInput, userId?: string): Promise<OrderDTO> {
   const fulfillmentGate = await loadFulfillmentGate();
-  // Collapse duplicate product lines so stock checks see the true total.
+  // Collapse duplicate product+variant lines for order snapshots while keeping
+  // stock checks grouped by product because variants share product inventory.
+  const cartLines = new Map<
+    string,
+    { productId: string; variantName: string | null; quantity: number }
+  >();
   const quantityByProduct = new Map<string, number>();
   for (const line of input.items) {
+    const variantName = line.variantName?.trim() || null;
+    const key = `${line.productId}\u0000${variantName ?? ""}`;
+    const existing = cartLines.get(key);
+    if (existing) {
+      existing.quantity += line.quantity;
+    } else {
+      cartLines.set(key, { productId: line.productId, variantName, quantity: line.quantity });
+    }
     quantityByProduct.set(
       line.productId,
       (quantityByProduct.get(line.productId) ?? 0) + line.quantity,
@@ -338,6 +352,8 @@ export async function checkout(input: CheckoutInput, userId?: string): Promise<O
 
     let subtotal = new Prisma.Decimal(0);
     const orderItems: Prisma.OrderItemCreateWithoutOrderInput[] = [];
+    const promotionQuantities = new Map<string, number>();
+    const revenueByProduct = new Map<string, Prisma.Decimal>();
 
     for (const [productId, quantity] of quantityByProduct) {
       const product = byId.get(productId);
@@ -348,21 +364,49 @@ export async function checkout(input: CheckoutInput, userId?: string): Promise<O
       if (product.stock < quantity) {
         throw Errors.conflict(`Only ${product.stock} of "${product.name}" left in stock.`);
       }
+    }
 
+    for (const line of cartLines.values()) {
+      const product = byId.get(line.productId)!;
       const effective = effectivePrices.get(product.id);
-      const unitPrice =
-        effective?.effectivePrice ??
-        new Prisma.Decimal((product.sellingPrice ?? product.price).toString());
-      subtotal = subtotal.add(unitPrice.mul(quantity));
+      const variants = productVariantsSchema.parse(product.variants ?? []);
+      const selectedVariant = line.variantName
+        ? variants.find((variant) => variant.name === line.variantName)
+        : null;
+      if (line.variantName && !selectedVariant) {
+        throw Errors.badRequest(
+          `"${product.name}" option "${line.variantName}" is no longer available.`,
+        );
+      }
+      const variantHasPrice = selectedVariant?.price != null;
+      const unitPrice = variantHasPrice
+        ? new Prisma.Decimal(selectedVariant.price!.toString())
+        : (effective?.effectivePrice ??
+          new Prisma.Decimal((product.sellingPrice ?? product.price).toString()));
+      const lineTotal = unitPrice.mul(line.quantity);
+      subtotal = subtotal.add(lineTotal);
+      revenueByProduct.set(
+        product.id,
+        (revenueByProduct.get(product.id) ?? new Prisma.Decimal(0)).add(lineTotal),
+      );
+      if (!variantHasPrice) {
+        promotionQuantities.set(
+          product.id,
+          (promotionQuantities.get(product.id) ?? 0) + line.quantity,
+        );
+      }
 
       orderItems.push({
         product: { connect: { id: product.id } },
-        productName: product.name,
+        productName: selectedVariant ? `${product.name} - ${selectedVariant.name}` : product.name,
         unitPrice,
-        quantity,
-        imageUrl: product.images[0] ?? null,
+        quantity: line.quantity,
+        imageUrl: selectedVariant?.imageUrl ?? product.images[0] ?? null,
       });
+    }
 
+    for (const [productId, quantity] of quantityByProduct) {
+      const product = byId.get(productId)!;
       // Conditional decrement guards against a concurrent checkout draining stock
       // between the read above and this write.
       const res = await tx.product.updateMany({
@@ -448,9 +492,7 @@ export async function checkout(input: CheckoutInput, userId?: string): Promise<O
         metadata: {
           orderId: created.id,
           quantity,
-          revenue: (effectivePrices.get(productId)?.effectivePrice ?? new Prisma.Decimal(0))
-            .mul(quantity)
-            .toString(),
+          revenue: (revenueByProduct.get(productId) ?? new Prisma.Decimal(0)).toString(),
         },
       })),
     });
@@ -477,7 +519,7 @@ export async function checkout(input: CheckoutInput, userId?: string): Promise<O
 
     // Reserve campaign inventory in the same transaction as stock/order. The
     // conditional counters make promotion limits safe during traffic spikes.
-    for (const [productId, quantity] of quantityByProduct) {
+    for (const [productId, quantity] of promotionQuantities) {
       const effective = effectivePrices.get(productId);
       if (!effective?.promotionId || !effective.promotionProductId) continue;
       const campaign = await tx.promotion.findUnique({ where: { id: effective.promotionId } });

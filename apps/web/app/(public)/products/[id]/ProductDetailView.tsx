@@ -80,7 +80,10 @@ export default function ProductDetailView({
   const router = useRouter();
   const { addToCart } = useCart();
   const { isClosed: sabbathClosed } = useSabbathStatus();
-  const [mainImage, setMainImage] = useState(product.images[0]);
+  const variantOptions = product.variants ?? [];
+  const initialVariant = variantOptions[0] ?? null;
+  const [mainImage, setMainImage] = useState(initialVariant?.imageUrl ?? product.images[0]);
+  const [selectedVariantName, setSelectedVariantName] = useState(initialVariant?.name ?? "");
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewSummary, setReviewSummary] = useState<ReviewSummaryDTO>(product.ratingSummary);
   const [reviewTotal, setReviewTotal] = useState(product.ratingSummary.count);
@@ -160,24 +163,47 @@ export default function ProductDetailView({
 
   const sellingPrice = getSellingPrice(product);
   const originalPrice = getOriginalPrice(product);
-  const discountPercent = getDiscountPercent(product);
-  const savings = originalPrice ? Math.max(0, originalPrice - sellingPrice) : 0;
+  const selectedVariant =
+    variantOptions.find((variant) => variant.name === selectedVariantName) ?? null;
+  const displayPrice = selectedVariant?.price ?? sellingPrice;
+  const discountPercent =
+    originalPrice && originalPrice > displayPrice
+      ? Math.round(((originalPrice - displayPrice) / originalPrice) * 100)
+      : null;
+  const savings = originalPrice ? Math.max(0, originalPrice - displayPrice) : 0;
+  const galleryImages = Array.from(
+    new Set([
+      ...product.images,
+      ...variantOptions.flatMap((variant) => (variant.imageUrl ? [variant.imageUrl] : [])),
+    ]),
+  );
   const productDescription =
     product.description?.trim() ||
     product.shortDescription?.trim() ||
     "More product information will be available soon.";
 
+  const handleVariantSelect = (name: string) => {
+    const nextVariant = variantOptions.find((variant) => variant.name === name);
+    setSelectedVariantName(name);
+    if (nextVariant?.imageUrl) setMainImage(nextVariant.imageUrl);
+  };
+
   const handleAddToCart = () => {
     if (sabbathClosed || !product.inStock) return;
+    const cartLineId = selectedVariant
+      ? `${product.id}::variant::${selectedVariant.name}`
+      : product.id;
     addToCart({
-      id: product.id,
+      id: cartLineId,
+      productId: product.id,
       slug: product.slug,
-      name: product.name,
+      name: selectedVariant ? `${product.name} - ${selectedVariant.name}` : product.name,
+      variantName: selectedVariant?.name ?? null,
       brandName: product.brandName,
       storeName: product.storeName,
-      price: sellingPrice,
+      price: displayPrice,
       quantity,
-      image: mainImage,
+      image: selectedVariant?.imageUrl ?? mainImage,
       maxQuantity: product.stock,
     });
   };
@@ -253,9 +279,9 @@ export default function ProductDetailView({
               />
             </div>
 
-            {product.images.length > 1 && (
+            {galleryImages.length > 1 && (
               <div className="mt-3 flex gap-2 overflow-x-auto pb-1 sm:mt-4 sm:gap-3">
-                {product.images.map((image, index) => (
+                {galleryImages.map((image, index) => (
                   <button
                     key={`${image}-${index}`}
                     type="button"
@@ -321,7 +347,7 @@ export default function ProductDetailView({
               <div className="mt-6 rounded-2xl bg-slate-50 p-4 dark:bg-slate-950/70">
                 <div className="flex flex-wrap items-end gap-x-3 gap-y-1">
                   <p className="text-3xl font-black tracking-tight text-slate-950 dark:text-white sm:text-4xl">
-                    {formatPrice(sellingPrice)}
+                    {formatPrice(displayPrice)}
                   </p>
                   {discountPercent && originalPrice && (
                     <p className="pb-1 text-sm text-slate-400 line-through">
@@ -335,6 +361,61 @@ export default function ProductDetailView({
                   </p>
                 )}
               </div>
+
+              {variantOptions.length > 0 && (
+                <div className="mt-5 border-t border-slate-100 pt-5 dark:border-slate-800">
+                  <div className="flex min-w-0 items-end justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                        Options
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-white">
+                        {selectedVariant ? selectedVariant.name : "Choose an option"}
+                      </p>
+                    </div>
+                    <span className="shrink-0 text-xs font-semibold text-[#006B2C] dark:text-[#00C83A]">
+                      {variantOptions.length} available
+                    </span>
+                  </div>
+
+                  <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                    {variantOptions.map((variant) => {
+                      const selected = selectedVariant?.name === variant.name;
+                      return (
+                        <button
+                          key={variant.name}
+                          type="button"
+                          onClick={() => handleVariantSelect(variant.name)}
+                          aria-pressed={selected}
+                          className={`flex min-w-0 items-center gap-2 rounded-2xl border p-2 text-left transition ${
+                            selected
+                              ? "border-[#009933] bg-[#EFFCF3] text-[#004D20] shadow-sm dark:border-[#00C83A] dark:bg-[#063D1E] dark:text-[#B8F5C8]"
+                              : "border-slate-200 bg-white text-slate-700 hover:border-[#B8F5C8] dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
+                          }`}
+                        >
+                          <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl bg-slate-50 dark:bg-slate-900">
+                            <Image
+                              src={variant.imageUrl || product.image}
+                              alt=""
+                              fill
+                              className="object-contain p-1"
+                              sizes="44px"
+                            />
+                          </span>
+                          <span className="min-w-0">
+                            <span className="block truncate text-sm font-bold">{variant.name}</span>
+                            <span className="mt-0.5 block truncate text-xs text-slate-500 dark:text-slate-400">
+                              {variant.price == null
+                                ? "Product price"
+                                : formatPrice(variant.price)}
+                            </span>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               <div
                 className={`mt-5 flex items-center gap-2 text-sm font-bold ${product.inStock ? "text-[#006B2C] dark:text-[#00C83A]" : "text-rose-600"}`}

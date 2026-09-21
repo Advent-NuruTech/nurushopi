@@ -1,5 +1,5 @@
 import type { Route } from "next";
-import type { BannerDTO, ProductDTO, WholesaleItemDTO } from "@nuru/types";
+import type { BannerDTO, ProductDTO, ProductVariant, WholesaleItemDTO } from "@nuru/types";
 
 /**
  * View models for the public storefront.
@@ -63,6 +63,7 @@ export interface ProductCardVM {
 
 export interface ProductDetailVM extends ProductCardVM {
   description: string | null;
+  variants: ProductVariant[];
 }
 
 export function toProductCardVM(p: ProductDTO): ProductCardVM {
@@ -99,7 +100,7 @@ export function toProductCardVM(p: ProductDTO): ProductCardVM {
 }
 
 export function toProductDetailVM(p: ProductDTO): ProductDetailVM {
-  return { ...toProductCardVM(p), description: p.description };
+  return { ...toProductCardVM(p), description: p.description, variants: p.variants ?? [] };
 }
 
 export interface WholesaleCardVM {

@@ -3,9 +3,13 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 export interface CartItem {
+  /** Cart line id. Variant selections use a product + variant composite id. */
   id: string;
+  /** Canonical catalog product id used by checkout. Falls back to `id` for legacy cart lines. */
+  productId?: string;
   slug?: string;
   name: string;
+  variantName?: string | null;
   brandName?: string | null;
   storeName?: string | null;
   price: number;

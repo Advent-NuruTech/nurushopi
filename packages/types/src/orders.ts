@@ -66,6 +66,7 @@ export type DeliveryDestinationInput = z.infer<typeof deliveryDestinationSchema>
 export const checkoutItemSchema = z
   .object({
     productId: idSchema,
+    variantName: z.string().trim().min(1).max(100).optional().nullable(),
     quantity: z.coerce
       .number({ invalid_type_error: "Quantity must be a number." })
       .int("Quantity must be a whole number.")
